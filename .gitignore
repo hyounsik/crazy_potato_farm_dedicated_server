@@ -1,0 +1,15 @@
+# Dart
+.dart_tool/
+build/
+coverage/
+doc/api/
+pubspec_overrides.yaml
+
+# Compiled server executables
+*.exe
+/server
+
+# IDE / OS
+.idea/
+*.iml
+.DS_Store

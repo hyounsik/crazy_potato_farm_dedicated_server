@@ -1,0 +1,7 @@
+name: potato_core
+description: Game rules shared by the client, host mode, and the dedicated server.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0

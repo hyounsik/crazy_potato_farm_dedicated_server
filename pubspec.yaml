@@ -1,0 +1,17 @@
+name: potato_dedicated_server
+description: Dedicated server for Crazy Potato Farm.
+publish_to: none
+
+environment:
+  sdk: ^3.13.0
+
+workspace:
+  - packages/potato_core
+  - packages/potato_session
+
+dependencies:
+  potato_session:
+    path: packages/potato_session
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.32.0

@@ -1,0 +1,12 @@
+name: potato_session
+description: Game session hosting shared by host mode and the dedicated server.
+publish_to: none
+resolution: workspace
+
+environment:
+  sdk: ^3.13.0
+
+dependencies:
+  # A relative path keeps working when the client pulls this package via git.
+  potato_core:
+    path: ../potato_core

@@ -28,6 +28,11 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 - 패키지끼리는 상대 경로(`path: ../potato_core`)로 의존한다. `any`로 적으면 workspace 밖에서 pub.dev를 찾다가 실패한다.
 - 클라이언트는 태그(`ref: vX.Y.Z`)로 고정한다. 클라이언트가 쓸 변경을 마치면 태그를 올린다.
 
+## 문서
+
+- 코드 가이드는 `docs/guides/<domain>-code-guide.md`(kebab-case)에 둔다. 작성 형식은 클라이언트 저장소의 형식 문서를 따른다 (옆 폴더에 클라이언트 저장소가 있을 때 `docs/guides/domain-code-guide-format.md`).
+- 공개 문서이므로 기획 근거 대신 기술적 결정만 적고, 비공개 저장소 문서로 링크하지 않는다.
+
 ## 코드 규칙
 
 - lint: `lints/recommended` + `avoid_print`, `prefer_single_quotes`, `always_use_package_imports`.

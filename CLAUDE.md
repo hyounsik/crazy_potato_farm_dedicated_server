@@ -37,7 +37,10 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 
 - lint: `lints/recommended` + `avoid_print`, `prefer_single_quotes`, `always_use_package_imports`.
 - 서버 실행 파일의 로그는 `stdout`/`stderr`로 쓴다 (컨테이너·서비스 로그에 남도록).
-- 코드를 바꾸면 루트에서 `dart format .` → `dart analyze` → `dart test`.
+- 코드를 바꾸면 루트에서 `dart format .` → `dart analyze` → `dart test`. 패키지 테스트는 그 패키지 폴더에서 `dart test`.
+- 모델(데이터 카탈로그, 세이브 문서, 명령·이벤트)은 Freezed + json_serializable이다. 키는 snake_case, `checked: true`(`packages/potato_core/build.yaml`). 모델을 고치면 패키지 폴더에서 `dart run build_runner build`.
+- **생성 파일(`*.freezed.dart`, `*.g.dart`)은 커밋한다.** 클라이언트가 git 의존성으로 받을 때는 코드 생성이 돌지 않기 때문이다.
+- `potato_core`는 웹에서도 같은 결과를 내야 한다. 정수 연산은 32비트 안에서 하고(웹 정수는 53비트까지만 정확), 무작위는 `dart:math` `Random` 대신 `GameRandom`을 쓴다. 확인: `dart test -p node test/common`.
 - 서버 실행: `dart run bin/server.dart` (포트는 `PORT` 환경 변수, 기본 8080). 상태 확인: `GET /health`.
 
 ## Git

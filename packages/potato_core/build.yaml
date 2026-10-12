@@ -1,0 +1,10 @@
+targets:
+  $default:
+    builders:
+      json_serializable:
+        options:
+          # Data files and save documents use snake_case keys.
+          field_rename: snake
+          # Reports which key failed, so catalog checks can point at it.
+          checked: true
+          explicit_to_json: true

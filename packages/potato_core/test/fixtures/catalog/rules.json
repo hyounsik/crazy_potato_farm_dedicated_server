@@ -1,0 +1,25 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "farm": {
+    "step_millis": 1000,
+    "offline_cap_minutes": 1440,
+    "size": 24,
+    "field_max_size": 3
+  },
+  "potatoes": {
+    "grade_drop_chance": 0.3
+  },
+  "new_farm": {
+    "food": 200,
+    "fields": [
+      { "origin": { "x": 12, "y": 9 }, "width": 2, "height": 2 }
+    ],
+    "seeds": [
+      { "type": "food", "grade": "normal", "count": 8 },
+      { "type": "food", "grade": "rare", "count": 3 },
+      { "type": "food", "grade": "legendary", "count": 1 },
+      { "type": "combat", "grade": "normal", "count": 2 }
+    ]
+  }
+}

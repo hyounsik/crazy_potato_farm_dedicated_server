@@ -7,6 +7,7 @@ import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/map/map_chunk.dart';
 import 'package:potato_core/src/map/map_data.dart';
 import 'package:potato_core/src/map/map_generator.dart';
@@ -188,7 +189,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 1;
+  static const int formatVersion = 2;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -680,7 +681,11 @@ final class RaidSimulation {
         return false;
       }
       final moved = bag.addFrom(item.stack);
-      if (moved > 0) _events.add(ItemPicked(ItemStack(item.stack.item, moved)));
+      if (moved > 0) {
+        _events.add(
+          ItemPicked(ItemStack(item.stack.item, moved, seed: item.stack.seed)),
+        );
+      }
       return item.stack.count == 0;
     });
   }
@@ -702,6 +707,7 @@ final class RaidSimulation {
               catalog.lootTables[drops.bundle]!,
               catalog.stackOf,
               _random,
+              makeSeed: _seedMaker(catalog, zone, _random),
             ),
           ),
         );
@@ -710,6 +716,7 @@ final class RaidSimulation {
           catalog.lootTables[drops.item]!,
           catalog.stackOf,
           _random,
+          makeSeed: _seedMaker(catalog, zone, _random),
         );
         for (final stack in loot.items) {
           floorItems.add(
@@ -792,6 +799,25 @@ final class RaidSimulation {
   }
 
   /// Gathering spots on free tiles, spaced apart, each with loot rolled now.
+  /// Seeds found in [zone] get its score as their level, and an ability
+  /// (and style) of their own.
+  static SeedMaker _seedMaker(
+    Catalog catalog,
+    ZoneData zone,
+    GameRandom random,
+  ) {
+    final roller = AbilityRoller(catalog);
+    return (item) => switch (catalog.items[item]?.seed) {
+      final kind? => roller.seed(
+        type: kind.type,
+        grade: kind.grade,
+        level: zone.score,
+        random: random,
+      ),
+      null => null,
+    };
+  }
+
   static List<RaidPile> _placeSpots(
     Catalog catalog,
     ZoneData zone,
@@ -812,7 +838,12 @@ final class RaidSimulation {
           id: newId(),
           position: at,
           kind: PileKind.spot,
-          loot: LootPile.roll(table, catalog.stackOf, random),
+          loot: LootPile.roll(
+            table,
+            catalog.stackOf,
+            random,
+            makeSeed: _seedMaker(catalog, zone, random),
+          ),
         ),
       );
     }

@@ -318,7 +318,8 @@ mixin _$BuildingLevelData {
 
 /// Baby potatoes paid to reach this level.
  int get cost;/// Potatoes of the housed type this building adds to the limit.
- int get capacity;
+ int get capacity;/// Dead potatoes this building keeps for reviving (graveyards).
+ int get graves;
 /// Create a copy of BuildingLevelData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -332,20 +333,20 @@ $BuildingLevelDataCopyWith<BuildingLevelData> get copyWith => _$BuildingLevelDat
 @override
 bool operator ==(Object other) {
   final _this = this as BuildingLevelData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingLevelData&&(identical(other.cost, _this.cost) || other.cost == _this.cost)&&(identical(other.capacity, _this.capacity) || other.capacity == _this.capacity));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingLevelData&&(identical(other.cost, _this.cost) || other.cost == _this.cost)&&(identical(other.capacity, _this.capacity) || other.capacity == _this.capacity)&&(identical(other.graves, _this.graves) || other.graves == _this.graves));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BuildingLevelData;
-  return Object.hash(runtimeType,_this.cost,_this.capacity);
+  return Object.hash(runtimeType,_this.cost,_this.capacity,_this.graves);
 }
 
 @override
 String toString() {
   final _this = this as BuildingLevelData;
-  return 'BuildingLevelData(cost: ${_this.cost}, capacity: ${_this.capacity})';
+  return 'BuildingLevelData(cost: ${_this.cost}, capacity: ${_this.capacity}, graves: ${_this.graves})';
 }
 
 
@@ -356,7 +357,7 @@ abstract mixin class $BuildingLevelDataCopyWith<$Res>  {
   factory $BuildingLevelDataCopyWith(BuildingLevelData value, $Res Function(BuildingLevelData) _then) = _$BuildingLevelDataCopyWithImpl;
 @useResult
 $Res call({
- int cost, int capacity
+ int cost, int capacity, int graves
 });
 
 
@@ -373,10 +374,11 @@ class _$BuildingLevelDataCopyWithImpl<$Res>
 
 /// Create a copy of BuildingLevelData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? cost = null,Object? capacity = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? cost = null,Object? capacity = null,Object? graves = null,}) {
   return _then(BuildingLevelData(
 cost: null == cost ? _self.cost : cost // ignore: cast_nullable_to_non_nullable
 as int,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
+as int,graves: null == graves ? _self.graves : graves // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -462,10 +464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int cost,  int capacity)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int cost,  int capacity,  int graves)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BuildingLevelData() when $default != null:
-return $default(_that.cost,_that.capacity);case _:
+return $default(_that.cost,_that.capacity,_that.graves);case _:
   return orElse();
 
 }
@@ -483,10 +485,10 @@ return $default(_that.cost,_that.capacity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int cost,  int capacity)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int cost,  int capacity,  int graves)  $default,) {final _that = this;
 switch (_that) {
 case _BuildingLevelData():
-return $default(_that.cost,_that.capacity);case _:
+return $default(_that.cost,_that.capacity,_that.graves);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -503,10 +505,10 @@ return $default(_that.cost,_that.capacity);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int cost,  int capacity)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int cost,  int capacity,  int graves)?  $default,) {final _that = this;
 switch (_that) {
 case _BuildingLevelData() when $default != null:
-return $default(_that.cost,_that.capacity);case _:
+return $default(_that.cost,_that.capacity,_that.graves);case _:
   return null;
 
 }
@@ -518,13 +520,15 @@ return $default(_that.cost,_that.capacity);case _:
 @JsonSerializable()
 
 class _BuildingLevelData implements BuildingLevelData {
-  const _BuildingLevelData({required this.cost, this.capacity = 0});
+  const _BuildingLevelData({required this.cost, this.capacity = 0, this.graves = 0});
   factory _BuildingLevelData.fromJson(Map<String, dynamic> json) => _$BuildingLevelDataFromJson(json);
 
 /// Baby potatoes paid to reach this level.
 @override final  int cost;
 /// Potatoes of the housed type this building adds to the limit.
 @override@JsonKey() final  int capacity;
+/// Dead potatoes this building keeps for reviving (graveyards).
+@override@JsonKey() final  int graves;
 
 /// Create a copy of BuildingLevelData
 /// with the given fields replaced by the non-null parameter values.
@@ -539,18 +543,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingLevelData&&(identical(other.cost, cost) || other.cost == cost)&&(identical(other.capacity, capacity) || other.capacity == capacity));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingLevelData&&(identical(other.cost, cost) || other.cost == cost)&&(identical(other.capacity, capacity) || other.capacity == capacity)&&(identical(other.graves, graves) || other.graves == graves));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,cost,capacity);
+    return Object.hash(runtimeType,cost,capacity,graves);
 }
 
 @override
 String toString() {
-    return 'BuildingLevelData(cost: $cost, capacity: $capacity)';
+    return 'BuildingLevelData(cost: $cost, capacity: $capacity, graves: $graves)';
 }
 
 
@@ -561,7 +565,7 @@ abstract mixin class _$BuildingLevelDataCopyWith<$Res> implements $BuildingLevel
   factory _$BuildingLevelDataCopyWith(_BuildingLevelData value, $Res Function(_BuildingLevelData) _then) = __$BuildingLevelDataCopyWithImpl;
 @override @useResult
 $Res call({
- int cost, int capacity
+ int cost, int capacity, int graves
 });
 
 
@@ -578,10 +582,11 @@ class __$BuildingLevelDataCopyWithImpl<$Res>
 
 /// Create a copy of BuildingLevelData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? cost = null,Object? capacity = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? cost = null,Object? capacity = null,Object? graves = null,}) {
   return _then(_BuildingLevelData(
 cost: null == cost ? _self.cost : cost // ignore: cast_nullable_to_non_nullable
 as int,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
+as int,graves: null == graves ? _self.graves : graves // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

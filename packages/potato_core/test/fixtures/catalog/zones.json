@@ -1,9 +1,10 @@
 {
-  "version": 1,
+  "version": 2,
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "zones": [
     {
       "id": "sample_zone",
+      "score": 3,
       "map": {
         "size": 40,
         "entry": {

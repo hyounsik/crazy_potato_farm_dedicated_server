@@ -35,6 +35,9 @@ abstract class BuildingLevelData with _$BuildingLevelData {
 
     /// Potatoes of the housed type this building adds to the limit.
     @Default(0) int capacity,
+
+    /// Dead potatoes this building keeps for reviving (graveyards).
+    @Default(0) int graves,
   }) = _BuildingLevelData;
 
   factory BuildingLevelData.fromJson(Map<String, dynamic> json) =>

@@ -1,6 +1,5 @@
 import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
-import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/farm/farm_command.dart';
 import 'package:potato_core/src/farm/farm_simulation.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -28,16 +27,17 @@ extension RaidHomecoming on RaidResult {
     final seeds = <Seed, int>{};
     for (final stack in items) {
       final item = catalog.items[stack.item];
+      final seed = stack.seed;
       switch (item?.kind) {
         case ItemKind.food:
           food += stack.count;
-        case ItemKind.seed:
+        case ItemKind.seed when seed != null:
           seeds.update(
-            item!.seed!,
+            seed,
             (n) => n + stack.count,
             ifAbsent: () => stack.count,
           );
-        case ItemKind.material || null:
+        case ItemKind.seed || ItemKind.material || null:
           break;
       }
     }
@@ -45,7 +45,7 @@ extension RaidHomecoming on RaidResult {
       food: food,
       seeds: [
         for (final MapEntry(key: seed, value: count) in seeds.entries)
-          SeedStackData(type: seed.type, grade: seed.grade, count: count),
+          SeedCount(seed: seed, count: count),
       ],
       potatoIds: [for (final c in companions) c.potatoId],
     );

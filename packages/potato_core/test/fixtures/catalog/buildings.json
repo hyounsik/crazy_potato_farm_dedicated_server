@@ -45,6 +45,21 @@
           "capacity": 2
         }
       ]
+    },
+    {
+      "id": "graveyard",
+      "width": 1,
+      "height": 1,
+      "levels": [
+        {
+          "cost": 50,
+          "graves": 3
+        },
+        {
+          "cost": 80,
+          "graves": 5
+        }
+      ]
     }
   ]
 }

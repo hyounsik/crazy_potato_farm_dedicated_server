@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:potato_core/src/potatoes/seed.dart';
+import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
 
 part 'item_data.freezed.dart';
 part 'item_data.g.dart';
@@ -24,12 +25,23 @@ abstract class ItemData with _$ItemData {
     /// How many fit in one bag slot.
     required int stack,
 
-    /// What a seed item plants; required for [ItemKind.seed] only.
-    Seed? seed,
+    /// What kind of seed a seed item is; required for [ItemKind.seed] only.
+    /// Each seed found gets its own level, ability and style.
+    SeedKindData? seed,
   }) = _ItemData;
 
   factory ItemData.fromJson(Map<String, dynamic> json) =>
       _$ItemDataFromJson(json);
+}
+
+/// A seed's type and grade, before the rest is rolled.
+@freezed
+abstract class SeedKindData with _$SeedKindData {
+  const factory SeedKindData({required PotatoType type, required Grade grade}) =
+      _SeedKindData;
+
+  factory SeedKindData.fromJson(Map<String, dynamic> json) =>
+      _$SeedKindDataFromJson(json);
 }
 
 /// What a gathering spot or a defeated enemy can give (`loot_tables.json`).

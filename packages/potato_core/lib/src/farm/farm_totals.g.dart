@@ -35,6 +35,10 @@ FarmTotals _$FarmTotalsFromJson(Map<String, dynamic> json) => $checkedCreate(
         'pests_cleared_by_tap',
         (v) => (v as num?)?.toInt() ?? 0,
       ),
+      foodHarvestedByGuards: $checkedConvert(
+        'food_harvested_by_guards',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
     );
     return val;
   },
@@ -45,6 +49,7 @@ FarmTotals _$FarmTotalsFromJson(Map<String, dynamic> json) => $checkedCreate(
     'pestsAppeared': 'pests_appeared',
     'pestsClearedByGuards': 'pests_cleared_by_guards',
     'pestsClearedByTap': 'pests_cleared_by_tap',
+    'foodHarvestedByGuards': 'food_harvested_by_guards',
   },
 );
 
@@ -56,4 +61,5 @@ Map<String, dynamic> _$FarmTotalsToJson(FarmTotals instance) =>
       'pests_appeared': instance.pestsAppeared,
       'pests_cleared_by_guards': instance.pestsClearedByGuards,
       'pests_cleared_by_tap': instance.pestsClearedByTap,
+      'food_harvested_by_guards': instance.foodHarvestedByGuards,
     };

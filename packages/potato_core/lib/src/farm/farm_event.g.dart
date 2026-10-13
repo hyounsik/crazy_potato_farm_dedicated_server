@@ -85,11 +85,13 @@ PotatoDied _$PotatoDiedFromJson(Map<String, dynamic> json) => $checkedCreate(
         'tile',
         (v) => v == null ? null : TilePos.fromJson(v as Map<String, dynamic>),
       ),
-      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
-      seedLeft: $checkedConvert(
-        'seed_left',
-        (v) => Seed.fromJson(v as Map<String, dynamic>),
+      at: $checkedConvert(
+        'at',
+        (v) => v == null ? null : TilePos.fromJson(v as Map<String, dynamic>),
       ),
+      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+      type: $checkedConvert('type', (v) => $enumDecode(_$PotatoTypeEnumMap, v)),
+      buried: $checkedConvert('buried', (v) => v as bool),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -97,7 +99,6 @@ PotatoDied _$PotatoDiedFromJson(Map<String, dynamic> json) => $checkedCreate(
   fieldKeyMap: const {
     'fieldId': 'field_id',
     'potatoId': 'potato_id',
-    'seedLeft': 'seed_left',
     r'$type': 'runtimeType',
   },
 );
@@ -106,10 +107,61 @@ Map<String, dynamic> _$PotatoDiedToJson(PotatoDied instance) =>
     <String, dynamic>{
       'field_id': instance.fieldId,
       'tile': instance.tile?.toJson(),
+      'at': instance.at?.toJson(),
       'potato_id': instance.potatoId,
-      'seed_left': instance.seedLeft.toJson(),
+      'type': _$PotatoTypeEnumMap[instance.type]!,
+      'buried': instance.buried,
       'runtimeType': instance.$type,
     };
+
+const _$PotatoTypeEnumMap = {
+  PotatoType.food: 'food',
+  PotatoType.combat: 'combat',
+  PotatoType.breeding: 'breeding',
+  PotatoType.buff: 'buff',
+};
+
+GraveLost _$GraveLostFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('GraveLost', json, ($checkedConvert) {
+      final val = GraveLost(
+        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$GraveLostToJson(GraveLost instance) => <String, dynamic>{
+  'potato_id': instance.potatoId,
+  'runtimeType': instance.$type,
+};
+
+PotatoRevived _$PotatoRevivedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('PotatoRevived', json, ($checkedConvert) {
+      final val = PotatoRevived(
+        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+        from: $checkedConvert('from', (v) => $enumDecode(_$GradeEnumMap, v)),
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$PotatoRevivedToJson(PotatoRevived instance) =>
+    <String, dynamic>{
+      'potato_id': instance.potatoId,
+      'from': _$GradeEnumMap[instance.from]!,
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
+const _$GradeEnumMap = {
+  Grade.normal: 'normal',
+  Grade.rare: 'rare',
+  Grade.legendary: 'legendary',
+};
 
 BuildingBuilt _$BuildingBuiltFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
@@ -347,6 +399,10 @@ FoodHarvested _$FoodHarvestedFromJson(Map<String, dynamic> json) =>
       final val = FoodHarvested(
         fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
         food: $checkedConvert('food', (v) => (v as num).toInt()),
+        seed: $checkedConvert(
+          'seed',
+          (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
+        ),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -356,6 +412,7 @@ Map<String, dynamic> _$FoodHarvestedToJson(FoodHarvested instance) =>
     <String, dynamic>{
       'field_id': instance.fieldId,
       'food': instance.food,
+      'seed': instance.seed?.toJson(),
       'runtimeType': instance.$type,
     };
 

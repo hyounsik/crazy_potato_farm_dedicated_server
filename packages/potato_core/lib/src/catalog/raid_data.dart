@@ -170,6 +170,9 @@ abstract class EnemyData with _$EnemyData {
 abstract class ZoneData with _$ZoneData {
   const factory ZoneData({
     required String id,
+
+    /// The region score: the level of the seeds found here.
+    required int score,
     required MapRecipe map,
     required ZoneEnemiesData enemies,
     required ZoneGatheringData gathering,

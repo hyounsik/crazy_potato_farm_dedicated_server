@@ -4,6 +4,7 @@
 /// the same input gives the same result on every device that runs a session.
 library;
 
+export 'src/catalog/ability_data.dart';
 export 'src/catalog/building_data.dart';
 export 'src/catalog/catalog.dart';
 export 'src/catalog/grade.dart';
@@ -27,12 +28,19 @@ export 'src/map/map_data.dart';
 export 'src/map/map_generator.dart';
 export 'src/map/map_physics.dart';
 export 'src/map/map_recipe.dart';
+export 'src/potatoes/ability_roller.dart';
 export 'src/potatoes/guard.dart';
 export 'src/potatoes/potato.dart';
+export 'src/potatoes/potato_effects.dart';
 export 'src/raid/homecoming.dart';
 export 'src/raid/raid_bodies.dart';
 export 'src/raid/raid_command.dart';
 export 'src/raid/raid_simulation.dart';
 export 'src/potatoes/seed.dart';
 export 'src/save/farm_document.dart';
-export 'src/save/migration.dart' show farmFormatVersion, migrateFarmJson;
+export 'src/save/migration.dart'
+    show
+        FarmTooOldException,
+        farmFormatVersion,
+        migrateFarmJson,
+        oldestFarmFormatVersion;

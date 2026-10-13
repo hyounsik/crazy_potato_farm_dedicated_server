@@ -1,5 +1,5 @@
 {
-  "version": 3,
+  "version": 4,
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "farm": {
     "step_millis": 1000,
@@ -26,6 +26,24 @@
     "fridge": {
       "size": 4,
       "aging_percent": 10
+    },
+    "harvest_rare_chance": 0.0,
+    "level": {
+      "food_yield_permille": 50,
+      "grade_up_chance_permille": 20,
+      "upkeep_permille": 100,
+      "buff_power_permille": 50
+    },
+    "combat_styles": {
+      "melee": {
+        "walk_percent": 125
+      },
+      "ranged": {
+        "walk_percent": 80
+      },
+      "escort": {
+        "walk_percent": 100
+      }
     }
   },
   "pests": {
@@ -65,22 +83,26 @@
       {
         "type": "food",
         "grade": "normal",
-        "count": 8
+        "count": 8,
+        "level": 0
       },
       {
         "type": "food",
         "grade": "rare",
-        "count": 3
+        "count": 3,
+        "level": 0
       },
       {
         "type": "food",
         "grade": "legendary",
-        "count": 1
+        "count": 1,
+        "level": 0
       },
       {
         "type": "combat",
         "grade": "normal",
-        "count": 2
+        "count": 2,
+        "level": 0
       }
     ]
   },

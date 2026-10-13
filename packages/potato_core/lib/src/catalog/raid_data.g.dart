@@ -331,6 +331,7 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_ZoneData', json, ($checkedConvert) {
       final val = _ZoneData(
         id: $checkedConvert('id', (v) => v as String),
+        score: $checkedConvert('score', (v) => (v as num).toInt()),
         map: $checkedConvert(
           'map',
           (v) => MapRecipe.fromJson(v as Map<String, dynamic>),
@@ -353,6 +354,7 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'id': instance.id,
+  'score': instance.score,
   'map': instance.map.toJson(),
   'enemies': instance.enemies.toJson(),
   'gathering': instance.gathering.toJson(),

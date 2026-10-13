@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/building_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
@@ -6,6 +7,7 @@ import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Read-only game data: numbers and content definitions loaded at startup.
 ///
@@ -18,6 +20,8 @@ final class Catalog {
     required this.rules,
     required Map<PotatoType, PotatoTypeData> potatoTypes,
     required Map<String, BuildingData> buildings,
+    required this.abilityRules,
+    required Map<String, AbilityData> abilities,
     required Map<String, ItemData> items,
     required Map<String, LootTableData> lootTables,
     required Map<String, WeaponData> weapons,
@@ -25,6 +29,7 @@ final class Catalog {
     required Map<String, ZoneData> zones,
   }) : _potatoTypes = Map.unmodifiable(potatoTypes),
        buildings = Map.unmodifiable(buildings),
+       abilities = Map.unmodifiable(abilities),
        items = Map.unmodifiable(items),
        lootTables = Map.unmodifiable(lootTables),
        weapons = Map.unmodifiable(weapons),
@@ -36,19 +41,28 @@ final class Catalog {
   /// Data ships with the app, so files are not migrated: a file with another
   /// version is an error.
   static const Map<String, int> fileVersions = {
-    'rules': 3,
+    'rules': 4,
     'potato_types': 2,
     'buildings': 1,
+    'potato_abilities': 1,
     'items': 1,
     'loot_tables': 1,
     'weapons': 1,
     'enemies': 1,
-    'zones': 1,
+    'zones': 2,
   };
 
   final RulesData rules;
   final Map<PotatoType, PotatoTypeData> _potatoTypes;
   final Map<String, BuildingData> buildings;
+  final AbilityRulesData abilityRules;
+
+  /// Every ability, in file order.
+  final Map<String, AbilityData> abilities;
+
+  /// The abilities of [pool] (`common`, or a type's name), in file order.
+  Iterable<AbilityData> abilitiesIn(String pool) =>
+      abilities.values.where((a) => a.pool == pool);
   final Map<String, ItemData> items;
   final Map<String, LootTableData> lootTables;
   final Map<String, WeaponData> weapons;
@@ -109,6 +123,49 @@ final class Catalog {
       (b) => b.id,
       _checkBuilding,
     );
+    final abilityFile = _readFile(files, 'potato_abilities', issues, (
+      check,
+      json,
+    ) {
+      final rules = check.parse(
+        'rules',
+        json['rules'],
+        AbilityRulesData.fromJson,
+      );
+      final pools = <String, AbilityPoolData>{};
+      final rawPools = json['pools'];
+      if (rawPools is! List<Object?>) {
+        check.issue('pools', 'must be a list');
+      } else {
+        for (final (index, raw) in rawPools.indexed) {
+          final pool = check.parse(
+            'pools[$index]',
+            raw,
+            AbilityPoolData.fromJson,
+          );
+          if (pool != null) pools[pool.id] = pool;
+        }
+      }
+      final abilities = <String, AbilityData>{};
+      final rawAbilities = json['abilities'];
+      if (rawAbilities is! List<Object?>) {
+        check.issue('abilities', 'must be a list');
+      } else {
+        for (final (index, raw) in rawAbilities.indexed) {
+          final path = 'abilities[$index]';
+          final ability = check.parse(path, raw, AbilityData.fromJson);
+          if (ability == null) continue;
+          if (abilities.containsKey(ability.id)) {
+            check.issue('$path.id', 'duplicate "${ability.id}"');
+          }
+          abilities[ability.id] = ability;
+          _checkAbility(check, path, ability, pools);
+        }
+      }
+      if (rules == null) return null;
+      _checkAbilityRules(check, rules, pools, abilities);
+      return (rules: rules, abilities: abilities);
+    });
     final items = _readEntries(
       files,
       'items',
@@ -153,6 +210,7 @@ final class Catalog {
     if (rules == null ||
         potatoTypes == null ||
         buildings == null ||
+        abilityFile == null ||
         items == null ||
         lootTables == null ||
         weapons == null ||
@@ -179,6 +237,8 @@ final class Catalog {
         rules: rules,
         potatoTypes: potatoTypes,
         buildings: buildings,
+        abilityRules: abilityFile.rules,
+        abilities: abilityFile.abilities,
         items: items,
         lootTables: lootTables,
         weapons: weapons,
@@ -227,6 +287,30 @@ final class Catalog {
       potatoes.guards.walkMillisPerTile,
     );
     check.atLeast('potatoes.fridge.size', potatoes.fridge.size, 0);
+    check.probability(
+      'potatoes.harvest_rare_chance',
+      potatoes.harvestRareChance,
+    );
+    final level = potatoes.level;
+    for (final (name, value) in [
+      ('food_yield_permille', level.foodYieldPermille),
+      ('grade_up_chance_permille', level.gradeUpChancePermille),
+      ('upkeep_permille', level.upkeepPermille),
+      ('buff_power_permille', level.buffPowerPermille),
+    ]) {
+      check.atLeast('potatoes.level.$name', value, 0);
+    }
+    for (final style in CombatStyle.values) {
+      final data = potatoes.combatStyles[style];
+      if (data == null) {
+        check.issue('potatoes.combat_styles', 'missing ${style.name}');
+      } else {
+        check.positive(
+          'potatoes.combat_styles.${style.name}.walk_percent',
+          data.walkPercent,
+        );
+      }
+    }
     check.percent(
       'potatoes.fridge.aging_percent',
       potatoes.fridge.agingPercent,
@@ -288,6 +372,7 @@ final class Catalog {
     }
     for (final (index, stack) in newFarm.seeds.indexed) {
       check.positive('new_farm.seeds[$index].count', stack.count);
+      check.atLeast('new_farm.seeds[$index].level', stack.level, 0);
     }
 
     final raid = rules.raid;
@@ -387,6 +472,7 @@ final class Catalog {
     for (final (index, level) in building.levels.indexed) {
       final at = '$path.levels[$index]';
       check.atLeast('$at.cost', level.cost, 0);
+      check.atLeast('$at.graves', level.graves, 0);
       if (level.capacity < capacity) {
         check.issue('$at.capacity', 'must not drop below the level before');
       }
@@ -396,6 +482,84 @@ final class Catalog {
       }
     }
   }
+
+  static void _checkAbility(
+    _FileCheck check,
+    String path,
+    AbilityData ability,
+    Map<String, AbilityPoolData> pools,
+  ) {
+    if (!pools.containsKey(ability.pool)) {
+      check.issue('$path.pool', 'no pool "${ability.pool}"');
+    }
+    final weight = ability.weight;
+    if (weight != null) check.positive('$path.weight', weight);
+    for (final (index, effect) in ability.effects.indexed) {
+      final at = '$path.effects[$index]';
+      switch (effect.kind) {
+        case EffectKind.stat:
+          if (effect.stat == null || effect.op == null) {
+            check.issue(at, 'stat effects need stat and op');
+          }
+        case EffectKind.periodic:
+          if (effect.action == null) {
+            check.issue('$at.action', 'periodic effects need an action');
+          }
+          final interval = effect.intervalInUse;
+          if (interval != null) check.positive('$at.interval_sec', interval);
+      }
+      if (ability.pool != PotatoType.buff.name &&
+          effect.target == EffectTarget.party) {
+        check.issue('$at.target', 'only buff abilities reach the party');
+      }
+    }
+  }
+
+  static void _checkAbilityRules(
+    _FileCheck check,
+    AbilityRulesData rules,
+    Map<String, AbilityPoolData> pools,
+    Map<String, AbilityData> abilities,
+  ) {
+    for (final grade in Grade.values) {
+      final slots = rules.slotsByGrade[grade];
+      if (slots == null) {
+        check.issue('rules.slots_by_grade', 'missing ${grade.name}');
+      } else {
+        check.positive('rules.slots_by_grade.${grade.name}', slots);
+      }
+    }
+    for (final rarity in Rarity.values) {
+      final weight = rules.rarityWeights[rarity];
+      if (weight == null) {
+        check.issue('rules.rarity_weights', 'missing ${rarity.name}');
+      } else {
+        check.positive('rules.rarity_weights.${rarity.name}', weight);
+      }
+    }
+    check.atLeast(
+      'rules.extra_slot_pool_weight.common',
+      rules.extraSlotPoolWeight.common,
+      0,
+    );
+    check.atLeast(
+      'rules.extra_slot_pool_weight.unique',
+      rules.extraSlotPoolWeight.unique,
+      0,
+    );
+    if (!pools.containsKey(commonPool)) {
+      check.issue('pools', 'missing "$commonPool"');
+    }
+    for (final type in PotatoType.values) {
+      // A type's own pool fills every seed's first slot.
+      if (!abilities.values.any((a) => a.pool == type.name)) {
+        check.issue('abilities', 'no ability in the ${type.name} pool');
+      }
+    }
+  }
+
+  /// The pool every type shares.
+  static const String commonPool = 'common';
 
   static void _checkItem(_FileCheck check, String path, ItemData item) {
     check.positive('$path.stack', item.stack);
@@ -449,6 +613,7 @@ final class Catalog {
   }
 
   static void _checkZone(_FileCheck check, String path, ZoneData zone) {
+    check.atLeast('$path.score', zone.score, 0);
     final map = zone.map;
     check.positive('$path.map.size', map.size);
     bool inside(int x, int y) =>
@@ -511,6 +676,7 @@ final class Catalog {
   }
 
   /// Ids one file uses must exist in another.
+  /// (Ability ids are checked where seeds are made.)
   static void _checkReferences(
     List<CatalogIssue> issues, {
     required RulesData rules,

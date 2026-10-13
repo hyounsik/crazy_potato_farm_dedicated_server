@@ -3,6 +3,7 @@ import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 
 part 'rules_data.freezed.dart';
 part 'rules_data.g.dart';
@@ -72,10 +73,46 @@ abstract class PotatoRulesData with _$PotatoRulesData {
     required double breedingGradeUpChance,
     required GuardRulesData guards,
     required FridgeRulesData fridge,
+
+    /// Chance that harvesting a field also gives a normal seed of the type
+    /// planted most there, before abilities raise it.
+    required double harvestRareChance,
+    required LevelRulesData level,
+
+    /// How each combat style changes guards on the farm.
+    required Map<CombatStyle, CombatStyleData> combatStyles,
   }) = _PotatoRulesData;
 
   factory PotatoRulesData.fromJson(Map<String, dynamic> json) =>
       _$PotatoRulesDataFromJson(json);
+}
+
+/// What each level adds to a potato's main job, in thousandths: 50 means
+/// +5% per level. Values are placeholders until the balance phase.
+@freezed
+abstract class LevelRulesData with _$LevelRulesData {
+  const factory LevelRulesData({
+    required int foodYieldPermille,
+    required int gradeUpChancePermille,
+    required int upkeepPermille,
+
+    /// How much stronger a buff potato's abilities get.
+    required int buffPowerPermille,
+  }) = _LevelRulesData;
+
+  factory LevelRulesData.fromJson(Map<String, dynamic> json) =>
+      _$LevelRulesDataFromJson(json);
+}
+
+@freezed
+abstract class CombatStyleData with _$CombatStyleData {
+  const factory CombatStyleData({
+    /// Walking pace on the farm, in percent of the base.
+    required int walkPercent,
+  }) = _CombatStyleData;
+
+  factory CombatStyleData.fromJson(Map<String, dynamic> json) =>
+      _$CombatStyleDataFromJson(json);
 }
 
 /// Grown combat potatoes walking the farm.
@@ -196,13 +233,15 @@ abstract class NewFarmData with _$NewFarmData {
       _$NewFarmDataFromJson(json);
 }
 
-/// A number of identical seeds.
+/// A number of seeds a new farm starts with. Each gets its own ability
+/// (and style) when the farm is made.
 @freezed
 abstract class SeedStackData with _$SeedStackData {
   const factory SeedStackData({
     required PotatoType type,
     required Grade grade,
     required int count,
+    required int level,
   }) = _SeedStackData;
 
   factory SeedStackData.fromJson(Map<String, dynamic> json) =>

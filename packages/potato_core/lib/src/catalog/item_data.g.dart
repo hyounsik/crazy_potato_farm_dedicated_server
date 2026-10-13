@@ -6,19 +6,23 @@ part of 'item_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_ItemData _$ItemDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_ItemData', json, ($checkedConvert) {
-      final val = _ItemData(
-        id: $checkedConvert('id', (v) => v as String),
-        kind: $checkedConvert('kind', (v) => $enumDecode(_$ItemKindEnumMap, v)),
-        stack: $checkedConvert('stack', (v) => (v as num).toInt()),
-        seed: $checkedConvert(
-          'seed',
-          (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
-        ),
-      );
-      return val;
-    });
+_ItemData _$ItemDataFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_ItemData',
+  json,
+  ($checkedConvert) {
+    final val = _ItemData(
+      id: $checkedConvert('id', (v) => v as String),
+      kind: $checkedConvert('kind', (v) => $enumDecode(_$ItemKindEnumMap, v)),
+      stack: $checkedConvert('stack', (v) => (v as num).toInt()),
+      seed: $checkedConvert(
+        'seed',
+        (v) =>
+            v == null ? null : SeedKindData.fromJson(v as Map<String, dynamic>),
+      ),
+    );
+    return val;
+  },
+);
 
 Map<String, dynamic> _$ItemDataToJson(_ItemData instance) => <String, dynamic>{
   'id': instance.id,
@@ -31,6 +35,37 @@ const _$ItemKindEnumMap = {
   ItemKind.food: 'food',
   ItemKind.seed: 'seed',
   ItemKind.material: 'material',
+};
+
+_SeedKindData _$SeedKindDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_SeedKindData', json, ($checkedConvert) {
+      final val = _SeedKindData(
+        type: $checkedConvert(
+          'type',
+          (v) => $enumDecode(_$PotatoTypeEnumMap, v),
+        ),
+        grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$SeedKindDataToJson(_SeedKindData instance) =>
+    <String, dynamic>{
+      'type': _$PotatoTypeEnumMap[instance.type]!,
+      'grade': _$GradeEnumMap[instance.grade]!,
+    };
+
+const _$PotatoTypeEnumMap = {
+  PotatoType.food: 'food',
+  PotatoType.combat: 'combat',
+  PotatoType.breeding: 'breeding',
+  PotatoType.buff: 'buff',
+};
+
+const _$GradeEnumMap = {
+  Grade.normal: 'normal',
+  Grade.rare: 'rare',
+  Grade.legendary: 'legendary',
 };
 
 _LootTableData _$LootTableDataFromJson(Map<String, dynamic> json) =>

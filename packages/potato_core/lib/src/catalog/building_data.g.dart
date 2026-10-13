@@ -47,9 +47,14 @@ _BuildingLevelData _$BuildingLevelDataFromJson(Map<String, dynamic> json) =>
       final val = _BuildingLevelData(
         cost: $checkedConvert('cost', (v) => (v as num).toInt()),
         capacity: $checkedConvert('capacity', (v) => (v as num?)?.toInt() ?? 0),
+        graves: $checkedConvert('graves', (v) => (v as num?)?.toInt() ?? 0),
       );
       return val;
     });
 
 Map<String, dynamic> _$BuildingLevelDataToJson(_BuildingLevelData instance) =>
-    <String, dynamic>{'cost': instance.cost, 'capacity': instance.capacity};
+    <String, dynamic>{
+      'cost': instance.cost,
+      'capacity': instance.capacity,
+      'graves': instance.graves,
+    };

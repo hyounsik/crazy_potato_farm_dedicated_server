@@ -27,7 +27,7 @@ _FarmDocument _$FarmDocumentFromJson(
       seeds: $checkedConvert(
         'seeds',
         (v) => (v as List<dynamic>)
-            .map((e) => SeedStackData.fromJson(e as Map<String, dynamic>))
+            .map((e) => SeedCount.fromJson(e as Map<String, dynamic>))
             .toList(),
       ),
       fields: $checkedConvert(
@@ -70,6 +70,14 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <AwayDocument>[],
       ),
+      graves: $checkedConvert(
+        'graves',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => PotatoDocument.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <PotatoDocument>[],
+      ),
       totals: $checkedConvert(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
@@ -97,6 +105,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'guards': instance.guards.map((e) => e.toJson()).toList(),
       'fridge': instance.fridge.map((e) => e.toJson()).toList(),
       'away': instance.away.map((e) => e.toJson()).toList(),
+      'graves': instance.graves.map((e) => e.toJson()).toList(),
       'totals': instance.totals,
     };
 
@@ -260,6 +269,15 @@ _PotatoDocument _$PotatoDocumentFromJson(
       ),
       type: $checkedConvert('type', (v) => $enumDecode(_$PotatoTypeEnumMap, v)),
       grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
+      level: $checkedConvert('level', (v) => (v as num).toInt()),
+      abilities: $checkedConvert(
+        'abilities',
+        (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+      ),
+      style: $checkedConvert(
+        'style',
+        (v) => $enumDecodeNullable(_$CombatStyleEnumMap, v),
+      ),
       grownMillis: $checkedConvert('grown_millis', (v) => (v as num).toInt()),
       livedMillis: $checkedConvert('lived_millis', (v) => (v as num).toInt()),
       productionMillis: $checkedConvert(
@@ -284,6 +302,9 @@ Map<String, dynamic> _$PotatoDocumentToJson(_PotatoDocument instance) =>
       'tile': instance.tile?.toJson(),
       'type': _$PotatoTypeEnumMap[instance.type]!,
       'grade': _$GradeEnumMap[instance.grade]!,
+      'level': instance.level,
+      'abilities': instance.abilities,
+      'style': _$CombatStyleEnumMap[instance.style],
       'grown_millis': instance.grownMillis,
       'lived_millis': instance.livedMillis,
       'production_millis': instance.productionMillis,
@@ -302,4 +323,10 @@ const _$GradeEnumMap = {
   Grade.normal: 'normal',
   Grade.rare: 'rare',
   Grade.legendary: 'legendary',
+};
+
+const _$CombatStyleEnumMap = {
+  CombatStyle.melee: 'melee',
+  CombatStyle.ranged: 'ranged',
+  CombatStyle.escort: 'escort',
 };

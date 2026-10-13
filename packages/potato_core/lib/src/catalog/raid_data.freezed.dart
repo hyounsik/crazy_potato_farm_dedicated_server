@@ -1865,7 +1865,8 @@ as double,
 /// @nodoc
 mixin _$ZoneData {
 
- String get id; MapRecipe get map; ZoneEnemiesData get enemies; ZoneGatheringData get gathering; ZoneDropsData get drops;
+ String get id;/// The region score: the level of the seeds found here.
+ int get score; MapRecipe get map; ZoneEnemiesData get enemies; ZoneGatheringData get gathering; ZoneDropsData get drops;
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1879,20 +1880,20 @@ $ZoneDataCopyWith<ZoneData> get copyWith => _$ZoneDataCopyWithImpl<ZoneData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneData;
-  return Object.hash(runtimeType,_this.id,_this.map,_this.enemies,_this.gathering,_this.drops);
+  return Object.hash(runtimeType,_this.id,_this.score,_this.map,_this.enemies,_this.gathering,_this.drops);
 }
 
 @override
 String toString() {
   final _this = this as ZoneData;
-  return 'ZoneData(id: ${_this.id}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops})';
+  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops})';
 }
 
 
@@ -1903,7 +1904,7 @@ abstract mixin class $ZoneDataCopyWith<$Res>  {
   factory $ZoneDataCopyWith(ZoneData value, $Res Function(ZoneData) _then) = _$ZoneDataCopyWithImpl;
 @useResult
 $Res call({
- String id, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
 });
 
 
@@ -1920,10 +1921,11 @@ class _$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
   return _then(ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as int,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullable
 as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_nullable_to_non_nullable
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable
@@ -2048,10 +2050,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
   return orElse();
 
 }
@@ -2069,10 +2071,10 @@ return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData():
-return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2089,10 +2091,10 @@ return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
   return null;
 
 }
@@ -2104,10 +2106,12 @@ return $default(_that.id,_that.map,_that.enemies,_that.gathering,_that.drops);ca
 @JsonSerializable()
 
 class _ZoneData implements ZoneData {
-  const _ZoneData({required this.id, required this.map, required this.enemies, required this.gathering, required this.drops});
+  const _ZoneData({required this.id, required this.score, required this.map, required this.enemies, required this.gathering, required this.drops});
   factory _ZoneData.fromJson(Map<String, dynamic> json) => _$ZoneDataFromJson(json);
 
 @override final  String id;
+/// The region score: the level of the seeds found here.
+@override final  int score;
 @override final  MapRecipe map;
 @override final  ZoneEnemiesData enemies;
 @override final  ZoneGatheringData gathering;
@@ -2126,18 +2130,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,map,enemies,gathering,drops);
+    return Object.hash(runtimeType,id,score,map,enemies,gathering,drops);
 }
 
 @override
 String toString() {
-    return 'ZoneData(id: $id, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops)';
+    return 'ZoneData(id: $id, score: $score, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops)';
 }
 
 
@@ -2148,7 +2152,7 @@ abstract mixin class _$ZoneDataCopyWith<$Res> implements $ZoneDataCopyWith<$Res>
   factory _$ZoneDataCopyWith(_ZoneData value, $Res Function(_ZoneData) _then) = __$ZoneDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
 });
 
 
@@ -2165,10 +2169,11 @@ class __$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
   return _then(_ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullable
+as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
+as int,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullable
 as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_nullable_to_non_nullable
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable

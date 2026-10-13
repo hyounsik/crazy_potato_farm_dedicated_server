@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -29,15 +31,29 @@ sealed class FarmEvent with _$FarmEvent {
     required int potatoId,
   }) = PotatoGrown;
 
-  /// A potato reached the end of its life. [seedLeft] went into the pouch;
-  /// baby potatoes still stored on it are lost. [fieldId] and [tile] are
-  /// null for a guard or a potato in the fridge.
+  /// A potato reached the end of its life where it stood: in a field
+  /// ([fieldId], [tile]), guarding (standing at [at]), or in the fridge.
+  /// It is [buried] in a graveyard, or gone when the farm has none. Baby
+  /// potatoes still stored on it are lost.
   const factory FarmEvent.died({
     int? fieldId,
     TilePos? tile,
+    TilePos? at,
     required int potatoId,
-    required Seed seedLeft,
+    required PotatoType type,
+    required bool buried,
   }) = PotatoDied;
+
+  /// The graveyards were full, so the oldest grave [potatoId] was lost.
+  const factory FarmEvent.graveLost({required int potatoId}) = GraveLost;
+
+  /// Dead potato [potatoId] came back as [seed]. [from] was its grade; the
+  /// seed may be a grade lower (or, with an ability, higher).
+  const factory FarmEvent.revived({
+    required int potatoId,
+    required Grade from,
+    required Seed seed,
+  }) = PotatoRevived;
 
   const factory FarmEvent.built({
     required int buildingId,
@@ -90,9 +106,13 @@ sealed class FarmEvent with _$FarmEvent {
   /// A potato left the fridge for a field or a training ground.
   const factory FarmEvent.takenOut({required int potatoId}) = PotatoTakenOut;
 
-  /// [food] baby potatoes moved from potatoes in a field to the farm.
-  const factory FarmEvent.harvested({required int fieldId, required int food}) =
-      FoodHarvested;
+  /// [food] baby potatoes moved from potatoes in a field to the farm, and
+  /// sometimes a [seed] with them (a rare harvest).
+  const factory FarmEvent.harvested({
+    required int fieldId,
+    required int food,
+    Seed? seed,
+  }) = FoodHarvested;
 
   const factory FarmEvent.departed({
     required int food,

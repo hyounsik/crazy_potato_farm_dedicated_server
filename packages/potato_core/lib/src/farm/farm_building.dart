@@ -28,6 +28,9 @@ final class FarmBuilding {
   /// Potatoes of the housed type this building adds to the limit now.
   int get capacity => data.levels[level - 1].capacity;
 
+  /// Dead potatoes this building keeps now.
+  int get graves => data.levels[level - 1].graves;
+
   /// The cost of the next level, or null at the top.
   int? get upgradeCost =>
       level < data.levels.length ? data.levels[level].cost : null;

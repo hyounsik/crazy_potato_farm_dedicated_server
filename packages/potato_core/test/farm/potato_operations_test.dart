@@ -4,42 +4,17 @@ import 'package:potato_core/potato_core.dart';
 import 'package:test/test.dart';
 
 import '../fixtures/sample_catalog.dart';
+import '../fixtures/seeds.dart';
 
-const _food = Seed(type: PotatoType.food, grade: Grade.normal);
-const _combat = Seed(type: PotatoType.combat, grade: Grade.normal);
-const _breeding = Seed(type: PotatoType.breeding, grade: Grade.normal);
-const _buff = Seed(type: PotatoType.buff, grade: Grade.normal);
+final _food = plainSeed(PotatoType.food, Grade.normal);
+final _combat = plainSeed(PotatoType.combat, Grade.normal);
+final _breeding = plainSeed(PotatoType.breeding, Grade.normal);
+final _buff = plainSeed(PotatoType.buff, Grade.normal);
 
 /// The sample field is 2×2 at (12, 9); the open area is 8×8 at (8, 8).
 const _a = TilePos(12, 9);
 const _b = TilePos(13, 9);
 const _c = TilePos(12, 10);
-
-/// The sample catalog with [change] applied to its decoded files.
-Catalog _catalogWith(void Function(Map<String, dynamic> files) change) {
-  final files =
-      jsonDecode(jsonEncode(sampleCatalogFiles())) as Map<String, dynamic>;
-  change(files);
-  final result = Catalog.load(files);
-  if (!result.isValid) throw StateError('${result.issues}');
-  return result.catalog!;
-}
-
-Map<String, dynamic> _rules(Map<String, dynamic> files) =>
-    files['rules'] as Map<String, dynamic>;
-
-/// No pests and no upkeep, so each test turns on only what it checks.
-Catalog _quietCatalog([void Function(Map<String, dynamic> files)? change]) =>
-    _catalogWith((files) {
-      final pests = _rules(files)['pests'] as Map<String, dynamic>;
-      (pests['bug'] as Map)['chance_max'] = 0.0;
-      (pests['blight'] as Map)['chance'] = 0.0;
-      for (final type
-          in (files['potato_types'] as Map)['potato_types'] as List) {
-        (type as Map).remove('upkeep');
-      }
-      change?.call(files);
-    });
 
 void main() {
   late Catalog catalog;
@@ -49,12 +24,12 @@ void main() {
     catalog = with_;
     farm = FarmSimulation.newFarm(catalog, seed: 3);
     farm.food = 10000;
-    for (final seed in [_combat, _breeding, _buff]) {
+    for (final seed in [_food, _combat, _breeding, _buff]) {
       farm.seeds.add(seed, 10);
     }
   }
 
-  setUp(() => open(_quietCatalog()));
+  setUp(() => open(quietSampleCatalog()));
 
   int build(String kind, TilePos origin) {
     expect(farm.apply(FarmCommand.build(kind: kind, origin: origin)), isNull);
@@ -96,9 +71,7 @@ void main() {
       expect(at(7, 8), FarmRejection.blocked, reason: 'outside open land');
       expect(at(15, 15), isNull, reason: 'the open edge needs no gap');
       expect(
-        farm.apply(
-          const FarmCommand.build(kind: 'castle', origin: TilePos(8, 8)),
-        ),
+        farm.apply(FarmCommand.build(kind: 'castle', origin: TilePos(8, 8))),
         FarmRejection.noSuchBuilding,
       );
     });
@@ -107,10 +80,7 @@ void main() {
       farm.food = 99;
       expect(
         farm.apply(
-          const FarmCommand.build(
-            kind: 'training_ground',
-            origin: TilePos(8, 8),
-          ),
+          FarmCommand.build(kind: 'training_ground', origin: TilePos(8, 8)),
         ),
         FarmRejection.notEnoughFood,
       );
@@ -133,9 +103,7 @@ void main() {
   group('capacity', () {
     test('field types need their building and stay within its limit', () {
       expect(
-        farm.apply(
-          const FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding),
-        ),
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding)),
         FarmRejection.typeLocked,
       );
       build('compost_yard', const TilePos(8, 8));
@@ -148,13 +116,11 @@ void main() {
         );
       }
       expect(
-        farm.apply(
-          const FarmCommand.plant(fieldId: 1, tile: _c, seed: _breeding),
-        ),
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _c, seed: _breeding)),
         FarmRejection.atCapacity,
       );
       expect(
-        farm.apply(const FarmCommand.plant(fieldId: 1, tile: _c, seed: _food)),
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _c, seed: _food)),
         isNull,
         reason: 'food potatoes have no limit',
       );
@@ -171,11 +137,7 @@ void main() {
       expect(farm.countOf(PotatoType.buff), 3, reason: 'they stay');
       expect(
         farm.apply(
-          const FarmCommand.plant(
-            fieldId: 1,
-            tile: TilePos(13, 10),
-            seed: _buff,
-          ),
+          FarmCommand.plant(fieldId: 1, tile: TilePos(13, 10), seed: _buff),
         ),
         FarmRejection.atCapacity,
       );
@@ -184,9 +146,7 @@ void main() {
     test('combat seeds grow in training grounds, not fields', () {
       final ground = build('training_ground', const TilePos(8, 8));
       expect(
-        farm.apply(
-          const FarmCommand.plant(fieldId: 1, tile: _a, seed: _combat),
-        ),
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _combat)),
         FarmRejection.wrongPlace,
       );
       final statue = build('statue', const TilePos(8, 11));
@@ -235,8 +195,8 @@ void main() {
   group('pests', () {
     setUp(
       () => open(
-        _quietCatalog((files) {
-          final pests = _rules(files)['pests'] as Map;
+        quietSampleCatalog((files) {
+          final pests = rulesOf(files)['pests'] as Map;
           (pests['blight'] as Map)['chance'] = 1.0;
         }),
       ),
@@ -248,7 +208,7 @@ void main() {
       farm.runSteps(checkSteps());
       expect(farm.field(1)!.pest, isNull, reason: 'nothing planted');
 
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       final potato = farm.field(1)!.potatoAt(_a)!;
       farm.runSteps(checkSteps());
       expect(farm.field(1)!.pest?.kind, PestKind.blight);
@@ -263,13 +223,13 @@ void main() {
 
     test('bugs come where food is stored and eat it', () {
       open(
-        _quietCatalog((files) {
-          final bug = (_rules(files)['pests'] as Map)['bug'] as Map;
+        quietSampleCatalog((files) {
+          final bug = (rulesOf(files)['pests'] as Map)['bug'] as Map;
           bug['chance_max'] = 1.0;
           bug['chance_per_stored'] = 1.0;
         }),
       );
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       final potato = farm.field(1)!.potatoAt(_a)!;
       final food = catalog.potatoType(PotatoType.food);
       // Grown, plus long enough to store some, ending on a pest check.
@@ -285,19 +245,19 @@ void main() {
     });
 
     test('tapping clears a pest and pays a reward', () {
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       farm.runSteps(checkSteps());
       farm.takeEvents();
       final before = farm.food;
 
-      expect(farm.apply(const FarmCommand.clearPest(fieldId: 1)), isNull);
+      expect(farm.apply(FarmCommand.clearPest(fieldId: 1)), isNull);
       expect(farm.field(1)!.pest, isNull);
       final cleared = farm.takeEvents().single as PestCleared;
       expect(cleared.byTap, isTrue);
       expect(farm.food, before + cleared.food);
       expect(cleared.food, inInclusiveRange(1, 3));
       expect(
-        farm.apply(const FarmCommand.clearPest(fieldId: 1)),
+        farm.apply(FarmCommand.clearPest(fieldId: 1)),
         FarmRejection.noPest,
       );
     });
@@ -305,7 +265,7 @@ void main() {
     test('guards walk to a pest and clear it over time', () {
       final ground = build('training_ground', const TilePos(8, 8));
       growGuard(ground);
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       // Run to the next check so the blight appears.
       while (farm.field(1)!.pest == null) {
         farm.step();
@@ -337,8 +297,8 @@ void main() {
   group('upkeep', () {
     setUp(
       () => open(
-        _catalogWith((files) {
-          final pests = _rules(files)['pests'] as Map;
+        sampleCatalogWith((files) {
+          final pests = rulesOf(files)['pests'] as Map;
           (pests['bug'] as Map)['chance_max'] = 0.0;
           (pests['blight'] as Map)['chance'] = 0.0;
         }),
@@ -349,8 +309,8 @@ void main() {
 
     test('other potatoes eat from the farm; food potatoes do not', () {
       build('statue', const TilePos(8, 8));
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _buff));
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _buff));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
       final before = farm.food;
       farm.runSteps(upkeepSteps());
       expect(farm.food, before - 2);
@@ -359,8 +319,8 @@ void main() {
 
     test('unpaid potatoes turn weak and recover once paid', () {
       build('statue', const TilePos(8, 8));
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _buff));
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _b, seed: _buff));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _buff));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: _buff));
       final [first, second] = [
         for (final p in farm.field(1)!.potatoes.values) p,
       ];
@@ -391,7 +351,7 @@ void main() {
       final guard = farm.guards.single;
       expect(guard.potato.id, id);
       expect(guard.potato.weak, isTrue);
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       farm.field(1)!.pest = Pest(kind: PestKind.blight);
       farm.step();
       final pace = catalog.rules.potatoes.guards.walkMillisPerTile;
@@ -403,15 +363,15 @@ void main() {
 
   test('a grown breeding potato can raise the grade of new potatoes', () {
     open(
-      _quietCatalog(
+      quietSampleCatalog(
         (files) =>
-            (_rules(files)['potatoes'] as Map)['breeding_grade_up_chance'] =
+            (rulesOf(files)['potatoes'] as Map)['breeding_grade_up_chance'] =
                 1.0,
       ),
     );
     build('compost_yard', const TilePos(8, 8));
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding));
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
     expect(
       farm.field(1)!.potatoAt(_b)!.grade,
       Grade.normal,
@@ -419,14 +379,14 @@ void main() {
     );
     farm.runSteps(catalog.potatoType(PotatoType.breeding).growSeconds);
     farm.takeEvents();
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _c, seed: _food));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _c, seed: _food));
     expect(farm.field(1)!.potatoAt(_c)!.grade, Grade.rare);
     expect((farm.takeEvents().single as PotatoPlanted).gradeUp, isTrue);
   });
 
   group('fridge', () {
     test('uprooted potatoes keep what they had and age slowly', () {
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds + 40);
       final potato = farm.field(1)!.potatoAt(_a)!;
       final stored = potato.stored;
@@ -452,7 +412,7 @@ void main() {
     });
 
     test('growing potatoes cannot go in', () {
-      farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       final potato = farm.field(1)!.potatoAt(_a)!;
       expect(
         farm.apply(FarmCommand.uproot(potatoId: potato.id)),
@@ -522,13 +482,13 @@ void main() {
   });
 
   test('a busy farm saves and loads to the same state', () {
-    open(_catalogWith((_) {}));
+    open(sampleCatalogWith((_) {}));
     final ground = build('training_ground', const TilePos(8, 8));
     build('compost_yard', const TilePos(8, 11));
     growGuard(ground);
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding));
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _c, seed: _food));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: _food));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _c, seed: _food));
     farm.apply(FarmCommand.uproot(potatoId: farm.field(1)!.potatoAt(_c)!.id));
     farm.runSteps(1000);
 

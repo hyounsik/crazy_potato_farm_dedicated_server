@@ -17,8 +17,9 @@ T _$identity<T>(T value) => value;
 mixin _$ItemData {
 
  String get id; ItemKind get kind;/// How many fit in one bag slot.
- int get stack;/// What a seed item plants; required for [ItemKind.seed] only.
- Seed? get seed;
+ int get stack;/// What kind of seed a seed item is; required for [ItemKind.seed] only.
+/// Each seed found gets its own level, ability and style.
+ SeedKindData? get seed;
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -56,11 +57,11 @@ abstract mixin class $ItemDataCopyWith<$Res>  {
   factory $ItemDataCopyWith(ItemData value, $Res Function(ItemData) _then) = _$ItemDataCopyWithImpl;
 @useResult
 $Res call({
- String id, ItemKind kind, int stack, Seed? seed
+ String id, ItemKind kind, int stack, SeedKindData? seed
 });
 
 
-$SeedCopyWith<$Res>? get seed;
+$SeedKindDataCopyWith<$Res>? get seed;
 
 }
 /// @nodoc
@@ -79,19 +80,19 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as ItemKind,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as int,seed: freezed == seed ? _self.seed : seed // ignore: cast_nullable_to_non_nullable
-as Seed?,
+as SeedKindData?,
   ));
 }
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$SeedCopyWith<$Res>? get seed {
+$SeedKindDataCopyWith<$Res>? get seed {
     if (_self.seed == null) {
     return null;
   }
 
-  return $SeedCopyWith<$Res>(_self.seed!, (value) {
+  return $SeedKindDataCopyWith<$Res>(_self.seed!, (value) {
     return _then(_self.copyWith(seed: value));
   });
 }
@@ -176,7 +177,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  Seed? seed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ItemData() when $default != null:
 return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
@@ -197,7 +198,7 @@ return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  Seed? seed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)  $default,) {final _that = this;
 switch (_that) {
 case _ItemData():
 return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
@@ -217,7 +218,7 @@ return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ItemKind kind,  int stack,  Seed? seed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)?  $default,) {final _that = this;
 switch (_that) {
 case _ItemData() when $default != null:
 return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
@@ -239,8 +240,9 @@ class _ItemData implements ItemData {
 @override final  ItemKind kind;
 /// How many fit in one bag slot.
 @override final  int stack;
-/// What a seed item plants; required for [ItemKind.seed] only.
-@override final  Seed? seed;
+/// What kind of seed a seed item is; required for [ItemKind.seed] only.
+/// Each seed found gets its own level, ability and style.
+@override final  SeedKindData? seed;
 
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
@@ -277,11 +279,11 @@ abstract mixin class _$ItemDataCopyWith<$Res> implements $ItemDataCopyWith<$Res>
   factory _$ItemDataCopyWith(_ItemData value, $Res Function(_ItemData) _then) = __$ItemDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, ItemKind kind, int stack, Seed? seed
+ String id, ItemKind kind, int stack, SeedKindData? seed
 });
 
 
-@override $SeedCopyWith<$Res>? get seed;
+@override $SeedKindDataCopyWith<$Res>? get seed;
 
 }
 /// @nodoc
@@ -300,7 +302,7 @@ id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as ItemKind,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as int,seed: freezed == seed ? _self.seed : seed // ignore: cast_nullable_to_non_nullable
-as Seed?,
+as SeedKindData?,
   ));
 }
 
@@ -308,15 +310,288 @@ as Seed?,
 /// with the given fields replaced by the non-null parameter values.
 @override
 @pragma('vm:prefer-inline')
-$SeedCopyWith<$Res>? get seed {
+$SeedKindDataCopyWith<$Res>? get seed {
     if (_self.seed == null) {
     return null;
   }
 
-  return $SeedCopyWith<$Res>(_self.seed!, (value) {
+  return $SeedKindDataCopyWith<$Res>(_self.seed!, (value) {
     return _then(_self.copyWith(seed: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$SeedKindData {
+
+ PotatoType get type; Grade get grade;
+/// Create a copy of SeedKindData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SeedKindDataCopyWith<SeedKindData> get copyWith => _$SeedKindDataCopyWithImpl<SeedKindData>(this as SeedKindData, _$identity);
+
+  /// Serializes this SeedKindData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as SeedKindData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeedKindData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as SeedKindData;
+  return Object.hash(runtimeType,_this.type,_this.grade);
+}
+
+@override
+String toString() {
+  final _this = this as SeedKindData;
+  return 'SeedKindData(type: ${_this.type}, grade: ${_this.grade})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SeedKindDataCopyWith<$Res>  {
+  factory $SeedKindDataCopyWith(SeedKindData value, $Res Function(SeedKindData) _then) = _$SeedKindDataCopyWithImpl;
+@useResult
+$Res call({
+ PotatoType type, Grade grade
+});
+
+
+
+
+}
+/// @nodoc
+class _$SeedKindDataCopyWithImpl<$Res>
+    implements $SeedKindDataCopyWith<$Res> {
+  _$SeedKindDataCopyWithImpl(this._self, this._then);
+
+  final SeedKindData _self;
+  final $Res Function(SeedKindData) _then;
+
+/// Create a copy of SeedKindData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,}) {
+  return _then(SeedKindData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SeedKindData].
+extension SeedKindDataPatterns on SeedKindData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SeedKindData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SeedKindData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SeedKindData value)  $default,){
+final _that = this;
+switch (_that) {
+case _SeedKindData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SeedKindData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SeedKindData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SeedKindData() when $default != null:
+return $default(_that.type,_that.grade);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade)  $default,) {final _that = this;
+switch (_that) {
+case _SeedKindData():
+return $default(_that.type,_that.grade);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade)?  $default,) {final _that = this;
+switch (_that) {
+case _SeedKindData() when $default != null:
+return $default(_that.type,_that.grade);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SeedKindData implements SeedKindData {
+  const _SeedKindData({required this.type, required this.grade});
+  factory _SeedKindData.fromJson(Map<String, dynamic> json) => _$SeedKindDataFromJson(json);
+
+@override final  PotatoType type;
+@override final  Grade grade;
+
+/// Create a copy of SeedKindData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SeedKindDataCopyWith<_SeedKindData> get copyWith => __$SeedKindDataCopyWithImpl<_SeedKindData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SeedKindDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeedKindData&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,type,grade);
+}
+
+@override
+String toString() {
+    return 'SeedKindData(type: $type, grade: $grade)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SeedKindDataCopyWith<$Res> implements $SeedKindDataCopyWith<$Res> {
+  factory _$SeedKindDataCopyWith(_SeedKindData value, $Res Function(_SeedKindData) _then) = __$SeedKindDataCopyWithImpl;
+@override @useResult
+$Res call({
+ PotatoType type, Grade grade
+});
+
+
+
+
+}
+/// @nodoc
+class __$SeedKindDataCopyWithImpl<$Res>
+    implements _$SeedKindDataCopyWith<$Res> {
+  __$SeedKindDataCopyWithImpl(this._self, this._then);
+
+  final _SeedKindData _self;
+  final $Res Function(_SeedKindData) _then;
+
+/// Create a copy of SeedKindData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,}) {
+  return _then(_SeedKindData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,
+  ));
+}
+
+
 }
 
 

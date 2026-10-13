@@ -1,6 +1,7 @@
 import 'dart:collection';
 import 'dart:math' as math;
 
+import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -12,8 +13,10 @@ import 'package:potato_core/src/farm/farm_command.dart';
 import 'package:potato_core/src/farm/farm_event.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
 import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
+import 'package:potato_core/src/potatoes/potato_effects.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 /// One farm's state and rules, advanced in fixed steps.
@@ -40,22 +43,49 @@ final class FarmSimulation {
     Iterable<Guard> guards = const [],
     Iterable<Potato> fridge = const [],
     Iterable<AwayPotato> away = const [],
+    Iterable<Potato> graves = const [],
     FarmTotals? totals,
-  }) : _fields = SplayTreeMap.fromIterable(fields, key: (f) => f.id),
+  }) : _graves = List.of(graves),
+       _fields = SplayTreeMap.fromIterable(fields, key: (f) => f.id),
        _buildings = SplayTreeMap.fromIterable(buildings, key: (b) => b.id),
        _guards = SplayTreeMap.fromIterable(guards, key: (g) => g.potato.id),
        _fridge = SplayTreeMap.fromIterable(fridge, key: (p) => p.id),
        _away = SplayTreeMap.fromIterable(away, key: (a) => a.potato.id),
-       totals = totals ?? FarmTotals();
+       totals = totals ?? FarmTotals(),
+       _roller = AbilityRoller(catalog),
+       _effects = PotatoEffects(catalog) {
+    for (final field in _fields.values) {
+      field._potatoes.values.forEach(_adopt);
+    }
+    for (final guard in _guards.values) {
+      _adopt(guard.potato);
+    }
+    _fridge.values.forEach(_adopt);
+    for (final away in _away.values) {
+      _adopt(away.potato);
+    }
+    _graves.forEach(_adopt);
+  }
 
   /// A new farm laid out by the catalog's `new_farm` rules.
   ///
   /// [seed] starts this farm's random sequence.
   factory FarmSimulation.newFarm(Catalog catalog, {required int seed}) {
     final start = catalog.rules.newFarm;
+    final random = GameRandom(seed);
+    final roller = AbilityRoller(catalog);
     final seeds = SeedPouch();
     for (final stack in start.seeds) {
-      seeds.add(Seed(type: stack.type, grade: stack.grade), stack.count);
+      for (var i = 0; i < stack.count; i++) {
+        seeds.add(
+          roller.seed(
+            type: stack.type,
+            grade: stack.grade,
+            level: stack.level,
+            random: random,
+          ),
+        );
+      }
     }
     var nextId = 1;
     final fields = [
@@ -63,7 +93,7 @@ final class FarmSimulation {
     ];
     return FarmSimulation.restore(
       catalog: catalog,
-      random: GameRandom(seed),
+      random: random,
       tick: 0,
       nextId: nextId,
       food: start.food,
@@ -74,6 +104,11 @@ final class FarmSimulation {
 
   final Catalog catalog;
   final GameRandom _random;
+  final AbilityRoller _roller;
+  final PotatoEffects _effects;
+
+  /// Each potato's effects and rates, kept until its field changes.
+  final Map<int, _Worked> _worked = {};
   int _tick;
   int _nextId;
   final SeedPouch _seeds;
@@ -82,6 +117,9 @@ final class FarmSimulation {
   final SplayTreeMap<int, Guard> _guards;
   final SplayTreeMap<int, Potato> _fridge;
   final SplayTreeMap<int, AwayPotato> _away;
+
+  /// Dead potatoes in the graveyards, oldest first.
+  final List<Potato> _graves;
   final List<FarmEvent> _events = [];
 
   /// Baby potatoes the farm owns.
@@ -122,6 +160,12 @@ final class FarmSimulation {
   /// Potatoes in the fridge, in id order.
   Iterable<Potato> get fridge => _fridge.values;
 
+  /// Dead potatoes waiting in the graveyards, oldest first.
+  Iterable<Potato> get graves => _graves;
+
+  /// How many dead potatoes the graveyards keep.
+  int get graveCapacity => _buildings.values.fold(0, (n, b) => n + b.graves);
+
   /// Potatoes out exploring.
   Iterable<Potato> get awayPotatoes => [for (final a in _away.values) a.potato];
 
@@ -146,6 +190,14 @@ final class FarmSimulation {
     }
     return null;
   }
+
+  /// What reaches [potato] from its own abilities and its field's: the
+  /// values the rules use for it now.
+  StatSums effectsOn(Potato potato) =>
+      _work(potato, fieldSpotOf(potato.id)?.field).sums;
+
+  /// Baby potatoes [potato] eats per upkeep payment now.
+  int upkeepOf(Potato potato) => _effects.upkeepOf(potato, effectsOn(potato));
 
   /// How many potatoes of [type] the farm's buildings look after, or null
   /// for a type with no limit.
@@ -223,6 +275,7 @@ final class FarmSimulation {
       potatoId,
       buildingId,
     ),
+    Revive(:final potatoId) => _revive(potatoId),
     Depart(:final food, :final potatoIds) => _depart(food, potatoIds),
     ReturnHome(:final food, :final seeds, :final potatoIds) => _returnHome(
       food,
@@ -270,7 +323,11 @@ final class FarmSimulation {
     if (pest != null) _harm(field, pest, millis);
     List<TilePos>? dead;
     for (final MapEntry(key: tile, value: potato) in field._potatoes.entries) {
-      final change = potato.live(millis, catalog.potatoType(potato.type));
+      final change = potato.live(
+        millis,
+        catalog.potatoType(potato.type),
+        _work(potato, field).rates,
+      );
       if (change.grew) {
         _events.add(
           FarmEvent.grown(fieldId: field.id, tile: tile, potatoId: potato.id),
@@ -279,13 +336,14 @@ final class FarmSimulation {
       if (change.died) (dead ??= []).add(tile);
     }
     for (final tile in dead ?? const <TilePos>[]) {
-      final potato = field._potatoes.remove(tile)!;
+      final potato = field._take(tile)!;
       _events.add(
         FarmEvent.died(
           fieldId: field.id,
           tile: tile,
           potatoId: potato.id,
-          seedLeft: _leaveSeed(potato),
+          type: potato.type,
+          buried: _bury(potato),
         ),
       );
     }
@@ -321,20 +379,23 @@ final class FarmSimulation {
     final data = catalog.potatoType(PotatoType.combat);
     List<Guard>? dead;
     for (final guard in _guards.values) {
-      final change = guard.potato.live(millis, data);
+      final change = guard.potato.live(millis, data, _work(guard.potato).rates);
       if (change.grew) _events.add(FarmEvent.grown(potatoId: guard.potato.id));
       if (change.died) {
         (dead ??= []).add(guard);
       } else if (guard.potato.isGrown(data)) {
         _patrol(guard, millis);
+        _harvestFor(guard);
       }
     }
     for (final guard in dead ?? const <Guard>[]) {
       _guards.remove(guard.potato.id);
       _events.add(
         FarmEvent.died(
+          at: guard.at,
           potatoId: guard.potato.id,
-          seedLeft: _leaveSeed(guard.potato),
+          type: guard.potato.type,
+          buried: _bury(guard.potato),
         ),
       );
     }
@@ -361,7 +422,14 @@ final class FarmSimulation {
       guard.walkMillis = math.max(0, guard.walkMillis - millis);
       if (guard.walkMillis == 0) guard.at = _besideField(field, guard.at);
     } else {
-      pest.clearedMillis += _effort(guard.potato, millis);
+      final speed = switch (pest.kind) {
+        PestKind.bug => FarmStat.bugClearSpeed,
+        PestKind.blight => FarmStat.blightClearSpeed,
+      };
+      final effort = _effort(guard.potato, millis);
+      pest.clearedMillis += _work(guard.potato).sums
+          .apply(speed, effort.toDouble())
+          .floor();
     }
   }
 
@@ -400,11 +468,7 @@ final class FarmSimulation {
       assigned[best!.id] = bestLoad + 1;
       guard
         ..targetFieldId = best.id
-        ..walkMillis =
-            bestDistance *
-            _rules.potatoes.guards.walkMillisPerTile *
-            100 ~/
-            _strengthPercent(guard.potato);
+        ..walkMillis = walkMillisFor(guard.potato, bestDistance);
       if (guard.walkMillis == 0) guard.at = _besideField(best, guard.at);
     }
   }
@@ -417,12 +481,16 @@ final class FarmSimulation {
       // Growth stops in the fridge, and life only starts once grown.
       if (!potato.isGrown(data)) continue;
       potato.livedMillis += aging;
-      if (potato.isDead(data)) (dead ??= []).add(potato);
+      if (potato.isDead) (dead ??= []).add(potato);
     }
     for (final potato in dead ?? const <Potato>[]) {
       _fridge.remove(potato.id);
       _events.add(
-        FarmEvent.died(potatoId: potato.id, seedLeft: _leaveSeed(potato)),
+        FarmEvent.died(
+          potatoId: potato.id,
+          type: potato.type,
+          buried: _bury(potato),
+        ),
       );
     }
   }
@@ -438,13 +506,19 @@ final class FarmSimulation {
       for (final potato in field._potatoes.values) {
         stored += potato.stored;
       }
+      final sums = field._sums(_effects);
       PestKind? kind;
       if (stored > 0 &&
           _random.chance(
-            math.min(rules.bug.chanceMax, stored * rules.bug.chancePerStored),
+            sums.apply(
+              FarmStat.blightChance,
+              math.min(rules.bug.chanceMax, stored * rules.bug.chancePerStored),
+            ),
           )) {
         kind = PestKind.bug;
-      } else if (_random.chance(rules.blight.chance)) {
+      } else if (_random.chance(
+        sums.apply(FarmStat.blightChance, rules.blight.chance),
+      )) {
         kind = PestKind.blight;
       }
       if (kind == null) continue;
@@ -459,13 +533,14 @@ final class FarmSimulation {
   /// for recovers.
   void _payUpkeep() {
     final payers = [
-      for (final field in _fields.values) ...field._potatoes.values,
-      for (final guard in _guards.values) guard.potato,
-    ]..sort((a, b) => a.id.compareTo(b.id));
+      for (final field in _fields.values)
+        for (final potato in field._potatoes.values) (potato, field),
+      for (final guard in _guards.values) (guard.potato, null),
+    ]..sort((a, b) => a.$1.id.compareTo(b.$1.id));
     final weakened = <int>[];
     final recovered = <int>[];
-    for (final potato in payers) {
-      final cost = catalog.potatoType(potato.type).upkeep;
+    for (final (potato, field) in payers) {
+      final cost = _effects.upkeepOf(potato, _work(potato, field).sums);
       if (cost == 0) continue;
       if (food >= cost) {
         food -= cost;
@@ -500,11 +575,7 @@ final class FarmSimulation {
     if (!_seeds.take(seed)) return FarmRejection.noSeed;
 
     final gradeUp = _breedingRaises(field, seed.grade);
-    final potato = Potato(
-      id: _nextId++,
-      type: seed.type,
-      grade: gradeUp ? seed.grade.higher! : seed.grade,
-    );
+    final potato = _sprout(seed, gradeUp ? seed.grade.higher! : seed.grade);
     field._put(tile, potato);
     _events.add(
       FarmEvent.planted(
@@ -539,7 +610,14 @@ final class FarmSimulation {
     }
     if (taken == 0) return FarmRejection.nothingToHarvest;
     food += taken;
-    _events.add(FarmEvent.harvested(fieldId: field.id, food: taken));
+    final chance = field
+        ._sums(_effects)
+        .apply(FarmStat.harvestRareChance, _rules.potatoes.harvestRareChance);
+    final seed = _random.chance(chance) ? _fieldSeed(field) : null;
+    if (seed != null) _seeds.add(seed);
+    _events.add(
+      FarmEvent.harvested(fieldId: field.id, food: taken, seed: seed),
+    );
     return null;
   }
 
@@ -595,6 +673,7 @@ final class FarmSimulation {
     _events.add(
       FarmEvent.demolished(buildingId: buildingId, toFridge: toFridge),
     );
+    _trimGraves();
     return null;
   }
 
@@ -608,7 +687,7 @@ final class FarmSimulation {
     final full = _roomFor(PotatoType.combat);
     if (full != null) return full;
     if (!_seeds.take(seed)) return FarmRejection.noSeed;
-    final potato = Potato(id: _nextId++, type: seed.type, grade: seed.grade);
+    final potato = _sprout(seed, seed.grade);
     _guards[potato.id] = Guard(
       potato: potato,
       buildingId: buildingId,
@@ -644,7 +723,7 @@ final class FarmSimulation {
       return FarmRejection.fridgeFull;
     }
     if (spot != null) {
-      spot.field._potatoes.remove(spot.tile);
+      spot.field._take(spot.tile);
       _toFridge(spot.potato);
     } else {
       _guards.remove(potatoId);
@@ -716,7 +795,7 @@ final class FarmSimulation {
     for (final away in going) {
       final id = away.potato.id;
       if (away.fieldId case final fieldId?) {
-        _fields[fieldId]!._potatoes.remove(away.tile);
+        _fields[fieldId]!._take(away.tile!);
       } else {
         _guards.remove(id);
       }
@@ -733,13 +812,13 @@ final class FarmSimulation {
 
   FarmRejection? _returnHome(
     int food,
-    List<SeedStackData> seeds,
+    List<SeedCount> seeds,
     List<int> potatoIds,
   ) {
     this.food += food;
     var seedCount = 0;
     for (final stack in seeds) {
-      _seeds.add(Seed(type: stack.type, grade: stack.grade), stack.count);
+      _seeds.add(stack.seed, stack.count);
       seedCount += stack.count;
     }
     final back = <int>[];
@@ -851,8 +930,7 @@ final class FarmSimulation {
     final reward = _rules.pests.reward;
     final gained =
         reward.foodMin + _random.nextInt(reward.foodMax - reward.foodMin + 1);
-    final type = _random.chance(reward.seedChance) ? field.mostPlanted : null;
-    final seed = type == null ? null : Seed(type: type, grade: Grade.normal);
+    final seed = _random.chance(reward.seedChance) ? _fieldSeed(field) : null;
     food += gained;
     if (seed != null) _seeds.add(seed);
     if (byTap) {
@@ -889,19 +967,180 @@ final class FarmSimulation {
         if (potato.type == PotatoType.breeding && potato.isGrown(data)) potato,
     ];
     if (breeders.isEmpty) return false;
-    final percent = breeders.map(_strengthPercent).reduce(math.max);
-    return _random.chance(
-      _rules.potatoes.breedingGradeUpChance * percent / 100,
+    var best = 0.0;
+    for (final breeder in breeders) {
+      final chance =
+          _effects.gradeUpChanceOf(breeder, _work(breeder, field).sums) *
+          _strengthPercent(breeder) /
+          100;
+      if (chance > best) best = chance;
+    }
+    return _random.chance(best);
+  }
+
+  /// Puts dead [potato] in a graveyard; false when the farm has none. A
+  /// full graveyard loses its oldest grave.
+  bool _bury(Potato potato) {
+    _worked.remove(potato.id);
+    potato
+      ..weak = false
+      ..stored = 0;
+    if (graveCapacity == 0) return false;
+    _graves.add(potato);
+    _trimGraves();
+    return true;
+  }
+
+  /// Drops the oldest graves past the graveyards' capacity.
+  void _trimGraves() {
+    while (_graves.length > graveCapacity) {
+      final lost = _graves.removeAt(0);
+      _events.add(FarmEvent.graveLost(potatoId: lost.id));
+    }
+  }
+
+  FarmRejection? _revive(int potatoId) {
+    final index = _graves.indexWhere((p) => p.id == potatoId);
+    if (index < 0) return FarmRejection.noGrave;
+    final potato = _graves.removeAt(index);
+    _events.add(
+      FarmEvent.revived(
+        potatoId: potatoId,
+        from: potato.grade,
+        seed: _leaveSeed(potato),
+      ),
     );
+    return null;
   }
 
   /// The seed a dead potato leaves: its own kind, sometimes a grade lower.
+  ///
+  /// An ability can give a chance of a grade higher instead.
   Seed _leaveSeed(Potato potato) {
+    var grade = potato.grade;
     final drops = _random.chance(_rules.potatoes.gradeDropChance);
-    final grade = drops ? potato.grade.lower ?? potato.grade : potato.grade;
-    final seed = Seed(type: potato.type, grade: grade);
+    // Only its own abilities: it has left its field.
+    final sums = _effects.own(potato);
+    final upChance = sums.apply(FarmStat.deathSeedGradeUpChance, 0);
+    if (drops) {
+      grade = grade.lower ?? grade;
+    } else if (upChance > 0 && _random.chance(upChance)) {
+      grade = grade.higher ?? grade;
+    }
+    final seed = potato.seed.copyWith(grade: grade);
     _seeds.add(seed);
     return seed;
+  }
+
+  /// A new potato from [seed], at [grade] (a breeding potato may have raised
+  /// it): the seed's ability first, then the rest of its slots rolled.
+  Potato _sprout(Seed seed, Grade grade) {
+    final potato = Potato(
+      id: _nextId++,
+      type: seed.type,
+      grade: grade,
+      level: seed.level,
+      abilities: _roller.slots(
+        type: seed.type,
+        grade: grade,
+        first: seed.ability,
+        random: _random,
+      ),
+      style: seed.style,
+    );
+    _adopt(potato);
+    return potato;
+  }
+
+  /// Works out what never changes for [potato] once it is on the farm.
+  void _adopt(Potato potato) {
+    potato.lifespanMillis = _effects.lifespanMillisOf(potato);
+  }
+
+  /// A normal seed of the type planted most in [field], at the highest
+  /// level among those potatoes; null for an empty field.
+  Seed? _fieldSeed(FarmField field) {
+    final type = field.mostPlanted;
+    if (type == null) return null;
+    var level = 0;
+    for (final potato in field._potatoes.values) {
+      if (potato.type == type && potato.level > level) level = potato.level;
+    }
+    return _roller.seed(
+      type: type,
+      grade: Grade.normal,
+      level: level,
+      random: _random,
+    );
+  }
+
+  /// Walking time for [potato] over [tiles], at its style's pace, slower
+  /// when weak.
+  int walkMillisFor(Potato potato, int tiles) {
+    final style = potato.style;
+    final pace = style == null
+        ? 100
+        : _rules.potatoes.combatStyles[style]?.walkPercent ?? 100;
+    return tiles *
+        _rules.potatoes.guards.walkMillisPerTile *
+        100 ~/
+        _strengthPercent(potato) *
+        100 ~/
+        pace;
+  }
+
+  /// A guard with a harvesting ability takes baby potatoes from the field
+  /// with the most stored, every so often.
+  void _harvestFor(Guard guard) {
+    final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
+    final interval = effect?.intervalInUse;
+    final amount = effect?.valueInUse?.floor() ?? 0;
+    if (interval == null || amount <= 0 || !_isDue(interval)) return;
+    FarmField? richest;
+    var most = 0;
+    for (final field in _fields.values) {
+      var stored = 0;
+      for (final potato in field._potatoes.values) {
+        stored += potato.stored;
+      }
+      if (stored > most) {
+        most = stored;
+        richest = field;
+      }
+    }
+    if (richest == null) return;
+    var left = amount;
+    for (final potato in richest._potatoes.values) {
+      if (left == 0) break;
+      final taken = math.min(left, potato.stored);
+      potato.stored -= taken;
+      left -= taken;
+    }
+    final taken = amount - left;
+    food += taken;
+    totals.foodHarvestedByGuards += taken;
+  }
+
+  /// [potato]'s effects and rates, from the cache while its field (if any)
+  /// has not changed.
+  _Worked _work(Potato potato, [FarmField? field]) {
+    final version = field?._version ?? -1;
+    final cached = _worked[potato.id];
+    if (cached != null &&
+        cached.fieldId == field?.id &&
+        cached.version == version) {
+      return cached;
+    }
+    final sums = <String, StatSum>{}..addAll(_effects.own(potato));
+    if (field != null) sums.addAll(field._sums(_effects));
+    final worked = _Worked(
+      fieldId: field?.id,
+      version: version,
+      sums: sums,
+      rates: _effects.ratesOf(potato, sums),
+    );
+    _worked[potato.id] = worked;
+    return worked;
   }
 }
 
@@ -926,6 +1165,25 @@ final class FarmField {
   /// The bug or blight on this field, if any.
   Pest? pest;
 
+  /// Bumped whenever the potatoes here change, so cached effects redo.
+  int _version = 0;
+  int _sumsVersion = -1;
+  StatSums _cachedSums = const {};
+
+  /// Effects that reach every potato here (and the field itself).
+  StatSums _sums(PotatoEffects effects) {
+    if (_sumsVersion != _version) {
+      _cachedSums = effects.field(_potatoes.values);
+      _sumsVersion = _version;
+    }
+    return _cachedSums;
+  }
+
+  Potato? _take(TilePos tile) {
+    _version++;
+    return _potatoes.remove(tile);
+  }
+
   /// Potatoes by tile, in id order.
   Map<TilePos, Potato> get potatoes => UnmodifiableMapView(_potatoes);
 
@@ -948,6 +1206,7 @@ final class FarmField {
   /// Plants [potato] on [tile], keeping id order even for a potato older
   /// than the rest (back from the fridge or from exploring).
   void _put(TilePos tile, Potato potato) {
+    _version++;
     final isNewest = _potatoes.values.every((p) => p.id < potato.id);
     _potatoes[tile] = potato;
     if (isNewest) return;
@@ -960,4 +1219,19 @@ final class FarmField {
   static List<MapEntry<TilePos, Potato>> _byId(
     Iterable<MapEntry<TilePos, Potato>> entries,
   ) => entries.toList()..sort((a, b) => a.value.id.compareTo(b.value.id));
+}
+
+/// A potato's effects and rates, as worked out for one state of its field.
+final class _Worked {
+  _Worked({
+    required this.fieldId,
+    required this.version,
+    required this.sums,
+    required this.rates,
+  });
+
+  final int? fieldId;
+  final int version;
+  final StatSums sums;
+  final PotatoRates rates;
 }

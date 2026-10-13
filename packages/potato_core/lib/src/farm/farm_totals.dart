@@ -16,6 +16,7 @@ final class FarmTotals {
     this.pestsAppeared = 0,
     this.pestsClearedByGuards = 0,
     this.pestsClearedByTap = 0,
+    this.foodHarvestedByGuards = 0,
   });
 
   factory FarmTotals.fromJson(Map<String, dynamic> json) =>
@@ -31,6 +32,9 @@ final class FarmTotals {
   int pestsClearedByGuards;
   int pestsClearedByTap;
 
+  /// Baby potatoes guards with a harvesting ability brought in.
+  int foodHarvestedByGuards;
+
   FarmTotals copy() => FarmTotals.fromJson(toJson());
 
   /// What changed since [before], as totals.
@@ -42,6 +46,7 @@ final class FarmTotals {
     pestsAppeared: pestsAppeared - before.pestsAppeared,
     pestsClearedByGuards: pestsClearedByGuards - before.pestsClearedByGuards,
     pestsClearedByTap: pestsClearedByTap - before.pestsClearedByTap,
+    foodHarvestedByGuards: foodHarvestedByGuards - before.foodHarvestedByGuards,
   );
 
   Map<String, dynamic> toJson() => _$FarmTotalsToJson(this);

@@ -2,7 +2,6 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
-import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/farm_building.dart';
@@ -30,7 +29,7 @@ abstract class FarmDocument with _$FarmDocument {
     required int nextId,
     required List<int> randomState,
     required int food,
-    required List<SeedStackData> seeds,
+    required List<SeedCount> seeds,
     required List<FieldDocument> fields,
     @Default(<BuildingDocument>[]) List<BuildingDocument> buildings,
     @Default(<GuardDocument>[]) List<GuardDocument> guards,
@@ -38,6 +37,9 @@ abstract class FarmDocument with _$FarmDocument {
     /// Potatoes in the fridge; their `tile` is null.
     @Default(<PotatoDocument>[]) List<PotatoDocument> fridge,
     @Default(<AwayDocument>[]) List<AwayDocument> away,
+
+    /// Dead potatoes in the graveyards, oldest first; `tile` is null.
+    @Default(<PotatoDocument>[]) List<PotatoDocument> graves,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
 
@@ -67,7 +69,7 @@ abstract class FarmDocument with _$FarmDocument {
     food: farm.food,
     seeds: [
       for (final MapEntry(key: seed, value: count) in farm.seeds.counts.entries)
-        SeedStackData(type: seed.type, grade: seed.grade, count: count),
+        SeedCount(seed: seed, count: count),
     ],
     fields: [
       for (final field in farm.fields)
@@ -117,6 +119,7 @@ abstract class FarmDocument with _$FarmDocument {
           buildingId: away.buildingId,
         ),
     ],
+    graves: [for (final potato in farm.graves) PotatoDocument.of(potato)],
     totals: farm.totals.toJson(),
   );
 
@@ -126,7 +129,7 @@ abstract class FarmDocument with _$FarmDocument {
   FarmSimulation toSimulation(Catalog catalog) {
     final pouch = SeedPouch();
     for (final stack in seeds) {
-      pouch.add(Seed(type: stack.type, grade: stack.grade), stack.count);
+      pouch.add(stack.seed, stack.count);
     }
     return FarmSimulation.restore(
       catalog: catalog,
@@ -185,6 +188,7 @@ abstract class FarmDocument with _$FarmDocument {
             buildingId: entry.buildingId,
           ),
       ],
+      graves: [for (final potato in graves) potato.toPotato()],
       totals: FarmTotals.fromJson(totals),
     );
   }
@@ -265,6 +269,9 @@ abstract class PotatoDocument with _$PotatoDocument {
     TilePos? tile,
     required PotatoType type,
     required Grade grade,
+    required int level,
+    required List<String> abilities,
+    CombatStyle? style,
     required int grownMillis,
     required int livedMillis,
     required int productionMillis,
@@ -282,6 +289,9 @@ abstract class PotatoDocument with _$PotatoDocument {
     tile: tile,
     type: potato.type,
     grade: potato.grade,
+    level: potato.level,
+    abilities: potato.abilities,
+    style: potato.style,
     grownMillis: potato.grownMillis,
     livedMillis: potato.livedMillis,
     productionMillis: potato.productionMillis,
@@ -293,6 +303,9 @@ abstract class PotatoDocument with _$PotatoDocument {
     id: id,
     type: type,
     grade: grade,
+    level: level,
+    abilities: abilities,
+    style: style,
     grownMillis: grownMillis,
     livedMillis: livedMillis,
     productionMillis: productionMillis,

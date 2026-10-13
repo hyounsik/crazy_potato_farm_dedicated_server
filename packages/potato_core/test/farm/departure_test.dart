@@ -2,8 +2,9 @@ import 'package:potato_core/potato_core.dart';
 import 'package:test/test.dart';
 
 import '../fixtures/sample_catalog.dart';
+import '../fixtures/seeds.dart';
 
-const _normal = Seed(type: PotatoType.food, grade: Grade.normal);
+final _normal = plainSeed(PotatoType.food, Grade.normal);
 const _tile = TilePos(12, 9);
 
 void main() {
@@ -13,10 +14,11 @@ void main() {
   setUp(() {
     catalog = sampleCatalog();
     farm = FarmSimulation.newFarm(catalog, seed: 1);
+    farm.seeds.add(_normal, 8);
   });
 
   int growOne() {
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
     farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
     return farm.field(1)!.potatoAt(_tile)!.id;
   }
@@ -43,13 +45,11 @@ void main() {
     expect(potato.livedMillis, lived);
     expect(potato.stored, 0);
     expect(
-      farm.apply(const FarmCommand.harvest(fieldId: 1, tile: _tile)),
+      farm.apply(FarmCommand.harvest(fieldId: 1, tile: _tile)),
       FarmRejection.noPotato,
     );
     expect(
-      farm.apply(
-        const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal),
-      ),
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal)),
       isNull,
     );
   });
@@ -57,7 +57,7 @@ void main() {
   test('a companion whose tile was taken comes home to the fridge', () {
     final id = growOne();
     farm.apply(FarmCommand.depart(food: 0, potatoIds: [id]));
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
     farm.takeEvents();
 
     farm.apply(FarmCommand.returnHome(food: 0, potatoIds: [id]));
@@ -69,10 +69,10 @@ void main() {
 
   test('who and how much can go', () {
     expect(
-      farm.apply(const FarmCommand.depart(food: 201)),
+      farm.apply(FarmCommand.depart(food: 201)),
       FarmRejection.notEnoughFood,
     );
-    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
     final sprout = farm.field(1)!.potatoAt(_tile)!.id;
     expect(
       farm.apply(FarmCommand.depart(food: 0, potatoIds: [sprout])),
@@ -80,7 +80,7 @@ void main() {
       reason: 'still growing',
     );
     expect(
-      farm.apply(const FarmCommand.depart(food: 0, potatoIds: [999])),
+      farm.apply(FarmCommand.depart(food: 0, potatoIds: [999])),
       FarmRejection.cannotGo,
     );
     expect(farm.food, 200, reason: 'a refused departure changes nothing');
@@ -90,12 +90,14 @@ void main() {
     final id = growOne();
     farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
 
+    final rare = plainSeed(PotatoType.food, Grade.rare);
+    final before = farm.seeds.count(rare);
     final result = RaidResult(
       outcome: RaidOutcome.wentHome,
       items: [
         ItemStack('food', 30),
-        ItemStack('seed_food_rare', 1),
-        ItemStack('seed_food_rare', 1),
+        ItemStack('seed_food_rare', 1, seed: rare),
+        ItemStack('seed_food_rare', 1, seed: rare),
         ItemStack('material', 9),
       ],
       companions: [(potatoId: id, down: true)],
@@ -104,10 +106,7 @@ void main() {
     expect(farm.apply(command), isNull);
 
     expect(farm.food, 190);
-    expect(
-      farm.seeds.count(const Seed(type: PotatoType.food, grade: Grade.rare)),
-      5,
-    );
+    expect(farm.seeds.count(rare), before + 2);
     expect(farm.awayPotatoes, isEmpty);
     expect(farm.fieldSpotOf(id)!.tile, _tile);
   });

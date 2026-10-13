@@ -112,6 +112,23 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
             'fridge',
             (v) => FridgeRulesData.fromJson(v as Map<String, dynamic>),
           ),
+          harvestRareChance: $checkedConvert(
+            'harvest_rare_chance',
+            (v) => (v as num).toDouble(),
+          ),
+          level: $checkedConvert(
+            'level',
+            (v) => LevelRulesData.fromJson(v as Map<String, dynamic>),
+          ),
+          combatStyles: $checkedConvert(
+            'combat_styles',
+            (v) => (v as Map<String, dynamic>).map(
+              (k, e) => MapEntry(
+                $enumDecode(_$CombatStyleEnumMap, k),
+                CombatStyleData.fromJson(e as Map<String, dynamic>),
+              ),
+            ),
+          ),
         );
         return val;
       },
@@ -120,6 +137,8 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
         'upkeepEverySeconds': 'upkeep_every_seconds',
         'weakPercent': 'weak_percent',
         'breedingGradeUpChance': 'breeding_grade_up_chance',
+        'harvestRareChance': 'harvest_rare_chance',
+        'combatStyles': 'combat_styles',
       },
     );
 
@@ -131,7 +150,70 @@ Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
       'breeding_grade_up_chance': instance.breedingGradeUpChance,
       'guards': instance.guards.toJson(),
       'fridge': instance.fridge.toJson(),
+      'harvest_rare_chance': instance.harvestRareChance,
+      'level': instance.level.toJson(),
+      'combat_styles': instance.combatStyles.map(
+        (k, e) => MapEntry(_$CombatStyleEnumMap[k]!, e.toJson()),
+      ),
     };
+
+const _$CombatStyleEnumMap = {
+  CombatStyle.melee: 'melee',
+  CombatStyle.ranged: 'ranged',
+  CombatStyle.escort: 'escort',
+};
+
+_LevelRulesData _$LevelRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_LevelRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _LevelRulesData(
+          foodYieldPermille: $checkedConvert(
+            'food_yield_permille',
+            (v) => (v as num).toInt(),
+          ),
+          gradeUpChancePermille: $checkedConvert(
+            'grade_up_chance_permille',
+            (v) => (v as num).toInt(),
+          ),
+          upkeepPermille: $checkedConvert(
+            'upkeep_permille',
+            (v) => (v as num).toInt(),
+          ),
+          buffPowerPermille: $checkedConvert(
+            'buff_power_permille',
+            (v) => (v as num).toInt(),
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'foodYieldPermille': 'food_yield_permille',
+        'gradeUpChancePermille': 'grade_up_chance_permille',
+        'upkeepPermille': 'upkeep_permille',
+        'buffPowerPermille': 'buff_power_permille',
+      },
+    );
+
+Map<String, dynamic> _$LevelRulesDataToJson(_LevelRulesData instance) =>
+    <String, dynamic>{
+      'food_yield_permille': instance.foodYieldPermille,
+      'grade_up_chance_permille': instance.gradeUpChancePermille,
+      'upkeep_permille': instance.upkeepPermille,
+      'buff_power_permille': instance.buffPowerPermille,
+    };
+
+_CombatStyleData _$CombatStyleDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_CombatStyleData', json, ($checkedConvert) {
+      final val = _CombatStyleData(
+        walkPercent: $checkedConvert('walk_percent', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'walkPercent': 'walk_percent'});
+
+Map<String, dynamic> _$CombatStyleDataToJson(_CombatStyleData instance) =>
+    <String, dynamic>{'walk_percent': instance.walkPercent};
 
 _GuardRulesData _$GuardRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_GuardRulesData', json, ($checkedConvert) {
@@ -333,6 +415,7 @@ _SeedStackData _$SeedStackDataFromJson(Map<String, dynamic> json) =>
         ),
         grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
         count: $checkedConvert('count', (v) => (v as num).toInt()),
+        level: $checkedConvert('level', (v) => (v as num).toInt()),
       );
       return val;
     });
@@ -342,6 +425,7 @@ Map<String, dynamic> _$SeedStackDataToJson(_SeedStackData instance) =>
       'type': _$PotatoTypeEnumMap[instance.type]!,
       'grade': _$GradeEnumMap[instance.grade]!,
       'count': instance.count,
+      'level': instance.level,
     };
 
 const _$PotatoTypeEnumMap = {

@@ -1,5 +1,4 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
-import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -67,6 +66,9 @@ sealed class FarmCommand with _$FarmCommand {
     required int buildingId,
   }) = Retrain;
 
+  /// Turns dead potato [potatoId] in a graveyard into its seed.
+  const factory FarmCommand.revive({required int potatoId}) = Revive;
+
   /// Sets out exploring with [food] baby potatoes and the potatoes
   /// [potatoIds] as companions. They leave the farm until [returnHome].
   const factory FarmCommand.depart({
@@ -79,7 +81,7 @@ sealed class FarmCommand with _$FarmCommand {
   /// when that place is gone or taken.
   const factory FarmCommand.returnHome({
     required int food,
-    @Default(<SeedStackData>[]) List<SeedStackData> seeds,
+    @Default(<SeedCount>[]) List<SeedCount> seeds,
     @Default(<int>[]) List<int> potatoIds,
   }) = ReturnHome;
 
@@ -116,6 +118,9 @@ enum FarmRejection {
 
   /// The potato is not in the fridge.
   notInFridge,
+
+  /// No dead potato with that id in the graveyards.
+  noGrave,
   noPotato,
   nothingToHarvest,
 

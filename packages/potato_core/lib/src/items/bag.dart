@@ -2,20 +2,41 @@ import 'dart:math' as math;
 
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Some amount of one item, in a bag slot or a loot pile.
 final class ItemStack {
-  ItemStack(this.item, this.count);
+  ItemStack(this.item, this.count, {this.seed});
 
-  factory ItemStack.fromJson(Map<String, dynamic> json) =>
-      ItemStack(json['item'] as String, json['count'] as int);
+  factory ItemStack.fromJson(Map<String, dynamic> json) => ItemStack(
+    json['item'] as String,
+    json['count'] as int,
+    seed: switch (json['seed']) {
+      final Map<String, dynamic> seed => Seed.fromJson(seed),
+      _ => null,
+    },
+  );
 
   /// The item's catalog id.
   final String item;
   int count;
 
-  Map<String, dynamic> toJson() => {'item': item, 'count': count};
+  /// The seed itself, for seed items: each one found has its own level,
+  /// ability and style, so only equal seeds share a stack.
+  final Seed? seed;
+
+  /// Whether [other] may top up this stack.
+  bool sameAs(ItemStack other) => other.item == item && other.seed == seed;
+
+  Map<String, dynamic> toJson() => {
+    'item': item,
+    'count': count,
+    if (seed != null) 'seed': seed!.toJson(),
+  };
 }
+
+/// Makes the seed for one seed item found, or null for other items.
+typedef SeedMaker = Seed? Function(String item);
 
 /// Looks up how many of an item fit in one slot.
 typedef StackSize = int Function(String item);
@@ -44,7 +65,7 @@ final class Bag {
     var moved = 0;
     for (final slot in slots) {
       if (from.count == 0) break;
-      if (slot == null || slot.item != from.item) continue;
+      if (slot == null || !slot.sameAs(from)) continue;
       final n = math.min(max - slot.count, from.count);
       if (n <= 0) continue;
       slot.count += n;
@@ -54,7 +75,7 @@ final class Bag {
     for (var i = 0; i < slots.length && from.count > 0; i++) {
       if (slots[i] != null) continue;
       final n = math.min(max, from.count);
-      slots[i] = ItemStack(from.item, n);
+      slots[i] = ItemStack(from.item, n, seed: from.seed);
       from.count -= n;
       moved += n;
     }
@@ -97,11 +118,13 @@ final class LootPile {
   LootPile([List<ItemStack>? items]) : items = items ?? [];
 
   /// Rolls [table] and merges the same items into as few stacks as fit.
+  /// Seed items get a seed each from [makeSeed].
   factory LootPile.roll(
     LootTableData table,
     StackSize stackSize,
-    GameRandom random,
-  ) {
+    GameRandom random, {
+    SeedMaker? makeSeed,
+  }) {
     final pile = LootPile();
     final total = table.entries.fold(0, (sum, e) => sum + e.weight);
     final rolls =
@@ -113,7 +136,16 @@ final class LootPile {
         return roll < 0;
       });
       final count = entry.min + random.nextInt(entry.max - entry.min + 1);
-      pile._merge(ItemStack(entry.item, count), stackSize);
+      final first = makeSeed?.call(entry.item);
+      if (first == null) {
+        pile._merge(ItemStack(entry.item, count), stackSize);
+        continue;
+      }
+      pile._merge(ItemStack(entry.item, 1, seed: first), stackSize);
+      for (var n = 1; n < count; n++) {
+        final seed = makeSeed!(entry.item)!;
+        pile._merge(ItemStack(entry.item, 1, seed: seed), stackSize);
+      }
     }
     return pile;
   }
@@ -126,7 +158,7 @@ final class LootPile {
     final max = stackSize(stack.item);
     for (final existing in items) {
       if (stack.count == 0) return;
-      if (existing.item != stack.item) continue;
+      if (!existing.sameAs(stack)) continue;
       final n = math.min(max - existing.count, stack.count);
       if (n <= 0) continue;
       existing.count += n;
@@ -134,7 +166,7 @@ final class LootPile {
     }
     while (stack.count > 0) {
       final n = math.min(max, stack.count);
-      items.add(ItemStack(stack.item, n));
+      items.add(ItemStack(stack.item, n, seed: stack.seed));
       stack.count -= n;
     }
   }

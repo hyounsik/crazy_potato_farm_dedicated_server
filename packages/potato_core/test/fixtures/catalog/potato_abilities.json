@@ -1,0 +1,303 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Made-up abilities; the game's real list is not public.",
+  "rules": {
+    "slots_by_grade": {
+      "normal": 1,
+      "rare": 2,
+      "legendary": 3
+    },
+    "extra_slot_pool_weight": {
+      "common": 1,
+      "unique": 1
+    },
+    "rarity_weights": {
+      "normal": 100,
+      "low": 30,
+      "very_low": 5
+    }
+  },
+  "pools": [
+    {
+      "id": "common",
+      "potato_types": [
+        "food",
+        "combat",
+        "breeding",
+        "buff"
+      ]
+    },
+    {
+      "id": "food",
+      "potato_types": [
+        "food"
+      ]
+    },
+    {
+      "id": "combat",
+      "potato_types": [
+        "combat"
+      ]
+    },
+    {
+      "id": "breeding",
+      "potato_types": [
+        "breeding"
+      ]
+    },
+    {
+      "id": "buff",
+      "potato_types": [
+        "buff"
+      ]
+    }
+  ],
+  "abilities": [
+    {
+      "id": "food.plain",
+      "pool": "food",
+      "effects": [
+        {
+          "context": "explore",
+          "target": "self",
+          "kind": "stat",
+          "stat": "unit.hp",
+          "op": "mul",
+          "value": 1.05
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "combat.plain",
+      "pool": "combat",
+      "effects": [
+        {
+          "context": "explore",
+          "target": "self",
+          "kind": "stat",
+          "stat": "unit.hp",
+          "op": "mul",
+          "value": 1.05
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "breeding.plain",
+      "pool": "breeding",
+      "effects": [
+        {
+          "context": "explore",
+          "target": "self",
+          "kind": "stat",
+          "stat": "unit.hp",
+          "op": "mul",
+          "value": 1.05
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "buff.plain",
+      "pool": "buff",
+      "effects": [
+        {
+          "context": "explore",
+          "target": "self",
+          "kind": "stat",
+          "stat": "unit.hp",
+          "op": "mul",
+          "value": 1.05
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "common.sturdy",
+      "pool": "common",
+      "effects": [
+        {
+          "context": "always",
+          "target": "self",
+          "kind": "stat",
+          "stat": "potato.lifespan",
+          "op": "mul",
+          "value": 1.1
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "common.quick",
+      "pool": "common",
+      "effects": [
+        {
+          "context": "always",
+          "target": "self",
+          "kind": "stat",
+          "stat": "potato.growth_speed",
+          "op": "mul",
+          "value": 1.25
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "food.plenty",
+      "pool": "food",
+      "effects": [
+        {
+          "context": "always",
+          "target": "self",
+          "kind": "stat",
+          "stat": "food.yield",
+          "op": "mul",
+          "value": 1.2
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "food.sweet",
+      "pool": "food",
+      "effects": [
+        {
+          "context": "always",
+          "target": "self",
+          "kind": "stat",
+          "stat": "food.yield",
+          "op": "mul",
+          "value": 1.5
+        },
+        {
+          "context": "farm",
+          "target": "field",
+          "kind": "stat",
+          "stat": "field.blight_chance",
+          "op": "mul",
+          "value": null,
+          "temp_value": 2.0
+        }
+      ],
+      "rarity": "very_low"
+    },
+    {
+      "id": "combat.keen",
+      "pool": "combat",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "stat",
+          "stat": "combat.pest_clear_speed",
+          "op": "mul",
+          "value": 1.5
+        },
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "stat",
+          "stat": "combat.disease_clear_speed",
+          "op": "mul",
+          "value": 1.5
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "combat.gatherer",
+      "pool": "combat",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "periodic",
+          "interval_sec": null,
+          "temp_interval_sec": 60,
+          "action": "harvest_food",
+          "value": null,
+          "temp_value": 3
+        }
+      ],
+      "rarity": "low"
+    },
+    {
+      "id": "breeding.eye",
+      "pool": "breeding",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "stat",
+          "stat": "breeding.grade_up_chance",
+          "op": "mul",
+          "value": 2.0
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "buff.calm",
+      "pool": "buff",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "field",
+          "kind": "stat",
+          "stat": "potato.aging_rate",
+          "op": "mul",
+          "value": null,
+          "temp_value": 0.5
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "buff.ward",
+      "pool": "buff",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "field",
+          "kind": "stat",
+          "stat": "field.blight_chance",
+          "op": "mul",
+          "value": 0.5
+        }
+      ],
+      "rarity": "normal"
+    },
+    {
+      "id": "buff.lucky",
+      "pool": "buff",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "field",
+          "kind": "stat",
+          "stat": "field.harvest_rare_chance",
+          "op": "add",
+          "value": 1.0
+        }
+      ],
+      "rarity": "low",
+      "weight": 10
+    },
+    {
+      "id": "buff.thrift",
+      "pool": "buff",
+      "effects": [
+        {
+          "context": "farm",
+          "target": "field",
+          "kind": "stat",
+          "stat": "potato.upkeep",
+          "op": "mul",
+          "value": 0.5
+        }
+      ],
+      "rarity": "normal"
+    }
+  ]
+}

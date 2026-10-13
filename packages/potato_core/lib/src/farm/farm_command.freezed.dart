@@ -60,6 +60,10 @@ FarmCommand _$FarmCommandFromJson(
           return Retrain.fromJson(
             json
           );
+                case 'revive':
+          return Revive.fromJson(
+            json
+          );
                 case 'depart':
           return Depart.fromJson(
             json
@@ -126,7 +130,7 @@ extension FarmCommandPatterns on FarmCommand {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Depart value)?  depart,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Revive value)?  revive,TResult Function( Depart value)?  depart,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
@@ -140,7 +144,8 @@ return train(_that);case ClearPest() when clearPest != null:
 return clearPest(_that);case Uproot() when uproot != null:
 return uproot(_that);case Replant() when replant != null:
 return replant(_that);case Retrain() when retrain != null:
-return retrain(_that);case Depart() when depart != null:
+return retrain(_that);case Revive() when revive != null:
+return revive(_that);case Depart() when depart != null:
 return depart(_that);case ReturnHome() when returnHome != null:
 return returnHome(_that);case _:
   return orElse();
@@ -160,7 +165,7 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Depart value)  depart,required TResult Function( ReturnHome value)  returnHome,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Revive value)  revive,required TResult Function( Depart value)  depart,required TResult Function( ReturnHome value)  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed():
@@ -174,7 +179,8 @@ return train(_that);case ClearPest():
 return clearPest(_that);case Uproot():
 return uproot(_that);case Replant():
 return replant(_that);case Retrain():
-return retrain(_that);case Depart():
+return retrain(_that);case Revive():
+return revive(_that);case Depart():
 return depart(_that);case ReturnHome():
 return returnHome(_that);}
 }
@@ -190,7 +196,7 @@ return returnHome(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Depart value)?  depart,TResult? Function( ReturnHome value)?  returnHome,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Revive value)?  revive,TResult? Function( Depart value)?  depart,TResult? Function( ReturnHome value)?  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
@@ -204,7 +210,8 @@ return train(_that);case ClearPest() when clearPest != null:
 return clearPest(_that);case Uproot() when uproot != null:
 return uproot(_that);case Replant() when replant != null:
 return replant(_that);case Retrain() when retrain != null:
-return retrain(_that);case Depart() when depart != null:
+return retrain(_that);case Revive() when revive != null:
+return revive(_that);case Depart() when depart != null:
 return depart(_that);case ReturnHome() when returnHome != null:
 return returnHome(_that);case _:
   return null;
@@ -223,7 +230,7 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int food,  List<int> potatoIds)?  depart,TResult Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)?  returnHome,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int potatoId)?  revive,TResult Function( int food,  List<int> potatoIds)?  depart,TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
@@ -236,7 +243,8 @@ return train(_that.buildingId,_that.seed);case ClearPest() when clearPest != nul
 return clearPest(_that.fieldId);case Uproot() when uproot != null:
 return uproot(_that.potatoId);case Replant() when replant != null:
 return replant(_that.potatoId,_that.fieldId,_that.tile);case Retrain() when retrain != null:
-return retrain(_that.potatoId,_that.buildingId);case Depart() when depart != null:
+return retrain(_that.potatoId,_that.buildingId);case Revive() when revive != null:
+return revive(_that.potatoId);case Depart() when depart != null:
 return depart(_that.food,_that.potatoIds);case ReturnHome() when returnHome != null:
 return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
   return orElse();
@@ -256,7 +264,7 @@ return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int food,  List<int> potatoIds)  depart,required TResult Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int potatoId)  revive,required TResult Function( int food,  List<int> potatoIds)  depart,required TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato():
@@ -269,7 +277,8 @@ return train(_that.buildingId,_that.seed);case ClearPest():
 return clearPest(_that.fieldId);case Uproot():
 return uproot(_that.potatoId);case Replant():
 return replant(_that.potatoId,_that.fieldId,_that.tile);case Retrain():
-return retrain(_that.potatoId,_that.buildingId);case Depart():
+return retrain(_that.potatoId,_that.buildingId);case Revive():
+return revive(_that.potatoId);case Depart():
 return depart(_that.food,_that.potatoIds);case ReturnHome():
 return returnHome(_that.food,_that.seeds,_that.potatoIds);}
 }
@@ -285,7 +294,7 @@ return returnHome(_that.food,_that.seeds,_that.potatoIds);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int food,  List<int> potatoIds)?  depart,TResult? Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)?  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int potatoId)?  revive,TResult? Function( int food,  List<int> potatoIds)?  depart,TResult? Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
@@ -298,7 +307,8 @@ return train(_that.buildingId,_that.seed);case ClearPest() when clearPest != nul
 return clearPest(_that.fieldId);case Uproot() when uproot != null:
 return uproot(_that.potatoId);case Replant() when replant != null:
 return replant(_that.potatoId,_that.fieldId,_that.tile);case Retrain() when retrain != null:
-return retrain(_that.potatoId,_that.buildingId);case Depart() when depart != null:
+return retrain(_that.potatoId,_that.buildingId);case Revive() when revive != null:
+return revive(_that.potatoId);case Depart() when depart != null:
 return depart(_that.food,_that.potatoIds);case ReturnHome() when returnHome != null:
 return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
   return null;
@@ -1206,6 +1216,81 @@ as int,
 /// @nodoc
 @JsonSerializable()
 
+class Revive implements FarmCommand {
+  const Revive({required this.potatoId,  String? $type}): $type = $type ?? 'revive';
+  factory Revive.fromJson(Map<String, dynamic> json) => _$ReviveFromJson(json);
+
+ final  int potatoId;
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReviveCopyWith<Revive> get copyWith => _$ReviveCopyWithImpl<Revive>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ReviveToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is Revive&&(identical(other.potatoId, potatoId) || other.potatoId == potatoId));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,potatoId);
+}
+
+@override
+String toString() {
+    return 'FarmCommand.revive(potatoId: $potatoId)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReviveCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $ReviveCopyWith(Revive value, $Res Function(Revive) _then) = _$ReviveCopyWithImpl;
+@useResult
+$Res call({
+ int potatoId
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReviveCopyWithImpl<$Res>
+    implements $ReviveCopyWith<$Res> {
+  _$ReviveCopyWithImpl(this._self, this._then);
+
+  final Revive _self;
+  final $Res Function(Revive) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? potatoId = null,}) {
+  return _then(Revive(
+potatoId: null == potatoId ? _self.potatoId : potatoId // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
 class Depart implements FarmCommand {
   const Depart({required this.food,  List<int> potatoIds = const <int>[],  String? $type}): _potatoIds = potatoIds,$type = $type ?? 'depart';
   factory Depart.fromJson(Map<String, dynamic> json) => _$DepartFromJson(json);
@@ -1290,12 +1375,12 @@ as List<int>,
 @JsonSerializable()
 
 class ReturnHome implements FarmCommand {
-  const ReturnHome({required this.food,  List<SeedStackData> seeds = const <SeedStackData>[],  List<int> potatoIds = const <int>[],  String? $type}): _seeds = seeds,_potatoIds = potatoIds,$type = $type ?? 'returnHome';
+  const ReturnHome({required this.food,  List<SeedCount> seeds = const <SeedCount>[],  List<int> potatoIds = const <int>[],  String? $type}): _seeds = seeds,_potatoIds = potatoIds,$type = $type ?? 'returnHome';
   factory ReturnHome.fromJson(Map<String, dynamic> json) => _$ReturnHomeFromJson(json);
 
  final  int food;
- final  List<SeedStackData> _seeds;
-@JsonKey() List<SeedStackData> get seeds {
+ final  List<SeedCount> _seeds;
+@JsonKey() List<SeedCount> get seeds {
   if (_seeds is EqualUnmodifiableListView) return _seeds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_seeds);
@@ -1348,7 +1433,7 @@ abstract mixin class $ReturnHomeCopyWith<$Res> implements $FarmCommandCopyWith<$
   factory $ReturnHomeCopyWith(ReturnHome value, $Res Function(ReturnHome) _then) = _$ReturnHomeCopyWithImpl;
 @useResult
 $Res call({
- int food, List<SeedStackData> seeds, List<int> potatoIds
+ int food, List<SeedCount> seeds, List<int> potatoIds
 });
 
 
@@ -1369,7 +1454,7 @@ class _$ReturnHomeCopyWithImpl<$Res>
   return _then(ReturnHome(
 food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,seeds: null == seeds ? _self._seeds : seeds // ignore: cast_nullable_to_non_nullable
-as List<SeedStackData>,potatoIds: null == potatoIds ? _self._potatoIds : potatoIds // ignore: cast_nullable_to_non_nullable
+as List<SeedCount>,potatoIds: null == potatoIds ? _self._potatoIds : potatoIds // ignore: cast_nullable_to_non_nullable
 as List<int>,
   ));
 }

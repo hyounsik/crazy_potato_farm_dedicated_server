@@ -8,6 +8,7 @@ environment:
 dependencies:
   freezed_annotation: ^3.1.0
   json_annotation: ^4.12.0
+  tiled: ^0.12.0
 dev_dependencies:
   build_runner: ^2.16.2
   freezed: ^4.0.2

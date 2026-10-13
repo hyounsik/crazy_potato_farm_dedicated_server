@@ -48,3 +48,8 @@ jobs:
       - name: Test potato_core common code on JavaScript
         working-directory: packages/potato_core
         run: dart test -p node test/common
+
+      # Same seed, same map on the web: the generator test pins one map.
+      - name: Test map generator on JavaScript
+        working-directory: packages/potato_core
+        run: dart test -p node test/map/map_generator_test.dart

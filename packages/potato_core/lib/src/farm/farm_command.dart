@@ -51,7 +51,7 @@ sealed class FarmCommand with _$FarmCommand {
   /// The player tapped a field's pest the required number of times.
   const factory FarmCommand.clearPest({required int fieldId}) = ClearPest;
 
-  /// Takes a planted potato or a guard into the fridge.
+  /// Takes a grown planted potato or a grown guard into the fridge.
   const factory FarmCommand.uproot({required int potatoId}) = Uproot;
 
   /// Plants a potato from the fridge on an empty field tile.
@@ -110,6 +110,9 @@ enum FarmRejection {
   maxLevel,
   noPest,
   fridgeFull,
+
+  /// Only grown potatoes go into the fridge.
+  stillGrowing,
 
   /// The potato is not in the fridge.
   notInFridge,

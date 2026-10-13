@@ -636,6 +636,10 @@ final class FarmSimulation {
     final spot = fieldSpotOf(potatoId);
     final guard = _guards[potatoId];
     if (spot == null && guard == null) return FarmRejection.noPotato;
+    final potato = spot?.potato ?? guard!.potato;
+    if (!potato.isGrown(catalog.potatoType(potato.type))) {
+      return FarmRejection.stillGrowing;
+    }
     if (_fridge.length >= _rules.potatoes.fridge.size) {
       return FarmRejection.fridgeFull;
     }

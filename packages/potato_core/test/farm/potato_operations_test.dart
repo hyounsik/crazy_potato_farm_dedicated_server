@@ -451,11 +451,23 @@ void main() {
       expect(farm.fridge, isEmpty);
     });
 
-    test('growing potatoes stop growing in the fridge', () {
+    test('growing potatoes cannot go in', () {
       farm.apply(const FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
-      farm.runSteps(10);
       final potato = farm.field(1)!.potatoAt(_a)!;
-      farm.apply(FarmCommand.uproot(potatoId: potato.id));
+      expect(
+        farm.apply(FarmCommand.uproot(potatoId: potato.id)),
+        FarmRejection.stillGrowing,
+      );
+      expect(farm.fridge, isEmpty);
+    });
+
+    test('a growing potato that lands in the fridge stops growing', () {
+      // The one way in: its training ground is demolished with no other.
+      final ground = build('training_ground', const TilePos(8, 8));
+      farm.apply(FarmCommand.train(buildingId: ground, seed: _combat));
+      farm.runSteps(10);
+      farm.apply(FarmCommand.demolish(buildingId: ground));
+      final potato = farm.fridge.single;
       farm.runSteps(500);
       expect(potato.grownMillis, 10 * 1000);
       expect(potato.livedMillis, 0);
@@ -467,6 +479,7 @@ void main() {
       for (var i = 0; i <= size; i++) {
         final tile = tiles[i % tiles.length];
         farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: _food));
+        farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
         final id = farm.field(1)!.potatoAt(tile)!.id;
         expect(
           farm.apply(FarmCommand.uproot(potatoId: id)),

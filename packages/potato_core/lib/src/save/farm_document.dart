@@ -5,7 +5,11 @@ import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/farm/farm_building.dart';
 import 'package:potato_core/src/farm/farm_simulation.dart';
+import 'package:potato_core/src/farm/farm_totals.dart';
+import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 import 'package:potato_core/src/save/migration.dart';
@@ -28,6 +32,13 @@ abstract class FarmDocument with _$FarmDocument {
     required int food,
     required List<SeedStackData> seeds,
     required List<FieldDocument> fields,
+    @Default(<BuildingDocument>[]) List<BuildingDocument> buildings,
+    @Default(<GuardDocument>[]) List<GuardDocument> guards,
+
+    /// Potatoes in the fridge; their `tile` is null.
+    @Default(<PotatoDocument>[]) List<PotatoDocument> fridge,
+    @Default(<AwayDocument>[]) List<AwayDocument> away,
+    @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
 
   const FarmDocument._();
@@ -68,11 +79,50 @@ abstract class FarmDocument with _$FarmDocument {
                 in field.potatoes.entries)
               PotatoDocument.of(potato, tile),
           ],
+          pest: switch (field.pest) {
+            final pest? => PestDocument(
+              kind: pest.kind,
+              clearedMillis: pest.clearedMillis,
+              biteMillis: pest.biteMillis,
+            ),
+            null => null,
+          },
         ),
     ],
+    buildings: [
+      for (final building in farm.buildings)
+        BuildingDocument(
+          id: building.id,
+          kind: building.kind,
+          origin: building.origin,
+          level: building.level,
+        ),
+    ],
+    guards: [
+      for (final guard in farm.guards)
+        GuardDocument(
+          potato: PotatoDocument.of(guard.potato),
+          buildingId: guard.buildingId,
+          at: guard.at,
+          targetFieldId: guard.targetFieldId,
+          walkMillis: guard.walkMillis,
+        ),
+    ],
+    fridge: [for (final potato in farm.fridge) PotatoDocument.of(potato)],
+    away: [
+      for (final away in farm.awayEntries)
+        AwayDocument(
+          potato: PotatoDocument.of(away.potato, away.tile),
+          fieldId: away.fieldId,
+          buildingId: away.buildingId,
+        ),
+    ],
+    totals: farm.totals.toJson(),
   );
 
   /// Builds the running farm, using [catalog] for its rules.
+  ///
+  /// Throws [FormatException] for a building kind the catalog lacks.
   FarmSimulation toSimulation(Catalog catalog) {
     final pouch = SeedPouch();
     for (final stack in seeds) {
@@ -92,10 +142,50 @@ abstract class FarmDocument with _$FarmDocument {
             rect: field.rect,
             potatoes: {
               for (final potato in field.potatoes)
-                potato.tile: potato.toPotato(),
+                potato.tile!: potato.toPotato(),
+            },
+            pest: switch (field.pest) {
+              final pest? => Pest(
+                kind: pest.kind,
+                clearedMillis: pest.clearedMillis,
+                biteMillis: pest.biteMillis,
+              ),
+              null => null,
             },
           ),
       ],
+      buildings: [
+        for (final building in buildings)
+          FarmBuilding(
+            id: building.id,
+            data:
+                catalog.buildings[building.kind] ??
+                (throw FormatException('Unknown building "${building.kind}"')),
+            origin: building.origin,
+            level: building.level,
+          ),
+      ],
+      guards: [
+        for (final guard in guards)
+          Guard(
+            potato: guard.potato.toPotato(),
+            buildingId: guard.buildingId,
+            at: guard.at,
+            targetFieldId: guard.targetFieldId,
+            walkMillis: guard.walkMillis,
+          ),
+      ],
+      fridge: [for (final potato in fridge) potato.toPotato()],
+      away: [
+        for (final entry in away)
+          AwayPotato(
+            potato: entry.potato.toPotato(),
+            fieldId: entry.fieldId,
+            tile: entry.potato.tile,
+            buildingId: entry.buildingId,
+          ),
+      ],
+      totals: FarmTotals.fromJson(totals),
     );
   }
 }
@@ -106,6 +196,7 @@ abstract class FieldDocument with _$FieldDocument {
     required int id,
     required TileRect rect,
     required List<PotatoDocument> potatoes,
+    PestDocument? pest,
   }) = _FieldDocument;
 
   factory FieldDocument.fromJson(Map<String, dynamic> json) =>
@@ -113,17 +204,72 @@ abstract class FieldDocument with _$FieldDocument {
 }
 
 @freezed
+abstract class PestDocument with _$PestDocument {
+  const factory PestDocument({
+    required PestKind kind,
+    required int clearedMillis,
+    required int biteMillis,
+  }) = _PestDocument;
+
+  factory PestDocument.fromJson(Map<String, dynamic> json) =>
+      _$PestDocumentFromJson(json);
+}
+
+@freezed
+abstract class BuildingDocument with _$BuildingDocument {
+  const factory BuildingDocument({
+    required int id,
+    required String kind,
+    required TilePos origin,
+    required int level,
+  }) = _BuildingDocument;
+
+  factory BuildingDocument.fromJson(Map<String, dynamic> json) =>
+      _$BuildingDocumentFromJson(json);
+}
+
+@freezed
+abstract class GuardDocument with _$GuardDocument {
+  const factory GuardDocument({
+    required PotatoDocument potato,
+    required int buildingId,
+    required TilePos at,
+    int? targetFieldId,
+    required int walkMillis,
+  }) = _GuardDocument;
+
+  factory GuardDocument.fromJson(Map<String, dynamic> json) =>
+      _$GuardDocumentFromJson(json);
+}
+
+/// A potato out exploring. The potato's `tile` is the field tile it left,
+/// if it left a field.
+@freezed
+abstract class AwayDocument with _$AwayDocument {
+  const factory AwayDocument({
+    required PotatoDocument potato,
+    int? fieldId,
+    int? buildingId,
+  }) = _AwayDocument;
+
+  factory AwayDocument.fromJson(Map<String, dynamic> json) =>
+      _$AwayDocumentFromJson(json);
+}
+
+@freezed
 abstract class PotatoDocument with _$PotatoDocument {
   const factory PotatoDocument({
     required int id,
-    required TilePos tile,
+
+    /// Its field tile; null outside fields.
+    TilePos? tile,
     required PotatoType type,
     required Grade grade,
     required int grownMillis,
     required int livedMillis,
     required int productionMillis,
     required int stored,
-    required bool away,
+    @Default(false) bool weak,
   }) = _PotatoDocument;
 
   const PotatoDocument._();
@@ -131,7 +277,7 @@ abstract class PotatoDocument with _$PotatoDocument {
   factory PotatoDocument.fromJson(Map<String, dynamic> json) =>
       _$PotatoDocumentFromJson(json);
 
-  factory PotatoDocument.of(Potato potato, TilePos tile) => PotatoDocument(
+  factory PotatoDocument.of(Potato potato, [TilePos? tile]) => PotatoDocument(
     id: potato.id,
     tile: tile,
     type: potato.type,
@@ -140,7 +286,7 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: potato.livedMillis,
     productionMillis: potato.productionMillis,
     stored: potato.stored,
-    away: potato.away,
+    weak: potato.weak,
   );
 
   Potato toPotato() => Potato(
@@ -151,6 +297,6 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: livedMillis,
     productionMillis: productionMillis,
     stored: stored,
-    away: away,
+    weak: weak,
   );
 }

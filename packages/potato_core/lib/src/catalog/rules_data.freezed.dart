@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RulesData {
 
- FarmRulesData get farm; PotatoRulesData get potatoes; NewFarmData get newFarm; RaidRulesData get raid;
+ FarmRulesData get farm; PotatoRulesData get potatoes; PestRulesData get pests; NewFarmData get newFarm; RaidRulesData get raid;
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $RulesDataCopyWith<RulesData> get copyWith => _$RulesDataCopyWithImpl<RulesData>
 @override
 bool operator ==(Object other) {
   final _this = this as RulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.pests, _this.pests) || other.pests == _this.pests)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RulesData;
-  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.newFarm,_this.raid);
+  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.pests,_this.newFarm,_this.raid);
 }
 
 @override
 String toString() {
   final _this = this as RulesData;
-  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, newFarm: ${_this.newFarm}, raid: ${_this.raid})';
+  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, pests: ${_this.pests}, newFarm: ${_this.newFarm}, raid: ${_this.raid})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $RulesDataCopyWith<$Res>  {
   factory $RulesDataCopyWith(RulesData value, $Res Function(RulesData) _then) = _$RulesDataCopyWithImpl;
 @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm, RaidRulesData raid
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid
 });
 
 
-$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;
+$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$PestRulesDataCopyWith<$Res> get pests;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;
 
 }
 /// @nodoc
@@ -71,11 +71,12 @@ class _$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,Object? raid = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,}) {
   return _then(RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
-as PotatoRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
+as PotatoRulesData,pests: null == pests ? _self.pests : pests // ignore: cast_nullable_to_non_nullable
+as PestRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
 as NewFarmData,raid: null == raid ? _self.raid : raid // ignore: cast_nullable_to_non_nullable
 as RaidRulesData,
   ));
@@ -97,6 +98,15 @@ $PotatoRulesDataCopyWith<$Res> get potatoes {
   
   return $PotatoRulesDataCopyWith<$Res>(_self.potatoes, (value) {
     return _then(_self.copyWith(potatoes: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PestRulesDataCopyWith<$Res> get pests {
+  
+  return $PestRulesDataCopyWith<$Res>(_self.pests, (value) {
+    return _then(_self.copyWith(pests: value));
   });
 }/// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -198,10 +208,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid);case _:
   return orElse();
 
 }
@@ -219,10 +229,10 @@ return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid)  $default,) {final _that = this;
 switch (_that) {
 case _RulesData():
-return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -239,10 +249,10 @@ return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid)?  $default,) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid);case _:
   return null;
 
 }
@@ -254,11 +264,12 @@ return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
 @JsonSerializable()
 
 class _RulesData implements RulesData {
-  const _RulesData({required this.farm, required this.potatoes, required this.newFarm, required this.raid});
+  const _RulesData({required this.farm, required this.potatoes, required this.pests, required this.newFarm, required this.raid});
   factory _RulesData.fromJson(Map<String, dynamic> json) => _$RulesDataFromJson(json);
 
 @override final  FarmRulesData farm;
 @override final  PotatoRulesData potatoes;
+@override final  PestRulesData pests;
 @override final  NewFarmData newFarm;
 @override final  RaidRulesData raid;
 
@@ -275,18 +286,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.pests, pests) || other.pests == pests)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,farm,potatoes,newFarm,raid);
+    return Object.hash(runtimeType,farm,potatoes,pests,newFarm,raid);
 }
 
 @override
 String toString() {
-    return 'RulesData(farm: $farm, potatoes: $potatoes, newFarm: $newFarm, raid: $raid)';
+    return 'RulesData(farm: $farm, potatoes: $potatoes, pests: $pests, newFarm: $newFarm, raid: $raid)';
 }
 
 
@@ -297,11 +308,11 @@ abstract mixin class _$RulesDataCopyWith<$Res> implements $RulesDataCopyWith<$Re
   factory _$RulesDataCopyWith(_RulesData value, $Res Function(_RulesData) _then) = __$RulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm, RaidRulesData raid
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid
 });
 
 
-@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;
+@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $PestRulesDataCopyWith<$Res> get pests;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;
 
 }
 /// @nodoc
@@ -314,11 +325,12 @@ class __$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,Object? raid = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,}) {
   return _then(_RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
-as PotatoRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
+as PotatoRulesData,pests: null == pests ? _self.pests : pests // ignore: cast_nullable_to_non_nullable
+as PestRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
 as NewFarmData,raid: null == raid ? _self.raid : raid // ignore: cast_nullable_to_non_nullable
 as RaidRulesData,
   ));
@@ -341,6 +353,15 @@ $PotatoRulesDataCopyWith<$Res> get potatoes {
   
   return $PotatoRulesDataCopyWith<$Res>(_self.potatoes, (value) {
     return _then(_self.copyWith(potatoes: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PestRulesDataCopyWith<$Res> get pests {
+  
+  return $PestRulesDataCopyWith<$Res>(_self.pests, (value) {
+    return _then(_self.copyWith(pests: value));
   });
 }/// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -373,7 +394,9 @@ mixin _$FarmRulesData {
 /// treated as paused.
  int get offlineCapMinutes;/// Tiles along one side of the square farm.
  int get size;/// Tiles along the longer side of the largest field.
- int get fieldMaxSize;
+ int get fieldMaxSize;/// The part of the farm that can be built on. Fixed until locked blocks
+/// can be opened.
+ TileRect get openArea;
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -387,20 +410,20 @@ $FarmRulesDataCopyWith<FarmRulesData> get copyWith => _$FarmRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as FarmRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize)&&(identical(other.openArea, _this.openArea) || other.openArea == _this.openArea));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FarmRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize);
+  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize,_this.openArea);
 }
 
 @override
 String toString() {
   final _this = this as FarmRulesData;
-  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize})';
+  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize}, openArea: ${_this.openArea})';
 }
 
 
@@ -411,11 +434,11 @@ abstract mixin class $FarmRulesDataCopyWith<$Res>  {
   factory $FarmRulesDataCopyWith(FarmRulesData value, $Res Function(FarmRulesData) _then) = _$FarmRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, TileRect openArea
 });
 
 
-
+$TileRectCopyWith<$Res> get openArea;
 
 }
 /// @nodoc
@@ -428,16 +451,26 @@ class _$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? openArea = null,}) {
   return _then(FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
-as int,
+as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
+as TileRect,
   ));
 }
-
+/// Create a copy of FarmRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TileRectCopyWith<$Res> get openArea {
+  
+  return $TileRectCopyWith<$Res>(_self.openArea, (value) {
+    return _then(_self.copyWith(openArea: value));
+  });
+}
 }
 
 
@@ -519,10 +552,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
   return orElse();
 
 }
@@ -540,10 +573,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData():
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -560,10 +593,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)?  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
   return null;
 
 }
@@ -575,7 +608,7 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 @JsonSerializable()
 
 class _FarmRulesData extends FarmRulesData {
-  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize}): super._();
+  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize, required this.openArea}): super._();
   factory _FarmRulesData.fromJson(Map<String, dynamic> json) => _$FarmRulesDataFromJson(json);
 
 /// Game time one farm `step` covers, both while the app runs and when
@@ -588,6 +621,9 @@ class _FarmRulesData extends FarmRulesData {
 @override final  int size;
 /// Tiles along the longer side of the largest field.
 @override final  int fieldMaxSize;
+/// The part of the farm that can be built on. Fixed until locked blocks
+/// can be opened.
+@override final  TileRect openArea;
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -602,18 +638,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize)&&(identical(other.openArea, openArea) || other.openArea == openArea));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize);
+    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize,openArea);
 }
 
 @override
 String toString() {
-    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize)';
+    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize, openArea: $openArea)';
 }
 
 
@@ -624,11 +660,11 @@ abstract mixin class _$FarmRulesDataCopyWith<$Res> implements $FarmRulesDataCopy
   factory _$FarmRulesDataCopyWith(_FarmRulesData value, $Res Function(_FarmRulesData) _then) = __$FarmRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, TileRect openArea
 });
 
 
-
+@override $TileRectCopyWith<$Res> get openArea;
 
 }
 /// @nodoc
@@ -641,17 +677,27 @@ class __$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? openArea = null,}) {
   return _then(_FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
-as int,
+as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
+as TileRect,
   ));
 }
 
-
+/// Create a copy of FarmRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TileRectCopyWith<$Res> get openArea {
+  
+  return $TileRectCopyWith<$Res>(_self.openArea, (value) {
+    return _then(_self.copyWith(openArea: value));
+  });
+}
 }
 
 
@@ -659,7 +705,12 @@ as int,
 mixin _$PotatoRulesData {
 
 /// Chance that the seed a dead potato leaves is one grade lower.
- double get gradeDropChance;
+ double get gradeDropChance;/// Game time between two upkeep payments. A multiple of the farm step.
+ int get upkeepEverySeconds;/// How hard a weak (unfed) potato works, in percent: guards walk and
+/// clear pests, and breeding potatoes raise grades, at this rate.
+ int get weakPercent;/// Chance that a seed planted in a field with a grown breeding potato
+/// comes up one grade higher.
+ double get breedingGradeUpChance; GuardRulesData get guards; FridgeRulesData get fridge;
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -673,20 +724,20 @@ $PotatoRulesDataCopyWith<PotatoRulesData> get copyWith => _$PotatoRulesDataCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as PotatoRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoRulesData&&(identical(other.gradeDropChance, _this.gradeDropChance) || other.gradeDropChance == _this.gradeDropChance));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoRulesData&&(identical(other.gradeDropChance, _this.gradeDropChance) || other.gradeDropChance == _this.gradeDropChance)&&(identical(other.upkeepEverySeconds, _this.upkeepEverySeconds) || other.upkeepEverySeconds == _this.upkeepEverySeconds)&&(identical(other.weakPercent, _this.weakPercent) || other.weakPercent == _this.weakPercent)&&(identical(other.breedingGradeUpChance, _this.breedingGradeUpChance) || other.breedingGradeUpChance == _this.breedingGradeUpChance)&&(identical(other.guards, _this.guards) || other.guards == _this.guards)&&(identical(other.fridge, _this.fridge) || other.fridge == _this.fridge));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PotatoRulesData;
-  return Object.hash(runtimeType,_this.gradeDropChance);
+  return Object.hash(runtimeType,_this.gradeDropChance,_this.upkeepEverySeconds,_this.weakPercent,_this.breedingGradeUpChance,_this.guards,_this.fridge);
 }
 
 @override
 String toString() {
   final _this = this as PotatoRulesData;
-  return 'PotatoRulesData(gradeDropChance: ${_this.gradeDropChance})';
+  return 'PotatoRulesData(gradeDropChance: ${_this.gradeDropChance}, upkeepEverySeconds: ${_this.upkeepEverySeconds}, weakPercent: ${_this.weakPercent}, breedingGradeUpChance: ${_this.breedingGradeUpChance}, guards: ${_this.guards}, fridge: ${_this.fridge})';
 }
 
 
@@ -697,11 +748,11 @@ abstract mixin class $PotatoRulesDataCopyWith<$Res>  {
   factory $PotatoRulesDataCopyWith(PotatoRulesData value, $Res Function(PotatoRulesData) _then) = _$PotatoRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double gradeDropChance
+ double gradeDropChance, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge
 });
 
 
-
+$GuardRulesDataCopyWith<$Res> get guards;$FridgeRulesDataCopyWith<$Res> get fridge;
 
 }
 /// @nodoc
@@ -714,13 +765,36 @@ class _$PotatoRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? gradeDropChance = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? gradeDropChance = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,}) {
   return _then(PotatoRulesData(
 gradeDropChance: null == gradeDropChance ? _self.gradeDropChance : gradeDropChance // ignore: cast_nullable_to_non_nullable
-as double,
+as double,upkeepEverySeconds: null == upkeepEverySeconds ? _self.upkeepEverySeconds : upkeepEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,weakPercent: null == weakPercent ? _self.weakPercent : weakPercent // ignore: cast_nullable_to_non_nullable
+as int,breedingGradeUpChance: null == breedingGradeUpChance ? _self.breedingGradeUpChance : breedingGradeUpChance // ignore: cast_nullable_to_non_nullable
+as double,guards: null == guards ? _self.guards : guards // ignore: cast_nullable_to_non_nullable
+as GuardRulesData,fridge: null == fridge ? _self.fridge : fridge // ignore: cast_nullable_to_non_nullable
+as FridgeRulesData,
   ));
 }
-
+/// Create a copy of PotatoRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GuardRulesDataCopyWith<$Res> get guards {
+  
+  return $GuardRulesDataCopyWith<$Res>(_self.guards, (value) {
+    return _then(_self.copyWith(guards: value));
+  });
+}/// Create a copy of PotatoRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FridgeRulesDataCopyWith<$Res> get fridge {
+  
+  return $FridgeRulesDataCopyWith<$Res>(_self.fridge, (value) {
+    return _then(_self.copyWith(fridge: value));
+  });
+}
 }
 
 
@@ -802,10 +876,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double gradeDropChance)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double gradeDropChance,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PotatoRulesData() when $default != null:
-return $default(_that.gradeDropChance);case _:
+return $default(_that.gradeDropChance,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge);case _:
   return orElse();
 
 }
@@ -823,10 +897,10 @@ return $default(_that.gradeDropChance);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double gradeDropChance)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double gradeDropChance,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge)  $default,) {final _that = this;
 switch (_that) {
 case _PotatoRulesData():
-return $default(_that.gradeDropChance);case _:
+return $default(_that.gradeDropChance,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -843,10 +917,10 @@ return $default(_that.gradeDropChance);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double gradeDropChance)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double gradeDropChance,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge)?  $default,) {final _that = this;
 switch (_that) {
 case _PotatoRulesData() when $default != null:
-return $default(_that.gradeDropChance);case _:
+return $default(_that.gradeDropChance,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge);case _:
   return null;
 
 }
@@ -858,11 +932,21 @@ return $default(_that.gradeDropChance);case _:
 @JsonSerializable()
 
 class _PotatoRulesData implements PotatoRulesData {
-  const _PotatoRulesData({required this.gradeDropChance});
+  const _PotatoRulesData({required this.gradeDropChance, required this.upkeepEverySeconds, required this.weakPercent, required this.breedingGradeUpChance, required this.guards, required this.fridge});
   factory _PotatoRulesData.fromJson(Map<String, dynamic> json) => _$PotatoRulesDataFromJson(json);
 
 /// Chance that the seed a dead potato leaves is one grade lower.
 @override final  double gradeDropChance;
+/// Game time between two upkeep payments. A multiple of the farm step.
+@override final  int upkeepEverySeconds;
+/// How hard a weak (unfed) potato works, in percent: guards walk and
+/// clear pests, and breeding potatoes raise grades, at this rate.
+@override final  int weakPercent;
+/// Chance that a seed planted in a field with a grown breeding potato
+/// comes up one grade higher.
+@override final  double breedingGradeUpChance;
+@override final  GuardRulesData guards;
+@override final  FridgeRulesData fridge;
 
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -877,18 +961,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoRulesData&&(identical(other.gradeDropChance, gradeDropChance) || other.gradeDropChance == gradeDropChance));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoRulesData&&(identical(other.gradeDropChance, gradeDropChance) || other.gradeDropChance == gradeDropChance)&&(identical(other.upkeepEverySeconds, upkeepEverySeconds) || other.upkeepEverySeconds == upkeepEverySeconds)&&(identical(other.weakPercent, weakPercent) || other.weakPercent == weakPercent)&&(identical(other.breedingGradeUpChance, breedingGradeUpChance) || other.breedingGradeUpChance == breedingGradeUpChance)&&(identical(other.guards, guards) || other.guards == guards)&&(identical(other.fridge, fridge) || other.fridge == fridge));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,gradeDropChance);
+    return Object.hash(runtimeType,gradeDropChance,upkeepEverySeconds,weakPercent,breedingGradeUpChance,guards,fridge);
 }
 
 @override
 String toString() {
-    return 'PotatoRulesData(gradeDropChance: $gradeDropChance)';
+    return 'PotatoRulesData(gradeDropChance: $gradeDropChance, upkeepEverySeconds: $upkeepEverySeconds, weakPercent: $weakPercent, breedingGradeUpChance: $breedingGradeUpChance, guards: $guards, fridge: $fridge)';
 }
 
 
@@ -899,11 +983,11 @@ abstract mixin class _$PotatoRulesDataCopyWith<$Res> implements $PotatoRulesData
   factory _$PotatoRulesDataCopyWith(_PotatoRulesData value, $Res Function(_PotatoRulesData) _then) = __$PotatoRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double gradeDropChance
+ double gradeDropChance, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge
 });
 
 
-
+@override $GuardRulesDataCopyWith<$Res> get guards;@override $FridgeRulesDataCopyWith<$Res> get fridge;
 
 }
 /// @nodoc
@@ -916,9 +1000,1777 @@ class __$PotatoRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? gradeDropChance = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? gradeDropChance = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,}) {
   return _then(_PotatoRulesData(
 gradeDropChance: null == gradeDropChance ? _self.gradeDropChance : gradeDropChance // ignore: cast_nullable_to_non_nullable
+as double,upkeepEverySeconds: null == upkeepEverySeconds ? _self.upkeepEverySeconds : upkeepEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,weakPercent: null == weakPercent ? _self.weakPercent : weakPercent // ignore: cast_nullable_to_non_nullable
+as int,breedingGradeUpChance: null == breedingGradeUpChance ? _self.breedingGradeUpChance : breedingGradeUpChance // ignore: cast_nullable_to_non_nullable
+as double,guards: null == guards ? _self.guards : guards // ignore: cast_nullable_to_non_nullable
+as GuardRulesData,fridge: null == fridge ? _self.fridge : fridge // ignore: cast_nullable_to_non_nullable
+as FridgeRulesData,
+  ));
+}
+
+/// Create a copy of PotatoRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GuardRulesDataCopyWith<$Res> get guards {
+  
+  return $GuardRulesDataCopyWith<$Res>(_self.guards, (value) {
+    return _then(_self.copyWith(guards: value));
+  });
+}/// Create a copy of PotatoRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$FridgeRulesDataCopyWith<$Res> get fridge {
+  
+  return $FridgeRulesDataCopyWith<$Res>(_self.fridge, (value) {
+    return _then(_self.copyWith(fridge: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$GuardRulesData {
+
+/// Game time to walk one tile.
+ int get walkMillisPerTile;
+/// Create a copy of GuardRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GuardRulesDataCopyWith<GuardRulesData> get copyWith => _$GuardRulesDataCopyWithImpl<GuardRulesData>(this as GuardRulesData, _$identity);
+
+  /// Serializes this GuardRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as GuardRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GuardRulesData&&(identical(other.walkMillisPerTile, _this.walkMillisPerTile) || other.walkMillisPerTile == _this.walkMillisPerTile));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as GuardRulesData;
+  return Object.hash(runtimeType,_this.walkMillisPerTile);
+}
+
+@override
+String toString() {
+  final _this = this as GuardRulesData;
+  return 'GuardRulesData(walkMillisPerTile: ${_this.walkMillisPerTile})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GuardRulesDataCopyWith<$Res>  {
+  factory $GuardRulesDataCopyWith(GuardRulesData value, $Res Function(GuardRulesData) _then) = _$GuardRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ int walkMillisPerTile
+});
+
+
+
+
+}
+/// @nodoc
+class _$GuardRulesDataCopyWithImpl<$Res>
+    implements $GuardRulesDataCopyWith<$Res> {
+  _$GuardRulesDataCopyWithImpl(this._self, this._then);
+
+  final GuardRulesData _self;
+  final $Res Function(GuardRulesData) _then;
+
+/// Create a copy of GuardRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? walkMillisPerTile = null,}) {
+  return _then(GuardRulesData(
+walkMillisPerTile: null == walkMillisPerTile ? _self.walkMillisPerTile : walkMillisPerTile // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [GuardRulesData].
+extension GuardRulesDataPatterns on GuardRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GuardRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GuardRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GuardRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _GuardRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GuardRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GuardRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int walkMillisPerTile)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GuardRulesData() when $default != null:
+return $default(_that.walkMillisPerTile);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int walkMillisPerTile)  $default,) {final _that = this;
+switch (_that) {
+case _GuardRulesData():
+return $default(_that.walkMillisPerTile);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int walkMillisPerTile)?  $default,) {final _that = this;
+switch (_that) {
+case _GuardRulesData() when $default != null:
+return $default(_that.walkMillisPerTile);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _GuardRulesData implements GuardRulesData {
+  const _GuardRulesData({required this.walkMillisPerTile});
+  factory _GuardRulesData.fromJson(Map<String, dynamic> json) => _$GuardRulesDataFromJson(json);
+
+/// Game time to walk one tile.
+@override final  int walkMillisPerTile;
+
+/// Create a copy of GuardRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GuardRulesDataCopyWith<_GuardRulesData> get copyWith => __$GuardRulesDataCopyWithImpl<_GuardRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GuardRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GuardRulesData&&(identical(other.walkMillisPerTile, walkMillisPerTile) || other.walkMillisPerTile == walkMillisPerTile));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,walkMillisPerTile);
+}
+
+@override
+String toString() {
+    return 'GuardRulesData(walkMillisPerTile: $walkMillisPerTile)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GuardRulesDataCopyWith<$Res> implements $GuardRulesDataCopyWith<$Res> {
+  factory _$GuardRulesDataCopyWith(_GuardRulesData value, $Res Function(_GuardRulesData) _then) = __$GuardRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int walkMillisPerTile
+});
+
+
+
+
+}
+/// @nodoc
+class __$GuardRulesDataCopyWithImpl<$Res>
+    implements _$GuardRulesDataCopyWith<$Res> {
+  __$GuardRulesDataCopyWithImpl(this._self, this._then);
+
+  final _GuardRulesData _self;
+  final $Res Function(_GuardRulesData) _then;
+
+/// Create a copy of GuardRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? walkMillisPerTile = null,}) {
+  return _then(_GuardRulesData(
+walkMillisPerTile: null == walkMillisPerTile ? _self.walkMillisPerTile : walkMillisPerTile // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$FridgeRulesData {
+
+/// Potatoes it holds. Companions coming home may go past it.
+ int get size;/// How fast life runs out inside, in percent of normal.
+ int get agingPercent;
+/// Create a copy of FridgeRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FridgeRulesDataCopyWith<FridgeRulesData> get copyWith => _$FridgeRulesDataCopyWithImpl<FridgeRulesData>(this as FridgeRulesData, _$identity);
+
+  /// Serializes this FridgeRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as FridgeRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FridgeRulesData&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.agingPercent, _this.agingPercent) || other.agingPercent == _this.agingPercent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as FridgeRulesData;
+  return Object.hash(runtimeType,_this.size,_this.agingPercent);
+}
+
+@override
+String toString() {
+  final _this = this as FridgeRulesData;
+  return 'FridgeRulesData(size: ${_this.size}, agingPercent: ${_this.agingPercent})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FridgeRulesDataCopyWith<$Res>  {
+  factory $FridgeRulesDataCopyWith(FridgeRulesData value, $Res Function(FridgeRulesData) _then) = _$FridgeRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ int size, int agingPercent
+});
+
+
+
+
+}
+/// @nodoc
+class _$FridgeRulesDataCopyWithImpl<$Res>
+    implements $FridgeRulesDataCopyWith<$Res> {
+  _$FridgeRulesDataCopyWithImpl(this._self, this._then);
+
+  final FridgeRulesData _self;
+  final $Res Function(FridgeRulesData) _then;
+
+/// Create a copy of FridgeRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? agingPercent = null,}) {
+  return _then(FridgeRulesData(
+size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int,agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [FridgeRulesData].
+extension FridgeRulesDataPatterns on FridgeRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _FridgeRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _FridgeRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _FridgeRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _FridgeRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _FridgeRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _FridgeRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  int agingPercent)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _FridgeRulesData() when $default != null:
+return $default(_that.size,_that.agingPercent);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  int agingPercent)  $default,) {final _that = this;
+switch (_that) {
+case _FridgeRulesData():
+return $default(_that.size,_that.agingPercent);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  int agingPercent)?  $default,) {final _that = this;
+switch (_that) {
+case _FridgeRulesData() when $default != null:
+return $default(_that.size,_that.agingPercent);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _FridgeRulesData implements FridgeRulesData {
+  const _FridgeRulesData({required this.size, required this.agingPercent});
+  factory _FridgeRulesData.fromJson(Map<String, dynamic> json) => _$FridgeRulesDataFromJson(json);
+
+/// Potatoes it holds. Companions coming home may go past it.
+@override final  int size;
+/// How fast life runs out inside, in percent of normal.
+@override final  int agingPercent;
+
+/// Create a copy of FridgeRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$FridgeRulesDataCopyWith<_FridgeRulesData> get copyWith => __$FridgeRulesDataCopyWithImpl<_FridgeRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FridgeRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FridgeRulesData&&(identical(other.size, size) || other.size == size)&&(identical(other.agingPercent, agingPercent) || other.agingPercent == agingPercent));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,size,agingPercent);
+}
+
+@override
+String toString() {
+    return 'FridgeRulesData(size: $size, agingPercent: $agingPercent)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$FridgeRulesDataCopyWith<$Res> implements $FridgeRulesDataCopyWith<$Res> {
+  factory _$FridgeRulesDataCopyWith(_FridgeRulesData value, $Res Function(_FridgeRulesData) _then) = __$FridgeRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int size, int agingPercent
+});
+
+
+
+
+}
+/// @nodoc
+class __$FridgeRulesDataCopyWithImpl<$Res>
+    implements _$FridgeRulesDataCopyWith<$Res> {
+  __$FridgeRulesDataCopyWithImpl(this._self, this._then);
+
+  final _FridgeRulesData _self;
+  final $Res Function(_FridgeRulesData) _then;
+
+/// Create a copy of FridgeRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? agingPercent = null,}) {
+  return _then(_FridgeRulesData(
+size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
+as int,agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$PestRulesData {
+
+/// Game time between two rolls for new pests. A multiple of the farm
+/// step.
+ int get checkEverySeconds; BugRulesData get bug; BlightRulesData get blight;/// Taps in a row that clear a pest by hand.
+ int get taps;/// What clearing a pest gives.
+ PestRewardData get reward;
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PestRulesDataCopyWith<PestRulesData> get copyWith => _$PestRulesDataCopyWithImpl<PestRulesData>(this as PestRulesData, _$identity);
+
+  /// Serializes this PestRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as PestRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PestRulesData&&(identical(other.checkEverySeconds, _this.checkEverySeconds) || other.checkEverySeconds == _this.checkEverySeconds)&&(identical(other.bug, _this.bug) || other.bug == _this.bug)&&(identical(other.blight, _this.blight) || other.blight == _this.blight)&&(identical(other.taps, _this.taps) || other.taps == _this.taps)&&(identical(other.reward, _this.reward) || other.reward == _this.reward));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as PestRulesData;
+  return Object.hash(runtimeType,_this.checkEverySeconds,_this.bug,_this.blight,_this.taps,_this.reward);
+}
+
+@override
+String toString() {
+  final _this = this as PestRulesData;
+  return 'PestRulesData(checkEverySeconds: ${_this.checkEverySeconds}, bug: ${_this.bug}, blight: ${_this.blight}, taps: ${_this.taps}, reward: ${_this.reward})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PestRulesDataCopyWith<$Res>  {
+  factory $PestRulesDataCopyWith(PestRulesData value, $Res Function(PestRulesData) _then) = _$PestRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ int checkEverySeconds, BugRulesData bug, BlightRulesData blight, int taps, PestRewardData reward
+});
+
+
+$BugRulesDataCopyWith<$Res> get bug;$BlightRulesDataCopyWith<$Res> get blight;$PestRewardDataCopyWith<$Res> get reward;
+
+}
+/// @nodoc
+class _$PestRulesDataCopyWithImpl<$Res>
+    implements $PestRulesDataCopyWith<$Res> {
+  _$PestRulesDataCopyWithImpl(this._self, this._then);
+
+  final PestRulesData _self;
+  final $Res Function(PestRulesData) _then;
+
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? checkEverySeconds = null,Object? bug = null,Object? blight = null,Object? taps = null,Object? reward = null,}) {
+  return _then(PestRulesData(
+checkEverySeconds: null == checkEverySeconds ? _self.checkEverySeconds : checkEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,bug: null == bug ? _self.bug : bug // ignore: cast_nullable_to_non_nullable
+as BugRulesData,blight: null == blight ? _self.blight : blight // ignore: cast_nullable_to_non_nullable
+as BlightRulesData,taps: null == taps ? _self.taps : taps // ignore: cast_nullable_to_non_nullable
+as int,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
+as PestRewardData,
+  ));
+}
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BugRulesDataCopyWith<$Res> get bug {
+  
+  return $BugRulesDataCopyWith<$Res>(_self.bug, (value) {
+    return _then(_self.copyWith(bug: value));
+  });
+}/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BlightRulesDataCopyWith<$Res> get blight {
+  
+  return $BlightRulesDataCopyWith<$Res>(_self.blight, (value) {
+    return _then(_self.copyWith(blight: value));
+  });
+}/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PestRewardDataCopyWith<$Res> get reward {
+  
+  return $PestRewardDataCopyWith<$Res>(_self.reward, (value) {
+    return _then(_self.copyWith(reward: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [PestRulesData].
+extension PestRulesDataPatterns on PestRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PestRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PestRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PestRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _PestRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PestRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PestRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int checkEverySeconds,  BugRulesData bug,  BlightRulesData blight,  int taps,  PestRewardData reward)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PestRulesData() when $default != null:
+return $default(_that.checkEverySeconds,_that.bug,_that.blight,_that.taps,_that.reward);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int checkEverySeconds,  BugRulesData bug,  BlightRulesData blight,  int taps,  PestRewardData reward)  $default,) {final _that = this;
+switch (_that) {
+case _PestRulesData():
+return $default(_that.checkEverySeconds,_that.bug,_that.blight,_that.taps,_that.reward);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int checkEverySeconds,  BugRulesData bug,  BlightRulesData blight,  int taps,  PestRewardData reward)?  $default,) {final _that = this;
+switch (_that) {
+case _PestRulesData() when $default != null:
+return $default(_that.checkEverySeconds,_that.bug,_that.blight,_that.taps,_that.reward);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _PestRulesData implements PestRulesData {
+  const _PestRulesData({required this.checkEverySeconds, required this.bug, required this.blight, required this.taps, required this.reward});
+  factory _PestRulesData.fromJson(Map<String, dynamic> json) => _$PestRulesDataFromJson(json);
+
+/// Game time between two rolls for new pests. A multiple of the farm
+/// step.
+@override final  int checkEverySeconds;
+@override final  BugRulesData bug;
+@override final  BlightRulesData blight;
+/// Taps in a row that clear a pest by hand.
+@override final  int taps;
+/// What clearing a pest gives.
+@override final  PestRewardData reward;
+
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PestRulesDataCopyWith<_PestRulesData> get copyWith => __$PestRulesDataCopyWithImpl<_PestRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PestRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PestRulesData&&(identical(other.checkEverySeconds, checkEverySeconds) || other.checkEverySeconds == checkEverySeconds)&&(identical(other.bug, bug) || other.bug == bug)&&(identical(other.blight, blight) || other.blight == blight)&&(identical(other.taps, taps) || other.taps == taps)&&(identical(other.reward, reward) || other.reward == reward));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,checkEverySeconds,bug,blight,taps,reward);
+}
+
+@override
+String toString() {
+    return 'PestRulesData(checkEverySeconds: $checkEverySeconds, bug: $bug, blight: $blight, taps: $taps, reward: $reward)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PestRulesDataCopyWith<$Res> implements $PestRulesDataCopyWith<$Res> {
+  factory _$PestRulesDataCopyWith(_PestRulesData value, $Res Function(_PestRulesData) _then) = __$PestRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int checkEverySeconds, BugRulesData bug, BlightRulesData blight, int taps, PestRewardData reward
+});
+
+
+@override $BugRulesDataCopyWith<$Res> get bug;@override $BlightRulesDataCopyWith<$Res> get blight;@override $PestRewardDataCopyWith<$Res> get reward;
+
+}
+/// @nodoc
+class __$PestRulesDataCopyWithImpl<$Res>
+    implements _$PestRulesDataCopyWith<$Res> {
+  __$PestRulesDataCopyWithImpl(this._self, this._then);
+
+  final _PestRulesData _self;
+  final $Res Function(_PestRulesData) _then;
+
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? checkEverySeconds = null,Object? bug = null,Object? blight = null,Object? taps = null,Object? reward = null,}) {
+  return _then(_PestRulesData(
+checkEverySeconds: null == checkEverySeconds ? _self.checkEverySeconds : checkEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,bug: null == bug ? _self.bug : bug // ignore: cast_nullable_to_non_nullable
+as BugRulesData,blight: null == blight ? _self.blight : blight // ignore: cast_nullable_to_non_nullable
+as BlightRulesData,taps: null == taps ? _self.taps : taps // ignore: cast_nullable_to_non_nullable
+as int,reward: null == reward ? _self.reward : reward // ignore: cast_nullable_to_non_nullable
+as PestRewardData,
+  ));
+}
+
+/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BugRulesDataCopyWith<$Res> get bug {
+  
+  return $BugRulesDataCopyWith<$Res>(_self.bug, (value) {
+    return _then(_self.copyWith(bug: value));
+  });
+}/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BlightRulesDataCopyWith<$Res> get blight {
+  
+  return $BlightRulesDataCopyWith<$Res>(_self.blight, (value) {
+    return _then(_self.copyWith(blight: value));
+  });
+}/// Create a copy of PestRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PestRewardDataCopyWith<$Res> get reward {
+  
+  return $PestRewardDataCopyWith<$Res>(_self.reward, (value) {
+    return _then(_self.copyWith(reward: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$BugRulesData {
+
+/// Chance per check for each stored baby potato in the field.
+ double get chancePerStored;/// The chance never goes past this, however much is stored.
+ double get chanceMax;/// Game time between two bites.
+ int get eatEverySeconds;/// Baby potatoes eaten per bite.
+ int get eatAmount;/// Game time one guard at full strength needs to clear it.
+ int get clearSeconds;
+/// Create a copy of BugRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BugRulesDataCopyWith<BugRulesData> get copyWith => _$BugRulesDataCopyWithImpl<BugRulesData>(this as BugRulesData, _$identity);
+
+  /// Serializes this BugRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BugRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BugRulesData&&(identical(other.chancePerStored, _this.chancePerStored) || other.chancePerStored == _this.chancePerStored)&&(identical(other.chanceMax, _this.chanceMax) || other.chanceMax == _this.chanceMax)&&(identical(other.eatEverySeconds, _this.eatEverySeconds) || other.eatEverySeconds == _this.eatEverySeconds)&&(identical(other.eatAmount, _this.eatAmount) || other.eatAmount == _this.eatAmount)&&(identical(other.clearSeconds, _this.clearSeconds) || other.clearSeconds == _this.clearSeconds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BugRulesData;
+  return Object.hash(runtimeType,_this.chancePerStored,_this.chanceMax,_this.eatEverySeconds,_this.eatAmount,_this.clearSeconds);
+}
+
+@override
+String toString() {
+  final _this = this as BugRulesData;
+  return 'BugRulesData(chancePerStored: ${_this.chancePerStored}, chanceMax: ${_this.chanceMax}, eatEverySeconds: ${_this.eatEverySeconds}, eatAmount: ${_this.eatAmount}, clearSeconds: ${_this.clearSeconds})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BugRulesDataCopyWith<$Res>  {
+  factory $BugRulesDataCopyWith(BugRulesData value, $Res Function(BugRulesData) _then) = _$BugRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double chancePerStored, double chanceMax, int eatEverySeconds, int eatAmount, int clearSeconds
+});
+
+
+
+
+}
+/// @nodoc
+class _$BugRulesDataCopyWithImpl<$Res>
+    implements $BugRulesDataCopyWith<$Res> {
+  _$BugRulesDataCopyWithImpl(this._self, this._then);
+
+  final BugRulesData _self;
+  final $Res Function(BugRulesData) _then;
+
+/// Create a copy of BugRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? chancePerStored = null,Object? chanceMax = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
+  return _then(BugRulesData(
+chancePerStored: null == chancePerStored ? _self.chancePerStored : chancePerStored // ignore: cast_nullable_to_non_nullable
+as double,chanceMax: null == chanceMax ? _self.chanceMax : chanceMax // ignore: cast_nullable_to_non_nullable
+as double,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,eatAmount: null == eatAmount ? _self.eatAmount : eatAmount // ignore: cast_nullable_to_non_nullable
+as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BugRulesData].
+extension BugRulesDataPatterns on BugRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BugRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BugRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BugRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BugRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BugRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BugRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BugRulesData() when $default != null:
+return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)  $default,) {final _that = this;
+switch (_that) {
+case _BugRulesData():
+return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,) {final _that = this;
+switch (_that) {
+case _BugRulesData() when $default != null:
+return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BugRulesData implements BugRulesData {
+  const _BugRulesData({required this.chancePerStored, required this.chanceMax, required this.eatEverySeconds, required this.eatAmount, required this.clearSeconds});
+  factory _BugRulesData.fromJson(Map<String, dynamic> json) => _$BugRulesDataFromJson(json);
+
+/// Chance per check for each stored baby potato in the field.
+@override final  double chancePerStored;
+/// The chance never goes past this, however much is stored.
+@override final  double chanceMax;
+/// Game time between two bites.
+@override final  int eatEverySeconds;
+/// Baby potatoes eaten per bite.
+@override final  int eatAmount;
+/// Game time one guard at full strength needs to clear it.
+@override final  int clearSeconds;
+
+/// Create a copy of BugRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BugRulesDataCopyWith<_BugRulesData> get copyWith => __$BugRulesDataCopyWithImpl<_BugRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BugRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BugRulesData&&(identical(other.chancePerStored, chancePerStored) || other.chancePerStored == chancePerStored)&&(identical(other.chanceMax, chanceMax) || other.chanceMax == chanceMax)&&(identical(other.eatEverySeconds, eatEverySeconds) || other.eatEverySeconds == eatEverySeconds)&&(identical(other.eatAmount, eatAmount) || other.eatAmount == eatAmount)&&(identical(other.clearSeconds, clearSeconds) || other.clearSeconds == clearSeconds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,chancePerStored,chanceMax,eatEverySeconds,eatAmount,clearSeconds);
+}
+
+@override
+String toString() {
+    return 'BugRulesData(chancePerStored: $chancePerStored, chanceMax: $chanceMax, eatEverySeconds: $eatEverySeconds, eatAmount: $eatAmount, clearSeconds: $clearSeconds)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BugRulesDataCopyWith<$Res> implements $BugRulesDataCopyWith<$Res> {
+  factory _$BugRulesDataCopyWith(_BugRulesData value, $Res Function(_BugRulesData) _then) = __$BugRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double chancePerStored, double chanceMax, int eatEverySeconds, int eatAmount, int clearSeconds
+});
+
+
+
+
+}
+/// @nodoc
+class __$BugRulesDataCopyWithImpl<$Res>
+    implements _$BugRulesDataCopyWith<$Res> {
+  __$BugRulesDataCopyWithImpl(this._self, this._then);
+
+  final _BugRulesData _self;
+  final $Res Function(_BugRulesData) _then;
+
+/// Create a copy of BugRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? chancePerStored = null,Object? chanceMax = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
+  return _then(_BugRulesData(
+chancePerStored: null == chancePerStored ? _self.chancePerStored : chancePerStored // ignore: cast_nullable_to_non_nullable
+as double,chanceMax: null == chanceMax ? _self.chanceMax : chanceMax // ignore: cast_nullable_to_non_nullable
+as double,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
+as int,eatAmount: null == eatAmount ? _self.eatAmount : eatAmount // ignore: cast_nullable_to_non_nullable
+as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BlightRulesData {
+
+/// Chance per check for a field with at least one potato.
+ double get chance;/// Extra life used, in percent of the time passing: 100 doubles aging.
+ int get extraAgingPercent;/// Game time one guard at full strength needs to clear it.
+ int get clearSeconds;
+/// Create a copy of BlightRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BlightRulesDataCopyWith<BlightRulesData> get copyWith => _$BlightRulesDataCopyWithImpl<BlightRulesData>(this as BlightRulesData, _$identity);
+
+  /// Serializes this BlightRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BlightRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BlightRulesData&&(identical(other.chance, _this.chance) || other.chance == _this.chance)&&(identical(other.extraAgingPercent, _this.extraAgingPercent) || other.extraAgingPercent == _this.extraAgingPercent)&&(identical(other.clearSeconds, _this.clearSeconds) || other.clearSeconds == _this.clearSeconds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BlightRulesData;
+  return Object.hash(runtimeType,_this.chance,_this.extraAgingPercent,_this.clearSeconds);
+}
+
+@override
+String toString() {
+  final _this = this as BlightRulesData;
+  return 'BlightRulesData(chance: ${_this.chance}, extraAgingPercent: ${_this.extraAgingPercent}, clearSeconds: ${_this.clearSeconds})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BlightRulesDataCopyWith<$Res>  {
+  factory $BlightRulesDataCopyWith(BlightRulesData value, $Res Function(BlightRulesData) _then) = _$BlightRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double chance, int extraAgingPercent, int clearSeconds
+});
+
+
+
+
+}
+/// @nodoc
+class _$BlightRulesDataCopyWithImpl<$Res>
+    implements $BlightRulesDataCopyWith<$Res> {
+  _$BlightRulesDataCopyWithImpl(this._self, this._then);
+
+  final BlightRulesData _self;
+  final $Res Function(BlightRulesData) _then;
+
+/// Create a copy of BlightRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? chance = null,Object? extraAgingPercent = null,Object? clearSeconds = null,}) {
+  return _then(BlightRulesData(
+chance: null == chance ? _self.chance : chance // ignore: cast_nullable_to_non_nullable
+as double,extraAgingPercent: null == extraAgingPercent ? _self.extraAgingPercent : extraAgingPercent // ignore: cast_nullable_to_non_nullable
+as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BlightRulesData].
+extension BlightRulesDataPatterns on BlightRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BlightRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BlightRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BlightRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BlightRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BlightRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BlightRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chance,  int extraAgingPercent,  int clearSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BlightRulesData() when $default != null:
+return $default(_that.chance,_that.extraAgingPercent,_that.clearSeconds);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chance,  int extraAgingPercent,  int clearSeconds)  $default,) {final _that = this;
+switch (_that) {
+case _BlightRulesData():
+return $default(_that.chance,_that.extraAgingPercent,_that.clearSeconds);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chance,  int extraAgingPercent,  int clearSeconds)?  $default,) {final _that = this;
+switch (_that) {
+case _BlightRulesData() when $default != null:
+return $default(_that.chance,_that.extraAgingPercent,_that.clearSeconds);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BlightRulesData implements BlightRulesData {
+  const _BlightRulesData({required this.chance, required this.extraAgingPercent, required this.clearSeconds});
+  factory _BlightRulesData.fromJson(Map<String, dynamic> json) => _$BlightRulesDataFromJson(json);
+
+/// Chance per check for a field with at least one potato.
+@override final  double chance;
+/// Extra life used, in percent of the time passing: 100 doubles aging.
+@override final  int extraAgingPercent;
+/// Game time one guard at full strength needs to clear it.
+@override final  int clearSeconds;
+
+/// Create a copy of BlightRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BlightRulesDataCopyWith<_BlightRulesData> get copyWith => __$BlightRulesDataCopyWithImpl<_BlightRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BlightRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BlightRulesData&&(identical(other.chance, chance) || other.chance == chance)&&(identical(other.extraAgingPercent, extraAgingPercent) || other.extraAgingPercent == extraAgingPercent)&&(identical(other.clearSeconds, clearSeconds) || other.clearSeconds == clearSeconds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,chance,extraAgingPercent,clearSeconds);
+}
+
+@override
+String toString() {
+    return 'BlightRulesData(chance: $chance, extraAgingPercent: $extraAgingPercent, clearSeconds: $clearSeconds)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BlightRulesDataCopyWith<$Res> implements $BlightRulesDataCopyWith<$Res> {
+  factory _$BlightRulesDataCopyWith(_BlightRulesData value, $Res Function(_BlightRulesData) _then) = __$BlightRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double chance, int extraAgingPercent, int clearSeconds
+});
+
+
+
+
+}
+/// @nodoc
+class __$BlightRulesDataCopyWithImpl<$Res>
+    implements _$BlightRulesDataCopyWith<$Res> {
+  __$BlightRulesDataCopyWithImpl(this._self, this._then);
+
+  final _BlightRulesData _self;
+  final $Res Function(_BlightRulesData) _then;
+
+/// Create a copy of BlightRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? chance = null,Object? extraAgingPercent = null,Object? clearSeconds = null,}) {
+  return _then(_BlightRulesData(
+chance: null == chance ? _self.chance : chance // ignore: cast_nullable_to_non_nullable
+as double,extraAgingPercent: null == extraAgingPercent ? _self.extraAgingPercent : extraAgingPercent // ignore: cast_nullable_to_non_nullable
+as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$PestRewardData {
+
+ int get foodMin; int get foodMax;/// Chance of a normal seed of the type most planted in the field.
+ double get seedChance;
+/// Create a copy of PestRewardData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PestRewardDataCopyWith<PestRewardData> get copyWith => _$PestRewardDataCopyWithImpl<PestRewardData>(this as PestRewardData, _$identity);
+
+  /// Serializes this PestRewardData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as PestRewardData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PestRewardData&&(identical(other.foodMin, _this.foodMin) || other.foodMin == _this.foodMin)&&(identical(other.foodMax, _this.foodMax) || other.foodMax == _this.foodMax)&&(identical(other.seedChance, _this.seedChance) || other.seedChance == _this.seedChance));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as PestRewardData;
+  return Object.hash(runtimeType,_this.foodMin,_this.foodMax,_this.seedChance);
+}
+
+@override
+String toString() {
+  final _this = this as PestRewardData;
+  return 'PestRewardData(foodMin: ${_this.foodMin}, foodMax: ${_this.foodMax}, seedChance: ${_this.seedChance})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PestRewardDataCopyWith<$Res>  {
+  factory $PestRewardDataCopyWith(PestRewardData value, $Res Function(PestRewardData) _then) = _$PestRewardDataCopyWithImpl;
+@useResult
+$Res call({
+ int foodMin, int foodMax, double seedChance
+});
+
+
+
+
+}
+/// @nodoc
+class _$PestRewardDataCopyWithImpl<$Res>
+    implements $PestRewardDataCopyWith<$Res> {
+  _$PestRewardDataCopyWithImpl(this._self, this._then);
+
+  final PestRewardData _self;
+  final $Res Function(PestRewardData) _then;
+
+/// Create a copy of PestRewardData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? foodMin = null,Object? foodMax = null,Object? seedChance = null,}) {
+  return _then(PestRewardData(
+foodMin: null == foodMin ? _self.foodMin : foodMin // ignore: cast_nullable_to_non_nullable
+as int,foodMax: null == foodMax ? _self.foodMax : foodMax // ignore: cast_nullable_to_non_nullable
+as int,seedChance: null == seedChance ? _self.seedChance : seedChance // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [PestRewardData].
+extension PestRewardDataPatterns on PestRewardData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PestRewardData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PestRewardData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PestRewardData value)  $default,){
+final _that = this;
+switch (_that) {
+case _PestRewardData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PestRewardData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PestRewardData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int foodMin,  int foodMax,  double seedChance)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PestRewardData() when $default != null:
+return $default(_that.foodMin,_that.foodMax,_that.seedChance);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int foodMin,  int foodMax,  double seedChance)  $default,) {final _that = this;
+switch (_that) {
+case _PestRewardData():
+return $default(_that.foodMin,_that.foodMax,_that.seedChance);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int foodMin,  int foodMax,  double seedChance)?  $default,) {final _that = this;
+switch (_that) {
+case _PestRewardData() when $default != null:
+return $default(_that.foodMin,_that.foodMax,_that.seedChance);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _PestRewardData implements PestRewardData {
+  const _PestRewardData({required this.foodMin, required this.foodMax, required this.seedChance});
+  factory _PestRewardData.fromJson(Map<String, dynamic> json) => _$PestRewardDataFromJson(json);
+
+@override final  int foodMin;
+@override final  int foodMax;
+/// Chance of a normal seed of the type most planted in the field.
+@override final  double seedChance;
+
+/// Create a copy of PestRewardData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PestRewardDataCopyWith<_PestRewardData> get copyWith => __$PestRewardDataCopyWithImpl<_PestRewardData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PestRewardDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PestRewardData&&(identical(other.foodMin, foodMin) || other.foodMin == foodMin)&&(identical(other.foodMax, foodMax) || other.foodMax == foodMax)&&(identical(other.seedChance, seedChance) || other.seedChance == seedChance));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,foodMin,foodMax,seedChance);
+}
+
+@override
+String toString() {
+    return 'PestRewardData(foodMin: $foodMin, foodMax: $foodMax, seedChance: $seedChance)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PestRewardDataCopyWith<$Res> implements $PestRewardDataCopyWith<$Res> {
+  factory _$PestRewardDataCopyWith(_PestRewardData value, $Res Function(_PestRewardData) _then) = __$PestRewardDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int foodMin, int foodMax, double seedChance
+});
+
+
+
+
+}
+/// @nodoc
+class __$PestRewardDataCopyWithImpl<$Res>
+    implements _$PestRewardDataCopyWith<$Res> {
+  __$PestRewardDataCopyWithImpl(this._self, this._then);
+
+  final _PestRewardData _self;
+  final $Res Function(_PestRewardData) _then;
+
+/// Create a copy of PestRewardData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? foodMin = null,Object? foodMax = null,Object? seedChance = null,}) {
+  return _then(_PestRewardData(
+foodMin: null == foodMin ? _self.foodMin : foodMin // ignore: cast_nullable_to_non_nullable
+as int,foodMax: null == foodMax ? _self.foodMax : foodMax // ignore: cast_nullable_to_non_nullable
+as int,seedChance: null == seedChance ? _self.seedChance : seedChance // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

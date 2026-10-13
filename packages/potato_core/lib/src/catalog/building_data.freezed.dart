@@ -1,0 +1,592 @@
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// coverage:ignore-file
+// ignore_for_file: type=lint, type=warning, deprecated_member_use, deprecated_member_use_from_same_package
+// ignore_for_file: unused_element, deprecated_member_use, deprecated_member_use_from_same_package, use_function_type_syntax_for_parameters, unnecessary_const, avoid_init_to_null, invalid_override_different_default_values_named, prefer_expression_function_bodies, annotate_overrides, invalid_annotation_target, unnecessary_question_mark
+
+part of 'building_data.dart';
+
+// **************************************************************************
+// FreezedGenerator
+// **************************************************************************
+
+// GENERATED CODE - DO NOT MODIFY BY HAND
+// dart format off
+T _$identity<T>(T value) => value;
+
+/// @nodoc
+mixin _$BuildingData {
+
+ String get id;/// Tiles taken along x and y.
+ int get width; int get height;/// The potato type this building unlocks and looks after, if any. Every
+/// building of the type adds its capacity to the type's limit.
+ PotatoType? get houses;/// Level 1 first. Level 1's cost is the cost to build; each later
+/// level's cost is the cost to upgrade to it.
+ List<BuildingLevelData> get levels;
+/// Create a copy of BuildingData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BuildingDataCopyWith<BuildingData> get copyWith => _$BuildingDataCopyWithImpl<BuildingData>(this as BuildingData, _$identity);
+
+  /// Serializes this BuildingData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BuildingData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.width, _this.width) || other.width == _this.width)&&(identical(other.height, _this.height) || other.height == _this.height)&&(identical(other.houses, _this.houses) || other.houses == _this.houses)&&const DeepCollectionEquality().equals(other.levels, _this.levels));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BuildingData;
+  return Object.hash(runtimeType,_this.id,_this.width,_this.height,_this.houses,const DeepCollectionEquality().hash(_this.levels));
+}
+
+@override
+String toString() {
+  final _this = this as BuildingData;
+  return 'BuildingData(id: ${_this.id}, width: ${_this.width}, height: ${_this.height}, houses: ${_this.houses}, levels: ${_this.levels})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BuildingDataCopyWith<$Res>  {
+  factory $BuildingDataCopyWith(BuildingData value, $Res Function(BuildingData) _then) = _$BuildingDataCopyWithImpl;
+@useResult
+$Res call({
+ String id, int width, int height, PotatoType? houses, List<BuildingLevelData> levels
+});
+
+
+
+
+}
+/// @nodoc
+class _$BuildingDataCopyWithImpl<$Res>
+    implements $BuildingDataCopyWith<$Res> {
+  _$BuildingDataCopyWithImpl(this._self, this._then);
+
+  final BuildingData _self;
+  final $Res Function(BuildingData) _then;
+
+/// Create a copy of BuildingData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? levels = null,}) {
+  return _then(BuildingData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as int,houses: freezed == houses ? _self.houses : houses // ignore: cast_nullable_to_non_nullable
+as PotatoType?,levels: null == levels ? _self.levels : levels // ignore: cast_nullable_to_non_nullable
+as List<BuildingLevelData>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BuildingData].
+extension BuildingDataPatterns on BuildingData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BuildingData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BuildingData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BuildingData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BuildingData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BuildingData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BuildingData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  List<BuildingLevelData> levels)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BuildingData() when $default != null:
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.levels);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  List<BuildingLevelData> levels)  $default,) {final _that = this;
+switch (_that) {
+case _BuildingData():
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.levels);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int width,  int height,  PotatoType? houses,  List<BuildingLevelData> levels)?  $default,) {final _that = this;
+switch (_that) {
+case _BuildingData() when $default != null:
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.levels);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BuildingData implements BuildingData {
+  const _BuildingData({required this.id, required this.width, required this.height, this.houses, required  List<BuildingLevelData> levels}): _levels = levels;
+  factory _BuildingData.fromJson(Map<String, dynamic> json) => _$BuildingDataFromJson(json);
+
+@override final  String id;
+/// Tiles taken along x and y.
+@override final  int width;
+@override final  int height;
+/// The potato type this building unlocks and looks after, if any. Every
+/// building of the type adds its capacity to the type's limit.
+@override final  PotatoType? houses;
+/// Level 1 first. Level 1's cost is the cost to build; each later
+/// level's cost is the cost to upgrade to it.
+ final  List<BuildingLevelData> _levels;
+/// Level 1 first. Level 1's cost is the cost to build; each later
+/// level's cost is the cost to upgrade to it.
+@override List<BuildingLevelData> get levels {
+  if (_levels is EqualUnmodifiableListView) return _levels;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_levels);
+}
+
+
+/// Create a copy of BuildingData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BuildingDataCopyWith<_BuildingData> get copyWith => __$BuildingDataCopyWithImpl<_BuildingData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BuildingDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingData&&(identical(other.id, id) || other.id == id)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.houses, houses) || other.houses == houses)&&const DeepCollectionEquality().equals(other.levels, _levels));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,width,height,houses,const DeepCollectionEquality().hash(_levels));
+}
+
+@override
+String toString() {
+    return 'BuildingData(id: $id, width: $width, height: $height, houses: $houses, levels: $levels)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BuildingDataCopyWith<$Res> implements $BuildingDataCopyWith<$Res> {
+  factory _$BuildingDataCopyWith(_BuildingData value, $Res Function(_BuildingData) _then) = __$BuildingDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, int width, int height, PotatoType? houses, List<BuildingLevelData> levels
+});
+
+
+
+
+}
+/// @nodoc
+class __$BuildingDataCopyWithImpl<$Res>
+    implements _$BuildingDataCopyWith<$Res> {
+  __$BuildingDataCopyWithImpl(this._self, this._then);
+
+  final _BuildingData _self;
+  final $Res Function(_BuildingData) _then;
+
+/// Create a copy of BuildingData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? levels = null,}) {
+  return _then(_BuildingData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int,height: null == height ? _self.height : height // ignore: cast_nullable_to_non_nullable
+as int,houses: freezed == houses ? _self.houses : houses // ignore: cast_nullable_to_non_nullable
+as PotatoType?,levels: null == levels ? _self._levels : levels // ignore: cast_nullable_to_non_nullable
+as List<BuildingLevelData>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BuildingLevelData {
+
+/// Baby potatoes paid to reach this level.
+ int get cost;/// Potatoes of the housed type this building adds to the limit.
+ int get capacity;
+/// Create a copy of BuildingLevelData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BuildingLevelDataCopyWith<BuildingLevelData> get copyWith => _$BuildingLevelDataCopyWithImpl<BuildingLevelData>(this as BuildingLevelData, _$identity);
+
+  /// Serializes this BuildingLevelData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BuildingLevelData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingLevelData&&(identical(other.cost, _this.cost) || other.cost == _this.cost)&&(identical(other.capacity, _this.capacity) || other.capacity == _this.capacity));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BuildingLevelData;
+  return Object.hash(runtimeType,_this.cost,_this.capacity);
+}
+
+@override
+String toString() {
+  final _this = this as BuildingLevelData;
+  return 'BuildingLevelData(cost: ${_this.cost}, capacity: ${_this.capacity})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BuildingLevelDataCopyWith<$Res>  {
+  factory $BuildingLevelDataCopyWith(BuildingLevelData value, $Res Function(BuildingLevelData) _then) = _$BuildingLevelDataCopyWithImpl;
+@useResult
+$Res call({
+ int cost, int capacity
+});
+
+
+
+
+}
+/// @nodoc
+class _$BuildingLevelDataCopyWithImpl<$Res>
+    implements $BuildingLevelDataCopyWith<$Res> {
+  _$BuildingLevelDataCopyWithImpl(this._self, this._then);
+
+  final BuildingLevelData _self;
+  final $Res Function(BuildingLevelData) _then;
+
+/// Create a copy of BuildingLevelData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? cost = null,Object? capacity = null,}) {
+  return _then(BuildingLevelData(
+cost: null == cost ? _self.cost : cost // ignore: cast_nullable_to_non_nullable
+as int,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BuildingLevelData].
+extension BuildingLevelDataPatterns on BuildingLevelData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BuildingLevelData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BuildingLevelData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BuildingLevelData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BuildingLevelData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BuildingLevelData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BuildingLevelData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int cost,  int capacity)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BuildingLevelData() when $default != null:
+return $default(_that.cost,_that.capacity);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int cost,  int capacity)  $default,) {final _that = this;
+switch (_that) {
+case _BuildingLevelData():
+return $default(_that.cost,_that.capacity);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int cost,  int capacity)?  $default,) {final _that = this;
+switch (_that) {
+case _BuildingLevelData() when $default != null:
+return $default(_that.cost,_that.capacity);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BuildingLevelData implements BuildingLevelData {
+  const _BuildingLevelData({required this.cost, this.capacity = 0});
+  factory _BuildingLevelData.fromJson(Map<String, dynamic> json) => _$BuildingLevelDataFromJson(json);
+
+/// Baby potatoes paid to reach this level.
+@override final  int cost;
+/// Potatoes of the housed type this building adds to the limit.
+@override@JsonKey() final  int capacity;
+
+/// Create a copy of BuildingLevelData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BuildingLevelDataCopyWith<_BuildingLevelData> get copyWith => __$BuildingLevelDataCopyWithImpl<_BuildingLevelData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BuildingLevelDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingLevelData&&(identical(other.cost, cost) || other.cost == cost)&&(identical(other.capacity, capacity) || other.capacity == capacity));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,cost,capacity);
+}
+
+@override
+String toString() {
+    return 'BuildingLevelData(cost: $cost, capacity: $capacity)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BuildingLevelDataCopyWith<$Res> implements $BuildingLevelDataCopyWith<$Res> {
+  factory _$BuildingLevelDataCopyWith(_BuildingLevelData value, $Res Function(_BuildingLevelData) _then) = __$BuildingLevelDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int cost, int capacity
+});
+
+
+
+
+}
+/// @nodoc
+class __$BuildingLevelDataCopyWithImpl<$Res>
+    implements _$BuildingLevelDataCopyWith<$Res> {
+  __$BuildingLevelDataCopyWithImpl(this._self, this._then);
+
+  final _BuildingLevelData _self;
+  final $Res Function(_BuildingLevelData) _then;
+
+/// Create a copy of BuildingLevelData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? cost = null,Object? capacity = null,}) {
+  return _then(_BuildingLevelData(
+cost: null == cost ? _self.cost : cost // ignore: cast_nullable_to_non_nullable
+as int,capacity: null == capacity ? _self.capacity : capacity // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+// dart format on

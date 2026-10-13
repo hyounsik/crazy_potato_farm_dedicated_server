@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 2;
+const int farmFormatVersion = 3;
 
 /// Upgrades from version `n` to `n + 1`, at index `n - 1`.
 ///
@@ -16,6 +16,25 @@ _farmMigrations = [
       }
     }
     return json;
+  },
+  // 2 → 3: buildings, guards, the fridge, pests, and upkeep. Potatoes out
+  // exploring leave their tile, so another can be planted there meanwhile.
+  (json) {
+    final away = <Map<String, dynamic>>[];
+    for (final field in json['fields'] as List<Object?>) {
+      final fieldMap = field! as Map;
+      final staying = <Object?>[];
+      for (final potato in fieldMap['potatoes'] as List<Object?>) {
+        final potatoMap = potato! as Map;
+        if (potatoMap.remove('away') == true) {
+          away.add({'potato': potatoMap, 'field_id': fieldMap['id']});
+        } else {
+          staying.add(potatoMap);
+        }
+      }
+      fieldMap['potatoes'] = staying;
+    }
+    return json..['away'] = away;
   },
 ];
 

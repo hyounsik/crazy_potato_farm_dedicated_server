@@ -26,6 +26,7 @@ _PotatoTypeData _$PotatoTypeDataFromJson(
             ? null
             : ProductionData.fromJson(v as Map<String, dynamic>),
       ),
+      upkeep: $checkedConvert('upkeep', (v) => (v as num?)?.toInt() ?? 0),
     );
     return val;
   },
@@ -43,6 +44,7 @@ Map<String, dynamic> _$PotatoTypeDataToJson(_PotatoTypeData instance) =>
       'lifespan_seconds': instance.lifespanSeconds,
       'unlock_building': instance.unlockBuilding,
       'production': instance.production?.toJson(),
+      'upkeep': instance.upkeep,
     };
 
 const _$PotatoTypeEnumMap = {

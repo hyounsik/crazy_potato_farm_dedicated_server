@@ -27,6 +27,10 @@ abstract class PotatoTypeData with _$PotatoTypeData {
 
     /// What a fully grown potato makes on the farm. Food potatoes only.
     ProductionData? production,
+
+    /// Baby potatoes each potato of this type eats every upkeep interval
+    /// (`rules.potatoes.upkeep_every_seconds`). Food potatoes eat nothing.
+    @Default(0) int upkeep,
   }) = _PotatoTypeData;
 
   const PotatoTypeData._();

@@ -26,7 +26,7 @@ void main() {
       (files['rules']! as Map<String, dynamic>)['version'] = 1;
       expect(
         Catalog.load(files).issues.single.toString(),
-        'rules: version: expected 2, found 1',
+        'rules: version: expected 3, found 1',
       );
     });
 

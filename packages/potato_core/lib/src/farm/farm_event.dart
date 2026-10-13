@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 part 'farm_event.freezed.dart';
@@ -10,27 +11,84 @@ part 'farm_event.g.dart';
 /// when the event is reported.
 @freezed
 sealed class FarmEvent with _$FarmEvent {
+  /// [gradeUp] is true when a breeding potato in the field raised the new
+  /// potato one grade above [seed].
   const factory FarmEvent.planted({
     required int fieldId,
     required TilePos tile,
     required int potatoId,
     required Seed seed,
+    @Default(false) bool gradeUp,
   }) = PotatoPlanted;
 
+  /// A potato finished growing. [fieldId] and [tile] are null for a combat
+  /// potato, which grows in a training ground and starts guarding.
   const factory FarmEvent.grown({
-    required int fieldId,
-    required TilePos tile,
+    int? fieldId,
+    TilePos? tile,
     required int potatoId,
   }) = PotatoGrown;
 
   /// A potato reached the end of its life. [seedLeft] went into the pouch;
-  /// baby potatoes still stored on it are lost.
+  /// baby potatoes still stored on it are lost. [fieldId] and [tile] are
+  /// null for a guard or a potato in the fridge.
   const factory FarmEvent.died({
-    required int fieldId,
-    required TilePos tile,
+    int? fieldId,
+    TilePos? tile,
     required int potatoId,
     required Seed seedLeft,
   }) = PotatoDied;
+
+  const factory FarmEvent.built({
+    required int buildingId,
+    required String kind,
+    required TilePos origin,
+  }) = BuildingBuilt;
+
+  const factory FarmEvent.upgraded({
+    required int buildingId,
+    required int level,
+  }) = BuildingUpgraded;
+
+  /// [toFridge] lists potatoes that were growing inside and had nowhere
+  /// else to go.
+  const factory FarmEvent.demolished({
+    required int buildingId,
+    @Default(<int>[]) List<int> toFridge,
+  }) = BuildingDemolished;
+
+  const factory FarmEvent.trained({
+    required int buildingId,
+    required int potatoId,
+    required Seed seed,
+  }) = SeedTrained;
+
+  const factory FarmEvent.pestAppeared({
+    required int fieldId,
+    required PestKind kind,
+  }) = PestAppeared;
+
+  /// [food] baby potatoes and [seed], if any, went into the farm as the
+  /// reward.
+  const factory FarmEvent.pestCleared({
+    required int fieldId,
+    required PestKind kind,
+    required bool byTap,
+    required int food,
+    Seed? seed,
+  }) = PestCleared;
+
+  /// These potatoes could not be paid for and work slower until they are.
+  const factory FarmEvent.weakened({required List<int> potatoIds}) =
+      PotatoesWeakened;
+
+  const factory FarmEvent.recovered({required List<int> potatoIds}) =
+      PotatoesRecovered;
+
+  const factory FarmEvent.uprooted({required int potatoId}) = PotatoUprooted;
+
+  /// A potato left the fridge for a field or a training ground.
+  const factory FarmEvent.takenOut({required int potatoId}) = PotatoTakenOut;
 
   /// [food] baby potatoes moved from potatoes in a field to the farm.
   const factory FarmEvent.harvested({required int fieldId, required int food}) =
@@ -41,10 +99,13 @@ sealed class FarmEvent with _$FarmEvent {
     required List<int> potatoIds,
   }) = Departed;
 
+  /// [potatoIds] came home; those in [toFridge] found their place gone or
+  /// taken and went to the fridge.
   const factory FarmEvent.returned({
     required int food,
     required int seeds,
     required List<int> potatoIds,
+    @Default(<int>[]) List<int> toFridge,
   }) = Returned;
 
   factory FarmEvent.fromJson(Map<String, dynamic> json) =>

@@ -33,25 +33,38 @@ void main() {
     ]);
   });
 
-  test('an away potato keeps its tile and stands still', () {
+  test('an away potato stands still and frees its tile', () {
     final id = growOne();
     farm.apply(FarmCommand.depart(food: 0, potatoIds: [id]));
-    final potato = farm.potatoById(id)!.potato;
+    final potato = farm.potatoById(id)!;
     final lived = potato.livedMillis;
 
     farm.runSteps(100);
     expect(potato.livedMillis, lived);
     expect(potato.stored, 0);
     expect(
-      farm.apply(
-        const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal),
-      ),
-      FarmRejection.tileTaken,
-    );
-    expect(
       farm.apply(const FarmCommand.harvest(fieldId: 1, tile: _tile)),
       FarmRejection.noPotato,
     );
+    expect(
+      farm.apply(
+        const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal),
+      ),
+      isNull,
+    );
+  });
+
+  test('a companion whose tile was taken comes home to the fridge', () {
+    final id = growOne();
+    farm.apply(FarmCommand.depart(food: 0, potatoIds: [id]));
+    farm.apply(const FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+    farm.takeEvents();
+
+    farm.apply(FarmCommand.returnHome(food: 0, potatoIds: [id]));
+    expect(farm.fridge.single.id, id);
+    expect(farm.takeEvents(), [
+      FarmEvent.returned(food: 0, seeds: 0, potatoIds: [id], toFridge: [id]),
+    ]);
   });
 
   test('who and how much can go', () {
@@ -96,7 +109,7 @@ void main() {
       5,
     );
     expect(farm.awayPotatoes, isEmpty);
-    expect(farm.potatoById(id)!.tile, _tile);
+    expect(farm.fieldSpotOf(id)!.tile, _tile);
   });
 
   test('companions carry their farm potato over to the run', () {

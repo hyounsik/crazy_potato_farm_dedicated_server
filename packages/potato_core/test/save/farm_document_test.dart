@@ -71,21 +71,46 @@ void main() {
   });
 
   group('decode', () {
-    test('upgrades a version 1 document: nobody is away', () {
-      final json = FarmDocument.of(busyFarm()).toJson();
-      final v1 = jsonDecode(jsonEncode(json)) as Map<String, dynamic>
-        ..['format_version'] = 1;
-      for (final field in v1['fields'] as List) {
-        for (final potato in (field as Map)['potatoes'] as List) {
-          (potato as Map).remove('away');
+    /// The busy farm as an older version wrote it: no buildings, guards,
+    /// fridge, pests, or upkeep yet.
+    Map<String, dynamic> oldDocument(int version, {bool away = false}) {
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(busyFarm()).toJson()),
+      ) as Map<String, dynamic>;
+      for (final key in ['buildings', 'guards', 'fridge', 'away', 'totals']) {
+        json.remove(key);
+      }
+      for (final field in json['fields'] as List) {
+        (field as Map).remove('pest');
+        for (final potato in field['potatoes'] as List) {
+          (potato as Map).remove('weak');
+          if (version == 2) potato['away'] = away;
         }
       }
-      final upgraded = FarmDocument.decode(v1);
+      return json..['format_version'] = version;
+    }
+
+    test('upgrades a version 1 document: nobody is away', () {
+      final planted = FarmDocument.of(busyFarm()).fields.single.potatoes;
+      final upgraded = FarmDocument.decode(oldDocument(1));
       expect(upgraded.formatVersion, farmFormatVersion);
-      expect(
-        upgraded.fields.expand((f) => f.potatoes).every((p) => !p.away),
-        isTrue,
-      );
+      expect(upgraded.fields.single.potatoes, hasLength(planted.length));
+      expect(upgraded.away, isEmpty);
+      expect(upgraded.buildings, isEmpty);
+    });
+
+    test('upgrades a version 2 document: away potatoes leave their tile', () {
+      final planted = FarmDocument.of(busyFarm()).fields.single.potatoes;
+      final upgraded = FarmDocument.decode(oldDocument(2, away: true));
+      expect(upgraded.fields.single.potatoes, isEmpty);
+      expect(upgraded.away, hasLength(planted.length));
+      expect(upgraded.away.first.fieldId, 1);
+      expect(upgraded.away.first.potato.tile, isNotNull);
+
+      final farm = upgraded.toSimulation(catalog);
+      final id = farm.awayPotatoes.first.id;
+      farm.apply(FarmCommand.returnHome(food: 0, potatoIds: [id]));
+      expect(farm.fieldSpotOf(id), isNotNull);
     });
 
     test('rejects a document from a newer app', () {

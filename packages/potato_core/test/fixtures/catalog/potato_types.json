@@ -1,5 +1,5 @@
 {
-  "version": 1,
+  "version": 2,
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "potato_types": [
     {
@@ -8,12 +8,34 @@
       "lifespan_seconds": 1800,
       "production": {
         "every_seconds": 30,
-        "amount": { "normal": 1, "rare": 2, "legendary": 3 },
+        "amount": {
+          "normal": 1,
+          "rare": 2,
+          "legendary": 3
+        },
         "store_max": 12
       }
     },
-    { "type": "combat", "grow_seconds": 180, "lifespan_seconds": 2400, "unlock_building": "training_ground" },
-    { "type": "breeding", "grow_seconds": 180, "lifespan_seconds": 2400, "unlock_building": "compost_yard" },
-    { "type": "buff", "grow_seconds": 180, "lifespan_seconds": 2400, "unlock_building": "statue" }
+    {
+      "type": "combat",
+      "grow_seconds": 180,
+      "lifespan_seconds": 2400,
+      "unlock_building": "training_ground",
+      "upkeep": 2
+    },
+    {
+      "type": "breeding",
+      "grow_seconds": 180,
+      "lifespan_seconds": 2400,
+      "unlock_building": "compost_yard",
+      "upkeep": 2
+    },
+    {
+      "type": "buff",
+      "grow_seconds": 180,
+      "lifespan_seconds": 2400,
+      "unlock_building": "statue",
+      "upkeep": 2
+    }
   ]
 }

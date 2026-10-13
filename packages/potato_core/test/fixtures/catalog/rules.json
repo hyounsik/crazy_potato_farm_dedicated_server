@@ -1,14 +1,53 @@
 {
-  "version": 2,
+  "version": 3,
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "farm": {
     "step_millis": 1000,
     "offline_cap_minutes": 1440,
     "size": 24,
-    "field_max_size": 3
+    "field_max_size": 3,
+    "open_area": {
+      "origin": {
+        "x": 8,
+        "y": 8
+      },
+      "width": 8,
+      "height": 8
+    }
   },
   "potatoes": {
-    "grade_drop_chance": 0.3
+    "grade_drop_chance": 0.3,
+    "upkeep_every_seconds": 60,
+    "weak_percent": 50,
+    "breeding_grade_up_chance": 0.25,
+    "guards": {
+      "walk_millis_per_tile": 500
+    },
+    "fridge": {
+      "size": 4,
+      "aging_percent": 10
+    }
+  },
+  "pests": {
+    "check_every_seconds": 60,
+    "bug": {
+      "chance_per_stored": 0.05,
+      "chance_max": 0.5,
+      "eat_every_seconds": 30,
+      "eat_amount": 1,
+      "clear_seconds": 20
+    },
+    "blight": {
+      "chance": 0.05,
+      "extra_aging_percent": 100,
+      "clear_seconds": 30
+    },
+    "taps": 5,
+    "reward": {
+      "food_min": 1,
+      "food_max": 3,
+      "seed_chance": 0.1
+    }
   },
   "new_farm": {
     "food": 200,

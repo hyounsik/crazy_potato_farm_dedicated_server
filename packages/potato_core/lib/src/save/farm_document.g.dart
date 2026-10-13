@@ -6,44 +6,83 @@ part of 'farm_document.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_FarmDocument _$FarmDocumentFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      '_FarmDocument',
-      json,
-      ($checkedConvert) {
-        final val = _FarmDocument(
-          formatVersion: $checkedConvert(
-            'format_version',
-            (v) => (v as num).toInt(),
-          ),
-          tick: $checkedConvert('tick', (v) => (v as num).toInt()),
-          nextId: $checkedConvert('next_id', (v) => (v as num).toInt()),
-          randomState: $checkedConvert(
-            'random_state',
-            (v) => (v as List<dynamic>).map((e) => (e as num).toInt()).toList(),
-          ),
-          food: $checkedConvert('food', (v) => (v as num).toInt()),
-          seeds: $checkedConvert(
-            'seeds',
-            (v) => (v as List<dynamic>)
-                .map((e) => SeedStackData.fromJson(e as Map<String, dynamic>))
-                .toList(),
-          ),
-          fields: $checkedConvert(
-            'fields',
-            (v) => (v as List<dynamic>)
-                .map((e) => FieldDocument.fromJson(e as Map<String, dynamic>))
-                .toList(),
-          ),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'formatVersion': 'format_version',
-        'nextId': 'next_id',
-        'randomState': 'random_state',
-      },
+_FarmDocument _$FarmDocumentFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_FarmDocument',
+  json,
+  ($checkedConvert) {
+    final val = _FarmDocument(
+      formatVersion: $checkedConvert(
+        'format_version',
+        (v) => (v as num).toInt(),
+      ),
+      tick: $checkedConvert('tick', (v) => (v as num).toInt()),
+      nextId: $checkedConvert('next_id', (v) => (v as num).toInt()),
+      randomState: $checkedConvert(
+        'random_state',
+        (v) => (v as List<dynamic>).map((e) => (e as num).toInt()).toList(),
+      ),
+      food: $checkedConvert('food', (v) => (v as num).toInt()),
+      seeds: $checkedConvert(
+        'seeds',
+        (v) => (v as List<dynamic>)
+            .map((e) => SeedStackData.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      fields: $checkedConvert(
+        'fields',
+        (v) => (v as List<dynamic>)
+            .map((e) => FieldDocument.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
+      buildings: $checkedConvert(
+        'buildings',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => BuildingDocument.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <BuildingDocument>[],
+      ),
+      guards: $checkedConvert(
+        'guards',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => GuardDocument.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <GuardDocument>[],
+      ),
+      fridge: $checkedConvert(
+        'fridge',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => PotatoDocument.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <PotatoDocument>[],
+      ),
+      away: $checkedConvert(
+        'away',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => AwayDocument.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <AwayDocument>[],
+      ),
+      totals: $checkedConvert(
+        'totals',
+        (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
+      ),
     );
+    return val;
+  },
+  fieldKeyMap: const {
+    'formatVersion': 'format_version',
+    'nextId': 'next_id',
+    'randomState': 'random_state',
+  },
+);
 
 Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
     <String, dynamic>{
@@ -54,6 +93,11 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'food': instance.food,
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
       'fields': instance.fields.map((e) => e.toJson()).toList(),
+      'buildings': instance.buildings.map((e) => e.toJson()).toList(),
+      'guards': instance.guards.map((e) => e.toJson()).toList(),
+      'fridge': instance.fridge.map((e) => e.toJson()).toList(),
+      'away': instance.away.map((e) => e.toJson()).toList(),
+      'totals': instance.totals,
     };
 
 _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>
@@ -70,6 +114,12 @@ _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>
               .map((e) => PotatoDocument.fromJson(e as Map<String, dynamic>))
               .toList(),
         ),
+        pest: $checkedConvert(
+          'pest',
+          (v) => v == null
+              ? null
+              : PestDocument.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -79,6 +129,121 @@ Map<String, dynamic> _$FieldDocumentToJson(_FieldDocument instance) =>
       'id': instance.id,
       'rect': instance.rect.toJson(),
       'potatoes': instance.potatoes.map((e) => e.toJson()).toList(),
+      'pest': instance.pest?.toJson(),
+    };
+
+_PestDocument _$PestDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_PestDocument',
+      json,
+      ($checkedConvert) {
+        final val = _PestDocument(
+          kind: $checkedConvert(
+            'kind',
+            (v) => $enumDecode(_$PestKindEnumMap, v),
+          ),
+          clearedMillis: $checkedConvert(
+            'cleared_millis',
+            (v) => (v as num).toInt(),
+          ),
+          biteMillis: $checkedConvert('bite_millis', (v) => (v as num).toInt()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'clearedMillis': 'cleared_millis',
+        'biteMillis': 'bite_millis',
+      },
+    );
+
+Map<String, dynamic> _$PestDocumentToJson(_PestDocument instance) =>
+    <String, dynamic>{
+      'kind': _$PestKindEnumMap[instance.kind]!,
+      'cleared_millis': instance.clearedMillis,
+      'bite_millis': instance.biteMillis,
+    };
+
+const _$PestKindEnumMap = {PestKind.bug: 'bug', PestKind.blight: 'blight'};
+
+_BuildingDocument _$BuildingDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_BuildingDocument', json, ($checkedConvert) {
+      final val = _BuildingDocument(
+        id: $checkedConvert('id', (v) => (v as num).toInt()),
+        kind: $checkedConvert('kind', (v) => v as String),
+        origin: $checkedConvert(
+          'origin',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        level: $checkedConvert('level', (v) => (v as num).toInt()),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$BuildingDocumentToJson(_BuildingDocument instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'kind': instance.kind,
+      'origin': instance.origin.toJson(),
+      'level': instance.level,
+    };
+
+_GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_GuardDocument',
+      json,
+      ($checkedConvert) {
+        final val = _GuardDocument(
+          potato: $checkedConvert(
+            'potato',
+            (v) => PotatoDocument.fromJson(v as Map<String, dynamic>),
+          ),
+          buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+          at: $checkedConvert(
+            'at',
+            (v) => TilePos.fromJson(v as Map<String, dynamic>),
+          ),
+          targetFieldId: $checkedConvert(
+            'target_field_id',
+            (v) => (v as num?)?.toInt(),
+          ),
+          walkMillis: $checkedConvert('walk_millis', (v) => (v as num).toInt()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'buildingId': 'building_id',
+        'targetFieldId': 'target_field_id',
+        'walkMillis': 'walk_millis',
+      },
+    );
+
+Map<String, dynamic> _$GuardDocumentToJson(_GuardDocument instance) =>
+    <String, dynamic>{
+      'potato': instance.potato.toJson(),
+      'building_id': instance.buildingId,
+      'at': instance.at.toJson(),
+      'target_field_id': instance.targetFieldId,
+      'walk_millis': instance.walkMillis,
+    };
+
+_AwayDocument _$AwayDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_AwayDocument', json, ($checkedConvert) {
+      final val = _AwayDocument(
+        potato: $checkedConvert(
+          'potato',
+          (v) => PotatoDocument.fromJson(v as Map<String, dynamic>),
+        ),
+        fieldId: $checkedConvert('field_id', (v) => (v as num?)?.toInt()),
+        buildingId: $checkedConvert('building_id', (v) => (v as num?)?.toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'fieldId': 'field_id', 'buildingId': 'building_id'});
+
+Map<String, dynamic> _$AwayDocumentToJson(_AwayDocument instance) =>
+    <String, dynamic>{
+      'potato': instance.potato.toJson(),
+      'field_id': instance.fieldId,
+      'building_id': instance.buildingId,
     };
 
 _PotatoDocument _$PotatoDocumentFromJson(
@@ -91,7 +256,7 @@ _PotatoDocument _$PotatoDocumentFromJson(
       id: $checkedConvert('id', (v) => (v as num).toInt()),
       tile: $checkedConvert(
         'tile',
-        (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        (v) => v == null ? null : TilePos.fromJson(v as Map<String, dynamic>),
       ),
       type: $checkedConvert('type', (v) => $enumDecode(_$PotatoTypeEnumMap, v)),
       grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
@@ -102,7 +267,7 @@ _PotatoDocument _$PotatoDocumentFromJson(
         (v) => (v as num).toInt(),
       ),
       stored: $checkedConvert('stored', (v) => (v as num).toInt()),
-      away: $checkedConvert('away', (v) => v as bool),
+      weak: $checkedConvert('weak', (v) => v as bool? ?? false),
     );
     return val;
   },
@@ -116,14 +281,14 @@ _PotatoDocument _$PotatoDocumentFromJson(
 Map<String, dynamic> _$PotatoDocumentToJson(_PotatoDocument instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'tile': instance.tile.toJson(),
+      'tile': instance.tile?.toJson(),
       'type': _$PotatoTypeEnumMap[instance.type]!,
       'grade': _$GradeEnumMap[instance.grade]!,
       'grown_millis': instance.grownMillis,
       'lived_millis': instance.livedMillis,
       'production_millis': instance.productionMillis,
       'stored': instance.stored,
-      'away': instance.away,
+      'weak': instance.weak,
     };
 
 const _$PotatoTypeEnumMap = {

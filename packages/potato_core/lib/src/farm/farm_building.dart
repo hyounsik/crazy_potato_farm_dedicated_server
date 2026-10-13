@@ -1,0 +1,34 @@
+import 'package:potato_core/src/catalog/building_data.dart';
+import 'package:potato_core/src/common/tile.dart';
+
+/// A building standing on the farm.
+final class FarmBuilding {
+  FarmBuilding({
+    required this.id,
+    required this.data,
+    required this.origin,
+    this.level = 1,
+  });
+
+  /// Shares the id sequence with fields and potatoes.
+  final int id;
+  final BuildingData data;
+
+  /// The top-left tile.
+  final TilePos origin;
+
+  /// From 1 up to the number of levels in [data].
+  int level;
+
+  String get kind => data.id;
+
+  TileRect get rect =>
+      TileRect(origin: origin, width: data.width, height: data.height);
+
+  /// Potatoes of the housed type this building adds to the limit now.
+  int get capacity => data.levels[level - 1].capacity;
+
+  /// The cost of the next level, or null at the top.
+  int? get upgradeCost =>
+      level < data.levels.length ? data.levels[level].cost : null;
+}

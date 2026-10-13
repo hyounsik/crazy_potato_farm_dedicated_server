@@ -20,7 +20,7 @@ final class Potato {
     this.livedMillis = 0,
     this.productionMillis = 0,
     this.stored = 0,
-    this.away = false,
+    this.weak = false,
   });
 
   /// Unique within the farm, and never reused.
@@ -40,9 +40,9 @@ final class Potato {
   /// Baby potatoes made and waiting to be harvested.
   int stored;
 
-  /// Out exploring. Its tile stays taken, and the farm does not advance it:
-  /// the run looks after it until it comes home.
-  bool away;
+  /// Its last upkeep went unpaid, so it works slower until the next one is
+  /// paid. Food potatoes never are.
+  bool weak;
 
   /// The seed this potato grew from, and the kind it leaves when it dies
   /// (before any grade drop).
@@ -53,6 +53,9 @@ final class Potato {
   /// Growth from 0 (just planted) to 1 (fully grown).
   double growthOf(PotatoTypeData data) =>
       math.min(1, grownMillis / (data.growSeconds * 1000));
+
+  bool isDead(PotatoTypeData data) =>
+      livedMillis >= data.lifespanSeconds * 1000;
 
   /// Life left from 1 (just grown) to 0 (about to die).
   double lifeLeftOf(PotatoTypeData data) =>
@@ -72,7 +75,7 @@ final class Potato {
       grownMillis = math.min(grown, growMillis);
       grew = grownMillis == growMillis;
     }
-    if (working == 0) return (grew: grew, died: false);
+    if (working == 0) return (grew: grew, died: isDead(data));
 
     livedMillis += working;
     final production = data.production;
@@ -84,7 +87,7 @@ final class Potato {
       final made = batches * (production.amount[grade] ?? 0);
       stored = math.min(production.storeMax, stored + made);
     }
-    return (grew: grew, died: livedMillis >= data.lifespanSeconds * 1000);
+    return (grew: grew, died: isDead(data));
   }
 
   /// Empties the store and returns how much was in it.

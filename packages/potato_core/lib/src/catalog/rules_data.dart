@@ -13,6 +13,7 @@ abstract class RulesData with _$RulesData {
   const factory RulesData({
     required FarmRulesData farm,
     required PotatoRulesData potatoes,
+    required PestRulesData pests,
     required NewFarmData newFarm,
     required RaidRulesData raid,
   }) = _RulesData;
@@ -37,6 +38,10 @@ abstract class FarmRulesData with _$FarmRulesData {
 
     /// Tiles along the longer side of the largest field.
     required int fieldMaxSize,
+
+    /// The part of the farm that can be built on. Fixed until locked blocks
+    /// can be opened.
+    required TileRect openArea,
   }) = _FarmRulesData;
 
   const FarmRulesData._();
@@ -54,10 +59,127 @@ abstract class PotatoRulesData with _$PotatoRulesData {
   const factory PotatoRulesData({
     /// Chance that the seed a dead potato leaves is one grade lower.
     required double gradeDropChance,
+
+    /// Game time between two upkeep payments. A multiple of the farm step.
+    required int upkeepEverySeconds,
+
+    /// How hard a weak (unfed) potato works, in percent: guards walk and
+    /// clear pests, and breeding potatoes raise grades, at this rate.
+    required int weakPercent,
+
+    /// Chance that a seed planted in a field with a grown breeding potato
+    /// comes up one grade higher.
+    required double breedingGradeUpChance,
+    required GuardRulesData guards,
+    required FridgeRulesData fridge,
   }) = _PotatoRulesData;
 
   factory PotatoRulesData.fromJson(Map<String, dynamic> json) =>
       _$PotatoRulesDataFromJson(json);
+}
+
+/// Grown combat potatoes walking the farm.
+@freezed
+abstract class GuardRulesData with _$GuardRulesData {
+  const factory GuardRulesData({
+    /// Game time to walk one tile.
+    required int walkMillisPerTile,
+  }) = _GuardRulesData;
+
+  factory GuardRulesData.fromJson(Map<String, dynamic> json) =>
+      _$GuardRulesDataFromJson(json);
+}
+
+/// The potato fridge: potatoes taken out of fields and training grounds.
+@freezed
+abstract class FridgeRulesData with _$FridgeRulesData {
+  const factory FridgeRulesData({
+    /// Potatoes it holds. Companions coming home may go past it.
+    required int size,
+
+    /// How fast life runs out inside, in percent of normal.
+    required int agingPercent,
+  }) = _FridgeRulesData;
+
+  factory FridgeRulesData.fromJson(Map<String, dynamic> json) =>
+      _$FridgeRulesDataFromJson(json);
+}
+
+/// Bugs and blight appearing on fields.
+@freezed
+abstract class PestRulesData with _$PestRulesData {
+  const factory PestRulesData({
+    /// Game time between two rolls for new pests. A multiple of the farm
+    /// step.
+    required int checkEverySeconds,
+    required BugRulesData bug,
+    required BlightRulesData blight,
+
+    /// Taps in a row that clear a pest by hand.
+    required int taps,
+
+    /// What clearing a pest gives.
+    required PestRewardData reward,
+  }) = _PestRulesData;
+
+  factory PestRulesData.fromJson(Map<String, dynamic> json) =>
+      _$PestRulesDataFromJson(json);
+}
+
+/// Bugs eat the baby potatoes stored on a field's potatoes.
+@freezed
+abstract class BugRulesData with _$BugRulesData {
+  const factory BugRulesData({
+    /// Chance per check for each stored baby potato in the field.
+    required double chancePerStored,
+
+    /// The chance never goes past this, however much is stored.
+    required double chanceMax,
+
+    /// Game time between two bites.
+    required int eatEverySeconds,
+
+    /// Baby potatoes eaten per bite.
+    required int eatAmount,
+
+    /// Game time one guard at full strength needs to clear it.
+    required int clearSeconds,
+  }) = _BugRulesData;
+
+  factory BugRulesData.fromJson(Map<String, dynamic> json) =>
+      _$BugRulesDataFromJson(json);
+}
+
+/// Blight makes a field's potatoes use up their life faster.
+@freezed
+abstract class BlightRulesData with _$BlightRulesData {
+  const factory BlightRulesData({
+    /// Chance per check for a field with at least one potato.
+    required double chance,
+
+    /// Extra life used, in percent of the time passing: 100 doubles aging.
+    required int extraAgingPercent,
+
+    /// Game time one guard at full strength needs to clear it.
+    required int clearSeconds,
+  }) = _BlightRulesData;
+
+  factory BlightRulesData.fromJson(Map<String, dynamic> json) =>
+      _$BlightRulesDataFromJson(json);
+}
+
+@freezed
+abstract class PestRewardData with _$PestRewardData {
+  const factory PestRewardData({
+    required int foodMin,
+    required int foodMax,
+
+    /// Chance of a normal seed of the type most planted in the field.
+    required double seedChance,
+  }) = _PestRewardData;
+
+  factory PestRewardData.fromJson(Map<String, dynamic> json) =>
+      _$PestRewardDataFromJson(json);
 }
 
 /// What a newly made farm starts with.

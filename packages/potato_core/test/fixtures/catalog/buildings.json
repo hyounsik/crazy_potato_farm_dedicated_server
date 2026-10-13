@@ -1,0 +1,50 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "buildings": [
+    {
+      "id": "training_ground",
+      "width": 2,
+      "height": 2,
+      "houses": "combat",
+      "levels": [
+        {
+          "cost": 100,
+          "capacity": 2
+        },
+        {
+          "cost": 150,
+          "capacity": 4
+        }
+      ]
+    },
+    {
+      "id": "compost_yard",
+      "width": 1,
+      "height": 1,
+      "houses": "breeding",
+      "levels": [
+        {
+          "cost": 50,
+          "capacity": 2
+        },
+        {
+          "cost": 80,
+          "capacity": 3
+        }
+      ]
+    },
+    {
+      "id": "statue",
+      "width": 1,
+      "height": 1,
+      "houses": "buff",
+      "levels": [
+        {
+          "cost": 50,
+          "capacity": 2
+        }
+      ]
+    }
+  ]
+}

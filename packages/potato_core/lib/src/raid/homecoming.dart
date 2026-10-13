@@ -11,7 +11,7 @@ import 'package:potato_core/src/raid/raid_simulation.dart';
 List<CompanionStart> companionsFor(FarmSimulation farm, List<int> potatoIds) =>
     [
       for (final id in potatoIds)
-        if (farm.potatoById(id)?.potato case final potato?)
+        if (farm.potatoById(id) case final potato?)
           CompanionStart(
             potatoId: potato.id,
             type: potato.type,
@@ -21,7 +21,7 @@ List<CompanionStart> companionsFor(FarmSimulation farm, List<int> potatoIds) =>
 
 extension RaidHomecoming on RaidResult {
   /// The farm command that brings this run home: food and seeds from the
-  /// bag, and every companion back to its tile, knocked down or not (they
+  /// bag, and every companion back to the farm, knocked down or not (they
   /// recover at the farm). Other items have nowhere to go yet and are left.
   FarmCommand homecoming(Catalog catalog) {
     var food = 0;

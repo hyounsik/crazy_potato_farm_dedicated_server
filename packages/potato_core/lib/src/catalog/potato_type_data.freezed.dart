@@ -21,7 +21,9 @@ mixin _$PotatoTypeData {
  int get lifespanSeconds;/// The building the farm needs before seeds of this type can be planted.
 /// Null means the type can always be planted.
  String? get unlockBuilding;/// What a fully grown potato makes on the farm. Food potatoes only.
- ProductionData? get production;
+ ProductionData? get production;/// Baby potatoes each potato of this type eats every upkeep interval
+/// (`rules.potatoes.upkeep_every_seconds`). Food potatoes eat nothing.
+ int get upkeep;
 /// Create a copy of PotatoTypeData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -35,20 +37,20 @@ $PotatoTypeDataCopyWith<PotatoTypeData> get copyWith => _$PotatoTypeDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as PotatoTypeData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoTypeData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.growSeconds, _this.growSeconds) || other.growSeconds == _this.growSeconds)&&(identical(other.lifespanSeconds, _this.lifespanSeconds) || other.lifespanSeconds == _this.lifespanSeconds)&&(identical(other.unlockBuilding, _this.unlockBuilding) || other.unlockBuilding == _this.unlockBuilding)&&(identical(other.production, _this.production) || other.production == _this.production));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoTypeData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.growSeconds, _this.growSeconds) || other.growSeconds == _this.growSeconds)&&(identical(other.lifespanSeconds, _this.lifespanSeconds) || other.lifespanSeconds == _this.lifespanSeconds)&&(identical(other.unlockBuilding, _this.unlockBuilding) || other.unlockBuilding == _this.unlockBuilding)&&(identical(other.production, _this.production) || other.production == _this.production)&&(identical(other.upkeep, _this.upkeep) || other.upkeep == _this.upkeep));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PotatoTypeData;
-  return Object.hash(runtimeType,_this.type,_this.growSeconds,_this.lifespanSeconds,_this.unlockBuilding,_this.production);
+  return Object.hash(runtimeType,_this.type,_this.growSeconds,_this.lifespanSeconds,_this.unlockBuilding,_this.production,_this.upkeep);
 }
 
 @override
 String toString() {
   final _this = this as PotatoTypeData;
-  return 'PotatoTypeData(type: ${_this.type}, growSeconds: ${_this.growSeconds}, lifespanSeconds: ${_this.lifespanSeconds}, unlockBuilding: ${_this.unlockBuilding}, production: ${_this.production})';
+  return 'PotatoTypeData(type: ${_this.type}, growSeconds: ${_this.growSeconds}, lifespanSeconds: ${_this.lifespanSeconds}, unlockBuilding: ${_this.unlockBuilding}, production: ${_this.production}, upkeep: ${_this.upkeep})';
 }
 
 
@@ -59,7 +61,7 @@ abstract mixin class $PotatoTypeDataCopyWith<$Res>  {
   factory $PotatoTypeDataCopyWith(PotatoTypeData value, $Res Function(PotatoTypeData) _then) = _$PotatoTypeDataCopyWithImpl;
 @useResult
 $Res call({
- PotatoType type, int growSeconds, int lifespanSeconds, String? unlockBuilding, ProductionData? production
+ PotatoType type, int growSeconds, int lifespanSeconds, String? unlockBuilding, ProductionData? production, int upkeep
 });
 
 
@@ -76,14 +78,15 @@ class _$PotatoTypeDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoTypeData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? growSeconds = null,Object? lifespanSeconds = null,Object? unlockBuilding = freezed,Object? production = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? growSeconds = null,Object? lifespanSeconds = null,Object? unlockBuilding = freezed,Object? production = freezed,Object? upkeep = null,}) {
   return _then(PotatoTypeData(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,growSeconds: null == growSeconds ? _self.growSeconds : growSeconds // ignore: cast_nullable_to_non_nullable
 as int,lifespanSeconds: null == lifespanSeconds ? _self.lifespanSeconds : lifespanSeconds // ignore: cast_nullable_to_non_nullable
 as int,unlockBuilding: freezed == unlockBuilding ? _self.unlockBuilding : unlockBuilding // ignore: cast_nullable_to_non_nullable
 as String?,production: freezed == production ? _self.production : production // ignore: cast_nullable_to_non_nullable
-as ProductionData?,
+as ProductionData?,upkeep: null == upkeep ? _self.upkeep : upkeep // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of PotatoTypeData
@@ -180,10 +183,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production,  int upkeep)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PotatoTypeData() when $default != null:
-return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production);case _:
+return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production,_that.upkeep);case _:
   return orElse();
 
 }
@@ -201,10 +204,10 @@ return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockB
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production,  int upkeep)  $default,) {final _that = this;
 switch (_that) {
 case _PotatoTypeData():
-return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production);case _:
+return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production,_that.upkeep);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -221,10 +224,10 @@ return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockB
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  int growSeconds,  int lifespanSeconds,  String? unlockBuilding,  ProductionData? production,  int upkeep)?  $default,) {final _that = this;
 switch (_that) {
 case _PotatoTypeData() when $default != null:
-return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production);case _:
+return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockBuilding,_that.production,_that.upkeep);case _:
   return null;
 
 }
@@ -236,7 +239,7 @@ return $default(_that.type,_that.growSeconds,_that.lifespanSeconds,_that.unlockB
 @JsonSerializable()
 
 class _PotatoTypeData extends PotatoTypeData {
-  const _PotatoTypeData({required this.type, required this.growSeconds, required this.lifespanSeconds, this.unlockBuilding, this.production}): super._();
+  const _PotatoTypeData({required this.type, required this.growSeconds, required this.lifespanSeconds, this.unlockBuilding, this.production, this.upkeep = 0}): super._();
   factory _PotatoTypeData.fromJson(Map<String, dynamic> json) => _$PotatoTypeDataFromJson(json);
 
 @override final  PotatoType type;
@@ -249,6 +252,9 @@ class _PotatoTypeData extends PotatoTypeData {
 @override final  String? unlockBuilding;
 /// What a fully grown potato makes on the farm. Food potatoes only.
 @override final  ProductionData? production;
+/// Baby potatoes each potato of this type eats every upkeep interval
+/// (`rules.potatoes.upkeep_every_seconds`). Food potatoes eat nothing.
+@override@JsonKey() final  int upkeep;
 
 /// Create a copy of PotatoTypeData
 /// with the given fields replaced by the non-null parameter values.
@@ -263,18 +269,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoTypeData&&(identical(other.type, type) || other.type == type)&&(identical(other.growSeconds, growSeconds) || other.growSeconds == growSeconds)&&(identical(other.lifespanSeconds, lifespanSeconds) || other.lifespanSeconds == lifespanSeconds)&&(identical(other.unlockBuilding, unlockBuilding) || other.unlockBuilding == unlockBuilding)&&(identical(other.production, production) || other.production == production));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoTypeData&&(identical(other.type, type) || other.type == type)&&(identical(other.growSeconds, growSeconds) || other.growSeconds == growSeconds)&&(identical(other.lifespanSeconds, lifespanSeconds) || other.lifespanSeconds == lifespanSeconds)&&(identical(other.unlockBuilding, unlockBuilding) || other.unlockBuilding == unlockBuilding)&&(identical(other.production, production) || other.production == production)&&(identical(other.upkeep, upkeep) || other.upkeep == upkeep));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,type,growSeconds,lifespanSeconds,unlockBuilding,production);
+    return Object.hash(runtimeType,type,growSeconds,lifespanSeconds,unlockBuilding,production,upkeep);
 }
 
 @override
 String toString() {
-    return 'PotatoTypeData(type: $type, growSeconds: $growSeconds, lifespanSeconds: $lifespanSeconds, unlockBuilding: $unlockBuilding, production: $production)';
+    return 'PotatoTypeData(type: $type, growSeconds: $growSeconds, lifespanSeconds: $lifespanSeconds, unlockBuilding: $unlockBuilding, production: $production, upkeep: $upkeep)';
 }
 
 
@@ -285,7 +291,7 @@ abstract mixin class _$PotatoTypeDataCopyWith<$Res> implements $PotatoTypeDataCo
   factory _$PotatoTypeDataCopyWith(_PotatoTypeData value, $Res Function(_PotatoTypeData) _then) = __$PotatoTypeDataCopyWithImpl;
 @override @useResult
 $Res call({
- PotatoType type, int growSeconds, int lifespanSeconds, String? unlockBuilding, ProductionData? production
+ PotatoType type, int growSeconds, int lifespanSeconds, String? unlockBuilding, ProductionData? production, int upkeep
 });
 
 
@@ -302,14 +308,15 @@ class __$PotatoTypeDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoTypeData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? growSeconds = null,Object? lifespanSeconds = null,Object? unlockBuilding = freezed,Object? production = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? growSeconds = null,Object? lifespanSeconds = null,Object? unlockBuilding = freezed,Object? production = freezed,Object? upkeep = null,}) {
   return _then(_PotatoTypeData(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,growSeconds: null == growSeconds ? _self.growSeconds : growSeconds // ignore: cast_nullable_to_non_nullable
 as int,lifespanSeconds: null == lifespanSeconds ? _self.lifespanSeconds : lifespanSeconds // ignore: cast_nullable_to_non_nullable
 as int,unlockBuilding: freezed == unlockBuilding ? _self.unlockBuilding : unlockBuilding // ignore: cast_nullable_to_non_nullable
 as String?,production: freezed == production ? _self.production : production // ignore: cast_nullable_to_non_nullable
-as ProductionData?,
+as ProductionData?,upkeep: null == upkeep ? _self.upkeep : upkeep // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

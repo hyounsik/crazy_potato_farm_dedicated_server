@@ -1,4 +1,5 @@
 import 'package:json_annotation/json_annotation.dart';
+import 'package:potato_core/src/catalog/building_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -16,12 +17,14 @@ final class Catalog {
   Catalog._({
     required this.rules,
     required Map<PotatoType, PotatoTypeData> potatoTypes,
+    required Map<String, BuildingData> buildings,
     required Map<String, ItemData> items,
     required Map<String, LootTableData> lootTables,
     required Map<String, WeaponData> weapons,
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
   }) : _potatoTypes = Map.unmodifiable(potatoTypes),
+       buildings = Map.unmodifiable(buildings),
        items = Map.unmodifiable(items),
        lootTables = Map.unmodifiable(lootTables),
        weapons = Map.unmodifiable(weapons),
@@ -33,8 +36,9 @@ final class Catalog {
   /// Data ships with the app, so files are not migrated: a file with another
   /// version is an error.
   static const Map<String, int> fileVersions = {
-    'rules': 2,
-    'potato_types': 1,
+    'rules': 3,
+    'potato_types': 2,
+    'buildings': 1,
     'items': 1,
     'loot_tables': 1,
     'weapons': 1,
@@ -44,6 +48,7 @@ final class Catalog {
 
   final RulesData rules;
   final Map<PotatoType, PotatoTypeData> _potatoTypes;
+  final Map<String, BuildingData> buildings;
   final Map<String, ItemData> items;
   final Map<String, LootTableData> lootTables;
   final Map<String, WeaponData> weapons;
@@ -51,6 +56,13 @@ final class Catalog {
   final Map<String, ZoneData> zones;
 
   PotatoTypeData potatoType(PotatoType type) => _potatoTypes[type]!;
+
+  /// The building that unlocks [type], or null for a type that needs none.
+  BuildingData? unlockBuildingOf(PotatoType type) =>
+      switch (potatoType(type).unlockBuilding) {
+        final id? => buildings[id],
+        null => null,
+      };
 
   /// How many of [item] fit in one bag slot.
   int stackOf(String item) => items[item]!.stack;
@@ -89,6 +101,14 @@ final class Catalog {
       return byType;
     });
 
+    final buildings = _readEntries(
+      files,
+      'buildings',
+      issues,
+      BuildingData.fromJson,
+      (b) => b.id,
+      _checkBuilding,
+    );
     final items = _readEntries(
       files,
       'items',
@@ -132,6 +152,7 @@ final class Catalog {
 
     if (rules == null ||
         potatoTypes == null ||
+        buildings == null ||
         items == null ||
         lootTables == null ||
         weapons == null ||
@@ -142,6 +163,8 @@ final class Catalog {
     _checkReferences(
       issues,
       rules: rules,
+      potatoTypes: potatoTypes,
+      buildings: buildings,
       items: items,
       lootTables: lootTables,
       weapons: weapons,
@@ -155,6 +178,7 @@ final class Catalog {
       Catalog._(
         rules: rules,
         potatoTypes: potatoTypes,
+        buildings: buildings,
         items: items,
         lootTables: lootTables,
         weapons: weapons,
@@ -171,10 +195,71 @@ final class Catalog {
     check.positive('farm.offline_cap_minutes', farm.offlineCapMinutes);
     check.positive('farm.size', farm.size);
     check.positive('farm.field_max_size', farm.fieldMaxSize);
-    check.probability(
-      'potatoes.grade_drop_chance',
-      rules.potatoes.gradeDropChance,
+    final open = farm.openArea;
+    if (open.width < 1 ||
+        open.height < 1 ||
+        open.left < 0 ||
+        open.top < 0 ||
+        open.right > farm.size ||
+        open.bottom > farm.size) {
+      check.issue('farm.open_area', 'must lie inside the farm');
+    }
+
+    final potatoes = rules.potatoes;
+    check.probability('potatoes.grade_drop_chance', potatoes.gradeDropChance);
+    check.everySteps(
+      'potatoes.upkeep_every_seconds',
+      potatoes.upkeepEverySeconds,
+      farm.stepMillis,
     );
+    if (potatoes.weakPercent < 1 || potatoes.weakPercent > 100) {
+      check.issue(
+        'potatoes.weak_percent',
+        'must be 1 to 100, found ${potatoes.weakPercent}',
+      );
+    }
+    check.probability(
+      'potatoes.breeding_grade_up_chance',
+      potatoes.breedingGradeUpChance,
+    );
+    check.positive(
+      'potatoes.guards.walk_millis_per_tile',
+      potatoes.guards.walkMillisPerTile,
+    );
+    check.atLeast('potatoes.fridge.size', potatoes.fridge.size, 0);
+    check.percent(
+      'potatoes.fridge.aging_percent',
+      potatoes.fridge.agingPercent,
+    );
+
+    final pests = rules.pests;
+    check.everySteps(
+      'pests.check_every_seconds',
+      pests.checkEverySeconds,
+      farm.stepMillis,
+    );
+    check.probability('pests.bug.chance_per_stored', pests.bug.chancePerStored);
+    check.probability('pests.bug.chance_max', pests.bug.chanceMax);
+    check.everySteps(
+      'pests.bug.eat_every_seconds',
+      pests.bug.eatEverySeconds,
+      farm.stepMillis,
+    );
+    check.atLeast('pests.bug.eat_amount', pests.bug.eatAmount, 0);
+    check.positive('pests.bug.clear_seconds', pests.bug.clearSeconds);
+    check.probability('pests.blight.chance', pests.blight.chance);
+    check.atLeast(
+      'pests.blight.extra_aging_percent',
+      pests.blight.extraAgingPercent,
+      0,
+    );
+    check.positive('pests.blight.clear_seconds', pests.blight.clearSeconds);
+    check.positive('pests.taps', pests.taps);
+    check.atLeast('pests.reward.food_min', pests.reward.foodMin, 0);
+    if (pests.reward.foodMax < pests.reward.foodMin) {
+      check.issue('pests.reward.food_max', 'must be at least food_min');
+    }
+    check.probability('pests.reward.seed_chance', pests.reward.seedChance);
 
     final newFarm = rules.newFarm;
     check.atLeast('new_farm.food', newFarm.food, 0);
@@ -266,6 +351,10 @@ final class Catalog {
 
     final production = data.production;
     final makesFood = data.type == PotatoType.food;
+    check.atLeast('$path.upkeep', data.upkeep, 0);
+    if (makesFood && data.upkeep != 0) {
+      check.issue('$path.upkeep', 'food potatoes eat nothing');
+    }
     if (makesFood && production == null) {
       check.issue('$path.production', 'food potatoes need production');
     } else if (!makesFood && production != null) {
@@ -280,6 +369,30 @@ final class Catalog {
         check.issue('$path.production.amount', 'missing ${grade.name}');
       } else {
         check.atLeast('$path.production.amount.${grade.name}', amount, 0);
+      }
+    }
+  }
+
+  static void _checkBuilding(
+    _FileCheck check,
+    String path,
+    BuildingData building,
+  ) {
+    check.positive('$path.width', building.width);
+    check.positive('$path.height', building.height);
+    if (building.levels.isEmpty) {
+      check.issue('$path.levels', 'must not be empty');
+    }
+    var capacity = 0;
+    for (final (index, level) in building.levels.indexed) {
+      final at = '$path.levels[$index]';
+      check.atLeast('$at.cost', level.cost, 0);
+      if (level.capacity < capacity) {
+        check.issue('$at.capacity', 'must not drop below the level before');
+      }
+      capacity = level.capacity;
+      if (building.houses == null && level.capacity != 0) {
+        check.issue('$at.capacity', 'only buildings that house potatoes');
       }
     }
   }
@@ -401,6 +514,8 @@ final class Catalog {
   static void _checkReferences(
     List<CatalogIssue> issues, {
     required RulesData rules,
+    required Map<PotatoType, PotatoTypeData> potatoTypes,
+    required Map<String, BuildingData> buildings,
     required Map<String, ItemData> items,
     required Map<String, LootTableData> lootTables,
     required Map<String, WeaponData> weapons,
@@ -410,6 +525,23 @@ final class Catalog {
     void missing(String file, String path, String what, String id) =>
         issues.add(CatalogIssue(file, path, 'no $what "$id"'));
 
+    for (final (index, type) in PotatoType.values.indexed) {
+      final id = potatoTypes[type]?.unlockBuilding;
+      if (id == null) continue;
+      final path = 'potato_types[$index].unlock_building';
+      final building = buildings[id];
+      if (building == null) {
+        missing('potato_types', path, 'building', id);
+      } else if (building.houses != type) {
+        issues.add(
+          CatalogIssue(
+            'potato_types',
+            path,
+            '"$id" does not house ${type.name}',
+          ),
+        );
+      }
+    }
     final food = rules.raid.food.item;
     final foodItem = items[food];
     if (foodItem == null) {
@@ -563,6 +695,19 @@ final class _FileCheck {
 
   void probability(String path, double value) {
     if (value < 0 || value > 1) issue(path, 'must be 0 to 1, found $value');
+  }
+
+  void percent(String path, int value) {
+    if (value < 0 || value > 100) issue(path, 'must be 0 to 100, found $value');
+  }
+
+  /// A positive interval in seconds that a whole number of steps covers.
+  void everySteps(String path, int seconds, int stepMillis) {
+    if (seconds <= 0) {
+      issue(path, 'must be positive, found $seconds');
+    } else if (seconds * 1000 % stepMillis != 0) {
+      issue(path, 'must be a multiple of the step ($stepMillis ms)');
+    }
   }
 }
 

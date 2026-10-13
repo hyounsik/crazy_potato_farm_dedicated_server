@@ -1,0 +1,81 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "loot_tables": [
+    {
+      "id": "spot",
+      "rolls_min": 1,
+      "rolls_max": 2,
+      "entries": [
+        {
+          "item": "food",
+          "weight": 6,
+          "min": 10,
+          "max": 25
+        },
+        {
+          "item": "seed_food_normal",
+          "weight": 4,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "item": "seed_food_rare",
+          "weight": 1,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "item": "material",
+          "weight": 2,
+          "min": 2,
+          "max": 6
+        }
+      ]
+    },
+    {
+      "id": "drop",
+      "rolls_min": 1,
+      "rolls_max": 1,
+      "entries": [
+        {
+          "item": "food",
+          "weight": 6,
+          "min": 3,
+          "max": 8
+        },
+        {
+          "item": "seed_food_normal",
+          "weight": 2,
+          "min": 1,
+          "max": 1
+        }
+      ]
+    },
+    {
+      "id": "bundle",
+      "rolls_min": 2,
+      "rolls_max": 4,
+      "entries": [
+        {
+          "item": "food",
+          "weight": 3,
+          "min": 5,
+          "max": 15
+        },
+        {
+          "item": "seed_food_rare",
+          "weight": 2,
+          "min": 1,
+          "max": 1
+        },
+        {
+          "item": "material",
+          "weight": 3,
+          "min": 3,
+          "max": 10
+        }
+      ]
+    }
+  ]
+}

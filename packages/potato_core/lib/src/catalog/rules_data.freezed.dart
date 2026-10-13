@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RulesData {
 
- FarmRulesData get farm; PotatoRulesData get potatoes; NewFarmData get newFarm;
+ FarmRulesData get farm; PotatoRulesData get potatoes; NewFarmData get newFarm; RaidRulesData get raid;
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $RulesDataCopyWith<RulesData> get copyWith => _$RulesDataCopyWithImpl<RulesData>
 @override
 bool operator ==(Object other) {
   final _this = this as RulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RulesData;
-  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.newFarm);
+  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.newFarm,_this.raid);
 }
 
 @override
 String toString() {
   final _this = this as RulesData;
-  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, newFarm: ${_this.newFarm})';
+  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, newFarm: ${_this.newFarm}, raid: ${_this.raid})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $RulesDataCopyWith<$Res>  {
   factory $RulesDataCopyWith(RulesData value, $Res Function(RulesData) _then) = _$RulesDataCopyWithImpl;
 @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm
+ FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm, RaidRulesData raid
 });
 
 
-$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$NewFarmDataCopyWith<$Res> get newFarm;
+$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;
 
 }
 /// @nodoc
@@ -71,12 +71,13 @@ class _$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,Object? raid = null,}) {
   return _then(RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
 as PotatoRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
-as NewFarmData,
+as NewFarmData,raid: null == raid ? _self.raid : raid // ignore: cast_nullable_to_non_nullable
+as RaidRulesData,
   ));
 }
 /// Create a copy of RulesData
@@ -105,6 +106,15 @@ $NewFarmDataCopyWith<$Res> get newFarm {
   
   return $NewFarmDataCopyWith<$Res>(_self.newFarm, (value) {
     return _then(_self.copyWith(newFarm: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RaidRulesDataCopyWith<$Res> get raid {
+  
+  return $RaidRulesDataCopyWith<$Res>(_self.raid, (value) {
+    return _then(_self.copyWith(raid: value));
   });
 }
 }
@@ -188,10 +198,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
+return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
   return orElse();
 
 }
@@ -209,10 +219,10 @@ return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)  $default,) {final _that = this;
 switch (_that) {
 case _RulesData():
-return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
+return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -229,10 +239,10 @@ return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  NewFarmData newFarm,  RaidRulesData raid)?  $default,) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
+return $default(_that.farm,_that.potatoes,_that.newFarm,_that.raid);case _:
   return null;
 
 }
@@ -244,12 +254,13 @@ return $default(_that.farm,_that.potatoes,_that.newFarm);case _:
 @JsonSerializable()
 
 class _RulesData implements RulesData {
-  const _RulesData({required this.farm, required this.potatoes, required this.newFarm});
+  const _RulesData({required this.farm, required this.potatoes, required this.newFarm, required this.raid});
   factory _RulesData.fromJson(Map<String, dynamic> json) => _$RulesDataFromJson(json);
 
 @override final  FarmRulesData farm;
 @override final  PotatoRulesData potatoes;
 @override final  NewFarmData newFarm;
+@override final  RaidRulesData raid;
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -264,18 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,farm,potatoes,newFarm);
+    return Object.hash(runtimeType,farm,potatoes,newFarm,raid);
 }
 
 @override
 String toString() {
-    return 'RulesData(farm: $farm, potatoes: $potatoes, newFarm: $newFarm)';
+    return 'RulesData(farm: $farm, potatoes: $potatoes, newFarm: $newFarm, raid: $raid)';
 }
 
 
@@ -286,11 +297,11 @@ abstract mixin class _$RulesDataCopyWith<$Res> implements $RulesDataCopyWith<$Re
   factory _$RulesDataCopyWith(_RulesData value, $Res Function(_RulesData) _then) = __$RulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm
+ FarmRulesData farm, PotatoRulesData potatoes, NewFarmData newFarm, RaidRulesData raid
 });
 
 
-@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $NewFarmDataCopyWith<$Res> get newFarm;
+@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;
 
 }
 /// @nodoc
@@ -303,12 +314,13 @@ class __$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? newFarm = null,Object? raid = null,}) {
   return _then(_RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
 as PotatoRulesData,newFarm: null == newFarm ? _self.newFarm : newFarm // ignore: cast_nullable_to_non_nullable
-as NewFarmData,
+as NewFarmData,raid: null == raid ? _self.raid : raid // ignore: cast_nullable_to_non_nullable
+as RaidRulesData,
   ));
 }
 
@@ -338,6 +350,15 @@ $NewFarmDataCopyWith<$Res> get newFarm {
   
   return $NewFarmDataCopyWith<$Res>(_self.newFarm, (value) {
     return _then(_self.copyWith(newFarm: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$RaidRulesDataCopyWith<$Res> get raid {
+  
+  return $RaidRulesDataCopyWith<$Res>(_self.raid, (value) {
+    return _then(_self.copyWith(raid: value));
   });
 }
 }

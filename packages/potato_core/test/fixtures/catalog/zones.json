@@ -1,0 +1,84 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "zones": [
+    {
+      "id": "sample_zone",
+      "map": {
+        "size": 40,
+        "entry": {
+          "x": 20,
+          "y": 36
+        },
+        "exits": [],
+        "clear_radius": 2,
+        "terrain": [
+          {
+            "type": "blob",
+            "center": {
+              "x": 20,
+              "y": 18
+            },
+            "area": 40
+          },
+          {
+            "type": "ring",
+            "center": {
+              "x": 9,
+              "y": 10
+            },
+            "radius": 6,
+            "thickness": 2,
+            "facing": {
+              "x": 0,
+              "y": 1
+            },
+            "gap": 3
+          }
+        ],
+        "scatter": {
+          "count": 60,
+          "big_chance": 0.25
+        }
+      },
+      "enemies": {
+        "count": 30,
+        "kinds": [
+          {
+            "enemy": "biter",
+            "weight": 5
+          },
+          {
+            "enemy": "brute",
+            "weight": 1
+          },
+          {
+            "enemy": "spitter",
+            "weight": 3
+          }
+        ],
+        "packs": 4,
+        "pack_size_min": 3,
+        "pack_size_max": 4,
+        "pack_kinds": [
+          "biter",
+          "spitter"
+        ],
+        "keep_away": 4.5,
+        "sight_multiplier": 0.7,
+        "speed_multiplier": 0.8
+      },
+      "gathering": {
+        "count": 20,
+        "spacing": 4,
+        "loot": "spot"
+      },
+      "drops": {
+        "bundle_chance": 0.06,
+        "bundle": "bundle",
+        "item_chance": 0.35,
+        "item": "drop"
+      }
+    }
+  ]
+}

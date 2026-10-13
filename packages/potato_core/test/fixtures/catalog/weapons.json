@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "weapons": [
+    {
+      "id": "rapid",
+      "range": 2.4,
+      "interval": 0.16,
+      "damage": 5,
+      "bullet_speed": 9,
+      "spread_degrees": 8
+    },
+    {
+      "id": "spread",
+      "range": 1.8,
+      "interval": 0.8,
+      "damage": 6,
+      "bullet_speed": 8,
+      "pellets": 6,
+      "spread_degrees": 40
+    },
+    {
+      "id": "charge",
+      "range": 3.8,
+      "interval": 0.9,
+      "damage": 60,
+      "bullet_speed": 20,
+      "aim_seconds": 0.7
+    }
+  ]
+}

@@ -1,6 +1,7 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
+import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 
 part 'rules_data.freezed.dart';
@@ -13,6 +14,7 @@ abstract class RulesData with _$RulesData {
     required FarmRulesData farm,
     required PotatoRulesData potatoes,
     required NewFarmData newFarm,
+    required RaidRulesData raid,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>

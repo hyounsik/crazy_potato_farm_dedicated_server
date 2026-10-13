@@ -21,6 +21,10 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) =>
           'new_farm',
           (v) => NewFarmData.fromJson(v as Map<String, dynamic>),
         ),
+        raid: $checkedConvert(
+          'raid',
+          (v) => RaidRulesData.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'newFarm': 'new_farm'});
@@ -30,6 +34,7 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'farm': instance.farm.toJson(),
       'potatoes': instance.potatoes.toJson(),
       'new_farm': instance.newFarm.toJson(),
+      'raid': instance.raid.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>

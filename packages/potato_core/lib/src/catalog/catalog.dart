@@ -1,7 +1,10 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
+import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
+import 'package:potato_core/src/map/map_recipe.dart';
 
 /// Read-only game data: numbers and content definitions loaded at startup.
 ///
@@ -13,21 +16,47 @@ final class Catalog {
   Catalog._({
     required this.rules,
     required Map<PotatoType, PotatoTypeData> potatoTypes,
-  }) : _potatoTypes = Map.unmodifiable(potatoTypes);
+    required Map<String, ItemData> items,
+    required Map<String, LootTableData> lootTables,
+    required Map<String, WeaponData> weapons,
+    required Map<String, EnemyData> enemies,
+    required Map<String, ZoneData> zones,
+  }) : _potatoTypes = Map.unmodifiable(potatoTypes),
+       items = Map.unmodifiable(items),
+       lootTables = Map.unmodifiable(lootTables),
+       weapons = Map.unmodifiable(weapons),
+       enemies = Map.unmodifiable(enemies),
+       zones = Map.unmodifiable(zones);
 
   /// The format version each data file must declare in its `version` field.
   ///
   /// Data ships with the app, so files are not migrated: a file with another
   /// version is an error.
-  static const Map<String, int> fileVersions = {'rules': 1, 'potato_types': 1};
+  static const Map<String, int> fileVersions = {
+    'rules': 2,
+    'potato_types': 1,
+    'items': 1,
+    'loot_tables': 1,
+    'weapons': 1,
+    'enemies': 1,
+    'zones': 1,
+  };
 
   final RulesData rules;
   final Map<PotatoType, PotatoTypeData> _potatoTypes;
+  final Map<String, ItemData> items;
+  final Map<String, LootTableData> lootTables;
+  final Map<String, WeaponData> weapons;
+  final Map<String, EnemyData> enemies;
+  final Map<String, ZoneData> zones;
 
   PotatoTypeData potatoType(PotatoType type) => _potatoTypes[type]!;
 
+  /// How many of [item] fit in one bag slot.
+  int stackOf(String item) => items[item]!.stack;
+
   /// Builds a catalog from decoded data files keyed by file name without the
-  /// extension (`rules`, `potato_types`).
+  /// extension (`rules`, `potato_types`, ...).
   ///
   /// Returns every problem found rather than stopping at the first one; the
   /// catalog is null unless the list is empty.
@@ -60,11 +89,78 @@ final class Catalog {
       return byType;
     });
 
-    if (issues.isNotEmpty || rules == null || potatoTypes == null) {
+    final items = _readEntries(
+      files,
+      'items',
+      issues,
+      ItemData.fromJson,
+      (i) => i.id,
+      _checkItem,
+    );
+    final lootTables = _readEntries(
+      files,
+      'loot_tables',
+      issues,
+      LootTableData.fromJson,
+      (t) => t.id,
+      _checkLootTable,
+    );
+    final weapons = _readEntries(
+      files,
+      'weapons',
+      issues,
+      WeaponData.fromJson,
+      (w) => w.id,
+      _checkWeapon,
+    );
+    final enemies = _readEntries(
+      files,
+      'enemies',
+      issues,
+      EnemyData.fromJson,
+      (e) => e.id,
+      _checkEnemy,
+    );
+    final zones = _readEntries(
+      files,
+      'zones',
+      issues,
+      ZoneData.fromJson,
+      (z) => z.id,
+      _checkZone,
+    );
+
+    if (rules == null ||
+        potatoTypes == null ||
+        items == null ||
+        lootTables == null ||
+        weapons == null ||
+        enemies == null ||
+        zones == null) {
+      return CatalogLoadResult._(null, List.unmodifiable(issues));
+    }
+    _checkReferences(
+      issues,
+      rules: rules,
+      items: items,
+      lootTables: lootTables,
+      weapons: weapons,
+      enemies: enemies,
+      zones: zones,
+    );
+    if (issues.isNotEmpty) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
     }
     return CatalogLoadResult._(
-      Catalog._(rules: rules, potatoTypes: potatoTypes),
+      Catalog._(
+        rules: rules,
+        potatoTypes: potatoTypes,
+        items: items,
+        lootTables: lootTables,
+        weapons: weapons,
+        enemies: enemies,
+        zones: zones,
+      ),
       const [],
     );
   }
@@ -108,6 +204,56 @@ final class Catalog {
     for (final (index, stack) in newFarm.seeds.indexed) {
       check.positive('new_farm.seeds[$index].count', stack.count);
     }
+
+    final raid = rules.raid;
+    check.positive('raid.step_millis', raid.stepMillis);
+    check.positive('raid.bag_slots', raid.bagSlots);
+    check.positiveNumber('raid.pickup_radius', raid.pickupRadius);
+    check.atLeastNumber('raid.enemy_alert_seconds', raid.enemyAlertSeconds, 0);
+    final player = raid.player;
+    for (final (name, value) in [
+      ('speed', player.speed),
+      ('radius', player.radius),
+      ('max_hp', player.maxHp),
+      ('sight', player.sight),
+      ('dash_distance', player.dashDistance),
+      ('dash_seconds', player.dashSeconds),
+    ]) {
+      check.positiveNumber('raid.player.$name', value);
+    }
+    for (final (name, value) in [
+      ('regen_delay_seconds', player.regenDelaySeconds),
+      ('regen_per_second', player.regenPerSecond),
+      ('dash_cooldown_seconds', player.dashCooldownSeconds),
+    ]) {
+      check.atLeastNumber('raid.player.$name', value, 0);
+    }
+    final food = raid.food;
+    check.atLeastNumber('raid.food.per_second', food.perSecond, 0);
+    check.atLeastNumber(
+      'raid.food.regen_extra_per_second',
+      food.regenExtraPerSecond,
+      0,
+    );
+    check.probability(
+      'raid.food.hungry_speed_multiplier',
+      food.hungrySpeedMultiplier,
+    );
+    check.positiveNumber(
+      'raid.food.hungry_return_seconds',
+      food.hungryReturnSeconds,
+    );
+    final companion = raid.companion;
+    check.positiveNumber('raid.companion.max_hp', companion.maxHp);
+    check.positiveNumber('raid.companion.radius', companion.radius);
+    check.positiveNumber(
+      'raid.companion.speed_multiplier',
+      companion.speedMultiplier,
+    );
+    check.positiveNumber(
+      'raid.companion.catch_up_distance',
+      companion.catchUpDistance,
+    );
   }
 
   static void _checkPotatoType(
@@ -137,6 +283,208 @@ final class Catalog {
       }
     }
   }
+
+  static void _checkItem(_FileCheck check, String path, ItemData item) {
+    check.positive('$path.stack', item.stack);
+    final isSeed = item.kind == ItemKind.seed;
+    if (isSeed && item.seed == null) {
+      check.issue('$path.seed', 'seed items need a seed');
+    } else if (!isSeed && item.seed != null) {
+      check.issue('$path.seed', 'only seed items have a seed');
+    }
+  }
+
+  static void _checkLootTable(
+    _FileCheck check,
+    String path,
+    LootTableData table,
+  ) {
+    check.atLeast('$path.rolls_min', table.rollsMin, 0);
+    if (table.rollsMax < table.rollsMin) {
+      check.issue('$path.rolls_max', 'must be at least rolls_min');
+    }
+    if (table.entries.isEmpty) {
+      check.issue('$path.entries', 'must not be empty');
+    }
+    for (final (index, entry) in table.entries.indexed) {
+      final at = '$path.entries[$index]';
+      check.positive('$at.weight', entry.weight);
+      check.positive('$at.min', entry.min);
+      if (entry.max < entry.min) check.issue('$at.max', 'must be at least min');
+    }
+  }
+
+  static void _checkWeapon(_FileCheck check, String path, WeaponData weapon) {
+    check.positiveNumber('$path.range', weapon.range);
+    check.positiveNumber('$path.interval', weapon.interval);
+    check.positiveNumber('$path.damage', weapon.damage);
+    check.positiveNumber('$path.bullet_speed', weapon.bulletSpeed);
+    check.positive('$path.pellets', weapon.pellets);
+    check.atLeastNumber('$path.spread_degrees', weapon.spreadDegrees, 0);
+    check.atLeastNumber('$path.aim_seconds', weapon.aimSeconds, 0);
+  }
+
+  static void _checkEnemy(_FileCheck check, String path, EnemyData enemy) {
+    check.positiveNumber('$path.max_hp', enemy.maxHp);
+    check.positiveNumber('$path.radius', enemy.radius);
+    check.positiveNumber('$path.damage', enemy.damage);
+    check.positiveNumber('$path.attack_interval', enemy.attackInterval);
+    if (enemy.attack == EnemyAttack.ranged) {
+      check.positiveNumber('$path.range', enemy.range);
+      check.positiveNumber('$path.bullet_speed', enemy.bulletSpeed);
+    }
+  }
+
+  static void _checkZone(_FileCheck check, String path, ZoneData zone) {
+    final map = zone.map;
+    check.positive('$path.map.size', map.size);
+    bool inside(int x, int y) =>
+        x >= 0 && y >= 0 && x < map.size && y < map.size;
+    if (!inside(map.entry.x, map.entry.y)) {
+      check.issue('$path.map.entry', 'must lie inside the map');
+    }
+    for (final (index, exit) in map.exits.indexed) {
+      if (!inside(exit.x, exit.y)) {
+        check.issue('$path.map.exits[$index]', 'must lie inside the map');
+      }
+    }
+    for (final (index, piece) in map.terrain.indexed) {
+      final at = '$path.map.terrain[$index]';
+      switch (piece) {
+        case BlobPiece(:final area):
+          check.positive('$at.area', area);
+        case WallPiece(:final thickness, :final gap):
+          check.positive('$at.thickness', thickness);
+          check.atLeast('$at.gap', gap, 0);
+        case RingPiece(:final radius, :final thickness, :final gap):
+          check.positive('$at.radius', radius);
+          check.positive('$at.thickness', thickness);
+          check.positive('$at.gap', gap);
+        case ChunkPiece():
+          break;
+      }
+    }
+    check.atLeast('$path.map.scatter.count', map.scatter.count, 0);
+    check.probability('$path.map.scatter.big_chance', map.scatter.bigChance);
+
+    final enemies = zone.enemies;
+    check.atLeast('$path.enemies.count', enemies.count, 0);
+    if (enemies.count > 0 && enemies.kinds.isEmpty) {
+      check.issue('$path.enemies.kinds', 'must not be empty');
+    }
+    for (final (index, kind) in enemies.kinds.indexed) {
+      check.positive('$path.enemies.kinds[$index].weight', kind.weight);
+    }
+    if (enemies.packs > 0) {
+      check.positive('$path.enemies.pack_size_min', enemies.packSizeMin);
+      if (enemies.packSizeMax < enemies.packSizeMin) {
+        check.issue('$path.enemies.pack_size_max', 'must be at least min');
+      }
+      if (enemies.packKinds.isEmpty) {
+        check.issue('$path.enemies.pack_kinds', 'must not be empty');
+      }
+    }
+    check.positiveNumber(
+      '$path.enemies.sight_multiplier',
+      enemies.sightMultiplier,
+    );
+    check.positiveNumber(
+      '$path.enemies.speed_multiplier',
+      enemies.speedMultiplier,
+    );
+    check.atLeast('$path.gathering.count', zone.gathering.count, 0);
+    check.probability('$path.drops.bundle_chance', zone.drops.bundleChance);
+    check.probability('$path.drops.item_chance', zone.drops.itemChance);
+  }
+
+  /// Ids one file uses must exist in another.
+  static void _checkReferences(
+    List<CatalogIssue> issues, {
+    required RulesData rules,
+    required Map<String, ItemData> items,
+    required Map<String, LootTableData> lootTables,
+    required Map<String, WeaponData> weapons,
+    required Map<String, EnemyData> enemies,
+    required Map<String, ZoneData> zones,
+  }) {
+    void missing(String file, String path, String what, String id) =>
+        issues.add(CatalogIssue(file, path, 'no $what "$id"'));
+
+    final food = rules.raid.food.item;
+    final foodItem = items[food];
+    if (foodItem == null) {
+      missing('rules', 'raid.food.item', 'item', food);
+    } else if (foodItem.kind != ItemKind.food) {
+      issues.add(
+        CatalogIssue('rules', 'raid.food.item', '"$food" is not a food item'),
+      );
+    }
+    final weapon = rules.raid.startWeapon;
+    if (!weapons.containsKey(weapon)) {
+      missing('rules', 'raid.start_weapon', 'weapon', weapon);
+    }
+    for (final table in lootTables.values) {
+      for (final (index, entry) in table.entries.indexed) {
+        if (!items.containsKey(entry.item)) {
+          missing(
+            'loot_tables',
+            '${table.id}.entries[$index].item',
+            'item',
+            entry.item,
+          );
+        }
+      }
+    }
+    for (final zone in zones.values) {
+      final at = zone.id;
+      for (final (index, kind) in zone.enemies.kinds.indexed) {
+        if (!enemies.containsKey(kind.enemy)) {
+          missing(
+            'zones',
+            '$at.enemies.kinds[$index].enemy',
+            'enemy',
+            kind.enemy,
+          );
+        }
+      }
+      for (final (index, kind) in zone.enemies.packKinds.indexed) {
+        if (!enemies.containsKey(kind)) {
+          missing('zones', '$at.enemies.pack_kinds[$index]', 'enemy', kind);
+        }
+      }
+      for (final (path, table) in [
+        ('gathering.loot', zone.gathering.loot),
+        ('drops.bundle', zone.drops.bundle),
+        ('drops.item', zone.drops.item),
+      ]) {
+        if (!lootTables.containsKey(table)) {
+          missing('zones', '$at.$path', 'loot table', table);
+        }
+      }
+    }
+  }
+
+  /// Reads a list file whose entries have unique string ids.
+  static Map<String, T>? _readEntries<T>(
+    Map<String, Object?> files,
+    String file,
+    List<CatalogIssue> issues,
+    T Function(Map<String, dynamic> json) fromJson,
+    String Function(T entry) idOf,
+    void Function(_FileCheck check, String path, T entry) checkEntry,
+  ) => _readFile(files, file, issues, (check, json) {
+    final byId = <String, T>{};
+    for (final (index, raw) in check.list(json).indexed) {
+      final path = '$file[$index]';
+      final entry = check.parse(path, raw, fromJson);
+      if (entry == null) continue;
+      final id = idOf(entry);
+      if (byId.containsKey(id)) check.issue('$path.id', 'duplicate "$id"');
+      byId[id] = entry;
+      checkEntry(check, path, entry);
+    }
+    return byId;
+  });
 
   /// Checks the file exists and has the expected `version`, then reads it.
   static T? _readFile<T>(
@@ -202,6 +550,14 @@ final class _FileCheck {
   }
 
   void atLeast(String path, int value, int min) {
+    if (value < min) issue(path, 'must be at least $min, found $value');
+  }
+
+  void positiveNumber(String path, double value) {
+    if (value <= 0) issue(path, 'must be positive, found $value');
+  }
+
+  void atLeastNumber(String path, double value, double min) {
     if (value < min) issue(path, 'must be at least $min, found $value');
   }
 

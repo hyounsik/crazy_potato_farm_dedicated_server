@@ -1,0 +1,34 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only. Values are not the game's real numbers.",
+  "items": [
+    {
+      "id": "food",
+      "kind": "food",
+      "stack": 100
+    },
+    {
+      "id": "seed_food_normal",
+      "kind": "seed",
+      "stack": 1,
+      "seed": {
+        "type": "food",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "seed_food_rare",
+      "kind": "seed",
+      "stack": 1,
+      "seed": {
+        "type": "food",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "material",
+      "kind": "material",
+      "stack": 100
+    }
+  ]
+}

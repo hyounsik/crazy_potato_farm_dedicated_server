@@ -28,6 +28,14 @@ FarmCommand _$FarmCommandFromJson(
           return HarvestField.fromJson(
             json
           );
+                case 'depart':
+          return Depart.fromJson(
+            json
+          );
+                case 'returnHome':
+          return ReturnHome.fromJson(
+            json
+          );
         
           default:
             throw CheckedFromJsonException(
@@ -43,12 +51,7 @@ FarmCommand _$FarmCommandFromJson(
 /// @nodoc
 mixin _$FarmCommand {
 
- int get fieldId;
-/// Create a copy of FarmCommand
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$FarmCommandCopyWith<FarmCommand> get copyWith => _$FarmCommandCopyWithImpl<FarmCommand>(this as FarmCommand, _$identity);
+
 
   /// Serializes this FarmCommand to a JSON map.
   Map<String, dynamic> toJson();
@@ -56,55 +59,24 @@ $FarmCommandCopyWith<FarmCommand> get copyWith => _$FarmCommandCopyWithImpl<Farm
 
 @override
 bool operator ==(Object other) {
-  final _this = this as FarmCommand;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmCommand&&(identical(other.fieldId, _this.fieldId) || other.fieldId == _this.fieldId));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmCommand);
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
-int get hashCode {
-  final _this = this as FarmCommand;
-  return Object.hash(runtimeType,_this.fieldId);
-}
+int get hashCode => runtimeType.hashCode;
 
 @override
 String toString() {
-  final _this = this as FarmCommand;
-  return 'FarmCommand(fieldId: ${_this.fieldId})';
+    return 'FarmCommand()';
 }
 
 
 }
 
 /// @nodoc
-abstract mixin class $FarmCommandCopyWith<$Res>  {
-  factory $FarmCommandCopyWith(FarmCommand value, $Res Function(FarmCommand) _then) = _$FarmCommandCopyWithImpl;
-@useResult
-$Res call({
- int fieldId
-});
-
-
-
-
-}
-/// @nodoc
-class _$FarmCommandCopyWithImpl<$Res>
-    implements $FarmCommandCopyWith<$Res> {
-  _$FarmCommandCopyWithImpl(this._self, this._then);
-
-  final FarmCommand _self;
-  final $Res Function(FarmCommand) _then;
-
-/// Create a copy of FarmCommand
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? fieldId = null,}) {
-  return _then(_self.copyWith(
-fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
+class $FarmCommandCopyWith<$Res>  {
+$FarmCommandCopyWith(FarmCommand _, $Res Function(FarmCommand) __);
 }
 
 
@@ -122,13 +94,15 @@ extension FarmCommandPatterns on FarmCommand {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( Depart value)?  depart,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that);case HarvestPotato() when harvest != null:
 return harvest(_that);case HarvestField() when harvestField != null:
-return harvestField(_that);case _:
+return harvestField(_that);case Depart() when depart != null:
+return depart(_that);case ReturnHome() when returnHome != null:
+return returnHome(_that);case _:
   return orElse();
 
 }
@@ -146,13 +120,15 @@ return harvestField(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( Depart value)  depart,required TResult Function( ReturnHome value)  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that);case HarvestPotato():
 return harvest(_that);case HarvestField():
-return harvestField(_that);}
+return harvestField(_that);case Depart():
+return depart(_that);case ReturnHome():
+return returnHome(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -166,13 +142,15 @@ return harvestField(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( Depart value)?  depart,TResult? Function( ReturnHome value)?  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that);case HarvestPotato() when harvest != null:
 return harvest(_that);case HarvestField() when harvestField != null:
-return harvestField(_that);case _:
+return harvestField(_that);case Depart() when depart != null:
+return depart(_that);case ReturnHome() when returnHome != null:
+return returnHome(_that);case _:
   return null;
 
 }
@@ -189,12 +167,14 @@ return harvestField(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( int food,  List<int> potatoIds)?  depart,TResult Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)?  returnHome,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
 return harvest(_that.fieldId,_that.tile);case HarvestField() when harvestField != null:
-return harvestField(_that.fieldId);case _:
+return harvestField(_that.fieldId);case Depart() when depart != null:
+return depart(_that.food,_that.potatoIds);case ReturnHome() when returnHome != null:
+return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
   return orElse();
 
 }
@@ -212,12 +192,14 @@ return harvestField(_that.fieldId);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( int food,  List<int> potatoIds)  depart,required TResult Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato():
 return harvest(_that.fieldId,_that.tile);case HarvestField():
-return harvestField(_that.fieldId);}
+return harvestField(_that.fieldId);case Depart():
+return depart(_that.food,_that.potatoIds);case ReturnHome():
+return returnHome(_that.food,_that.seeds,_that.potatoIds);}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -231,12 +213,14 @@ return harvestField(_that.fieldId);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( int food,  List<int> potatoIds)?  depart,TResult? Function( int food,  List<SeedStackData> seeds,  List<int> potatoIds)?  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
 return harvest(_that.fieldId,_that.tile);case HarvestField() when harvestField != null:
-return harvestField(_that.fieldId);case _:
+return harvestField(_that.fieldId);case Depart() when depart != null:
+return depart(_that.food,_that.potatoIds);case ReturnHome() when returnHome != null:
+return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
   return null;
 
 }
@@ -251,7 +235,7 @@ class PlantSeed implements FarmCommand {
   const PlantSeed({required this.fieldId, required this.tile, required this.seed,  String? $type}): $type = $type ?? 'plant';
   factory PlantSeed.fromJson(Map<String, dynamic> json) => _$PlantSeedFromJson(json);
 
-@override final  int fieldId;
+ final  int fieldId;
  final  TilePos tile;
  final  Seed seed;
 
@@ -261,7 +245,7 @@ final String $type;
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $PlantSeedCopyWith<PlantSeed> get copyWith => _$PlantSeedCopyWithImpl<PlantSeed>(this, _$identity);
 
@@ -292,7 +276,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $PlantSeedCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
   factory $PlantSeedCopyWith(PlantSeed value, $Res Function(PlantSeed) _then) = _$PlantSeedCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  int fieldId, TilePos tile, Seed seed
 });
@@ -311,7 +295,7 @@ class _$PlantSeedCopyWithImpl<$Res>
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? tile = null,Object? seed = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? tile = null,Object? seed = null,}) {
   return _then(PlantSeed(
 fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
 as int,tile: null == tile ? _self.tile : tile // ignore: cast_nullable_to_non_nullable
@@ -348,7 +332,7 @@ class HarvestPotato implements FarmCommand {
   const HarvestPotato({required this.fieldId, required this.tile,  String? $type}): $type = $type ?? 'harvest';
   factory HarvestPotato.fromJson(Map<String, dynamic> json) => _$HarvestPotatoFromJson(json);
 
-@override final  int fieldId;
+ final  int fieldId;
  final  TilePos tile;
 
 @JsonKey(name: 'runtimeType')
@@ -357,7 +341,7 @@ final String $type;
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $HarvestPotatoCopyWith<HarvestPotato> get copyWith => _$HarvestPotatoCopyWithImpl<HarvestPotato>(this, _$identity);
 
@@ -388,7 +372,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $HarvestPotatoCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
   factory $HarvestPotatoCopyWith(HarvestPotato value, $Res Function(HarvestPotato) _then) = _$HarvestPotatoCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  int fieldId, TilePos tile
 });
@@ -407,7 +391,7 @@ class _$HarvestPotatoCopyWithImpl<$Res>
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? tile = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? fieldId = null,Object? tile = null,}) {
   return _then(HarvestPotato(
 fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
 as int,tile: null == tile ? _self.tile : tile // ignore: cast_nullable_to_non_nullable
@@ -434,7 +418,7 @@ class HarvestField implements FarmCommand {
   const HarvestField({required this.fieldId,  String? $type}): $type = $type ?? 'harvestField';
   factory HarvestField.fromJson(Map<String, dynamic> json) => _$HarvestFieldFromJson(json);
 
-@override final  int fieldId;
+ final  int fieldId;
 
 @JsonKey(name: 'runtimeType')
 final String $type;
@@ -442,7 +426,7 @@ final String $type;
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
+@JsonKey(includeFromJson: false, includeToJson: false)
 @pragma('vm:prefer-inline')
 $HarvestFieldCopyWith<HarvestField> get copyWith => _$HarvestFieldCopyWithImpl<HarvestField>(this, _$identity);
 
@@ -473,7 +457,7 @@ String toString() {
 /// @nodoc
 abstract mixin class $HarvestFieldCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
   factory $HarvestFieldCopyWith(HarvestField value, $Res Function(HarvestField) _then) = _$HarvestFieldCopyWithImpl;
-@override @useResult
+@useResult
 $Res call({
  int fieldId
 });
@@ -492,10 +476,184 @@ class _$HarvestFieldCopyWithImpl<$Res>
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? fieldId = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? fieldId = null,}) {
   return _then(HarvestField(
 fieldId: null == fieldId ? _self.fieldId : fieldId // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class Depart implements FarmCommand {
+  const Depart({required this.food,  List<int> potatoIds = const <int>[],  String? $type}): _potatoIds = potatoIds,$type = $type ?? 'depart';
+  factory Depart.fromJson(Map<String, dynamic> json) => _$DepartFromJson(json);
+
+ final  int food;
+ final  List<int> _potatoIds;
+@JsonKey() List<int> get potatoIds {
+  if (_potatoIds is EqualUnmodifiableListView) return _potatoIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_potatoIds);
+}
+
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DepartCopyWith<Depart> get copyWith => _$DepartCopyWithImpl<Depart>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$DepartToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is Depart&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.potatoIds, _potatoIds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,food,const DeepCollectionEquality().hash(_potatoIds));
+}
+
+@override
+String toString() {
+    return 'FarmCommand.depart(food: $food, potatoIds: $potatoIds)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DepartCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $DepartCopyWith(Depart value, $Res Function(Depart) _then) = _$DepartCopyWithImpl;
+@useResult
+$Res call({
+ int food, List<int> potatoIds
+});
+
+
+
+
+}
+/// @nodoc
+class _$DepartCopyWithImpl<$Res>
+    implements $DepartCopyWith<$Res> {
+  _$DepartCopyWithImpl(this._self, this._then);
+
+  final Depart _self;
+  final $Res Function(Depart) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? food = null,Object? potatoIds = null,}) {
+  return _then(Depart(
+food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
+as int,potatoIds: null == potatoIds ? _self._potatoIds : potatoIds // ignore: cast_nullable_to_non_nullable
+as List<int>,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class ReturnHome implements FarmCommand {
+  const ReturnHome({required this.food,  List<SeedStackData> seeds = const <SeedStackData>[],  List<int> potatoIds = const <int>[],  String? $type}): _seeds = seeds,_potatoIds = potatoIds,$type = $type ?? 'returnHome';
+  factory ReturnHome.fromJson(Map<String, dynamic> json) => _$ReturnHomeFromJson(json);
+
+ final  int food;
+ final  List<SeedStackData> _seeds;
+@JsonKey() List<SeedStackData> get seeds {
+  if (_seeds is EqualUnmodifiableListView) return _seeds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_seeds);
+}
+
+ final  List<int> _potatoIds;
+@JsonKey() List<int> get potatoIds {
+  if (_potatoIds is EqualUnmodifiableListView) return _potatoIds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_potatoIds);
+}
+
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ReturnHomeCopyWith<ReturnHome> get copyWith => _$ReturnHomeCopyWithImpl<ReturnHome>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ReturnHomeToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ReturnHome&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&const DeepCollectionEquality().equals(other.potatoIds, _potatoIds));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,food,const DeepCollectionEquality().hash(_seeds),const DeepCollectionEquality().hash(_potatoIds));
+}
+
+@override
+String toString() {
+    return 'FarmCommand.returnHome(food: $food, seeds: $seeds, potatoIds: $potatoIds)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ReturnHomeCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $ReturnHomeCopyWith(ReturnHome value, $Res Function(ReturnHome) _then) = _$ReturnHomeCopyWithImpl;
+@useResult
+$Res call({
+ int food, List<SeedStackData> seeds, List<int> potatoIds
+});
+
+
+
+
+}
+/// @nodoc
+class _$ReturnHomeCopyWithImpl<$Res>
+    implements $ReturnHomeCopyWith<$Res> {
+  _$ReturnHomeCopyWithImpl(this._self, this._then);
+
+  final ReturnHome _self;
+  final $Res Function(ReturnHome) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? food = null,Object? seeds = null,Object? potatoIds = null,}) {
+  return _then(ReturnHome(
+food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
+as int,seeds: null == seeds ? _self._seeds : seeds // ignore: cast_nullable_to_non_nullable
+as List<SeedStackData>,potatoIds: null == potatoIds ? _self._potatoIds : potatoIds // ignore: cast_nullable_to_non_nullable
+as List<int>,
   ));
 }
 

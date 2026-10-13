@@ -36,6 +36,17 @@ sealed class FarmEvent with _$FarmEvent {
   const factory FarmEvent.harvested({required int fieldId, required int food}) =
       FoodHarvested;
 
+  const factory FarmEvent.departed({
+    required int food,
+    required List<int> potatoIds,
+  }) = Departed;
+
+  const factory FarmEvent.returned({
+    required int food,
+    required int seeds,
+    required List<int> potatoIds,
+  }) = Returned;
+
   factory FarmEvent.fromJson(Map<String, dynamic> json) =>
       _$FarmEventFromJson(json);
 }

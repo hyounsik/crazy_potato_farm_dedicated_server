@@ -20,6 +20,7 @@ final class Potato {
     this.livedMillis = 0,
     this.productionMillis = 0,
     this.stored = 0,
+    this.away = false,
   });
 
   /// Unique within the farm, and never reused.
@@ -38,6 +39,10 @@ final class Potato {
 
   /// Baby potatoes made and waiting to be harvested.
   int stored;
+
+  /// Out exploring. Its tile stays taken, and the farm does not advance it:
+  /// the run looks after it until it comes home.
+  bool away;
 
   /// The seed this potato grew from, and the kind it leaves when it dies
   /// (before any grade drop).

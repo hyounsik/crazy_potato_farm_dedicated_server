@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -24,6 +25,21 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
+  /// Sets out exploring with [food] baby potatoes and the potatoes
+  /// [potatoIds] as companions. They leave the farm until [returnHome].
+  const factory FarmCommand.depart({
+    required int food,
+    @Default(<int>[]) List<int> potatoIds,
+  }) = Depart;
+
+  /// Comes back from exploring: [food] and [seeds] go into the farm, and
+  /// the companions [potatoIds] go back to their tiles.
+  const factory FarmCommand.returnHome({
+    required int food,
+    @Default(<SeedStackData>[]) List<SeedStackData> seeds,
+    @Default(<int>[]) List<int> potatoIds,
+  }) = ReturnHome;
+
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>
       _$FarmCommandFromJson(json);
 }
@@ -39,4 +55,11 @@ enum FarmRejection {
   typeLocked,
   noPotato,
   nothingToHarvest,
+
+  /// Taking more baby potatoes than the farm has.
+  notEnoughFood,
+
+  /// A companion that is missing, still growing, already out, or of a type
+  /// that never leaves the farm.
+  cannotGo,
 }

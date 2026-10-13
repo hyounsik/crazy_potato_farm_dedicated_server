@@ -624,7 +624,7 @@ $TileRectCopyWith<$Res> get rect {
 /// @nodoc
 mixin _$PotatoDocument {
 
- int get id; TilePos get tile; PotatoType get type; Grade get grade; int get grownMillis; int get livedMillis; int get productionMillis; int get stored;
+ int get id; TilePos get tile; PotatoType get type; Grade get grade; int get grownMillis; int get livedMillis; int get productionMillis; int get stored; bool get away;
 /// Create a copy of PotatoDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -638,20 +638,20 @@ $PotatoDocumentCopyWith<PotatoDocument> get copyWith => _$PotatoDocumentCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as PotatoDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.tile, _this.tile) || other.tile == _this.tile)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.grownMillis, _this.grownMillis) || other.grownMillis == _this.grownMillis)&&(identical(other.livedMillis, _this.livedMillis) || other.livedMillis == _this.livedMillis)&&(identical(other.productionMillis, _this.productionMillis) || other.productionMillis == _this.productionMillis)&&(identical(other.stored, _this.stored) || other.stored == _this.stored));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.tile, _this.tile) || other.tile == _this.tile)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.grownMillis, _this.grownMillis) || other.grownMillis == _this.grownMillis)&&(identical(other.livedMillis, _this.livedMillis) || other.livedMillis == _this.livedMillis)&&(identical(other.productionMillis, _this.productionMillis) || other.productionMillis == _this.productionMillis)&&(identical(other.stored, _this.stored) || other.stored == _this.stored)&&(identical(other.away, _this.away) || other.away == _this.away));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PotatoDocument;
-  return Object.hash(runtimeType,_this.id,_this.tile,_this.type,_this.grade,_this.grownMillis,_this.livedMillis,_this.productionMillis,_this.stored);
+  return Object.hash(runtimeType,_this.id,_this.tile,_this.type,_this.grade,_this.grownMillis,_this.livedMillis,_this.productionMillis,_this.stored,_this.away);
 }
 
 @override
 String toString() {
   final _this = this as PotatoDocument;
-  return 'PotatoDocument(id: ${_this.id}, tile: ${_this.tile}, type: ${_this.type}, grade: ${_this.grade}, grownMillis: ${_this.grownMillis}, livedMillis: ${_this.livedMillis}, productionMillis: ${_this.productionMillis}, stored: ${_this.stored})';
+  return 'PotatoDocument(id: ${_this.id}, tile: ${_this.tile}, type: ${_this.type}, grade: ${_this.grade}, grownMillis: ${_this.grownMillis}, livedMillis: ${_this.livedMillis}, productionMillis: ${_this.productionMillis}, stored: ${_this.stored}, away: ${_this.away})';
 }
 
 
@@ -662,7 +662,7 @@ abstract mixin class $PotatoDocumentCopyWith<$Res>  {
   factory $PotatoDocumentCopyWith(PotatoDocument value, $Res Function(PotatoDocument) _then) = _$PotatoDocumentCopyWithImpl;
 @useResult
 $Res call({
- int id, TilePos tile, PotatoType type, Grade grade, int grownMillis, int livedMillis, int productionMillis, int stored
+ int id, TilePos tile, PotatoType type, Grade grade, int grownMillis, int livedMillis, int productionMillis, int stored, bool away
 });
 
 
@@ -679,7 +679,7 @@ class _$PotatoDocumentCopyWithImpl<$Res>
 
 /// Create a copy of PotatoDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tile = null,Object? type = null,Object? grade = null,Object? grownMillis = null,Object? livedMillis = null,Object? productionMillis = null,Object? stored = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tile = null,Object? type = null,Object? grade = null,Object? grownMillis = null,Object? livedMillis = null,Object? productionMillis = null,Object? stored = null,Object? away = null,}) {
   return _then(PotatoDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,tile: null == tile ? _self.tile : tile // ignore: cast_nullable_to_non_nullable
@@ -689,7 +689,8 @@ as Grade,grownMillis: null == grownMillis ? _self.grownMillis : grownMillis // i
 as int,livedMillis: null == livedMillis ? _self.livedMillis : livedMillis // ignore: cast_nullable_to_non_nullable
 as int,productionMillis: null == productionMillis ? _self.productionMillis : productionMillis // ignore: cast_nullable_to_non_nullable
 as int,stored: null == stored ? _self.stored : stored // ignore: cast_nullable_to_non_nullable
-as int,
+as int,away: null == away ? _self.away : away // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 /// Create a copy of PotatoDocument
@@ -783,10 +784,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored,  bool away)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PotatoDocument() when $default != null:
-return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored);case _:
+return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored,_that.away);case _:
   return orElse();
 
 }
@@ -804,10 +805,10 @@ return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored,  bool away)  $default,) {final _that = this;
 switch (_that) {
 case _PotatoDocument():
-return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored);case _:
+return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored,_that.away);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -824,10 +825,10 @@ return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  TilePos tile,  PotatoType type,  Grade grade,  int grownMillis,  int livedMillis,  int productionMillis,  int stored,  bool away)?  $default,) {final _that = this;
 switch (_that) {
 case _PotatoDocument() when $default != null:
-return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored);case _:
+return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_that.livedMillis,_that.productionMillis,_that.stored,_that.away);case _:
   return null;
 
 }
@@ -839,7 +840,7 @@ return $default(_that.id,_that.tile,_that.type,_that.grade,_that.grownMillis,_th
 @JsonSerializable()
 
 class _PotatoDocument extends PotatoDocument {
-  const _PotatoDocument({required this.id, required this.tile, required this.type, required this.grade, required this.grownMillis, required this.livedMillis, required this.productionMillis, required this.stored}): super._();
+  const _PotatoDocument({required this.id, required this.tile, required this.type, required this.grade, required this.grownMillis, required this.livedMillis, required this.productionMillis, required this.stored, required this.away}): super._();
   factory _PotatoDocument.fromJson(Map<String, dynamic> json) => _$PotatoDocumentFromJson(json);
 
 @override final  int id;
@@ -850,6 +851,7 @@ class _PotatoDocument extends PotatoDocument {
 @override final  int livedMillis;
 @override final  int productionMillis;
 @override final  int stored;
+@override final  bool away;
 
 /// Create a copy of PotatoDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -864,18 +866,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.tile, tile) || other.tile == tile)&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.grownMillis, grownMillis) || other.grownMillis == grownMillis)&&(identical(other.livedMillis, livedMillis) || other.livedMillis == livedMillis)&&(identical(other.productionMillis, productionMillis) || other.productionMillis == productionMillis)&&(identical(other.stored, stored) || other.stored == stored));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.tile, tile) || other.tile == tile)&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.grownMillis, grownMillis) || other.grownMillis == grownMillis)&&(identical(other.livedMillis, livedMillis) || other.livedMillis == livedMillis)&&(identical(other.productionMillis, productionMillis) || other.productionMillis == productionMillis)&&(identical(other.stored, stored) || other.stored == stored)&&(identical(other.away, away) || other.away == away));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,tile,type,grade,grownMillis,livedMillis,productionMillis,stored);
+    return Object.hash(runtimeType,id,tile,type,grade,grownMillis,livedMillis,productionMillis,stored,away);
 }
 
 @override
 String toString() {
-    return 'PotatoDocument(id: $id, tile: $tile, type: $type, grade: $grade, grownMillis: $grownMillis, livedMillis: $livedMillis, productionMillis: $productionMillis, stored: $stored)';
+    return 'PotatoDocument(id: $id, tile: $tile, type: $type, grade: $grade, grownMillis: $grownMillis, livedMillis: $livedMillis, productionMillis: $productionMillis, stored: $stored, away: $away)';
 }
 
 
@@ -886,7 +888,7 @@ abstract mixin class _$PotatoDocumentCopyWith<$Res> implements $PotatoDocumentCo
   factory _$PotatoDocumentCopyWith(_PotatoDocument value, $Res Function(_PotatoDocument) _then) = __$PotatoDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- int id, TilePos tile, PotatoType type, Grade grade, int grownMillis, int livedMillis, int productionMillis, int stored
+ int id, TilePos tile, PotatoType type, Grade grade, int grownMillis, int livedMillis, int productionMillis, int stored, bool away
 });
 
 
@@ -903,7 +905,7 @@ class __$PotatoDocumentCopyWithImpl<$Res>
 
 /// Create a copy of PotatoDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tile = null,Object? type = null,Object? grade = null,Object? grownMillis = null,Object? livedMillis = null,Object? productionMillis = null,Object? stored = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tile = null,Object? type = null,Object? grade = null,Object? grownMillis = null,Object? livedMillis = null,Object? productionMillis = null,Object? stored = null,Object? away = null,}) {
   return _then(_PotatoDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,tile: null == tile ? _self.tile : tile // ignore: cast_nullable_to_non_nullable
@@ -913,7 +915,8 @@ as Grade,grownMillis: null == grownMillis ? _self.grownMillis : grownMillis // i
 as int,livedMillis: null == livedMillis ? _self.livedMillis : livedMillis // ignore: cast_nullable_to_non_nullable
 as int,productionMillis: null == productionMillis ? _self.productionMillis : productionMillis // ignore: cast_nullable_to_non_nullable
 as int,stored: null == stored ? _self.stored : stored // ignore: cast_nullable_to_non_nullable
-as int,
+as int,away: null == away ? _self.away : away // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

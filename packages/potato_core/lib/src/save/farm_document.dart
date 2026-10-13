@@ -123,6 +123,7 @@ abstract class PotatoDocument with _$PotatoDocument {
     required int livedMillis,
     required int productionMillis,
     required int stored,
+    required bool away,
   }) = _PotatoDocument;
 
   const PotatoDocument._();
@@ -139,6 +140,7 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: potato.livedMillis,
     productionMillis: potato.productionMillis,
     stored: potato.stored,
+    away: potato.away,
   );
 
   Potato toPotato() => Potato(
@@ -149,5 +151,6 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: livedMillis,
     productionMillis: productionMillis,
     stored: stored,
+    away: away,
   );
 }

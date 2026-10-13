@@ -1,6 +1,8 @@
 import 'dart:collection';
 
 import 'package:potato_core/src/catalog/catalog.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
+import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/farm_command.dart';
@@ -90,7 +92,31 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
+    Depart(:final food, :final potatoIds) => _depart(food, potatoIds),
+    ReturnHome(:final food, :final seeds, :final potatoIds) => _returnHome(
+      food,
+      seeds,
+      potatoIds,
+    ),
   };
+
+  /// The potato with [id], wherever it is planted.
+  ({FarmField field, TilePos tile, Potato potato})? potatoById(int id) {
+    for (final field in _fields.values) {
+      for (final MapEntry(key: tile, value: potato)
+          in field._potatoes.entries) {
+        if (potato.id == id) return (field: field, tile: tile, potato: potato);
+      }
+    }
+    return null;
+  }
+
+  /// Potatoes out exploring.
+  Iterable<Potato> get awayPotatoes => [
+    for (final field in _fields.values)
+      for (final potato in field._potatoes.values)
+        if (potato.away) potato,
+  ];
 
   /// Advances the farm by one fixed step (`rules.farm.step_millis`).
   void step() {
@@ -100,6 +126,7 @@ final class FarmSimulation {
       List<TilePos>? dead;
       for (final MapEntry(key: tile, value: potato)
           in field._potatoes.entries) {
+        if (potato.away) continue;
         final change = potato.live(millis, catalog.potatoType(potato.type));
         if (change.grew) {
           _events.add(
@@ -166,7 +193,7 @@ final class FarmSimulation {
     final field = _fields[fieldId];
     if (field == null) return FarmRejection.noSuchField;
     final potato = field._potatoes[tile];
-    if (potato == null) return FarmRejection.noPotato;
+    if (potato == null || potato.away) return FarmRejection.noPotato;
     return _collect(field, [potato]);
   }
 
@@ -179,11 +206,58 @@ final class FarmSimulation {
   FarmRejection? _collect(FarmField field, Iterable<Potato> potatoes) {
     var taken = 0;
     for (final potato in potatoes) {
-      taken += potato.takeStored();
+      if (!potato.away) taken += potato.takeStored();
     }
     if (taken == 0) return FarmRejection.nothingToHarvest;
     food += taken;
     _events.add(FarmEvent.harvested(fieldId: field.id, food: taken));
+    return null;
+  }
+
+  FarmRejection? _depart(int food, List<int> potatoIds) {
+    if (food < 0 || food > this.food) return FarmRejection.notEnoughFood;
+    final going = <Potato>[];
+    for (final id in potatoIds.toSet()) {
+      final potato = potatoById(id)?.potato;
+      if (potato == null ||
+          potato.away ||
+          potato.type == PotatoType.breeding ||
+          !potato.isGrown(catalog.potatoType(potato.type))) {
+        return FarmRejection.cannotGo;
+      }
+      going.add(potato);
+    }
+    this.food -= food;
+    for (final potato in going) {
+      potato.away = true;
+    }
+    _events.add(
+      FarmEvent.departed(food: food, potatoIds: [for (final p in going) p.id]),
+    );
+    return null;
+  }
+
+  FarmRejection? _returnHome(
+    int food,
+    List<SeedStackData> seeds,
+    List<int> potatoIds,
+  ) {
+    this.food += food;
+    var seedCount = 0;
+    for (final stack in seeds) {
+      _seeds.add(Seed(type: stack.type, grade: stack.grade), stack.count);
+      seedCount += stack.count;
+    }
+    final back = <int>[];
+    for (final id in potatoIds) {
+      final potato = potatoById(id)?.potato;
+      if (potato == null || !potato.away) continue;
+      potato.away = false;
+      back.add(id);
+    }
+    _events.add(
+      FarmEvent.returned(food: food, seeds: seedCount, potatoIds: back),
+    );
     return null;
   }
 

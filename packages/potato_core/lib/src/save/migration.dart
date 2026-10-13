@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 1;
+const int farmFormatVersion = 2;
 
 /// Upgrades from version `n` to `n + 1`, at index `n - 1`.
 ///
@@ -7,7 +7,17 @@ const int farmFormatVersion = 1;
 /// rewrites the old JSON map, and keep every old step. Steps work on plain
 /// maps because the old shape no longer has a model class.
 final List<Map<String, dynamic> Function(Map<String, dynamic> json)>
-_farmMigrations = [];
+_farmMigrations = [
+  // 1 → 2: potatoes can be out exploring.
+  (json) {
+    for (final field in json['fields'] as List<Object?>) {
+      for (final potato in (field! as Map)['potatoes'] as List<Object?>) {
+        (potato! as Map)['away'] = false;
+      }
+    }
+    return json;
+  },
+];
 
 /// Brings a decoded farm document up to [farmFormatVersion].
 ///

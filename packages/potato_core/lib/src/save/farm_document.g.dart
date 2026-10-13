@@ -102,6 +102,7 @@ _PotatoDocument _$PotatoDocumentFromJson(
         (v) => (v as num).toInt(),
       ),
       stored: $checkedConvert('stored', (v) => (v as num).toInt()),
+      away: $checkedConvert('away', (v) => v as bool),
     );
     return val;
   },
@@ -122,6 +123,7 @@ Map<String, dynamic> _$PotatoDocumentToJson(_PotatoDocument instance) =>
       'lived_millis': instance.livedMillis,
       'production_millis': instance.productionMillis,
       'stored': instance.stored,
+      'away': instance.away,
     };
 
 const _$PotatoTypeEnumMap = {

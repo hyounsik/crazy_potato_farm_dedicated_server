@@ -71,6 +71,23 @@ void main() {
   });
 
   group('decode', () {
+    test('upgrades a version 1 document: nobody is away', () {
+      final json = FarmDocument.of(busyFarm()).toJson();
+      final v1 = jsonDecode(jsonEncode(json)) as Map<String, dynamic>
+        ..['format_version'] = 1;
+      for (final field in v1['fields'] as List) {
+        for (final potato in (field as Map)['potatoes'] as List) {
+          (potato as Map).remove('away');
+        }
+      }
+      final upgraded = FarmDocument.decode(v1);
+      expect(upgraded.formatVersion, farmFormatVersion);
+      expect(
+        upgraded.fields.expand((f) => f.potatoes).every((p) => !p.away),
+        isTrue,
+      );
+    });
+
     test('rejects a document from a newer app', () {
       final json = FarmDocument.of(busyFarm()).toJson()
         ..['format_version'] = farmFormatVersion + 1;

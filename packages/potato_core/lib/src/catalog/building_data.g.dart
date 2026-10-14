@@ -18,6 +18,11 @@ _BuildingData _$BuildingDataFromJson(Map<String, dynamic> json) =>
         ),
         buildable: $checkedConvert('buildable', (v) => v as bool? ?? true),
         removable: $checkedConvert('removable', (v) => v as bool? ?? true),
+        totem: $checkedConvert(
+          'totem',
+          (v) =>
+              v == null ? null : TotemData.fromJson(v as Map<String, dynamic>),
+        ),
         levels: $checkedConvert(
           'levels',
           (v) => (v as List<dynamic>)
@@ -36,6 +41,7 @@ Map<String, dynamic> _$BuildingDataToJson(_BuildingData instance) =>
       'houses': _$PotatoTypeEnumMap[instance.houses],
       'buildable': instance.buildable,
       'removable': instance.removable,
+      'totem': instance.totem?.toJson(),
       'levels': instance.levels.map((e) => e.toJson()).toList(),
     };
 
@@ -61,4 +67,31 @@ Map<String, dynamic> _$BuildingLevelDataToJson(_BuildingLevelData instance) =>
       'cost': instance.cost,
       'capacity': instance.capacity,
       'graves': instance.graves,
+    };
+
+_TotemData _$TotemDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_TotemData', json, ($checkedConvert) {
+      final val = _TotemData(
+        stats: $checkedConvert(
+          'stats',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+        percent: $checkedConvert('percent', (v) => (v as num).toDouble()),
+        seconds: $checkedConvert('seconds', (v) => (v as num).toInt()),
+        cooldownSeconds: $checkedConvert(
+          'cooldown_seconds',
+          (v) => (v as num).toInt(),
+        ),
+        food: $checkedConvert('food', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'cooldownSeconds': 'cooldown_seconds'});
+
+Map<String, dynamic> _$TotemDataToJson(_TotemData instance) =>
+    <String, dynamic>{
+      'stats': instance.stats,
+      'percent': instance.percent,
+      'seconds': instance.seconds,
+      'cooldown_seconds': instance.cooldownSeconds,
+      'food': instance.food,
     };

@@ -72,6 +72,44 @@
           "graves": 5
         }
       ]
+    },
+    {
+      "id": "totem_growth",
+      "width": 1,
+      "height": 1,
+      "levels": [
+        {
+          "cost": 40
+        }
+      ],
+      "totem": {
+        "stats": [
+          "potato.growth_speed"
+        ],
+        "percent": 0.5,
+        "seconds": 60,
+        "cooldown_seconds": 120,
+        "food": 10
+      }
+    },
+    {
+      "id": "totem_harvest",
+      "width": 1,
+      "height": 1,
+      "levels": [
+        {
+          "cost": 40
+        }
+      ],
+      "totem": {
+        "stats": [
+          "farm.harvest_bonus"
+        ],
+        "percent": 1.0,
+        "seconds": 60,
+        "cooldown_seconds": 120,
+        "food": 10
+      }
     }
   ]
 }

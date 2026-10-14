@@ -112,6 +112,11 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <MailDocument>[],
       ),
+      weaponLevel: $checkedConvert(
+        'weapon_level',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      totemLimit: $checkedConvert('totem_limit', (v) => (v as num?)?.toInt()),
       totals: $checkedConvert(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
@@ -126,6 +131,8 @@ _FarmDocument _$FarmDocumentFromJson(
     'openBlocks': 'open_blocks',
     'pouchSlots': 'pouch_slots',
     'gearSlots': 'gear_slots',
+    'weaponLevel': 'weapon_level',
+    'totemLimit': 'totem_limit',
   },
 );
 
@@ -149,6 +156,8 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'overflow': instance.overflow.map((e) => e.toJson()).toList(),
       'materials': instance.materials,
       'mail': instance.mail.map((e) => e.toJson()).toList(),
+      'weapon_level': instance.weaponLevel,
+      'totem_limit': instance.totemLimit,
       'totals': instance.totals,
     };
 
@@ -218,18 +227,34 @@ Map<String, dynamic> _$PestDocumentToJson(_PestDocument instance) =>
 const _$PestKindEnumMap = {PestKind.bug: 'bug', PestKind.blight: 'blight'};
 
 _BuildingDocument _$BuildingDocumentFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_BuildingDocument', json, ($checkedConvert) {
-      final val = _BuildingDocument(
-        id: $checkedConvert('id', (v) => (v as num).toInt()),
-        kind: $checkedConvert('kind', (v) => v as String),
-        origin: $checkedConvert(
-          'origin',
-          (v) => TilePos.fromJson(v as Map<String, dynamic>),
-        ),
-        level: $checkedConvert('level', (v) => (v as num).toInt()),
-      );
-      return val;
-    });
+    $checkedCreate(
+      '_BuildingDocument',
+      json,
+      ($checkedConvert) {
+        final val = _BuildingDocument(
+          id: $checkedConvert('id', (v) => (v as num).toInt()),
+          kind: $checkedConvert('kind', (v) => v as String),
+          origin: $checkedConvert(
+            'origin',
+            (v) => TilePos.fromJson(v as Map<String, dynamic>),
+          ),
+          level: $checkedConvert('level', (v) => (v as num).toInt()),
+          litUntilTick: $checkedConvert(
+            'lit_until_tick',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
+          readyTick: $checkedConvert(
+            'ready_tick',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'litUntilTick': 'lit_until_tick',
+        'readyTick': 'ready_tick',
+      },
+    );
 
 Map<String, dynamic> _$BuildingDocumentToJson(_BuildingDocument instance) =>
     <String, dynamic>{
@@ -237,6 +262,8 @@ Map<String, dynamic> _$BuildingDocumentToJson(_BuildingDocument instance) =>
       'kind': instance.kind,
       'origin': instance.origin.toJson(),
       'level': instance.level,
+      'lit_until_tick': instance.litUntilTick,
+      'ready_tick': instance.readyTick,
     };
 
 _GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>

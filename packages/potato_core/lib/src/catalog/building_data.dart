@@ -24,6 +24,9 @@ abstract class BuildingData with _$BuildingData {
     /// Whether it can be demolished. The house cannot.
     @Default(true) bool removable,
 
+    /// What it does when lit, for totems.
+    TotemData? totem,
+
     /// Level 1 first. Level 1's cost is the cost to build; each later
     /// level's cost is the cost to upgrade to it.
     required List<BuildingLevelData> levels,
@@ -48,4 +51,26 @@ abstract class BuildingLevelData with _$BuildingLevelData {
 
   factory BuildingLevelData.fromJson(Map<String, dynamic> json) =>
       _$BuildingLevelDataFromJson(json);
+}
+
+/// A totem's support while lit: farm stats raised (or lowered) by
+/// [percent], for [seconds], then a wait of [cooldownSeconds] before it can
+/// be lit again. Values are placeholders until the balance phase.
+@freezed
+abstract class TotemData with _$TotemData {
+  const factory TotemData({
+    /// Farm stat ids (see `FarmStat`).
+    required List<String> stats,
+
+    /// +0.2 raises them by 20%, -0.3 lowers them by 30%.
+    required double percent,
+    required int seconds,
+    required int cooldownSeconds,
+
+    /// Baby potatoes it takes to light it.
+    required int food,
+  }) = _TotemData;
+
+  factory TotemData.fromJson(Map<String, dynamic> json) =>
+      _$TotemDataFromJson(json);
 }

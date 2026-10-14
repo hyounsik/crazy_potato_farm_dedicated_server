@@ -53,6 +53,8 @@ abstract class FarmDocument with _$FarmDocument {
     @Default(<OverflowDocument>[]) List<OverflowDocument> overflow,
     @Default(<String, int>{}) Map<String, int> materials,
     @Default(<MailDocument>[]) List<MailDocument> mail,
+    @Default(0) int weaponLevel,
+    int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
 
@@ -111,6 +113,8 @@ abstract class FarmDocument with _$FarmDocument {
           kind: building.kind,
           origin: building.origin,
           level: building.level,
+          litUntilTick: building.litUntilTick,
+          readyTick: building.readyTick,
         ),
     ],
     guards: [
@@ -146,6 +150,8 @@ abstract class FarmDocument with _$FarmDocument {
     ],
     materials: Map.of(farm.materials),
     mail: [for (final mail in farm.mail) MailDocument.of(mail)],
+    weaponLevel: farm.weaponLevel,
+    totemLimit: farm.totemLimit,
     totals: farm.totals.toJson(),
   );
 
@@ -192,6 +198,8 @@ abstract class FarmDocument with _$FarmDocument {
                 (throw FormatException('Unknown building "${building.kind}"')),
             origin: building.origin,
             level: building.level,
+            litUntilTick: building.litUntilTick,
+            readyTick: building.readyTick,
           ),
       ],
       guards: [
@@ -227,6 +235,8 @@ abstract class FarmDocument with _$FarmDocument {
       ],
       materials: materials,
       mail: [for (final mail in this.mail) mail.toMail()],
+      weaponLevel: weaponLevel,
+      totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),
     );
     return farm..addMissingStartBuildings();
@@ -265,6 +275,10 @@ abstract class BuildingDocument with _$BuildingDocument {
     required String kind,
     required TilePos origin,
     required int level,
+
+    /// For totems: when its light goes out and when it can be lit again.
+    @Default(0) int litUntilTick,
+    @Default(0) int readyTick,
   }) = _BuildingDocument;
 
   factory BuildingDocument.fromJson(Map<String, dynamic> json) =>

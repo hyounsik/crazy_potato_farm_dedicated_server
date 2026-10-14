@@ -66,6 +66,17 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.mailArrived({required int mailId}) = MailArrived;
 
+  /// The workbench tried to raise the weapon to [level]; [worked] says
+  /// whether it took.
+  const factory FarmEvent.weaponEnhanced({
+    required int level,
+    required bool worked,
+  }) = WeaponEnhanced;
+
+  const factory FarmEvent.totemLit({required int buildingId}) = TotemLit;
+
+  const factory FarmEvent.totemOut({required int buildingId}) = TotemOut;
+
   const factory FarmEvent.blockOpened({
     required TilePos block,
     required int food,

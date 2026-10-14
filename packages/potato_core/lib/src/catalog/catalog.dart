@@ -393,6 +393,17 @@ final class Catalog {
       }
     }
     check.positive('mail.keep', rules.mail.keep);
+    final bench = rules.workbench;
+    check.atLeast('workbench.max_level', bench.maxLevel, 0);
+    check.atLeast('workbench.food', bench.food, 0);
+    check.atLeast('workbench.materials', bench.materials, 0);
+    check.probability('workbench.chance', bench.chance);
+    check.probability('workbench.min_chance', bench.minChance);
+    check.atLeastNumber('workbench.damage_percent', bench.damagePercent, 0);
+    final totems = rules.totems;
+    check.atLeast('totems.start_limit', totems.startLimit, 0);
+    check.atLeast('totems.max_limit', totems.maxLimit, totems.startLimit);
+    check.atLeast('totems.limit_step_food', totems.limitStepFood, 0);
     check.atLeast('mail.building_seed_level', rules.mail.buildingSeedLevel, 0);
 
     final newFarm = rules.newFarm;
@@ -518,6 +529,14 @@ final class Catalog {
   ) {
     check.positive('$path.width', building.width);
     check.positive('$path.height', building.height);
+    if (building.totem case final totem?) {
+      if (totem.stats.isEmpty) {
+        check.issue('$path.totem.stats', 'must not be empty');
+      }
+      check.positive('$path.totem.seconds', totem.seconds);
+      check.atLeast('$path.totem.cooldown_seconds', totem.cooldownSeconds, 0);
+      check.atLeast('$path.totem.food', totem.food, 0);
+    }
     if (building.levels.isEmpty) {
       check.issue('$path.levels', 'must not be empty');
     }

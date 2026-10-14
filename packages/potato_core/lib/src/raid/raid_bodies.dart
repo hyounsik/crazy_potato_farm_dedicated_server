@@ -37,6 +37,7 @@ final class RaidPlayer extends RaidBody {
     required super.radius,
     required super.maxHp,
     required this.weapon,
+    this.weaponLevel = 0,
     super.hp,
     this.facing = const Vec2(1, 0),
     this.dashLeft = 0,
@@ -57,6 +58,7 @@ final class RaidPlayer extends RaidBody {
     maxHp: (json['max_hp'] as num).toDouble(),
     hp: (json['hp'] as num).toDouble(),
     weapon: json['weapon'] as String,
+    weaponLevel: json['weapon_level'] as int? ?? 0,
     facing: Vec2.fromJson(json['facing'] as List<Object?>),
     dashLeft: (json['dash_left'] as num).toDouble(),
     dashCooldown: (json['dash_cooldown'] as num).toDouble(),
@@ -71,6 +73,9 @@ final class RaidPlayer extends RaidBody {
 
   /// The weapon's catalog id.
   String weapon;
+
+  /// How far the weapon was strengthened at the workbench.
+  int weaponLevel;
   Vec2 facing;
   double dashLeft;
   double dashCooldown;
@@ -100,6 +105,7 @@ final class RaidPlayer extends RaidBody {
     'max_hp': maxHp,
     'hp': hp,
     'weapon': weapon,
+    'weapon_level': weaponLevel,
     'facing': facing.toJson(),
     'dash_left': dashLeft,
     'dash_cooldown': dashCooldown,

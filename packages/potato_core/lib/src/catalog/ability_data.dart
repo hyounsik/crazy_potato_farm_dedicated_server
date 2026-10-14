@@ -57,6 +57,10 @@ abstract final class FarmStat {
       'potato.death_seed_grade_up_chance';
   static const String bugClearSpeed = 'combat.pest_clear_speed';
   static const String blightClearSpeed = 'combat.disease_clear_speed';
+
+  /// Baby potatoes harvested by hand or by a guard, on top of what was
+  /// stored (the harvest totem).
+  static const String harvestBonus = 'farm.harvest_bonus';
 }
 
 /// Periodic actions on the farm. Rules run [harvestFood]; [say] is for

@@ -51,8 +51,11 @@ final class FarmSimulation {
     Iterable<OverflowSeed> overflow = const [],
     Map<String, int> materials = const {},
     Iterable<Mail> mail = const [],
+    this.weaponLevel = 0,
+    int? totemLimit,
     FarmTotals? totals,
   }) : _graves = List.of(graves),
+       totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
        pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
        gearSlots = gearSlots ?? catalog.rules.storage.gearSlots,
        _overflow = List.of(overflow),
@@ -160,6 +163,17 @@ final class FarmSimulation {
 
   /// Letters, oldest first.
   final List<Mail> _mail;
+
+  /// How far the weapon was strengthened at the workbench.
+  int weaponLevel;
+
+  /// Totems that may stand on the farm.
+  int totemLimit;
+
+  /// Bumped whenever a totem lights or goes out, so cached effects redo.
+  int _totemVersion = 0;
+  int _totemSumsVersion = -1;
+  StatSums _cachedTotemSums = const {};
   final SplayTreeMap<int, Guard> _guards;
   final SplayTreeMap<int, Potato> _fridge;
   final SplayTreeMap<int, AwayPotato> _away;
@@ -352,6 +366,9 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
+    EnhanceWeapon() => _enhanceWeapon(),
+    LightTotem(:final buildingId) => _lightTotem(buildingId),
+    RaiseTotemLimit() => _raiseTotemLimit(),
     WidenPouch() => _widen(pouch: true),
     WidenGearBox() => _widen(pouch: false),
     SellSeed(:final seed) => _sellSeed(seed),
@@ -398,6 +415,7 @@ final class FarmSimulation {
     _stepGuards(millis);
     _stepFridge(millis);
     _expireOverflow();
+    _putOutTotems();
     if (_isDue(_rules.pests.checkEverySeconds)) _rollPests();
     if (_isDue(_rules.potatoes.upkeepEverySeconds)) _payUpkeep();
   }
@@ -657,7 +675,9 @@ final class FarmSimulation {
       for (final potato in field._potatoes.values) {
         stored += potato.stored;
       }
-      final sums = field._sums(_effects);
+      final sums = <String, StatSum>{}
+        ..addAll(field._sums(_effects))
+        ..addAll(_totemSums());
       PestKind? kind;
       if (stored > 0 &&
           _random.chance(
@@ -760,6 +780,7 @@ final class FarmSimulation {
       taken += potato.takeStored();
     }
     if (taken == 0) return FarmRejection.nothingToHarvest;
+    taken = _withHarvestBonus(taken);
     food += taken;
     final chance = field
         ._sums(_effects)
@@ -884,6 +905,9 @@ final class FarmSimulation {
   FarmRejection? _build(String kind, TilePos origin) {
     final data = catalog.buildings[kind];
     if (data == null || !data.buildable) return FarmRejection.noSuchBuilding;
+    if (data.totem != null && totemCount >= totemLimit) {
+      return FarmRejection.totemLimit;
+    }
     final building = FarmBuilding(id: _nextId, data: data, origin: origin);
     if (!canPlace(building.rect)) return FarmRejection.blocked;
     final cost = data.levels.first.cost;
@@ -991,6 +1015,97 @@ final class FarmSimulation {
     mail.read = true;
     return null;
   }
+
+  FarmRejection? _enhanceWeapon() {
+    final bench = _rules.workbench;
+    if (weaponLevel >= bench.maxLevel) return FarmRejection.atMost;
+    final next = bench.nextFrom(weaponLevel);
+    if (food < next.food) return FarmRejection.notEnoughFood;
+    final have = _materials[bench.material] ?? 0;
+    if (have < next.materials) return FarmRejection.notEnoughMaterials;
+    food -= next.food;
+    if (have == next.materials) {
+      _materials.remove(bench.material);
+    } else {
+      _materials[bench.material] = have - next.materials;
+    }
+    final worked = _random.chance(next.chance);
+    if (worked) weaponLevel++;
+    _events.add(
+      FarmEvent.weaponEnhanced(
+        level: weaponLevel + (worked ? 0 : 1),
+        worked: worked,
+      ),
+    );
+    return null;
+  }
+
+  /// Totems standing on the farm.
+  int get totemCount =>
+      _buildings.values.where((b) => b.data.totem != null).length;
+
+  /// Whether totem [building] is lit now.
+  bool isLit(FarmBuilding building) => _tick < building.litUntilTick;
+
+  FarmRejection? _lightTotem(int buildingId) {
+    final building = _buildings[buildingId];
+    final totem = building?.data.totem;
+    if (building == null || totem == null) return FarmRejection.cannotLight;
+    if (isLit(building) || _tick < building.readyTick) {
+      return FarmRejection.cannotLight;
+    }
+    if (food < totem.food) return FarmRejection.notEnoughFood;
+    food -= totem.food;
+    final steps = 1000 ~/ _rules.farm.stepMillis;
+    building
+      ..litUntilTick = _tick + totem.seconds * steps
+      ..readyTick = _tick + (totem.seconds + totem.cooldownSeconds) * steps;
+    _totemVersion++;
+    _events.add(FarmEvent.totemLit(buildingId: buildingId));
+    return null;
+  }
+
+  FarmRejection? _raiseTotemLimit() {
+    final rules = _rules.totems;
+    if (totemLimit >= rules.maxLimit) return FarmRejection.atMost;
+    if (food < rules.limitStepFood) return FarmRejection.notEnoughFood;
+    food -= rules.limitStepFood;
+    totemLimit++;
+    return null;
+  }
+
+  /// Totems whose time is up go out.
+  void _putOutTotems() {
+    for (final building in _buildings.values) {
+      if (building.data.totem != null && building.litUntilTick == _tick) {
+        _totemVersion++;
+        _events.add(FarmEvent.totemOut(buildingId: building.id));
+      }
+    }
+  }
+
+  /// What lit totems do across the whole farm. The same kind lit twice
+  /// counts in full once, then half, and so on, like buff potatoes.
+  StatSums _totemSums() {
+    if (_totemSumsVersion == _totemVersion) return _cachedTotemSums;
+    final sums = <String, StatSum>{};
+    final copies = <String, int>{};
+    for (final building in _buildings.values) {
+      final totem = building.data.totem;
+      if (totem == null || !isLit(building)) continue;
+      final copy = copies[building.kind] = (copies[building.kind] ?? 0) + 1;
+      for (final stat in totem.stats) {
+        sums.putIfAbsent(stat, StatSum.new).percent +=
+            totem.percent / (1 << (copy - 1));
+      }
+    }
+    _totemSumsVersion = _totemVersion;
+    return _cachedTotemSums = sums;
+  }
+
+  /// [taken] baby potatoes with the harvest totem's bonus on top.
+  int _withHarvestBonus(int taken) =>
+      _totemSums().apply(FarmStat.harvestBonus, taken.toDouble()).floor();
 
   FarmRejection? _claimMail(int mailId) {
     final mail = _mail.where((m) => m.id == mailId).firstOrNull;
@@ -1545,6 +1660,7 @@ final class FarmSimulation {
       richest.stored--;
       taken++;
     }
+    taken = _withHarvestBonus(taken);
     food += taken;
     totals.foodHarvestedByGuards += taken;
   }
@@ -1556,14 +1672,17 @@ final class FarmSimulation {
     final cached = _worked[potato.id];
     if (cached != null &&
         cached.fieldId == field?.id &&
-        cached.version == version) {
+        cached.version == version &&
+        cached.totems == _totemVersion) {
       return cached;
     }
     final sums = <String, StatSum>{}..addAll(_effects.own(potato));
     if (field != null) sums.addAll(field._sums(_effects));
+    sums.addAll(_totemSums());
     final worked = _Worked(
       fieldId: field?.id,
       version: version,
+      totems: _totemVersion,
       sums: sums,
       rates: _effects.ratesOf(potato, sums),
     );
@@ -1670,12 +1789,16 @@ final class _Worked {
   _Worked({
     required this.fieldId,
     required this.version,
+    required this.totems,
     required this.sums,
     required this.rates,
   });
 
   final int? fieldId;
   final int version;
+
+  /// The totem version the sums were worked out at.
+  final int totems;
   final StatSums sums;
   final PotatoRates rates;
 }

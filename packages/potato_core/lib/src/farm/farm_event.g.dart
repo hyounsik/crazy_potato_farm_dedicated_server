@@ -216,6 +216,59 @@ Map<String, dynamic> _$MailArrivedToJson(MailArrived instance) =>
       'runtimeType': instance.$type,
     };
 
+WeaponEnhanced _$WeaponEnhancedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('WeaponEnhanced', json, ($checkedConvert) {
+      final val = WeaponEnhanced(
+        level: $checkedConvert('level', (v) => (v as num).toInt()),
+        worked: $checkedConvert('worked', (v) => v as bool),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$WeaponEnhancedToJson(WeaponEnhanced instance) =>
+    <String, dynamic>{
+      'level': instance.level,
+      'worked': instance.worked,
+      'runtimeType': instance.$type,
+    };
+
+TotemLit _$TotemLitFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'TotemLit',
+  json,
+  ($checkedConvert) {
+    final val = TotemLit(
+      buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+);
+
+Map<String, dynamic> _$TotemLitToJson(TotemLit instance) => <String, dynamic>{
+  'building_id': instance.buildingId,
+  'runtimeType': instance.$type,
+};
+
+TotemOut _$TotemOutFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'TotemOut',
+  json,
+  ($checkedConvert) {
+    final val = TotemOut(
+      buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+);
+
+Map<String, dynamic> _$TotemOutToJson(TotemOut instance) => <String, dynamic>{
+  'building_id': instance.buildingId,
+  'runtimeType': instance.$type,
+};
+
 BlockOpened _$BlockOpenedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('BlockOpened', json, ($checkedConvert) {
       final val = BlockOpened(

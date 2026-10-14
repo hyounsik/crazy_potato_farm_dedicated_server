@@ -65,6 +65,47 @@ Map<String, dynamic> _$HarvestFieldToJson(HarvestField instance) =>
       'runtimeType': instance.$type,
     };
 
+EnhanceWeapon _$EnhanceWeaponFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('EnhanceWeapon', json, ($checkedConvert) {
+      final val = EnhanceWeapon(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$EnhanceWeaponToJson(EnhanceWeapon instance) =>
+    <String, dynamic>{'runtimeType': instance.$type};
+
+LightTotem _$LightTotemFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'LightTotem',
+  json,
+  ($checkedConvert) {
+    final val = LightTotem(
+      buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+);
+
+Map<String, dynamic> _$LightTotemToJson(LightTotem instance) =>
+    <String, dynamic>{
+      'building_id': instance.buildingId,
+      'runtimeType': instance.$type,
+    };
+
+RaiseTotemLimit _$RaiseTotemLimitFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RaiseTotemLimit', json, ($checkedConvert) {
+      final val = RaiseTotemLimit(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RaiseTotemLimitToJson(RaiseTotemLimit instance) =>
+    <String, dynamic>{'runtimeType': instance.$type};
+
 WidenPouch _$WidenPouchFromJson(Map<String, dynamic> json) =>
     $checkedCreate('WidenPouch', json, ($checkedConvert) {
       final val = WidenPouch(

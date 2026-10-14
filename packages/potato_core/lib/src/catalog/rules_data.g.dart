@@ -37,6 +37,14 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) =>
           'mail',
           (v) => MailRulesData.fromJson(v as Map<String, dynamic>),
         ),
+        workbench: $checkedConvert(
+          'workbench',
+          (v) => WorkbenchRulesData.fromJson(v as Map<String, dynamic>),
+        ),
+        totems: $checkedConvert(
+          'totems',
+          (v) => TotemRulesData.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'newFarm': 'new_farm'});
@@ -50,6 +58,8 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'raid': instance.raid.toJson(),
       'storage': instance.storage.toJson(),
       'mail': instance.mail.toJson(),
+      'workbench': instance.workbench.toJson(),
+      'totems': instance.totems.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -489,6 +499,85 @@ Map<String, dynamic> _$StorageRulesDataToJson(
   'overflow_seconds': instance.overflowSeconds,
   'seed_food': instance.seedFood.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
 };
+
+_WorkbenchRulesData _$WorkbenchRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_WorkbenchRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _WorkbenchRulesData(
+      maxLevel: $checkedConvert('max_level', (v) => (v as num).toInt()),
+      food: $checkedConvert('food', (v) => (v as num).toInt()),
+      foodStep: $checkedConvert('food_step', (v) => (v as num).toInt()),
+      material: $checkedConvert('material', (v) => v as String),
+      materials: $checkedConvert('materials', (v) => (v as num).toInt()),
+      materialsStep: $checkedConvert(
+        'materials_step',
+        (v) => (v as num).toInt(),
+      ),
+      chance: $checkedConvert('chance', (v) => (v as num).toDouble()),
+      chanceStep: $checkedConvert('chance_step', (v) => (v as num).toDouble()),
+      minChance: $checkedConvert('min_chance', (v) => (v as num).toDouble()),
+      damagePercent: $checkedConvert(
+        'damage_percent',
+        (v) => (v as num).toDouble(),
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'maxLevel': 'max_level',
+    'foodStep': 'food_step',
+    'materialsStep': 'materials_step',
+    'chanceStep': 'chance_step',
+    'minChance': 'min_chance',
+    'damagePercent': 'damage_percent',
+  },
+);
+
+Map<String, dynamic> _$WorkbenchRulesDataToJson(_WorkbenchRulesData instance) =>
+    <String, dynamic>{
+      'max_level': instance.maxLevel,
+      'food': instance.food,
+      'food_step': instance.foodStep,
+      'material': instance.material,
+      'materials': instance.materials,
+      'materials_step': instance.materialsStep,
+      'chance': instance.chance,
+      'chance_step': instance.chanceStep,
+      'min_chance': instance.minChance,
+      'damage_percent': instance.damagePercent,
+    };
+
+_TotemRulesData _$TotemRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_TotemRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _TotemRulesData(
+          startLimit: $checkedConvert('start_limit', (v) => (v as num).toInt()),
+          limitStepFood: $checkedConvert(
+            'limit_step_food',
+            (v) => (v as num).toInt(),
+          ),
+          maxLimit: $checkedConvert('max_limit', (v) => (v as num).toInt()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'startLimit': 'start_limit',
+        'limitStepFood': 'limit_step_food',
+        'maxLimit': 'max_limit',
+      },
+    );
+
+Map<String, dynamic> _$TotemRulesDataToJson(_TotemRulesData instance) =>
+    <String, dynamic>{
+      'start_limit': instance.startLimit,
+      'limit_step_food': instance.limitStepFood,
+      'max_limit': instance.maxLimit,
+    };
 
 _MailRulesData _$MailRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_MailRulesData', json, ($checkedConvert) {

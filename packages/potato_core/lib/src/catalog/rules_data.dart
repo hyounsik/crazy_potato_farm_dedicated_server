@@ -19,6 +19,8 @@ abstract class RulesData with _$RulesData {
     required RaidRulesData raid,
     required StorageRulesData storage,
     required MailRulesData mail,
+    required WorkbenchRulesData workbench,
+    required TotemRulesData totems,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -287,6 +289,64 @@ abstract class StorageRulesData with _$StorageRulesData {
 
   factory StorageRulesData.fromJson(Map<String, dynamic> json) =>
       _$StorageRulesDataFromJson(json);
+}
+
+/// Strengthening the weapon at the house's workbench. Values are
+/// placeholders until the balance phase.
+@freezed
+abstract class WorkbenchRulesData with _$WorkbenchRulesData {
+  const factory WorkbenchRulesData({
+    required int maxLevel,
+
+    /// Baby potatoes for the first level, and what each level adds.
+    required int food,
+    required int foodStep,
+
+    /// The material item spent, how many for the first level, and what
+    /// each level adds.
+    required String material,
+    required int materials,
+    required int materialsStep,
+
+    /// Chance the first level works, what each level takes off, and the
+    /// lowest it gets.
+    required double chance,
+    required double chanceStep,
+    required double minChance,
+
+    /// Weapon damage each level adds, in percent.
+    required double damagePercent,
+  }) = _WorkbenchRulesData;
+
+  const WorkbenchRulesData._();
+
+  factory WorkbenchRulesData.fromJson(Map<String, dynamic> json) =>
+      _$WorkbenchRulesDataFromJson(json);
+
+  /// What going from [level] to the next costs, and its chance.
+  ({int food, int materials, double chance}) nextFrom(int level) => (
+    food: food + level * foodStep,
+    materials: materials + level * materialsStep,
+    chance: chance - level * chanceStep < minChance
+        ? minChance
+        : chance - level * chanceStep,
+  );
+}
+
+/// How many totems can stand on the farm. Values are placeholders.
+@freezed
+abstract class TotemRulesData with _$TotemRulesData {
+  const factory TotemRulesData({
+    /// Totems a new farm may put up.
+    required int startLimit,
+
+    /// Baby potatoes one more totem costs, and the most there can be.
+    required int limitStepFood,
+    required int maxLimit,
+  }) = _TotemRulesData;
+
+  factory TotemRulesData.fromJson(Map<String, dynamic> json) =>
+      _$TotemRulesDataFromJson(json);
 }
 
 /// The mailbox. Values are placeholders until the balance phase.

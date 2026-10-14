@@ -8,6 +8,8 @@ final class FarmBuilding {
     required this.data,
     required this.origin,
     this.level = 1,
+    this.litUntilTick = 0,
+    this.readyTick = 0,
   });
 
   /// Shares the id sequence with fields and potatoes.
@@ -19,6 +21,11 @@ final class FarmBuilding {
 
   /// From 1 up to the number of levels in [data].
   int level;
+
+  /// For totems: the step its light goes out on, and the step it can be lit
+  /// again after its wait.
+  int litUntilTick;
+  int readyTick;
 
   String get kind => data.id;
 

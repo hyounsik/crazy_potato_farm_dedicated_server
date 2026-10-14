@@ -171,5 +171,22 @@
   "mail": {
     "keep": 5,
     "building_seed_level": 1
+  },
+  "workbench": {
+    "max_level": 5,
+    "food": 20,
+    "food_step": 10,
+    "material": "material",
+    "materials": 2,
+    "materials_step": 1,
+    "chance": 1.0,
+    "chance_step": 0.2,
+    "min_chance": 0.2,
+    "damage_percent": 10
+  },
+  "totems": {
+    "start_limit": 2,
+    "limit_step_food": 100,
+    "max_limit": 4
   }
 }

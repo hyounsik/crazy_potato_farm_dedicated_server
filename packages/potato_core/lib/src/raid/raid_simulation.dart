@@ -78,6 +78,7 @@ final class RaidSimulation {
     required int seed,
     Map<String, MapChunk> chunks = const {},
     int food = 0,
+    int weaponLevel = 0,
     List<CompanionStart> companions = const [],
   }) {
     final zoneData = catalog.zones[zone];
@@ -94,6 +95,7 @@ final class RaidSimulation {
       radius: rules.player.radius,
       maxHp: rules.player.maxHp,
       weapon: rules.startWeapon,
+      weaponLevel: weaponLevel,
     );
     final bag = Bag(rules.bagSlots, catalog.stackOf);
     if (food > 0) bag.addFrom(ItemStack(rules.food.item, food));
@@ -149,6 +151,12 @@ final class RaidSimulation {
       tick: 0,
     );
   }
+
+  /// What one of the player's bullets does: the weapon's damage, raised
+  /// by its workbench level.
+  double get playerShotDamage =>
+      catalog.weapons[player.weapon]!.damage *
+      (1 + player.weaponLevel * catalog.rules.workbench.damagePercent / 100);
 
   /// Rebuilds a run saved with [toJson].
   factory RaidSimulation.fromJson(Map<String, dynamic> json, Catalog catalog) {
@@ -444,7 +452,7 @@ final class RaidSimulation {
           id: _newId(),
           position: player.position + direction * player.radius,
           velocity: direction * gun.bulletSpeed,
-          damage: gun.damage,
+          damage: playerShotDamage,
           owner: player.id,
           side: RaidSide.player,
           remaining: gun.range * 1.15,

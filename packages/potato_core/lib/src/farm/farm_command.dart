@@ -24,6 +24,16 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
+  /// Strengthens the weapon one level at the workbench, for baby potatoes
+  /// and materials. It may not take; what was spent is gone either way.
+  const factory FarmCommand.enhanceWeapon() = EnhanceWeapon;
+
+  /// Lights totem [buildingId] for baby potatoes.
+  const factory FarmCommand.lightTotem({required int buildingId}) = LightTotem;
+
+  /// Lets one more totem stand on the farm, for baby potatoes.
+  const factory FarmCommand.raiseTotemLimit() = RaiseTotemLimit;
+
   /// Widens the seed pouch by one step, for baby potatoes.
   const factory FarmCommand.widenPouch() = WidenPouch;
 
@@ -187,6 +197,15 @@ enum FarmRejection {
 
   /// The letter's gift was already taken, or it brings nothing.
   nothingToClaim,
+
+  /// Not enough materials.
+  notEnoughMaterials,
+
+  /// As many totems stand as the farm allows.
+  totemLimit,
+
+  /// Not a totem, or a totem already lit or still waiting.
+  cannotLight,
   maxLevel,
   noPest,
   fridgeFull,

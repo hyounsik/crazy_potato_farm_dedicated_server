@@ -1284,7 +1284,7 @@ $TilePosCopyWith<$Res> get origin {
 /// @nodoc
 mixin _$GuardDocument {
 
- PotatoDocument get potato; int get buildingId; TilePos get at; int? get targetFieldId; int get walkMillis;
+ PotatoDocument get potato; int get buildingId; TilePos get at; int? get targetFieldId; bool get harvesting; TilePos? get walkTo; int get walkMillis; int get walkTotalMillis;
 /// Create a copy of GuardDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1298,20 +1298,20 @@ $GuardDocumentCopyWith<GuardDocument> get copyWith => _$GuardDocumentCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as GuardDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GuardDocument&&(identical(other.potato, _this.potato) || other.potato == _this.potato)&&(identical(other.buildingId, _this.buildingId) || other.buildingId == _this.buildingId)&&(identical(other.at, _this.at) || other.at == _this.at)&&(identical(other.targetFieldId, _this.targetFieldId) || other.targetFieldId == _this.targetFieldId)&&(identical(other.walkMillis, _this.walkMillis) || other.walkMillis == _this.walkMillis));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GuardDocument&&(identical(other.potato, _this.potato) || other.potato == _this.potato)&&(identical(other.buildingId, _this.buildingId) || other.buildingId == _this.buildingId)&&(identical(other.at, _this.at) || other.at == _this.at)&&(identical(other.targetFieldId, _this.targetFieldId) || other.targetFieldId == _this.targetFieldId)&&(identical(other.harvesting, _this.harvesting) || other.harvesting == _this.harvesting)&&(identical(other.walkTo, _this.walkTo) || other.walkTo == _this.walkTo)&&(identical(other.walkMillis, _this.walkMillis) || other.walkMillis == _this.walkMillis)&&(identical(other.walkTotalMillis, _this.walkTotalMillis) || other.walkTotalMillis == _this.walkTotalMillis));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as GuardDocument;
-  return Object.hash(runtimeType,_this.potato,_this.buildingId,_this.at,_this.targetFieldId,_this.walkMillis);
+  return Object.hash(runtimeType,_this.potato,_this.buildingId,_this.at,_this.targetFieldId,_this.harvesting,_this.walkTo,_this.walkMillis,_this.walkTotalMillis);
 }
 
 @override
 String toString() {
   final _this = this as GuardDocument;
-  return 'GuardDocument(potato: ${_this.potato}, buildingId: ${_this.buildingId}, at: ${_this.at}, targetFieldId: ${_this.targetFieldId}, walkMillis: ${_this.walkMillis})';
+  return 'GuardDocument(potato: ${_this.potato}, buildingId: ${_this.buildingId}, at: ${_this.at}, targetFieldId: ${_this.targetFieldId}, harvesting: ${_this.harvesting}, walkTo: ${_this.walkTo}, walkMillis: ${_this.walkMillis}, walkTotalMillis: ${_this.walkTotalMillis})';
 }
 
 
@@ -1322,11 +1322,11 @@ abstract mixin class $GuardDocumentCopyWith<$Res>  {
   factory $GuardDocumentCopyWith(GuardDocument value, $Res Function(GuardDocument) _then) = _$GuardDocumentCopyWithImpl;
 @useResult
 $Res call({
- PotatoDocument potato, int buildingId, TilePos at, int? targetFieldId, int walkMillis
+ PotatoDocument potato, int buildingId, TilePos at, int? targetFieldId, bool harvesting, TilePos? walkTo, int walkMillis, int walkTotalMillis
 });
 
 
-$PotatoDocumentCopyWith<$Res> get potato;$TilePosCopyWith<$Res> get at;
+$PotatoDocumentCopyWith<$Res> get potato;$TilePosCopyWith<$Res> get at;$TilePosCopyWith<$Res>? get walkTo;
 
 }
 /// @nodoc
@@ -1339,13 +1339,16 @@ class _$GuardDocumentCopyWithImpl<$Res>
 
 /// Create a copy of GuardDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? potato = null,Object? buildingId = null,Object? at = null,Object? targetFieldId = freezed,Object? walkMillis = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? potato = null,Object? buildingId = null,Object? at = null,Object? targetFieldId = freezed,Object? harvesting = null,Object? walkTo = freezed,Object? walkMillis = null,Object? walkTotalMillis = null,}) {
   return _then(GuardDocument(
 potato: null == potato ? _self.potato : potato // ignore: cast_nullable_to_non_nullable
 as PotatoDocument,buildingId: null == buildingId ? _self.buildingId : buildingId // ignore: cast_nullable_to_non_nullable
 as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
 as TilePos,targetFieldId: freezed == targetFieldId ? _self.targetFieldId : targetFieldId // ignore: cast_nullable_to_non_nullable
-as int?,walkMillis: null == walkMillis ? _self.walkMillis : walkMillis // ignore: cast_nullable_to_non_nullable
+as int?,harvesting: null == harvesting ? _self.harvesting : harvesting // ignore: cast_nullable_to_non_nullable
+as bool,walkTo: freezed == walkTo ? _self.walkTo : walkTo // ignore: cast_nullable_to_non_nullable
+as TilePos?,walkMillis: null == walkMillis ? _self.walkMillis : walkMillis // ignore: cast_nullable_to_non_nullable
+as int,walkTotalMillis: null == walkTotalMillis ? _self.walkTotalMillis : walkTotalMillis // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -1366,6 +1369,18 @@ $TilePosCopyWith<$Res> get at {
   
   return $TilePosCopyWith<$Res>(_self.at, (value) {
     return _then(_self.copyWith(at: value));
+  });
+}/// Create a copy of GuardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TilePosCopyWith<$Res>? get walkTo {
+    if (_self.walkTo == null) {
+    return null;
+  }
+
+  return $TilePosCopyWith<$Res>(_self.walkTo!, (value) {
+    return _then(_self.copyWith(walkTo: value));
   });
 }
 }
@@ -1449,10 +1464,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  int walkMillis)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  bool harvesting,  TilePos? walkTo,  int walkMillis,  int walkTotalMillis)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GuardDocument() when $default != null:
-return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.walkMillis);case _:
+return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.harvesting,_that.walkTo,_that.walkMillis,_that.walkTotalMillis);case _:
   return orElse();
 
 }
@@ -1470,10 +1485,10 @@ return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  int walkMillis)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  bool harvesting,  TilePos? walkTo,  int walkMillis,  int walkTotalMillis)  $default,) {final _that = this;
 switch (_that) {
 case _GuardDocument():
-return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.walkMillis);case _:
+return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.harvesting,_that.walkTo,_that.walkMillis,_that.walkTotalMillis);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1490,10 +1505,10 @@ return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  int walkMillis)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoDocument potato,  int buildingId,  TilePos at,  int? targetFieldId,  bool harvesting,  TilePos? walkTo,  int walkMillis,  int walkTotalMillis)?  $default,) {final _that = this;
 switch (_that) {
 case _GuardDocument() when $default != null:
-return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.walkMillis);case _:
+return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that.harvesting,_that.walkTo,_that.walkMillis,_that.walkTotalMillis);case _:
   return null;
 
 }
@@ -1505,14 +1520,17 @@ return $default(_that.potato,_that.buildingId,_that.at,_that.targetFieldId,_that
 @JsonSerializable()
 
 class _GuardDocument implements GuardDocument {
-  const _GuardDocument({required this.potato, required this.buildingId, required this.at, this.targetFieldId, required this.walkMillis});
+  const _GuardDocument({required this.potato, required this.buildingId, required this.at, this.targetFieldId, this.harvesting = false, this.walkTo, required this.walkMillis, this.walkTotalMillis = 0});
   factory _GuardDocument.fromJson(Map<String, dynamic> json) => _$GuardDocumentFromJson(json);
 
 @override final  PotatoDocument potato;
 @override final  int buildingId;
 @override final  TilePos at;
 @override final  int? targetFieldId;
+@override@JsonKey() final  bool harvesting;
+@override final  TilePos? walkTo;
 @override final  int walkMillis;
+@override@JsonKey() final  int walkTotalMillis;
 
 /// Create a copy of GuardDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -1527,18 +1545,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GuardDocument&&(identical(other.potato, potato) || other.potato == potato)&&(identical(other.buildingId, buildingId) || other.buildingId == buildingId)&&(identical(other.at, at) || other.at == at)&&(identical(other.targetFieldId, targetFieldId) || other.targetFieldId == targetFieldId)&&(identical(other.walkMillis, walkMillis) || other.walkMillis == walkMillis));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GuardDocument&&(identical(other.potato, potato) || other.potato == potato)&&(identical(other.buildingId, buildingId) || other.buildingId == buildingId)&&(identical(other.at, at) || other.at == at)&&(identical(other.targetFieldId, targetFieldId) || other.targetFieldId == targetFieldId)&&(identical(other.harvesting, harvesting) || other.harvesting == harvesting)&&(identical(other.walkTo, walkTo) || other.walkTo == walkTo)&&(identical(other.walkMillis, walkMillis) || other.walkMillis == walkMillis)&&(identical(other.walkTotalMillis, walkTotalMillis) || other.walkTotalMillis == walkTotalMillis));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,potato,buildingId,at,targetFieldId,walkMillis);
+    return Object.hash(runtimeType,potato,buildingId,at,targetFieldId,harvesting,walkTo,walkMillis,walkTotalMillis);
 }
 
 @override
 String toString() {
-    return 'GuardDocument(potato: $potato, buildingId: $buildingId, at: $at, targetFieldId: $targetFieldId, walkMillis: $walkMillis)';
+    return 'GuardDocument(potato: $potato, buildingId: $buildingId, at: $at, targetFieldId: $targetFieldId, harvesting: $harvesting, walkTo: $walkTo, walkMillis: $walkMillis, walkTotalMillis: $walkTotalMillis)';
 }
 
 
@@ -1549,11 +1567,11 @@ abstract mixin class _$GuardDocumentCopyWith<$Res> implements $GuardDocumentCopy
   factory _$GuardDocumentCopyWith(_GuardDocument value, $Res Function(_GuardDocument) _then) = __$GuardDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- PotatoDocument potato, int buildingId, TilePos at, int? targetFieldId, int walkMillis
+ PotatoDocument potato, int buildingId, TilePos at, int? targetFieldId, bool harvesting, TilePos? walkTo, int walkMillis, int walkTotalMillis
 });
 
 
-@override $PotatoDocumentCopyWith<$Res> get potato;@override $TilePosCopyWith<$Res> get at;
+@override $PotatoDocumentCopyWith<$Res> get potato;@override $TilePosCopyWith<$Res> get at;@override $TilePosCopyWith<$Res>? get walkTo;
 
 }
 /// @nodoc
@@ -1566,13 +1584,16 @@ class __$GuardDocumentCopyWithImpl<$Res>
 
 /// Create a copy of GuardDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? potato = null,Object? buildingId = null,Object? at = null,Object? targetFieldId = freezed,Object? walkMillis = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? potato = null,Object? buildingId = null,Object? at = null,Object? targetFieldId = freezed,Object? harvesting = null,Object? walkTo = freezed,Object? walkMillis = null,Object? walkTotalMillis = null,}) {
   return _then(_GuardDocument(
 potato: null == potato ? _self.potato : potato // ignore: cast_nullable_to_non_nullable
 as PotatoDocument,buildingId: null == buildingId ? _self.buildingId : buildingId // ignore: cast_nullable_to_non_nullable
 as int,at: null == at ? _self.at : at // ignore: cast_nullable_to_non_nullable
 as TilePos,targetFieldId: freezed == targetFieldId ? _self.targetFieldId : targetFieldId // ignore: cast_nullable_to_non_nullable
-as int?,walkMillis: null == walkMillis ? _self.walkMillis : walkMillis // ignore: cast_nullable_to_non_nullable
+as int?,harvesting: null == harvesting ? _self.harvesting : harvesting // ignore: cast_nullable_to_non_nullable
+as bool,walkTo: freezed == walkTo ? _self.walkTo : walkTo // ignore: cast_nullable_to_non_nullable
+as TilePos?,walkMillis: null == walkMillis ? _self.walkMillis : walkMillis // ignore: cast_nullable_to_non_nullable
+as int,walkTotalMillis: null == walkTotalMillis ? _self.walkTotalMillis : walkTotalMillis // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -1594,6 +1615,18 @@ $TilePosCopyWith<$Res> get at {
   
   return $TilePosCopyWith<$Res>(_self.at, (value) {
     return _then(_self.copyWith(at: value));
+  });
+}/// Create a copy of GuardDocument
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TilePosCopyWith<$Res>? get walkTo {
+    if (_self.walkTo == null) {
+    return null;
+  }
+
+  return $TilePosCopyWith<$Res>(_self.walkTo!, (value) {
+    return _then(_self.copyWith(walkTo: value));
   });
 }
 }

@@ -211,6 +211,39 @@ void main() {
     );
   });
 
+  test('a harvesting guard walks to the field and takes from it evenly', () {
+    build('training_ground', const TilePos(8, 8));
+    final seed = _seed(PotatoType.combat, 'combat.gatherer');
+    farm.seeds.add(seed);
+    farm.apply(
+      FarmCommand.train(buildingId: farm.buildings.single.id, seed: seed),
+    );
+    final field = farm.field(1)!;
+    final potatoes = [
+      for (final tile in field.rect.tiles.take(3))
+        plant(plainSeed(PotatoType.food), tile),
+    ];
+    farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+    final guard = farm.guards.single;
+    for (final potato in potatoes) {
+      potato.stored = 10;
+    }
+    // Run until it sets off for the field.
+    while (!guard.harvesting) {
+      farm.step();
+    }
+    expect(guard.targetFieldId, field.id);
+    final before = farm.totals.foodHarvestedByGuards;
+    expect(potatoes.every((p) => p.stored == 10), isTrue, reason: 'not yet');
+    while (guard.harvesting) {
+      farm.step();
+    }
+    expect(field.rect.contains(guard.at), isFalse);
+    // 3 (stand-in) taken one at a time from the fullest: one from each.
+    expect(farm.totals.foodHarvestedByGuards - before, 3);
+    expect(potatoes.map((p) => p.stored), everyElement(9));
+  });
+
   test('guards walk at their style pace', () {
     final potato = Potato(
       id: 99,

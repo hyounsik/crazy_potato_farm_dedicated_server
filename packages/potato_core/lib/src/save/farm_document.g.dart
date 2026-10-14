@@ -215,14 +215,26 @@ _GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>
             'target_field_id',
             (v) => (v as num?)?.toInt(),
           ),
+          harvesting: $checkedConvert('harvesting', (v) => v as bool? ?? false),
+          walkTo: $checkedConvert(
+            'walk_to',
+            (v) =>
+                v == null ? null : TilePos.fromJson(v as Map<String, dynamic>),
+          ),
           walkMillis: $checkedConvert('walk_millis', (v) => (v as num).toInt()),
+          walkTotalMillis: $checkedConvert(
+            'walk_total_millis',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
         );
         return val;
       },
       fieldKeyMap: const {
         'buildingId': 'building_id',
         'targetFieldId': 'target_field_id',
+        'walkTo': 'walk_to',
         'walkMillis': 'walk_millis',
+        'walkTotalMillis': 'walk_total_millis',
       },
     );
 
@@ -232,7 +244,10 @@ Map<String, dynamic> _$GuardDocumentToJson(_GuardDocument instance) =>
       'building_id': instance.buildingId,
       'at': instance.at.toJson(),
       'target_field_id': instance.targetFieldId,
+      'harvesting': instance.harvesting,
+      'walk_to': instance.walkTo?.toJson(),
       'walk_millis': instance.walkMillis,
+      'walk_total_millis': instance.walkTotalMillis,
     };
 
 _AwayDocument _$AwayDocumentFromJson(Map<String, dynamic> json) =>

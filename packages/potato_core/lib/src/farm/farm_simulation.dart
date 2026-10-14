@@ -390,7 +390,7 @@ final class FarmSimulation {
         (dead ??= []).add(guard);
       } else if (guard.potato.isGrown(data)) {
         _patrol(guard, millis);
-        _harvestFor(guard);
+        _sendToHarvest(guard);
       }
     }
     for (final guard in dead ?? const <Guard>[]) {
@@ -413,19 +413,30 @@ final class FarmSimulation {
     }
   }
 
-  /// Walks a guard toward its target, or works on the pest once there.
+  /// Walks a guard toward where it is going, then works there: clears the
+  /// pest, brings in the field's baby potatoes, or, with nothing to do,
+  /// walks on to another patrol stop.
   void _patrol(Guard guard, int millis) {
+    if (guard.walkMillis > 0) {
+      guard.walkMillis = math.max(0, guard.walkMillis - millis);
+      // Work starts the step after arriving; on patrol, a pause at a stop.
+      if (guard.walkMillis == 0) {
+        guard
+          ..at = guard.walkTo ?? guard.at
+          ..walkTo = null;
+      }
+      return;
+    }
     final fieldId = guard.targetFieldId;
-    if (fieldId == null) return;
+    if (fieldId == null) return _walkOn(guard);
     final field = _fields[fieldId];
+    if (guard.harvesting) {
+      if (field != null) _bringIn(field, guard);
+      return guard.stop();
+    }
     final pest = field?.pest;
     if (field == null || pest == null) {
-      guard
-        ..targetFieldId = null
-        ..walkMillis = 0;
-    } else if (guard.walkMillis > 0) {
-      guard.walkMillis = math.max(0, guard.walkMillis - millis);
-      if (guard.walkMillis == 0) guard.at = _besideField(field, guard.at);
+      guard.stop();
     } else {
       final speed = switch (pest.kind) {
         PestKind.bug => FarmStat.bugClearSpeed,
@@ -454,6 +465,8 @@ final class FarmSimulation {
     }
     for (final guard in _guards.values) {
       if (guard.targetFieldId != null || !guard.potato.isGrown(data)) continue;
+      // Leave its patrol from where it has got to.
+      if (guard.walkTo != null) guard.stop();
       FarmField? best;
       var bestLoad = 0;
       var bestDistance = 0;
@@ -473,10 +486,42 @@ final class FarmSimulation {
       assigned[best!.id] = bestLoad + 1;
       guard
         ..targetFieldId = best.id
-        ..walkMillis = walkMillisFor(guard.potato, bestDistance);
-      if (guard.walkMillis == 0) guard.at = _besideField(best, guard.at);
+        ..walk(
+          _besideField(best, guard.at),
+          walkMillisFor(guard.potato, bestDistance),
+        );
     }
   }
+
+  /// How far a patrolling guard looks for its next stop, in tiles.
+  static const int _patrolReach = 4;
+
+  /// Sends a guard with nothing to do to a nearby tile of open ground.
+  ///
+  /// The stop is picked from the guard's id and the time, not the farm's
+  /// random numbers, so patrols never change what the rest of the farm
+  /// rolls.
+  void _walkOn(Guard guard) {
+    final stops = [
+      for (final tile in _rules.farm.openArea.tiles)
+        if (tile != guard.at &&
+            tile.manhattanDistanceTo(guard.at) <= _patrolReach &&
+            _isOpenGround(tile))
+          tile,
+    ];
+    if (stops.isEmpty) return;
+    final pick = ((guard.potato.id * 7919 + _tick) * 2654435761) & 0x7fffffff;
+    final stop = stops[pick % stops.length];
+    guard.walk(
+      stop,
+      walkMillisFor(guard.potato, stop.manhattanDistanceTo(guard.at)),
+    );
+  }
+
+  /// Open land that no field or building covers: where guards walk.
+  bool _isOpenGround(TilePos tile) =>
+      !_fields.values.any((f) => f.rect.contains(tile)) &&
+      !_buildings.values.any((b) => b.rect.contains(tile));
 
   void _stepFridge(int millis) {
     final aging = millis * _rules.potatoes.fridge.agingPercent ~/ 100;
@@ -966,11 +1011,7 @@ final class FarmSimulation {
       totals.pestsClearedByGuards++;
     }
     for (final guard in _guards.values) {
-      if (guard.targetFieldId == field.id) {
-        guard
-          ..targetFieldId = null
-          ..walkMillis = 0;
-      }
+      if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
     }
     _events.add(
       FarmEvent.pestCleared(
@@ -1122,9 +1163,11 @@ final class FarmSimulation {
         pace;
   }
 
-  /// A guard with a harvesting ability takes baby potatoes from the field
-  /// with the most stored, every so often.
-  void _harvestFor(Guard guard) {
+  /// A guard with a harvesting ability, when its time comes, walks to the
+  /// field with the most baby potatoes stored to bring them in. Busy with a
+  /// pest, it lets that time pass.
+  void _sendToHarvest(Guard guard) {
+    if (guard.targetFieldId != null) return;
     final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
     final interval = effect?.intervalInUse;
     final amount = effect?.valueInUse?.floor() ?? 0;
@@ -1142,14 +1185,34 @@ final class FarmSimulation {
       }
     }
     if (richest == null) return;
-    var left = amount;
-    for (final potato in richest._potatoes.values) {
-      if (left == 0) break;
-      final taken = math.min(left, potato.stored);
-      potato.stored -= taken;
-      left -= taken;
+    if (guard.walkTo != null) guard.stop();
+    final beside = _besideField(richest, guard.at);
+    guard
+      ..targetFieldId = richest.id
+      ..harvesting = true
+      ..walk(
+        beside,
+        walkMillisFor(guard.potato, beside.manhattanDistanceTo(guard.at)),
+      );
+  }
+
+  /// A harvesting guard beside [field] brings in its share: one baby potato
+  /// at a time from whichever potato has the most stored, so the field is
+  /// taken from evenly.
+  void _bringIn(FarmField field, Guard guard) {
+    final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
+    final amount = effect?.valueInUse?.floor() ?? 0;
+    final potatoes = field._potatoes.values.toList();
+    var taken = 0;
+    while (taken < amount) {
+      Potato? richest;
+      for (final potato in potatoes) {
+        if (potato.stored > (richest?.stored ?? 0)) richest = potato;
+      }
+      if (richest == null) break;
+      richest.stored--;
+      taken++;
     }
-    final taken = amount - left;
     food += taken;
     totals.foodHarvestedByGuards += taken;
   }

@@ -168,6 +168,43 @@ void main() {
   });
 
   group('guards', () {
+    test('a guard with nothing to do patrols open ground', () {
+      final ground = build('training_ground', const TilePos(8, 8));
+      growGuard(ground);
+      final guard = farm.guards.single;
+      final open = catalog.rules.farm.openArea;
+      final stood = <TilePos>{guard.at};
+      for (var i = 0; i < 120; i++) {
+        farm.step();
+        final at = guard.at;
+        stood.add(at);
+        expect(open.contains(at), isTrue);
+        expect(farm.fields.any((f) => f.rect.contains(at)), isFalse);
+        expect(farm.buildings.any((b) => b.rect.contains(at)), isFalse);
+      }
+      expect(stood.length, greaterThan(3), reason: 'it walks about');
+    });
+
+    test('a guard saved mid-walk loads walking the same way', () {
+      final ground = build('training_ground', const TilePos(8, 8));
+      growGuard(ground);
+      while (farm.guards.single.walkMillis == 0) {
+        farm.step();
+      }
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      final a = farm.guards.single;
+      final b = loaded.guards.single;
+      expect(b.walkTo, a.walkTo);
+      expect(b.walkMillis, a.walkMillis);
+      expect(b.walkTotalMillis, a.walkTotalMillis);
+      farm.runSteps(30);
+      loaded.runSteps(30);
+      expect(loaded.guards.single.at, farm.guards.single.at);
+    });
+
     test('a trained combat potato grows, then starts guarding', () {
       final ground = build('training_ground', const TilePos(8, 8));
       farm.takeEvents();
@@ -275,13 +312,18 @@ void main() {
       expect(guard.targetFieldId, isNull, reason: 'sent on the next step');
       farm.step();
       expect(guard.targetFieldId, 1);
-      // From (8, 10) to the tile beside the field at (11, 10): 3 tiles.
-      final walkMillis = 3 * catalog.rules.potatoes.guards.walkMillisPerTile;
+      // From wherever its patrol had got to, to the nearest tile beside the
+      // field, at the walking pace.
+      final beside = guard.walkTo ?? guard.at;
+      expect(farm.field(1)!.rect.contains(beside), isFalse);
+      final tiles = guard.at.manhattanDistanceTo(beside);
+      final walkMillis =
+          tiles * catalog.rules.potatoes.guards.walkMillisPerTile;
       expect(guard.walkMillis, walkMillis);
       final walkSteps = (walkMillis / 1000).ceil();
 
       farm.runSteps(walkSteps);
-      expect(guard.at, const TilePos(11, 10));
+      expect(guard.at, beside);
       expect(guard.working, isTrue);
 
       final clearSteps = catalog.rules.pests.blight.clearSeconds;
@@ -356,8 +398,9 @@ void main() {
       farm.step();
       final pace = catalog.rules.potatoes.guards.walkMillisPerTile;
       final percent = catalog.rules.potatoes.weakPercent;
-      // Assigned this step, three tiles away, at the weak pace.
-      expect(guard.walkMillis, 3 * pace * 100 ~/ percent);
+      // Assigned this step, from where it stood, at the weak pace.
+      final tiles = guard.at.manhattanDistanceTo(guard.walkTo!);
+      expect(guard.walkMillis, tiles * pace * 100 ~/ percent);
     });
   });
 

@@ -107,7 +107,10 @@ abstract class FarmDocument with _$FarmDocument {
           buildingId: guard.buildingId,
           at: guard.at,
           targetFieldId: guard.targetFieldId,
+          harvesting: guard.harvesting,
+          walkTo: guard.walkTo,
           walkMillis: guard.walkMillis,
+          walkTotalMillis: guard.walkTotalMillis,
         ),
     ],
     fridge: [for (final potato in farm.fridge) PotatoDocument.of(potato)],
@@ -175,7 +178,10 @@ abstract class FarmDocument with _$FarmDocument {
             buildingId: guard.buildingId,
             at: guard.at,
             targetFieldId: guard.targetFieldId,
+            harvesting: guard.harvesting,
+            walkTo: guard.walkTo,
             walkMillis: guard.walkMillis,
+            walkTotalMillis: guard.walkTotalMillis,
           ),
       ],
       fridge: [for (final potato in fridge) potato.toPotato()],
@@ -239,7 +245,10 @@ abstract class GuardDocument with _$GuardDocument {
     required int buildingId,
     required TilePos at,
     int? targetFieldId,
+    @Default(false) bool harvesting,
+    TilePos? walkTo,
     required int walkMillis,
+    @Default(0) int walkTotalMillis,
   }) = _GuardDocument;
 
   factory GuardDocument.fromJson(Map<String, dynamic> json) =>

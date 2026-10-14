@@ -400,6 +400,12 @@ final class Catalog {
     check.probability('workbench.chance', bench.chance);
     check.probability('workbench.min_chance', bench.minChance);
     check.atLeastNumber('workbench.damage_percent', bench.damagePercent, 0);
+    final breeding = rules.breeding;
+    check.positive('breeding.seed_every_seconds', breeding.seedEverySeconds);
+    check.positive('breeding.store_max', breeding.storeMax);
+    if (breeding.typeWeights.values.fold(0, (a, b) => a + b) <= 0) {
+      check.issue('breeding.type_weights', 'must add up to more than 0');
+    }
     final totems = rules.totems;
     check.atLeast('totems.start_limit', totems.startLimit, 0);
     check.atLeast('totems.max_limit', totems.maxLimit, totems.startLimit);

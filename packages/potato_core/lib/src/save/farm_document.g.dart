@@ -54,6 +54,16 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <GuardDocument>[],
       ),
+      breeders: $checkedConvert(
+        'breeders',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => BreederDocument.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <BreederDocument>[],
+      ),
       fridge: $checkedConvert(
         'fridge',
         (v) =>
@@ -147,6 +157,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'fields': instance.fields.map((e) => e.toJson()).toList(),
       'buildings': instance.buildings.map((e) => e.toJson()).toList(),
       'guards': instance.guards.map((e) => e.toJson()).toList(),
+      'breeders': instance.breeders.map((e) => e.toJson()).toList(),
       'fridge': instance.fridge.map((e) => e.toJson()).toList(),
       'away': instance.away.map((e) => e.toJson()).toList(),
       'graves': instance.graves.map((e) => e.toJson()).toList(),
@@ -247,12 +258,21 @@ _BuildingDocument _$BuildingDocumentFromJson(Map<String, dynamic> json) =>
             'ready_tick',
             (v) => (v as num?)?.toInt() ?? 0,
           ),
+          storedSeeds: $checkedConvert(
+            'stored_seeds',
+            (v) =>
+                (v as List<dynamic>?)
+                    ?.map((e) => Seed.fromJson(e as Map<String, dynamic>))
+                    .toList() ??
+                const <Seed>[],
+          ),
         );
         return val;
       },
       fieldKeyMap: const {
         'litUntilTick': 'lit_until_tick',
         'readyTick': 'ready_tick',
+        'storedSeeds': 'stored_seeds',
       },
     );
 
@@ -264,6 +284,7 @@ Map<String, dynamic> _$BuildingDocumentToJson(_BuildingDocument instance) =>
       'level': instance.level,
       'lit_until_tick': instance.litUntilTick,
       'ready_tick': instance.readyTick,
+      'stored_seeds': instance.storedSeeds.map((e) => e.toJson()).toList(),
     };
 
 _GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>
@@ -472,3 +493,21 @@ const _$MailKindEnumMap = {
   MailKind.start: 'start',
   MailKind.building: 'building',
 };
+
+_BreederDocument _$BreederDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_BreederDocument', json, ($checkedConvert) {
+      final val = _BreederDocument(
+        potato: $checkedConvert(
+          'potato',
+          (v) => PotatoDocument.fromJson(v as Map<String, dynamic>),
+        ),
+        buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'buildingId': 'building_id'});
+
+Map<String, dynamic> _$BreederDocumentToJson(_BreederDocument instance) =>
+    <String, dynamic>{
+      'potato': instance.potato.toJson(),
+      'building_id': instance.buildingId,
+    };

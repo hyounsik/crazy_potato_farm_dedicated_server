@@ -21,6 +21,7 @@ abstract class RulesData with _$RulesData {
     required MailRulesData mail,
     required WorkbenchRulesData workbench,
     required TotemRulesData totems,
+    required BreedingRulesData breeding,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -331,6 +332,25 @@ abstract class WorkbenchRulesData with _$WorkbenchRulesData {
         ? minChance
         : chance - level * chanceStep,
   );
+}
+
+/// Breeding potatoes making seeds in compost yards. Values are
+/// placeholders until the balance phase.
+@freezed
+abstract class BreedingRulesData with _$BreedingRulesData {
+  const factory BreedingRulesData({
+    /// Game time between two seeds from one grown breeding potato.
+    required int seedEverySeconds,
+
+    /// Seeds one yard holds before it stops filling.
+    required int storeMax,
+
+    /// How often each type comes up.
+    required Map<PotatoType, int> typeWeights,
+  }) = _BreedingRulesData;
+
+  factory BreedingRulesData.fromJson(Map<String, dynamic> json) =>
+      _$BreedingRulesDataFromJson(json);
 }
 
 /// How many totems can stand on the farm. Values are placeholders.

@@ -34,6 +34,7 @@ abstract class FarmDocument with _$FarmDocument {
     required List<FieldDocument> fields,
     @Default(<BuildingDocument>[]) List<BuildingDocument> buildings,
     @Default(<GuardDocument>[]) List<GuardDocument> guards,
+    @Default(<BreederDocument>[]) List<BreederDocument> breeders,
 
     /// Potatoes in the fridge; their `tile` is null.
     @Default(<PotatoDocument>[]) List<PotatoDocument> fridge,
@@ -115,6 +116,7 @@ abstract class FarmDocument with _$FarmDocument {
           level: building.level,
           litUntilTick: building.litUntilTick,
           readyTick: building.readyTick,
+          storedSeeds: List.of(building.storedSeeds),
         ),
     ],
     guards: [
@@ -128,6 +130,13 @@ abstract class FarmDocument with _$FarmDocument {
           walkTo: guard.walkTo,
           walkMillis: guard.walkMillis,
           walkTotalMillis: guard.walkTotalMillis,
+        ),
+    ],
+    breeders: [
+      for (final breeder in farm.breeders)
+        BreederDocument(
+          potato: PotatoDocument.of(breeder.potato),
+          buildingId: breeder.buildingId,
         ),
     ],
     fridge: [for (final potato in farm.fridge) PotatoDocument.of(potato)],
@@ -200,6 +209,7 @@ abstract class FarmDocument with _$FarmDocument {
             level: building.level,
             litUntilTick: building.litUntilTick,
             readyTick: building.readyTick,
+            storedSeeds: building.storedSeeds,
           ),
       ],
       guards: [
@@ -213,6 +223,13 @@ abstract class FarmDocument with _$FarmDocument {
             walkTo: guard.walkTo,
             walkMillis: guard.walkMillis,
             walkTotalMillis: guard.walkTotalMillis,
+          ),
+      ],
+      breeders: [
+        for (final breeder in breeders)
+          Breeder(
+            potato: breeder.potato.toPotato(),
+            buildingId: breeder.buildingId,
           ),
       ],
       fridge: [for (final potato in fridge) potato.toPotato()],
@@ -279,6 +296,9 @@ abstract class BuildingDocument with _$BuildingDocument {
     /// For totems: when its light goes out and when it can be lit again.
     @Default(0) int litUntilTick,
     @Default(0) int readyTick,
+
+    /// For compost yards: seeds waiting to be taken.
+    @Default(<Seed>[]) List<Seed> storedSeeds,
   }) = _BuildingDocument;
 
   factory BuildingDocument.fromJson(Map<String, dynamic> json) =>
@@ -422,4 +442,16 @@ abstract class MailDocument with _$MailDocument {
     read: read,
     claimed: claimed,
   );
+}
+
+/// A breeding potato in a compost yard.
+@freezed
+abstract class BreederDocument with _$BreederDocument {
+  const factory BreederDocument({
+    required PotatoDocument potato,
+    required int buildingId,
+  }) = _BreederDocument;
+
+  factory BreederDocument.fromJson(Map<String, dynamic> json) =>
+      _$BreederDocumentFromJson(json);
 }

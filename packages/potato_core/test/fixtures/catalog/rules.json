@@ -188,5 +188,15 @@
     "start_limit": 2,
     "limit_step_food": 100,
     "max_limit": 4
+  },
+  "breeding": {
+    "seed_every_seconds": 60,
+    "store_max": 3,
+    "type_weights": {
+      "food": 1,
+      "combat": 1,
+      "buff": 1,
+      "breeding": 1
+    }
   }
 }

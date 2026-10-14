@@ -75,6 +75,12 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.totemLit({required int buildingId}) = TotemLit;
 
+  /// A breeding potato in compost yard [buildingId] made [seed].
+  const factory FarmEvent.seedMade({
+    required int buildingId,
+    required Seed seed,
+  }) = SeedMade;
+
   const factory FarmEvent.totemOut({required int buildingId}) = TotemOut;
 
   const factory FarmEvent.blockOpened({

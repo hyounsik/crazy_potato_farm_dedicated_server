@@ -251,6 +251,29 @@ Map<String, dynamic> _$TotemLitToJson(TotemLit instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
+SeedMade _$SeedMadeFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'SeedMade',
+  json,
+  ($checkedConvert) {
+    final val = SeedMade(
+      buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      seed: $checkedConvert(
+        'seed',
+        (v) => Seed.fromJson(v as Map<String, dynamic>),
+      ),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+);
+
+Map<String, dynamic> _$SeedMadeToJson(SeedMade instance) => <String, dynamic>{
+  'building_id': instance.buildingId,
+  'seed': instance.seed.toJson(),
+  'runtimeType': instance.$type,
+};
+
 TotemOut _$TotemOutFromJson(Map<String, dynamic> json) => $checkedCreate(
   'TotemOut',
   json,

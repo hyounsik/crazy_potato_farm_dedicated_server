@@ -9,8 +9,6 @@ import '../fixtures/seeds.dart';
 /// The sample field is 2×2 at (12, 9).
 const _a = TilePos(12, 9);
 const _b = TilePos(13, 9);
-const _c = TilePos(12, 10);
-const _d = TilePos(13, 10);
 
 /// A level 0 seed of [type] whose first ability is [ability].
 Seed _seed(PotatoType type, String ability, {int level = 0, Grade? grade}) =>
@@ -158,7 +156,7 @@ void main() {
       expect(farm.upkeepOf(buff), 1);
     });
 
-    test('a better breeding eye raises grades more often', () {
+    test('a better breeding eye raises the grade of bred seeds', () {
       open(
         quietSampleCatalog(
           (files) =>
@@ -168,11 +166,18 @@ void main() {
       );
       farm.food = 10000;
       build('compost_yard', const TilePos(8, 8));
+      final yard = farm.buildings.single;
       // breeding.eye ×2 on a 0.5 chance: always.
-      plant(_seed(PotatoType.breeding, 'breeding.eye'));
-      farm.runSteps(catalog.potatoType(PotatoType.breeding).growSeconds);
-      for (final tile in [_b, _c, _d]) {
-        expect(plant(plainSeed(PotatoType.food), tile).grade, Grade.rare);
+      final seed = _seed(PotatoType.breeding, 'breeding.eye');
+      farm.seeds.add(seed);
+      farm.apply(FarmCommand.train(buildingId: yard.id, seed: seed));
+      farm.runSteps(
+        catalog.potatoType(PotatoType.breeding).growSeconds +
+            catalog.rules.breeding.seedEverySeconds * 3,
+      );
+      expect(yard.storedSeeds, isNotEmpty);
+      for (final bred in yard.storedSeeds) {
+        expect(bred.grade, Grade.rare);
       }
     });
 

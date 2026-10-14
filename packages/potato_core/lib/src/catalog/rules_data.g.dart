@@ -45,6 +45,10 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) =>
           'totems',
           (v) => TotemRulesData.fromJson(v as Map<String, dynamic>),
         ),
+        breeding: $checkedConvert(
+          'breeding',
+          (v) => BreedingRulesData.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'newFarm': 'new_farm'});
@@ -60,6 +64,7 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'mail': instance.mail.toJson(),
       'workbench': instance.workbench.toJson(),
       'totems': instance.totems.toJson(),
+      'breeding': instance.breeding.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -550,6 +555,52 @@ Map<String, dynamic> _$WorkbenchRulesDataToJson(_WorkbenchRulesData instance) =>
       'damage_percent': instance.damagePercent,
     };
 
+_BreedingRulesData _$BreedingRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_BreedingRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _BreedingRulesData(
+          seedEverySeconds: $checkedConvert(
+            'seed_every_seconds',
+            (v) => (v as num).toInt(),
+          ),
+          storeMax: $checkedConvert('store_max', (v) => (v as num).toInt()),
+          typeWeights: $checkedConvert(
+            'type_weights',
+            (v) => (v as Map<String, dynamic>).map(
+              (k, e) => MapEntry(
+                $enumDecode(_$PotatoTypeEnumMap, k),
+                (e as num).toInt(),
+              ),
+            ),
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'seedEverySeconds': 'seed_every_seconds',
+        'storeMax': 'store_max',
+        'typeWeights': 'type_weights',
+      },
+    );
+
+Map<String, dynamic> _$BreedingRulesDataToJson(_BreedingRulesData instance) =>
+    <String, dynamic>{
+      'seed_every_seconds': instance.seedEverySeconds,
+      'store_max': instance.storeMax,
+      'type_weights': instance.typeWeights.map(
+        (k, e) => MapEntry(_$PotatoTypeEnumMap[k]!, e),
+      ),
+    };
+
+const _$PotatoTypeEnumMap = {
+  PotatoType.food: 'food',
+  PotatoType.combat: 'combat',
+  PotatoType.breeding: 'breeding',
+  PotatoType.buff: 'buff',
+};
+
 _TotemRulesData _$TotemRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
       '_TotemRulesData',
@@ -682,10 +733,3 @@ Map<String, dynamic> _$SeedStackDataToJson(_SeedStackData instance) =>
       'ability': instance.ability,
       'style': _$CombatStyleEnumMap[instance.style],
     };
-
-const _$PotatoTypeEnumMap = {
-  PotatoType.food: 'food',
-  PotatoType.combat: 'combat',
-  PotatoType.breeding: 'breeding',
-  PotatoType.buff: 'buff',
-};

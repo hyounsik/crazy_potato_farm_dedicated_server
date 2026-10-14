@@ -221,6 +221,7 @@ final class Catalog {
     _checkReferences(
       issues,
       rules: rules,
+      abilities: abilityFile.abilities,
       potatoTypes: potatoTypes,
       buildings: buildings,
       items: items,
@@ -255,6 +256,8 @@ final class Catalog {
     check.positive('farm.offline_cap_minutes', farm.offlineCapMinutes);
     check.positive('farm.size', farm.size);
     check.positive('farm.field_max_size', farm.fieldMaxSize);
+    check.atLeast('farm.field_food', farm.fieldFood, 0);
+    check.atLeast('farm.field_tile_food', farm.fieldTileFood, 0);
     final open = farm.openArea;
     if (open.width < 1 ||
         open.height < 1 ||
@@ -381,6 +384,9 @@ final class Catalog {
     for (final (index, stack) in newFarm.seeds.indexed) {
       check.positive('new_farm.seeds[$index].count', stack.count);
       check.atLeast('new_farm.seeds[$index].level', stack.level, 0);
+      if (stack.style != null && stack.type != PotatoType.combat) {
+        check.issue('new_farm.seeds[$index].style', 'combat seeds only');
+      }
     }
 
     final raid = rules.raid;
@@ -688,6 +694,7 @@ final class Catalog {
   static void _checkReferences(
     List<CatalogIssue> issues, {
     required RulesData rules,
+    required Map<String, AbilityData> abilities,
     required Map<PotatoType, PotatoTypeData> potatoTypes,
     required Map<String, BuildingData> buildings,
     required Map<String, ItemData> items,
@@ -698,6 +705,24 @@ final class Catalog {
   }) {
     void missing(String file, String path, String what, String id) =>
         issues.add(CatalogIssue(file, path, 'no $what "$id"'));
+
+    for (final (index, stack) in rules.newFarm.seeds.indexed) {
+      final id = stack.ability;
+      if (id == null) continue;
+      final path = 'new_farm.seeds[$index].ability';
+      final ability = abilities[id];
+      if (ability == null) {
+        missing('rules', path, 'ability', id);
+      } else if (ability.pool != stack.type.name) {
+        issues.add(
+          CatalogIssue(
+            'rules',
+            path,
+            '"$id" is not a ${stack.type.name} ability',
+          ),
+        );
+      }
+    }
 
     for (final (index, type) in PotatoType.values.indexed) {
       final id = potatoTypes[type]?.unlockBuilding;

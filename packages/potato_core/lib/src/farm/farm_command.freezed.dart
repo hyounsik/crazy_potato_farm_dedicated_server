@@ -28,6 +28,10 @@ FarmCommand _$FarmCommandFromJson(
           return HarvestField.fromJson(
             json
           );
+                case 'makeField':
+          return MakeField.fromJson(
+            json
+          );
                 case 'build':
           return BuildBuilding.fromJson(
             json
@@ -130,13 +134,14 @@ extension FarmCommandPatterns on FarmCommand {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Revive value)?  revive,TResult Function( Depart value)?  depart,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( MakeField value)?  makeField,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Revive value)?  revive,TResult Function( Depart value)?  depart,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that);case HarvestPotato() when harvest != null:
 return harvest(_that);case HarvestField() when harvestField != null:
-return harvestField(_that);case BuildBuilding() when build != null:
+return harvestField(_that);case MakeField() when makeField != null:
+return makeField(_that);case BuildBuilding() when build != null:
 return build(_that);case UpgradeBuilding() when upgrade != null:
 return upgrade(_that);case DemolishBuilding() when demolish != null:
 return demolish(_that);case TrainSeed() when train != null:
@@ -165,13 +170,14 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Revive value)  revive,required TResult Function( Depart value)  depart,required TResult Function( ReturnHome value)  returnHome,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( MakeField value)  makeField,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Revive value)  revive,required TResult Function( Depart value)  depart,required TResult Function( ReturnHome value)  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that);case HarvestPotato():
 return harvest(_that);case HarvestField():
-return harvestField(_that);case BuildBuilding():
+return harvestField(_that);case MakeField():
+return makeField(_that);case BuildBuilding():
 return build(_that);case UpgradeBuilding():
 return upgrade(_that);case DemolishBuilding():
 return demolish(_that);case TrainSeed():
@@ -196,13 +202,14 @@ return returnHome(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Revive value)?  revive,TResult? Function( Depart value)?  depart,TResult? Function( ReturnHome value)?  returnHome,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( MakeField value)?  makeField,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Revive value)?  revive,TResult? Function( Depart value)?  depart,TResult? Function( ReturnHome value)?  returnHome,}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that);case HarvestPotato() when harvest != null:
 return harvest(_that);case HarvestField() when harvestField != null:
-return harvestField(_that);case BuildBuilding() when build != null:
+return harvestField(_that);case MakeField() when makeField != null:
+return makeField(_that);case BuildBuilding() when build != null:
 return build(_that);case UpgradeBuilding() when upgrade != null:
 return upgrade(_that);case DemolishBuilding() when demolish != null:
 return demolish(_that);case TrainSeed() when train != null:
@@ -230,12 +237,13 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int potatoId)?  revive,TResult Function( int food,  List<int> potatoIds)?  depart,TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( TileRect rect)?  makeField,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int potatoId)?  revive,TResult Function( int food,  List<int> potatoIds)?  depart,TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
 return harvest(_that.fieldId,_that.tile);case HarvestField() when harvestField != null:
-return harvestField(_that.fieldId);case BuildBuilding() when build != null:
+return harvestField(_that.fieldId);case MakeField() when makeField != null:
+return makeField(_that.rect);case BuildBuilding() when build != null:
 return build(_that.kind,_that.origin);case UpgradeBuilding() when upgrade != null:
 return upgrade(_that.buildingId);case DemolishBuilding() when demolish != null:
 return demolish(_that.buildingId);case TrainSeed() when train != null:
@@ -264,12 +272,13 @@ return returnHome(_that.food,_that.seeds,_that.potatoIds);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int potatoId)  revive,required TResult Function( int food,  List<int> potatoIds)  depart,required TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( TileRect rect)  makeField,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int potatoId)  revive,required TResult Function( int food,  List<int> potatoIds)  depart,required TResult Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato():
 return harvest(_that.fieldId,_that.tile);case HarvestField():
-return harvestField(_that.fieldId);case BuildBuilding():
+return harvestField(_that.fieldId);case MakeField():
+return makeField(_that.rect);case BuildBuilding():
 return build(_that.kind,_that.origin);case UpgradeBuilding():
 return upgrade(_that.buildingId);case DemolishBuilding():
 return demolish(_that.buildingId);case TrainSeed():
@@ -294,12 +303,13 @@ return returnHome(_that.food,_that.seeds,_that.potatoIds);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int potatoId)?  revive,TResult? Function( int food,  List<int> potatoIds)?  depart,TResult? Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( TileRect rect)?  makeField,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int potatoId)?  revive,TResult? Function( int food,  List<int> potatoIds)?  depart,TResult? Function( int food,  List<SeedCount> seeds,  List<int> potatoIds)?  returnHome,}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
 return harvest(_that.fieldId,_that.tile);case HarvestField() when harvestField != null:
-return harvestField(_that.fieldId);case BuildBuilding() when build != null:
+return harvestField(_that.fieldId);case MakeField() when makeField != null:
+return makeField(_that.rect);case BuildBuilding() when build != null:
 return build(_that.kind,_that.origin);case UpgradeBuilding() when upgrade != null:
 return upgrade(_that.buildingId);case DemolishBuilding() when demolish != null:
 return demolish(_that.buildingId);case TrainSeed() when train != null:
@@ -574,6 +584,90 @@ as int,
 }
 
 
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class MakeField implements FarmCommand {
+  const MakeField({required this.rect,  String? $type}): $type = $type ?? 'makeField';
+  factory MakeField.fromJson(Map<String, dynamic> json) => _$MakeFieldFromJson(json);
+
+ final  TileRect rect;
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MakeFieldCopyWith<MakeField> get copyWith => _$MakeFieldCopyWithImpl<MakeField>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MakeFieldToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is MakeField&&(identical(other.rect, rect) || other.rect == rect));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,rect);
+}
+
+@override
+String toString() {
+    return 'FarmCommand.makeField(rect: $rect)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MakeFieldCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $MakeFieldCopyWith(MakeField value, $Res Function(MakeField) _then) = _$MakeFieldCopyWithImpl;
+@useResult
+$Res call({
+ TileRect rect
+});
+
+
+$TileRectCopyWith<$Res> get rect;
+
+}
+/// @nodoc
+class _$MakeFieldCopyWithImpl<$Res>
+    implements $MakeFieldCopyWith<$Res> {
+  _$MakeFieldCopyWithImpl(this._self, this._then);
+
+  final MakeField _self;
+  final $Res Function(MakeField) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? rect = null,}) {
+  return _then(MakeField(
+rect: null == rect ? _self.rect : rect // ignore: cast_nullable_to_non_nullable
+as TileRect,
+  ));
+}
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TileRectCopyWith<$Res> get rect {
+  
+  return $TileRectCopyWith<$Res>(_self.rect, (value) {
+    return _then(_self.copyWith(rect: value));
+  });
+}
 }
 
 /// @nodoc

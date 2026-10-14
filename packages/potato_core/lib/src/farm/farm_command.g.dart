@@ -65,6 +65,23 @@ Map<String, dynamic> _$HarvestFieldToJson(HarvestField instance) =>
       'runtimeType': instance.$type,
     };
 
+MakeField _$MakeFieldFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('MakeField', json, ($checkedConvert) {
+      final val = MakeField(
+        rect: $checkedConvert(
+          'rect',
+          (v) => TileRect.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$MakeFieldToJson(MakeField instance) => <String, dynamic>{
+  'rect': instance.rect.toJson(),
+  'runtimeType': instance.$type,
+};
+
 BuildBuilding _$BuildBuildingFromJson(Map<String, dynamic> json) =>
     $checkedCreate('BuildBuilding', json, ($checkedConvert) {
       final val = BuildBuilding(

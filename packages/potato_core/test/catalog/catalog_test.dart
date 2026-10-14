@@ -102,6 +102,51 @@ void main() {
       ]);
     });
 
+    test('new farm seeds may fix an ability of their own type', () {
+      final files = sampleCatalogFiles();
+      final newFarm =
+          (files['rules']! as Map<String, dynamic>)['new_farm']
+              as Map<String, dynamic>;
+      (newFarm['seeds'] as List).addAll([
+        {
+          'type': 'combat',
+          'grade': 'normal',
+          'count': 1,
+          'level': 0,
+          'ability': 'combat.keen',
+          'style': 'melee',
+        },
+        {
+          'type': 'food',
+          'grade': 'normal',
+          'count': 1,
+          'level': 0,
+          'ability': 'combat.keen',
+          'style': 'melee',
+        },
+        {
+          'type': 'food',
+          'grade': 'normal',
+          'count': 1,
+          'level': 0,
+          'ability': 'nope',
+        },
+      ]);
+      expect(Catalog.load(files).issues.map((issue) => issue.toString()), [
+        'rules: new_farm.seeds[5].style: combat seeds only',
+        'rules: new_farm.seeds[5].ability: "combat.keen" is not a food ability',
+        'rules: new_farm.seeds[6].ability: no ability "nope"',
+      ]);
+
+      (newFarm['seeds'] as List).removeRange(5, 7);
+      final catalog = Catalog.load(files).catalog!;
+      final farm = FarmSimulation.newFarm(catalog, seed: 1);
+      final keen = farm.seeds.counts.keys.where(
+        (s) => s.ability == 'combat.keen' && s.style == CombatStyle.melee,
+      );
+      expect(keen, isNotEmpty);
+    });
+
     test('loads exploration data', () {
       final catalog = sampleCatalog();
       expect(catalog.rules.raid.food.item, 'food');

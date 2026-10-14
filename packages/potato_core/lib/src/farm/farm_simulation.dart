@@ -77,12 +77,16 @@ final class FarmSimulation {
     final seeds = SeedPouch();
     for (final stack in start.seeds) {
       for (var i = 0; i < stack.count; i++) {
+        final rolled = roller.seed(
+          type: stack.type,
+          grade: stack.grade,
+          level: stack.level,
+          random: random,
+        );
         seeds.add(
-          roller.seed(
-            type: stack.type,
-            grade: stack.grade,
-            level: stack.level,
-            random: random,
+          rolled.copyWith(
+            ability: stack.ability ?? rolled.ability,
+            style: stack.style ?? rolled.style,
           ),
         );
       }
@@ -260,6 +264,7 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
+    MakeField(:final rect) => _makeField(rect),
     BuildBuilding(:final kind, :final origin) => _build(kind, origin),
     UpgradeBuilding(:final buildingId) => _upgrade(buildingId),
     DemolishBuilding(:final buildingId) => _demolish(buildingId),
@@ -618,6 +623,28 @@ final class FarmSimulation {
     _events.add(
       FarmEvent.harvested(fieldId: field.id, food: taken, seed: seed),
     );
+    return null;
+  }
+
+  /// Baby potatoes a new field covering [rect] costs.
+  int fieldCost(TileRect rect) =>
+      _rules.farm.fieldFood + (rect.area - 1) * _rules.farm.fieldTileFood;
+
+  FarmRejection? _makeField(TileRect rect) {
+    final max = _rules.farm.fieldMaxSize;
+    if (rect.width < 1 ||
+        rect.height < 1 ||
+        rect.width > max ||
+        rect.height > max) {
+      return FarmRejection.badSize;
+    }
+    if (!canPlace(rect)) return FarmRejection.blocked;
+    final cost = fieldCost(rect);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
+    final field = FarmField(id: _nextId++, rect: rect);
+    _fields[field.id] = field;
+    _events.add(FarmEvent.fieldMade(fieldId: field.id, rect: rect));
     return null;
   }
 

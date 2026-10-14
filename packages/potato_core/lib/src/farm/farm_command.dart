@@ -24,6 +24,10 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
+  /// Makes a new empty field covering [rect], paying the 1x1 cost plus the
+  /// tile cost for every tile past the first.
+  const factory FarmCommand.makeField({required TileRect rect}) = MakeField;
+
   /// Puts up a new building of [kind] (a `buildings.json` id) with its
   /// top-left tile at [origin], paying its level 1 cost.
   const factory FarmCommand.build({
@@ -109,6 +113,9 @@ enum FarmRejection {
   /// The spot is outside the open land, or too close to another building
   /// (buildings keep one free tile between them, corners included).
   blocked,
+
+  /// A field side shorter than 1 or longer than the largest field.
+  badSize,
   maxLevel,
   noPest,
   fridgeFull,

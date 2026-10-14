@@ -1,3 +1,5 @@
+import 'dart:convert';
+
 import 'package:potato_core/potato_core.dart';
 import 'package:test/test.dart';
 
@@ -48,6 +50,54 @@ void main() {
       FarmDocument.of(farm),
       reason: 'the same farm seed rolls the same seeds',
     );
+  });
+
+  group('make a field', () {
+    const rect = TileRect(origin: TilePos(8, 13), width: 3, height: 2);
+
+    test('pays for the first tile and each tile after it', () {
+      farm.food = 1000;
+      expect(farm.fieldCost(rect), 20 + 5 * 5);
+      expect(farm.apply(const FarmCommand.makeField(rect: rect)), isNull);
+      expect(farm.food, 1000 - 45);
+      final made = farm.takeEvents().whereType<FieldMade>().single;
+      expect(farm.field(made.fieldId)!.rect, rect);
+      expect(farm.fields, hasLength(2));
+
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      expect(loaded.field(made.fieldId)!.rect, rect);
+    });
+
+    test('refuses a bad size, a crowded spot, or too little food', () {
+      farm.food = 1000;
+      expect(
+        farm.apply(
+          const FarmCommand.makeField(
+            rect: TileRect(origin: TilePos(8, 13), width: 4, height: 1),
+          ),
+        ),
+        FarmRejection.badSize,
+      );
+      // Next to the starting field at (12, 9) with no gap.
+      expect(
+        farm.apply(
+          const FarmCommand.makeField(
+            rect: TileRect(origin: TilePos(11, 9), width: 1, height: 1),
+          ),
+        ),
+        FarmRejection.blocked,
+      );
+      farm.food = 44;
+      expect(
+        farm.apply(const FarmCommand.makeField(rect: rect)),
+        FarmRejection.notEnoughFood,
+      );
+      expect(farm.fields, hasLength(1));
+      expect(farm.food, 44);
+    });
   });
 
   group('plant', () {

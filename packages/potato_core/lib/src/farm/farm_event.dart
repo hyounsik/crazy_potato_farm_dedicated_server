@@ -55,6 +55,11 @@ sealed class FarmEvent with _$FarmEvent {
     required Seed seed,
   }) = PotatoRevived;
 
+  const factory FarmEvent.fieldMade({
+    required int fieldId,
+    required TileRect rect,
+  }) = FieldMade;
+
   const factory FarmEvent.built({
     required int buildingId,
     required String kind,

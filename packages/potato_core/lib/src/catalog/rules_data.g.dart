@@ -58,6 +58,11 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
             'field_max_size',
             (v) => (v as num).toInt(),
           ),
+          fieldFood: $checkedConvert('field_food', (v) => (v as num).toInt()),
+          fieldTileFood: $checkedConvert(
+            'field_tile_food',
+            (v) => (v as num).toInt(),
+          ),
           openArea: $checkedConvert(
             'open_area',
             (v) => TileRect.fromJson(v as Map<String, dynamic>),
@@ -69,6 +74,8 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
         'stepMillis': 'step_millis',
         'offlineCapMinutes': 'offline_cap_minutes',
         'fieldMaxSize': 'field_max_size',
+        'fieldFood': 'field_food',
+        'fieldTileFood': 'field_tile_food',
         'openArea': 'open_area',
       },
     );
@@ -79,6 +86,8 @@ Map<String, dynamic> _$FarmRulesDataToJson(_FarmRulesData instance) =>
       'offline_cap_minutes': instance.offlineCapMinutes,
       'size': instance.size,
       'field_max_size': instance.fieldMaxSize,
+      'field_food': instance.fieldFood,
+      'field_tile_food': instance.fieldTileFood,
       'open_area': instance.openArea.toJson(),
     };
 
@@ -433,6 +442,11 @@ _SeedStackData _$SeedStackDataFromJson(Map<String, dynamic> json) =>
         grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
         count: $checkedConvert('count', (v) => (v as num).toInt()),
         level: $checkedConvert('level', (v) => (v as num).toInt()),
+        ability: $checkedConvert('ability', (v) => v as String?),
+        style: $checkedConvert(
+          'style',
+          (v) => $enumDecodeNullable(_$CombatStyleEnumMap, v),
+        ),
       );
       return val;
     });
@@ -443,6 +457,8 @@ Map<String, dynamic> _$SeedStackDataToJson(_SeedStackData instance) =>
       'grade': _$GradeEnumMap[instance.grade]!,
       'count': instance.count,
       'level': instance.level,
+      'ability': instance.ability,
+      'style': _$CombatStyleEnumMap[instance.style],
     };
 
 const _$PotatoTypeEnumMap = {

@@ -40,6 +40,12 @@ abstract class FarmRulesData with _$FarmRulesData {
     /// Tiles along the longer side of the largest field.
     required int fieldMaxSize,
 
+    /// Baby potatoes a new 1x1 field costs.
+    required int fieldFood,
+
+    /// Baby potatoes each tile past the first adds to a new field's cost.
+    required int fieldTileFood,
+
     /// The part of the farm that can be built on. Fixed until locked blocks
     /// can be opened.
     required TileRect openArea,
@@ -246,6 +252,13 @@ abstract class SeedStackData with _$SeedStackData {
     required Grade grade,
     required int count,
     required int level,
+
+    /// A fixed first ability (an id in the type's own pool), instead of one
+    /// rolled by hidden rarity.
+    String? ability,
+
+    /// A fixed combat style, instead of a random one. Combat seeds only.
+    CombatStyle? style,
   }) = _SeedStackData;
 
   factory SeedStackData.fromJson(Map<String, dynamic> json) =>

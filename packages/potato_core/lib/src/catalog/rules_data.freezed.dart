@@ -394,7 +394,9 @@ mixin _$FarmRulesData {
 /// treated as paused.
  int get offlineCapMinutes;/// Tiles along one side of the square farm.
  int get size;/// Tiles along the longer side of the largest field.
- int get fieldMaxSize;/// The part of the farm that can be built on. Fixed until locked blocks
+ int get fieldMaxSize;/// Baby potatoes a new 1x1 field costs.
+ int get fieldFood;/// Baby potatoes each tile past the first adds to a new field's cost.
+ int get fieldTileFood;/// The part of the farm that can be built on. Fixed until locked blocks
 /// can be opened.
  TileRect get openArea;
 /// Create a copy of FarmRulesData
@@ -410,20 +412,20 @@ $FarmRulesDataCopyWith<FarmRulesData> get copyWith => _$FarmRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as FarmRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize)&&(identical(other.openArea, _this.openArea) || other.openArea == _this.openArea));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize)&&(identical(other.fieldFood, _this.fieldFood) || other.fieldFood == _this.fieldFood)&&(identical(other.fieldTileFood, _this.fieldTileFood) || other.fieldTileFood == _this.fieldTileFood)&&(identical(other.openArea, _this.openArea) || other.openArea == _this.openArea));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FarmRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize,_this.openArea);
+  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize,_this.fieldFood,_this.fieldTileFood,_this.openArea);
 }
 
 @override
 String toString() {
   final _this = this as FarmRulesData;
-  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize}, openArea: ${_this.openArea})';
+  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize}, fieldFood: ${_this.fieldFood}, fieldTileFood: ${_this.fieldTileFood}, openArea: ${_this.openArea})';
 }
 
 
@@ -434,7 +436,7 @@ abstract mixin class $FarmRulesDataCopyWith<$Res>  {
   factory $FarmRulesDataCopyWith(FarmRulesData value, $Res Function(FarmRulesData) _then) = _$FarmRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, TileRect openArea
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldFood, int fieldTileFood, TileRect openArea
 });
 
 
@@ -451,12 +453,14 @@ class _$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? openArea = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,}) {
   return _then(FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
+as int,fieldFood: null == fieldFood ? _self.fieldFood : fieldFood // ignore: cast_nullable_to_non_nullable
+as int,fieldTileFood: null == fieldTileFood ? _self.fieldTileFood : fieldTileFood // ignore: cast_nullable_to_non_nullable
 as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
 as TileRect,
   ));
@@ -552,10 +556,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea);case _:
   return orElse();
 
 }
@@ -573,10 +577,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea)  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData():
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -593,10 +597,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  TileRect openArea)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea)?  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.openArea);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea);case _:
   return null;
 
 }
@@ -608,7 +612,7 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 @JsonSerializable()
 
 class _FarmRulesData extends FarmRulesData {
-  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize, required this.openArea}): super._();
+  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize, required this.fieldFood, required this.fieldTileFood, required this.openArea}): super._();
   factory _FarmRulesData.fromJson(Map<String, dynamic> json) => _$FarmRulesDataFromJson(json);
 
 /// Game time one farm `step` covers, both while the app runs and when
@@ -621,6 +625,10 @@ class _FarmRulesData extends FarmRulesData {
 @override final  int size;
 /// Tiles along the longer side of the largest field.
 @override final  int fieldMaxSize;
+/// Baby potatoes a new 1x1 field costs.
+@override final  int fieldFood;
+/// Baby potatoes each tile past the first adds to a new field's cost.
+@override final  int fieldTileFood;
 /// The part of the farm that can be built on. Fixed until locked blocks
 /// can be opened.
 @override final  TileRect openArea;
@@ -638,18 +646,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize)&&(identical(other.openArea, openArea) || other.openArea == openArea));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize)&&(identical(other.fieldFood, fieldFood) || other.fieldFood == fieldFood)&&(identical(other.fieldTileFood, fieldTileFood) || other.fieldTileFood == fieldTileFood)&&(identical(other.openArea, openArea) || other.openArea == openArea));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize,openArea);
+    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize,fieldFood,fieldTileFood,openArea);
 }
 
 @override
 String toString() {
-    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize, openArea: $openArea)';
+    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize, fieldFood: $fieldFood, fieldTileFood: $fieldTileFood, openArea: $openArea)';
 }
 
 
@@ -660,7 +668,7 @@ abstract mixin class _$FarmRulesDataCopyWith<$Res> implements $FarmRulesDataCopy
   factory _$FarmRulesDataCopyWith(_FarmRulesData value, $Res Function(_FarmRulesData) _then) = __$FarmRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, TileRect openArea
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldFood, int fieldTileFood, TileRect openArea
 });
 
 
@@ -677,12 +685,14 @@ class __$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? openArea = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,}) {
   return _then(_FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
+as int,fieldFood: null == fieldFood ? _self.fieldFood : fieldFood // ignore: cast_nullable_to_non_nullable
+as int,fieldTileFood: null == fieldTileFood ? _self.fieldTileFood : fieldTileFood // ignore: cast_nullable_to_non_nullable
 as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
 as TileRect,
   ));
@@ -3680,7 +3690,10 @@ as List<SeedStackData>,
 /// @nodoc
 mixin _$SeedStackData {
 
- PotatoType get type; Grade get grade; int get count; int get level;
+ PotatoType get type; Grade get grade; int get count; int get level;/// A fixed first ability (an id in the type's own pool), instead of one
+/// rolled by hidden rarity.
+ String? get ability;/// A fixed combat style, instead of a random one. Combat seeds only.
+ CombatStyle? get style;
 /// Create a copy of SeedStackData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3694,20 +3707,20 @@ $SeedStackDataCopyWith<SeedStackData> get copyWith => _$SeedStackDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as SeedStackData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeedStackData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.count, _this.count) || other.count == _this.count)&&(identical(other.level, _this.level) || other.level == _this.level));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SeedStackData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.count, _this.count) || other.count == _this.count)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.ability, _this.ability) || other.ability == _this.ability)&&(identical(other.style, _this.style) || other.style == _this.style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SeedStackData;
-  return Object.hash(runtimeType,_this.type,_this.grade,_this.count,_this.level);
+  return Object.hash(runtimeType,_this.type,_this.grade,_this.count,_this.level,_this.ability,_this.style);
 }
 
 @override
 String toString() {
   final _this = this as SeedStackData;
-  return 'SeedStackData(type: ${_this.type}, grade: ${_this.grade}, count: ${_this.count}, level: ${_this.level})';
+  return 'SeedStackData(type: ${_this.type}, grade: ${_this.grade}, count: ${_this.count}, level: ${_this.level}, ability: ${_this.ability}, style: ${_this.style})';
 }
 
 
@@ -3718,7 +3731,7 @@ abstract mixin class $SeedStackDataCopyWith<$Res>  {
   factory $SeedStackDataCopyWith(SeedStackData value, $Res Function(SeedStackData) _then) = _$SeedStackDataCopyWithImpl;
 @useResult
 $Res call({
- PotatoType type, Grade grade, int count, int level
+ PotatoType type, Grade grade, int count, int level, String? ability, CombatStyle? style
 });
 
 
@@ -3735,13 +3748,15 @@ class _$SeedStackDataCopyWithImpl<$Res>
 
 /// Create a copy of SeedStackData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,Object? count = null,Object? level = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,Object? count = null,Object? level = null,Object? ability = freezed,Object? style = freezed,}) {
   return _then(SeedStackData(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
 as Grade,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
 as int,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
-as int,
+as int,ability: freezed == ability ? _self.ability : ability // ignore: cast_nullable_to_non_nullable
+as String?,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as CombatStyle?,
   ));
 }
 
@@ -3826,10 +3841,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int count,  int level)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int count,  int level,  String? ability,  CombatStyle? style)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SeedStackData() when $default != null:
-return $default(_that.type,_that.grade,_that.count,_that.level);case _:
+return $default(_that.type,_that.grade,_that.count,_that.level,_that.ability,_that.style);case _:
   return orElse();
 
 }
@@ -3847,10 +3862,10 @@ return $default(_that.type,_that.grade,_that.count,_that.level);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int count,  int level)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int count,  int level,  String? ability,  CombatStyle? style)  $default,) {final _that = this;
 switch (_that) {
 case _SeedStackData():
-return $default(_that.type,_that.grade,_that.count,_that.level);case _:
+return $default(_that.type,_that.grade,_that.count,_that.level,_that.ability,_that.style);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3867,10 +3882,10 @@ return $default(_that.type,_that.grade,_that.count,_that.level);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade,  int count,  int level)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade,  int count,  int level,  String? ability,  CombatStyle? style)?  $default,) {final _that = this;
 switch (_that) {
 case _SeedStackData() when $default != null:
-return $default(_that.type,_that.grade,_that.count,_that.level);case _:
+return $default(_that.type,_that.grade,_that.count,_that.level,_that.ability,_that.style);case _:
   return null;
 
 }
@@ -3882,13 +3897,18 @@ return $default(_that.type,_that.grade,_that.count,_that.level);case _:
 @JsonSerializable()
 
 class _SeedStackData implements SeedStackData {
-  const _SeedStackData({required this.type, required this.grade, required this.count, required this.level});
+  const _SeedStackData({required this.type, required this.grade, required this.count, required this.level, this.ability, this.style});
   factory _SeedStackData.fromJson(Map<String, dynamic> json) => _$SeedStackDataFromJson(json);
 
 @override final  PotatoType type;
 @override final  Grade grade;
 @override final  int count;
 @override final  int level;
+/// A fixed first ability (an id in the type's own pool), instead of one
+/// rolled by hidden rarity.
+@override final  String? ability;
+/// A fixed combat style, instead of a random one. Combat seeds only.
+@override final  CombatStyle? style;
 
 /// Create a copy of SeedStackData
 /// with the given fields replaced by the non-null parameter values.
@@ -3903,18 +3923,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeedStackData&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.count, count) || other.count == count)&&(identical(other.level, level) || other.level == level));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SeedStackData&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.count, count) || other.count == count)&&(identical(other.level, level) || other.level == level)&&(identical(other.ability, ability) || other.ability == ability)&&(identical(other.style, style) || other.style == style));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,type,grade,count,level);
+    return Object.hash(runtimeType,type,grade,count,level,ability,style);
 }
 
 @override
 String toString() {
-    return 'SeedStackData(type: $type, grade: $grade, count: $count, level: $level)';
+    return 'SeedStackData(type: $type, grade: $grade, count: $count, level: $level, ability: $ability, style: $style)';
 }
 
 
@@ -3925,7 +3945,7 @@ abstract mixin class _$SeedStackDataCopyWith<$Res> implements $SeedStackDataCopy
   factory _$SeedStackDataCopyWith(_SeedStackData value, $Res Function(_SeedStackData) _then) = __$SeedStackDataCopyWithImpl;
 @override @useResult
 $Res call({
- PotatoType type, Grade grade, int count, int level
+ PotatoType type, Grade grade, int count, int level, String? ability, CombatStyle? style
 });
 
 
@@ -3942,13 +3962,15 @@ class __$SeedStackDataCopyWithImpl<$Res>
 
 /// Create a copy of SeedStackData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,Object? count = null,Object? level = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,Object? count = null,Object? level = null,Object? ability = freezed,Object? style = freezed,}) {
   return _then(_SeedStackData(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
 as Grade,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
 as int,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
-as int,
+as int,ability: freezed == ability ? _self.ability : ability // ignore: cast_nullable_to_non_nullable
+as String?,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as CombatStyle?,
   ));
 }
 

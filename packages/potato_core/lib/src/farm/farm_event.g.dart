@@ -163,6 +163,25 @@ const _$GradeEnumMap = {
   Grade.legendary: 'legendary',
 };
 
+FieldMade _$FieldMadeFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('FieldMade', json, ($checkedConvert) {
+      final val = FieldMade(
+        fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+        rect: $checkedConvert(
+          'rect',
+          (v) => TileRect.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'fieldId': 'field_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$FieldMadeToJson(FieldMade instance) => <String, dynamic>{
+  'field_id': instance.fieldId,
+  'rect': instance.rect.toJson(),
+  'runtimeType': instance.$type,
+};
+
 BuildingBuilt _$BuildingBuiltFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
       'BuildingBuilt',

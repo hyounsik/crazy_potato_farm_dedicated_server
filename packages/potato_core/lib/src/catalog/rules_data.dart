@@ -61,6 +61,10 @@ abstract class PotatoRulesData with _$PotatoRulesData {
     /// Chance that the seed a dead potato leaves is one grade lower.
     required double gradeDropChance,
 
+    /// Baby potatoes it costs to revive a dead potato as a seed, by its
+    /// grade.
+    required Map<Grade, int> reviveFood,
+
     /// Game time between two upkeep payments. A multiple of the farm step.
     required int upkeepEverySeconds,
 

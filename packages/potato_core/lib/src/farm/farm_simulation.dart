@@ -999,9 +999,15 @@ final class FarmSimulation {
     }
   }
 
+  /// Baby potatoes it costs to revive [potato] from a graveyard.
+  int reviveCost(Potato potato) => _rules.potatoes.reviveFood[potato.grade]!;
+
   FarmRejection? _revive(int potatoId) {
     final index = _graves.indexWhere((p) => p.id == potatoId);
     if (index < 0) return FarmRejection.noGrave;
+    final cost = reviveCost(_graves[index]);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
     final potato = _graves.removeAt(index);
     _events.add(
       FarmEvent.revived(

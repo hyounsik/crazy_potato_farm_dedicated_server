@@ -92,6 +92,13 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
             'grade_drop_chance',
             (v) => (v as num).toDouble(),
           ),
+          reviveFood: $checkedConvert(
+            'revive_food',
+            (v) => (v as Map<String, dynamic>).map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ),
+          ),
           upkeepEverySeconds: $checkedConvert(
             'upkeep_every_seconds',
             (v) => (v as num).toInt(),
@@ -134,6 +141,7 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
       },
       fieldKeyMap: const {
         'gradeDropChance': 'grade_drop_chance',
+        'reviveFood': 'revive_food',
         'upkeepEverySeconds': 'upkeep_every_seconds',
         'weakPercent': 'weak_percent',
         'breedingGradeUpChance': 'breeding_grade_up_chance',
@@ -145,6 +153,9 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
     <String, dynamic>{
       'grade_drop_chance': instance.gradeDropChance,
+      'revive_food': instance.reviveFood.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
       'upkeep_every_seconds': instance.upkeepEverySeconds,
       'weak_percent': instance.weakPercent,
       'breeding_grade_up_chance': instance.breedingGradeUpChance,
@@ -156,6 +167,12 @@ Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
         (k, e) => MapEntry(_$CombatStyleEnumMap[k]!, e.toJson()),
       ),
     };
+
+const _$GradeEnumMap = {
+  Grade.normal: 'normal',
+  Grade.rare: 'rare',
+  Grade.legendary: 'legendary',
+};
 
 const _$CombatStyleEnumMap = {
   CombatStyle.melee: 'melee',
@@ -433,10 +450,4 @@ const _$PotatoTypeEnumMap = {
   PotatoType.combat: 'combat',
   PotatoType.breeding: 'breeding',
   PotatoType.buff: 'buff',
-};
-
-const _$GradeEnumMap = {
-  Grade.normal: 'normal',
-  Grade.rare: 'rare',
-  Grade.legendary: 'legendary',
 };

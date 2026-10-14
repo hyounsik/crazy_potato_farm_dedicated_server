@@ -267,6 +267,14 @@ final class Catalog {
 
     final potatoes = rules.potatoes;
     check.probability('potatoes.grade_drop_chance', potatoes.gradeDropChance);
+    for (final grade in Grade.values) {
+      final food = potatoes.reviveFood[grade];
+      if (food == null) {
+        check.issue('potatoes.revive_food', 'missing ${grade.name}');
+      } else {
+        check.atLeast('potatoes.revive_food.${grade.name}', food, 0);
+      }
+    }
     check.everySteps(
       'potatoes.upkeep_every_seconds',
       potatoes.upkeepEverySeconds,

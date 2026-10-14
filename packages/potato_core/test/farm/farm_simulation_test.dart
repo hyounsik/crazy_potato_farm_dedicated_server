@@ -137,7 +137,17 @@ void main() {
       expect(farm.graves.single.id, id);
 
       final before = start - 1;
+      final grave = farm.graves.single;
+      expect(farm.reviveCost(grave), 10);
+      farm.food = 9;
+      expect(
+        farm.apply(FarmCommand.revive(potatoId: id)),
+        FarmRejection.notEnoughFood,
+      );
+      expect(farm.graves.single.id, id);
+      farm.food = 25;
       expect(farm.apply(FarmCommand.revive(potatoId: id)), isNull);
+      expect(farm.food, 15);
       final revived = farm.takeEvents().whereType<PotatoRevived>().single;
       expect(revived.from, Grade.normal);
       expect(revived.seed.ability, 'food.plain');

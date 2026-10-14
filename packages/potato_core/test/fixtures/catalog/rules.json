@@ -17,6 +17,11 @@
   },
   "potatoes": {
     "grade_drop_chance": 0.3,
+    "revive_food": {
+      "normal": 10,
+      "rare": 30,
+      "legendary": 100
+    },
     "upkeep_every_seconds": 60,
     "weak_percent": 50,
     "breeding_grade_up_chance": 0.25,

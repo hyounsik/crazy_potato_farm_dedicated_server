@@ -18,6 +18,12 @@ abstract class BuildingData with _$BuildingData {
     /// building of the type adds its capacity to the type's limit.
     PotatoType? houses,
 
+    /// Whether it shows in the build menu. The house comes with the farm.
+    @Default(true) bool buildable,
+
+    /// Whether it can be demolished. The house cannot.
+    @Default(true) bool removable,
+
     /// Level 1 first. Level 1's cost is the cost to build; each later
     /// level's cost is the cost to upgrade to it.
     required List<BuildingLevelData> levels,

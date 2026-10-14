@@ -65,6 +65,23 @@ Map<String, dynamic> _$HarvestFieldToJson(HarvestField instance) =>
       'runtimeType': instance.$type,
     };
 
+OpenBlock _$OpenBlockFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('OpenBlock', json, ($checkedConvert) {
+      final val = OpenBlock(
+        block: $checkedConvert(
+          'block',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$OpenBlockToJson(OpenBlock instance) => <String, dynamic>{
+  'block': instance.block.toJson(),
+  'runtimeType': instance.$type,
+};
+
 MakeField _$MakeFieldFromJson(Map<String, dynamic> json) =>
     $checkedCreate('MakeField', json, ($checkedConvert) {
       final val = MakeField(
@@ -81,6 +98,85 @@ Map<String, dynamic> _$MakeFieldToJson(MakeField instance) => <String, dynamic>{
   'rect': instance.rect.toJson(),
   'runtimeType': instance.$type,
 };
+
+ResizeField _$ResizeFieldFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ResizeField', json, ($checkedConvert) {
+      final val = ResizeField(
+        fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+        rect: $checkedConvert(
+          'rect',
+          (v) => TileRect.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'fieldId': 'field_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$ResizeFieldToJson(ResizeField instance) =>
+    <String, dynamic>{
+      'field_id': instance.fieldId,
+      'rect': instance.rect.toJson(),
+      'runtimeType': instance.$type,
+    };
+
+MoveField _$MoveFieldFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('MoveField', json, ($checkedConvert) {
+      final val = MoveField(
+        fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+        origin: $checkedConvert(
+          'origin',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'fieldId': 'field_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$MoveFieldToJson(MoveField instance) => <String, dynamic>{
+  'field_id': instance.fieldId,
+  'origin': instance.origin.toJson(),
+  'runtimeType': instance.$type,
+};
+
+RemoveField _$RemoveFieldFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RemoveField', json, ($checkedConvert) {
+      final val = RemoveField(
+        fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'fieldId': 'field_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RemoveFieldToJson(RemoveField instance) =>
+    <String, dynamic>{
+      'field_id': instance.fieldId,
+      'runtimeType': instance.$type,
+    };
+
+MoveBuilding _$MoveBuildingFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      'MoveBuilding',
+      json,
+      ($checkedConvert) {
+        final val = MoveBuilding(
+          buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+          origin: $checkedConvert(
+            'origin',
+            (v) => TilePos.fromJson(v as Map<String, dynamic>),
+          ),
+          $type: $checkedConvert('runtimeType', (v) => v as String?),
+        );
+        return val;
+      },
+      fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+    );
+
+Map<String, dynamic> _$MoveBuildingToJson(MoveBuilding instance) =>
+    <String, dynamic>{
+      'building_id': instance.buildingId,
+      'origin': instance.origin.toJson(),
+      'runtimeType': instance.$type,
+    };
 
 BuildBuilding _$BuildBuildingFromJson(Map<String, dynamic> json) =>
     $checkedCreate('BuildBuilding', json, ($checkedConvert) {

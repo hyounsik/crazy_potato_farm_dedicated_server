@@ -46,9 +46,18 @@ abstract class FarmRulesData with _$FarmRulesData {
     /// Baby potatoes each tile past the first adds to a new field's cost.
     required int fieldTileFood,
 
-    /// The part of the farm that can be built on. Fixed until locked blocks
-    /// can be opened.
+    /// The land open at the start, in whole blocks. The rest is locked and
+    /// opened a block at a time.
     required TileRect openArea,
+
+    /// Tiles along one side of a block, the unit locked land opens in.
+    required int blockSize,
+
+    /// Baby potatoes the first block opened costs.
+    required int blockFood,
+
+    /// What each block opened before adds to the next one's cost.
+    required int blockStepFood,
   }) = _FarmRulesData;
 
   const FarmRulesData._();
@@ -59,6 +68,22 @@ abstract class FarmRulesData with _$FarmRulesData {
   Duration get step => Duration(milliseconds: stepMillis);
 
   Duration get offlineCap => Duration(minutes: offlineCapMinutes);
+
+  /// The block holding [tile], in block units.
+  TilePos blockOf(TilePos tile) =>
+      TilePos(tile.x ~/ blockSize, tile.y ~/ blockSize);
+
+  /// The tiles [block] covers.
+  TileRect blockRect(TilePos block) => TileRect(
+    origin: TilePos(block.x * blockSize, block.y * blockSize),
+    width: blockSize,
+    height: blockSize,
+  );
+
+  /// The blocks open at the start: those [openArea] covers.
+  Set<TilePos> get startBlocks => {
+    for (final tile in openArea.tiles) blockOf(tile),
+  };
 }
 
 @freezed
@@ -230,12 +255,27 @@ abstract class PestRewardData with _$PestRewardData {
 }
 
 /// What a newly made farm starts with.
+/// A building a new farm starts with, by its `buildings.json` id.
+@freezed
+abstract class StartBuildingData with _$StartBuildingData {
+  const factory StartBuildingData({
+    required String kind,
+    required TilePos origin,
+  }) = _StartBuildingData;
+
+  factory StartBuildingData.fromJson(Map<String, dynamic> json) =>
+      _$StartBuildingDataFromJson(json);
+}
+
 @freezed
 abstract class NewFarmData with _$NewFarmData {
   const factory NewFarmData({
     /// Baby potatoes.
     required int food,
     required List<TileRect> fields,
+
+    /// Buildings a new farm starts with, such as the house.
+    @Default(<StartBuildingData>[]) List<StartBuildingData> buildings,
     required List<SeedStackData> seeds,
   }) = _NewFarmData;
 

@@ -55,10 +55,24 @@ sealed class FarmEvent with _$FarmEvent {
     required Seed seed,
   }) = PotatoRevived;
 
+  const factory FarmEvent.blockOpened({
+    required TilePos block,
+    required int food,
+  }) = BlockOpened;
+
   const factory FarmEvent.fieldMade({
     required int fieldId,
     required TileRect rect,
   }) = FieldMade;
+
+  /// A field was resized, moved or removed ([rect] is null when removed).
+  const factory FarmEvent.fieldChanged({required int fieldId, TileRect? rect}) =
+      FieldChanged;
+
+  const factory FarmEvent.buildingMoved({
+    required int buildingId,
+    required TilePos origin,
+  }) = BuildingMoved;
 
   const factory FarmEvent.built({
     required int buildingId,

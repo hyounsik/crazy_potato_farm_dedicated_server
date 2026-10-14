@@ -78,6 +78,12 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <PotatoDocument>[],
       ),
+      openBlocks: $checkedConvert(
+        'open_blocks',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => TilePos.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
       totals: $checkedConvert(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
@@ -89,6 +95,7 @@ _FarmDocument _$FarmDocumentFromJson(
     'formatVersion': 'format_version',
     'nextId': 'next_id',
     'randomState': 'random_state',
+    'openBlocks': 'open_blocks',
   },
 );
 
@@ -106,6 +113,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'fridge': instance.fridge.map((e) => e.toJson()).toList(),
       'away': instance.away.map((e) => e.toJson()).toList(),
       'graves': instance.graves.map((e) => e.toJson()).toList(),
+      'open_blocks': instance.openBlocks?.map((e) => e.toJson()).toList(),
       'totals': instance.totals,
     };
 

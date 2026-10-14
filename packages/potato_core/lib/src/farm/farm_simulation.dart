@@ -44,8 +44,10 @@ final class FarmSimulation {
     Iterable<Potato> fridge = const [],
     Iterable<AwayPotato> away = const [],
     Iterable<Potato> graves = const [],
+    Iterable<TilePos>? openBlocks,
     FarmTotals? totals,
   }) : _graves = List.of(graves),
+       _openBlocks = {...(openBlocks ?? catalog.rules.farm.startBlocks)},
        _fields = SplayTreeMap.fromIterable(fields, key: (f) => f.id),
        _buildings = SplayTreeMap.fromIterable(buildings, key: (b) => b.id),
        _guards = SplayTreeMap.fromIterable(guards, key: (g) => g.potato.id),
@@ -95,6 +97,14 @@ final class FarmSimulation {
     final fields = [
       for (final rect in start.fields) FarmField(id: nextId++, rect: rect),
     ];
+    final buildings = [
+      for (final building in start.buildings)
+        FarmBuilding(
+          id: nextId++,
+          data: catalog.buildings[building.kind]!,
+          origin: building.origin,
+        ),
+    ];
     return FarmSimulation.restore(
       catalog: catalog,
       random: random,
@@ -103,6 +113,7 @@ final class FarmSimulation {
       food: start.food,
       seeds: seeds,
       fields: fields,
+      buildings: buildings,
     );
   }
 
@@ -118,6 +129,9 @@ final class FarmSimulation {
   final SeedPouch _seeds;
   final SplayTreeMap<int, FarmField> _fields;
   final SplayTreeMap<int, FarmBuilding> _buildings;
+
+  /// Open blocks, in block units. Everything else is locked.
+  final Set<TilePos> _openBlocks;
   final SplayTreeMap<int, Guard> _guards;
   final SplayTreeMap<int, Potato> _fridge;
   final SplayTreeMap<int, AwayPotato> _away;
@@ -228,19 +242,50 @@ final class FarmSimulation {
     return count;
   }
 
-  /// Whether a building could stand on [rect]: on open land, with one free
-  /// tile (corners included) between it and every field and building.
-  /// [ignoring] is a building to leave out, e.g. one being moved.
-  bool canPlace(TileRect rect, {int? ignoring}) {
-    final open = _rules.farm.openArea;
-    if (rect.left < open.left ||
-        rect.top < open.top ||
-        rect.right > open.right ||
-        rect.bottom > open.bottom) {
+  /// Open blocks, in block units.
+  Iterable<TilePos> get openBlocks => _openBlocks;
+
+  /// Whether [tile] is on the farm and in an open block.
+  bool isOpen(TilePos tile) {
+    final size = _rules.farm.size;
+    if (tile.x < 0 || tile.y < 0 || tile.x >= size || tile.y >= size) {
       return false;
     }
+    return _openBlocks.contains(_rules.farm.blockOf(tile));
+  }
+
+  /// Whether locked [block] can be opened now: on the farm and sharing a
+  /// side with an open block.
+  bool canOpen(TilePos block) {
+    final count = _rules.farm.size ~/ _rules.farm.blockSize;
+    if (block.x < 0 || block.y < 0 || block.x >= count || block.y >= count) {
+      return false;
+    }
+    if (_openBlocks.contains(block)) return false;
+    return [
+      const TilePos(1, 0),
+      const TilePos(-1, 0),
+      const TilePos(0, 1),
+      const TilePos(0, -1),
+    ].any((step) => _openBlocks.contains(block + step));
+  }
+
+  /// Baby potatoes the next block costs: more for each one opened so far.
+  int get blockCost {
+    final opened = _openBlocks.length - _rules.farm.startBlocks.length;
+    return _rules.farm.blockFood +
+        math.max(0, opened) * _rules.farm.blockStepFood;
+  }
+
+  /// Whether a building could stand on [rect]: on open land, with one free
+  /// tile (corners included) between it and every field and building.
+  /// [ignoring] is a building or field to leave out, e.g. one being moved
+  /// (ids are shared, so one id names either).
+  bool canPlace(TileRect rect, {int? ignoring}) {
+    if (!rect.tiles.every(isOpen)) return false;
     final others = [
-      for (final field in _fields.values) field.rect,
+      for (final field in _fields.values)
+        if (field.id != ignoring) field.rect,
       for (final building in _buildings.values)
         if (building.id != ignoring) building.rect,
     ];
@@ -264,6 +309,14 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
+    OpenBlock(:final block) => _openBlock(block),
+    ResizeField(:final fieldId, :final rect) => _resizeField(fieldId, rect),
+    MoveField(:final fieldId, :final origin) => _moveField(fieldId, origin),
+    RemoveField(:final fieldId) => _removeField(fieldId),
+    MoveBuilding(:final buildingId, :final origin) => _moveBuilding(
+      buildingId,
+      origin,
+    ),
     MakeField(:final rect) => _makeField(rect),
     BuildBuilding(:final kind, :final origin) => _build(kind, origin),
     UpgradeBuilding(:final buildingId) => _upgrade(buildingId),
@@ -503,8 +556,9 @@ final class FarmSimulation {
   /// rolls.
   void _walkOn(Guard guard) {
     final stops = [
-      for (final tile in _rules.farm.openArea.tiles)
-        if (tile != guard.at &&
+      for (final tile in guard.at.around(_patrolReach))
+        if (isOpen(tile) &&
+            tile != guard.at &&
             tile.manhattanDistanceTo(guard.at) <= _patrolReach &&
             _isOpenGround(tile))
           tile,
@@ -671,6 +725,16 @@ final class FarmSimulation {
     return null;
   }
 
+  FarmRejection? _openBlock(TilePos block) {
+    if (!canOpen(block)) return FarmRejection.cannotOpen;
+    final cost = blockCost;
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
+    _openBlocks.add(block);
+    _events.add(FarmEvent.blockOpened(block: block, food: cost));
+    return null;
+  }
+
   /// Baby potatoes a new field covering [rect] costs.
   int fieldCost(TileRect rect) =>
       _rules.farm.fieldFood + (rect.area - 1) * _rules.farm.fieldTileFood;
@@ -693,9 +757,86 @@ final class FarmSimulation {
     return null;
   }
 
+  FarmRejection? _resizeField(int fieldId, TileRect rect) {
+    final field = _fields[fieldId];
+    if (field == null) return FarmRejection.noSuchField;
+    final max = _rules.farm.fieldMaxSize;
+    if (rect.width < 1 ||
+        rect.height < 1 ||
+        rect.width > max ||
+        rect.height > max) {
+      return FarmRejection.badSize;
+    }
+    if (!field._potatoes.keys.every(rect.contains)) {
+      return FarmRejection.fieldNotEmpty;
+    }
+    if (!canPlace(rect, ignoring: fieldId)) return FarmRejection.blocked;
+    final cost = resizeCost(field, rect);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
+    field.rect = rect;
+    _stopGuardsAt(fieldId);
+    _events.add(FarmEvent.fieldChanged(fieldId: fieldId, rect: rect));
+    return null;
+  }
+
+  /// Baby potatoes resizing [field] to [rect] costs: the tile price for
+  /// each tile added, nothing for shrinking.
+  int resizeCost(FarmField field, TileRect rect) =>
+      math.max(0, rect.area - field.rect.area) * _rules.farm.fieldTileFood;
+
+  FarmRejection? _moveField(int fieldId, TilePos origin) {
+    final field = _fields[fieldId];
+    if (field == null) return FarmRejection.noSuchField;
+    final rect = TileRect(
+      origin: origin,
+      width: field.rect.width,
+      height: field.rect.height,
+    );
+    if (!canPlace(rect, ignoring: fieldId)) return FarmRejection.blocked;
+    field._moveTo(origin);
+    _stopGuardsAt(fieldId);
+    _events.add(FarmEvent.fieldChanged(fieldId: fieldId, rect: rect));
+    return null;
+  }
+
+  FarmRejection? _removeField(int fieldId) {
+    final field = _fields[fieldId];
+    if (field == null) return FarmRejection.noSuchField;
+    if (field._potatoes.isNotEmpty) return FarmRejection.fieldNotEmpty;
+    _fields.remove(fieldId);
+    _stopGuardsAt(fieldId);
+    _events.add(FarmEvent.fieldChanged(fieldId: fieldId));
+    return null;
+  }
+
+  FarmRejection? _moveBuilding(int buildingId, TilePos origin) {
+    final building = _buildings[buildingId];
+    if (building == null) return FarmRejection.noSuchBuilding;
+    final rect = TileRect(
+      origin: origin,
+      width: building.data.width,
+      height: building.data.height,
+    );
+    if (!canPlace(rect, ignoring: buildingId)) return FarmRejection.blocked;
+    building.origin = origin;
+    _events.add(
+      FarmEvent.buildingMoved(buildingId: buildingId, origin: origin),
+    );
+    return null;
+  }
+
+  /// Guards heading for or working at a field that moved or went stop
+  /// where they are and look for work again.
+  void _stopGuardsAt(int fieldId) {
+    for (final guard in _guards.values) {
+      if (guard.targetFieldId == fieldId) guard.stop();
+    }
+  }
+
   FarmRejection? _build(String kind, TilePos origin) {
     final data = catalog.buildings[kind];
-    if (data == null) return FarmRejection.noSuchBuilding;
+    if (data == null || !data.buildable) return FarmRejection.noSuchBuilding;
     final building = FarmBuilding(id: _nextId, data: data, origin: origin);
     if (!canPlace(building.rect)) return FarmRejection.blocked;
     final cost = data.levels.first.cost;
@@ -723,7 +864,38 @@ final class FarmSimulation {
     return null;
   }
 
+  /// Puts back starting buildings that cannot be removed (the house) when a
+  /// farm saved before they existed lacks them: at their starting spot, or
+  /// the first open spot that fits.
+  void addMissingStartBuildings() {
+    for (final start in _rules.newFarm.buildings) {
+      final data = catalog.buildings[start.kind]!;
+      if (data.removable) continue;
+      if (_buildings.values.any((b) => b.kind == start.kind)) continue;
+      TilePos? spot;
+      bool fits(TilePos origin) => canPlace(
+        TileRect(origin: origin, width: data.width, height: data.height),
+      );
+      if (fits(start.origin)) {
+        spot = start.origin;
+      } else {
+        final size = _rules.farm.size;
+        for (var y = 0; y < size && spot == null; y++) {
+          for (var x = 0; x < size && spot == null; x++) {
+            if (fits(TilePos(x, y))) spot = TilePos(x, y);
+          }
+        }
+      }
+      if (spot == null) continue;
+      final building = FarmBuilding(id: _nextId++, data: data, origin: spot);
+      _buildings[building.id] = building;
+    }
+  }
+
   FarmRejection? _demolish(int buildingId) {
+    if (_buildings[buildingId]?.data.removable == false) {
+      return FarmRejection.cannotRemove;
+    }
     final building = _buildings.remove(buildingId);
     if (building == null) return FarmRejection.noSuchBuilding;
     final toFridge = <int>[];
@@ -1255,7 +1427,9 @@ final class FarmField {
   }
 
   final int id;
-  final TileRect rect;
+
+  /// Where it lies. Changes when the field is resized or moved.
+  TileRect rect;
   final Map<TilePos, Potato> _potatoes = {};
 
   /// The bug or blight on this field, if any.
@@ -1278,6 +1452,20 @@ final class FarmField {
   Potato? _take(TilePos tile) {
     _version++;
     return _potatoes.remove(tile);
+  }
+
+  /// Moves the field and its potatoes so its top-left tile is [origin].
+  void _moveTo(TilePos origin) {
+    final shift = origin - rect.origin;
+    final moved = [
+      for (final MapEntry(key: tile, value: potato) in _potatoes.entries)
+        MapEntry(tile + shift, potato),
+    ];
+    _potatoes
+      ..clear()
+      ..addEntries(moved);
+    rect = TileRect(origin: origin, width: rect.width, height: rect.height);
+    _version++;
   }
 
   /// Potatoes by tile, in id order.

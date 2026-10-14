@@ -102,6 +102,23 @@ void main() {
       ]);
     });
 
+    test('the starting land must be whole blocks', () {
+      final files = sampleCatalogFiles();
+      final farm =
+          (files['rules']! as Map<String, dynamic>)['farm']
+              as Map<String, dynamic>;
+      farm['open_area'] = {
+        'origin': {'x': 9, 'y': 8},
+        'width': 8,
+        'height': 8,
+      };
+      farm['block_size'] = 5;
+      expect(Catalog.load(files).issues.map((issue) => issue.toString()), [
+        'rules: farm.block_size: must divide the farm size',
+        'rules: farm.open_area: must be whole blocks',
+      ]);
+    });
+
     test('new farm seeds may fix an ability of their own type', () {
       final files = sampleCatalogFiles();
       final newFarm =

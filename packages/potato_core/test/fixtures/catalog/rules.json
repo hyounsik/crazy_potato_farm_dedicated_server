@@ -15,7 +15,10 @@
       },
       "width": 8,
       "height": 8
-    }
+    },
+    "block_size": 4,
+    "block_food": 50,
+    "block_step_food": 25
   },
   "potatoes": {
     "grade_drop_chance": 0.3,

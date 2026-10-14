@@ -67,6 +67,12 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
             'open_area',
             (v) => TileRect.fromJson(v as Map<String, dynamic>),
           ),
+          blockSize: $checkedConvert('block_size', (v) => (v as num).toInt()),
+          blockFood: $checkedConvert('block_food', (v) => (v as num).toInt()),
+          blockStepFood: $checkedConvert(
+            'block_step_food',
+            (v) => (v as num).toInt(),
+          ),
         );
         return val;
       },
@@ -77,6 +83,9 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
         'fieldFood': 'field_food',
         'fieldTileFood': 'field_tile_food',
         'openArea': 'open_area',
+        'blockSize': 'block_size',
+        'blockFood': 'block_food',
+        'blockStepFood': 'block_step_food',
       },
     );
 
@@ -89,6 +98,9 @@ Map<String, dynamic> _$FarmRulesDataToJson(_FarmRulesData instance) =>
       'field_food': instance.fieldFood,
       'field_tile_food': instance.fieldTileFood,
       'open_area': instance.openArea.toJson(),
+      'block_size': instance.blockSize,
+      'block_food': instance.blockFood,
+      'block_step_food': instance.blockStepFood,
     };
 
 _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
@@ -405,6 +417,24 @@ Map<String, dynamic> _$PestRewardDataToJson(_PestRewardData instance) =>
       'seed_chance': instance.seedChance,
     };
 
+_StartBuildingData _$StartBuildingDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_StartBuildingData', json, ($checkedConvert) {
+      final val = _StartBuildingData(
+        kind: $checkedConvert('kind', (v) => v as String),
+        origin: $checkedConvert(
+          'origin',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$StartBuildingDataToJson(_StartBuildingData instance) =>
+    <String, dynamic>{
+      'kind': instance.kind,
+      'origin': instance.origin.toJson(),
+    };
+
 _NewFarmData _$NewFarmDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_NewFarmData', json, ($checkedConvert) {
       final val = _NewFarmData(
@@ -414,6 +444,17 @@ _NewFarmData _$NewFarmDataFromJson(Map<String, dynamic> json) =>
           (v) => (v as List<dynamic>)
               .map((e) => TileRect.fromJson(e as Map<String, dynamic>))
               .toList(),
+        ),
+        buildings: $checkedConvert(
+          'buildings',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map(
+                    (e) =>
+                        StartBuildingData.fromJson(e as Map<String, dynamic>),
+                  )
+                  .toList() ??
+              const <StartBuildingData>[],
         ),
         seeds: $checkedConvert(
           'seeds',
@@ -429,6 +470,7 @@ Map<String, dynamic> _$NewFarmDataToJson(_NewFarmData instance) =>
     <String, dynamic>{
       'food': instance.food,
       'fields': instance.fields.map((e) => e.toJson()).toList(),
+      'buildings': instance.buildings.map((e) => e.toJson()).toList(),
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
     };
 

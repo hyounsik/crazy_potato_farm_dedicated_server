@@ -52,6 +52,68 @@ void main() {
     );
   });
 
+  group('blocks', () {
+    // The sample farm is 24x24 in 4x4 blocks; the middle 8x8 starts open.
+    test('the middle blocks start open', () {
+      expect(farm.openBlocks, unorderedEquals(catalog.rules.farm.startBlocks));
+      expect(farm.isOpen(const TilePos(8, 8)), isTrue);
+      expect(farm.isOpen(const TilePos(7, 8)), isFalse);
+      expect(farm.isOpen(const TilePos(-1, 8)), isFalse);
+    });
+
+    test('opening a block next to open land costs more each time', () {
+      farm.food = 1000;
+      expect(farm.blockCost, 50);
+      expect(farm.canOpen(const TilePos(0, 0)), isFalse, reason: 'not next');
+      expect(farm.canOpen(const TilePos(2, 2)), isFalse, reason: 'open');
+      expect(farm.canOpen(const TilePos(6, 2)), isFalse, reason: 'off farm');
+
+      expect(
+        farm.apply(const FarmCommand.openBlock(block: TilePos(1, 2))),
+        isNull,
+      );
+      expect(farm.food, 950);
+      expect(farm.takeEvents().whereType<BlockOpened>().single.food, 50);
+      expect(farm.isOpen(const TilePos(4, 8)), isTrue);
+      expect(farm.blockCost, 75);
+      // Now its neighbour further out can open too.
+      expect(farm.canOpen(const TilePos(0, 2)), isTrue);
+      expect(
+        farm.apply(const FarmCommand.openBlock(block: TilePos(1, 2))),
+        FarmRejection.cannotOpen,
+      );
+      farm.food = 74;
+      expect(
+        farm.apply(const FarmCommand.openBlock(block: TilePos(0, 2))),
+        FarmRejection.notEnoughFood,
+      );
+    });
+
+    test('fields and buildings go on opened land only', () {
+      farm.food = 1000;
+      const rect = TileRect(origin: TilePos(5, 9), width: 2, height: 2);
+      expect(farm.canPlace(rect), isFalse);
+      farm.apply(const FarmCommand.openBlock(block: TilePos(1, 2)));
+      expect(farm.canPlace(rect), isTrue);
+      expect(farm.apply(const FarmCommand.makeField(rect: rect)), isNull);
+    });
+
+    test('open blocks are saved; older saves keep the starting land', () {
+      farm.food = 1000;
+      farm.apply(const FarmCommand.openBlock(block: TilePos(1, 2)));
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      expect(loaded.openBlocks, unorderedEquals(farm.openBlocks));
+      expect(loaded.blockCost, 75);
+
+      json.remove('open_blocks');
+      final older = FarmDocument.decode(json).toSimulation(catalog);
+      expect(older.openBlocks, unorderedEquals(catalog.rules.farm.startBlocks));
+    });
+  });
+
   group('make a field', () {
     const rect = TileRect(origin: TilePos(8, 13), width: 3, height: 2);
 
@@ -97,6 +159,101 @@ void main() {
       );
       expect(farm.fields, hasLength(1));
       expect(farm.food, 44);
+    });
+  });
+
+  group('change a field', () {
+    // The starting field is 2x2 at (12, 9).
+    test('grows for the added tiles, but not past its potatoes', () {
+      farm.food = 1000;
+      expect(plant(const TilePos(13, 10)), isNull);
+      const bigger = TileRect(origin: TilePos(12, 9), width: 3, height: 3);
+      expect(farm.resizeCost(farm.field(1)!, bigger), 5 * 5);
+      expect(
+        farm.apply(const FarmCommand.resizeField(fieldId: 1, rect: bigger)),
+        isNull,
+      );
+      expect(farm.field(1)!.rect, bigger);
+      expect(farm.food, 1000 - 25);
+
+      const tooSmall = TileRect(origin: TilePos(12, 9), width: 1, height: 1);
+      expect(
+        farm.apply(const FarmCommand.resizeField(fieldId: 1, rect: tooSmall)),
+        FarmRejection.fieldNotEmpty,
+      );
+      const smaller = TileRect(origin: TilePos(13, 10), width: 1, height: 1);
+      expect(
+        farm.apply(const FarmCommand.resizeField(fieldId: 1, rect: smaller)),
+        isNull,
+      );
+      expect(farm.food, 1000 - 25, reason: 'shrinking gives nothing back');
+    });
+
+    test('moves with its potatoes', () {
+      expect(plant(const TilePos(13, 10)), isNull);
+      final potato = farm.field(1)!.potatoAt(const TilePos(13, 10))!;
+      expect(
+        farm.apply(
+          const FarmCommand.moveField(fieldId: 1, origin: TilePos(9, 12)),
+        ),
+        isNull,
+      );
+      final field = farm.field(1)!;
+      expect(field.rect.origin, const TilePos(9, 12));
+      expect(field.potatoAt(const TilePos(10, 13)), same(potato));
+      expect(
+        farm.apply(
+          const FarmCommand.moveField(fieldId: 1, origin: TilePos(2, 2)),
+        ),
+        FarmRejection.blocked,
+        reason: 'locked land',
+      );
+    });
+
+    test('is removed only when empty', () {
+      expect(plant(), isNull);
+      expect(
+        farm.apply(const FarmCommand.removeField(fieldId: 1)),
+        FarmRejection.fieldNotEmpty,
+      );
+      final fresh = FarmSimulation.newFarm(catalog, seed: 1);
+      expect(fresh.apply(const FarmCommand.removeField(fieldId: 1)), isNull);
+      expect(fresh.fields, isEmpty);
+    });
+
+    test('a moved field and building are saved where they went', () {
+      farm.food = 1000;
+      farm
+        ..apply(const FarmCommand.moveField(fieldId: 1, origin: TilePos(9, 12)))
+        ..apply(
+          FarmCommand.build(kind: 'graveyard', origin: const TilePos(14, 8)),
+        );
+      final building = farm.buildings.single;
+      expect(
+        farm.apply(
+          FarmCommand.moveBuilding(
+            buildingId: building.id,
+            origin: const TilePos(9, 8),
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        farm.apply(
+          FarmCommand.moveBuilding(
+            buildingId: building.id,
+            origin: const TilePos(9, 11),
+          ),
+        ),
+        FarmRejection.blocked,
+        reason: 'touches the field',
+      );
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      expect(loaded.field(1)!.rect.origin, const TilePos(9, 12));
+      expect(loaded.buildings.single.origin, const TilePos(9, 8));
     });
   });
 

@@ -46,6 +46,62 @@ void main() {
     return id;
   }
 
+  group('the house', () {
+    Catalog withHouse() {
+      final files = sampleCatalogFiles();
+      final newFarm =
+          (files['rules']! as Map<String, dynamic>)['new_farm']
+              as Map<String, dynamic>;
+      newFarm['buildings'] = [
+        {
+          'kind': 'house',
+          'origin': {'x': 8, 'y': 13},
+        },
+      ];
+      return Catalog.load(files).catalog!;
+    }
+
+    test('comes with a new farm, moves, but cannot be built or removed', () {
+      final catalog = withHouse();
+      final farm = FarmSimulation.newFarm(catalog, seed: 1);
+      final house = farm.buildings.single;
+      expect(house.kind, 'house');
+      expect(house.origin, const TilePos(8, 13));
+      farm.food = 1000;
+      expect(
+        farm.apply(
+          FarmCommand.build(kind: 'house', origin: const TilePos(8, 8)),
+        ),
+        FarmRejection.noSuchBuilding,
+      );
+      expect(
+        farm.apply(FarmCommand.demolish(buildingId: house.id)),
+        FarmRejection.cannotRemove,
+      );
+      expect(
+        farm.apply(
+          FarmCommand.moveBuilding(
+            buildingId: house.id,
+            origin: const TilePos(8, 8),
+          ),
+        ),
+        isNull,
+      );
+    });
+
+    test('is put back on a farm saved before it existed', () {
+      final catalog = withHouse();
+      final farm = FarmSimulation.newFarm(catalog, seed: 1);
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      json['buildings'] = <Object?>[];
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      expect(loaded.buildings.single.kind, 'house');
+      expect(loaded.buildings.single.origin, const TilePos(8, 13));
+    });
+  });
+
   group('buildings', () {
     test('building costs its first level and is reported', () {
       farm.takeEvents();

@@ -40,6 +40,10 @@ abstract class FarmDocument with _$FarmDocument {
 
     /// Dead potatoes in the graveyards, oldest first; `tile` is null.
     @Default(<PotatoDocument>[]) List<PotatoDocument> graves,
+
+    /// Open blocks, in block units. Null in documents from before blocks
+    /// opened: those farms still have only the starting land.
+    List<TilePos>? openBlocks,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
 
@@ -123,6 +127,8 @@ abstract class FarmDocument with _$FarmDocument {
         ),
     ],
     graves: [for (final potato in farm.graves) PotatoDocument.of(potato)],
+    openBlocks: farm.openBlocks.toList()
+      ..sort((a, b) => a.y != b.y ? a.y - b.y : a.x - b.x),
     totals: farm.totals.toJson(),
   );
 
@@ -134,7 +140,7 @@ abstract class FarmDocument with _$FarmDocument {
     for (final stack in seeds) {
       pouch.add(stack.seed, stack.count);
     }
-    return FarmSimulation.restore(
+    final farm = FarmSimulation.restore(
       catalog: catalog,
       random: GameRandom.fromState(randomState),
       tick: tick,
@@ -195,8 +201,10 @@ abstract class FarmDocument with _$FarmDocument {
           ),
       ],
       graves: [for (final potato in graves) potato.toPotato()],
+      openBlocks: openBlocks,
       totals: FarmTotals.fromJson(totals),
     );
+    return farm..addMissingStartBuildings();
   }
 }
 

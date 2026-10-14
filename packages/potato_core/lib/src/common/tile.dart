@@ -31,6 +31,16 @@ abstract class TilePos with _$TilePos {
   ];
 
   /// Steps between tiles when moving only along the grid.
+  /// The tiles within [reach] of this one along each axis (a square),
+  /// row by row.
+  Iterable<TilePos> around(int reach) sync* {
+    for (var y = this.y - reach; y <= this.y + reach; y++) {
+      for (var x = this.x - reach; x <= this.x + reach; x++) {
+        yield TilePos(x, y);
+      }
+    }
+  }
+
   int manhattanDistanceTo(TilePos other) =>
       (x - other.x).abs() + (y - other.y).abs();
 }

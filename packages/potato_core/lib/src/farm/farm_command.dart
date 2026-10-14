@@ -24,9 +24,36 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
+  /// Opens the locked [block] (in block units) next to open land, paying
+  /// more the more blocks have been opened.
+  const factory FarmCommand.openBlock({required TilePos block}) = OpenBlock;
+
   /// Makes a new empty field covering [rect], paying the 1x1 cost plus the
   /// tile cost for every tile past the first.
   const factory FarmCommand.makeField({required TileRect rect}) = MakeField;
+
+  /// Changes field [fieldId] to cover [rect]: every potato must stay inside,
+  /// and each tile added costs the tile price. Shrinking gives nothing back.
+  const factory FarmCommand.resizeField({
+    required int fieldId,
+    required TileRect rect,
+  }) = ResizeField;
+
+  /// Moves field [fieldId], with its potatoes and pest, so its top-left tile
+  /// is [origin].
+  const factory FarmCommand.moveField({
+    required int fieldId,
+    required TilePos origin,
+  }) = MoveField;
+
+  /// Removes empty field [fieldId]. What it cost is not given back.
+  const factory FarmCommand.removeField({required int fieldId}) = RemoveField;
+
+  /// Moves building [buildingId] so its top-left tile is [origin].
+  const factory FarmCommand.moveBuilding({
+    required int buildingId,
+    required TilePos origin,
+  }) = MoveBuilding;
 
   /// Puts up a new building of [kind] (a `buildings.json` id) with its
   /// top-left tile at [origin], paying its level 1 cost.
@@ -116,6 +143,15 @@ enum FarmRejection {
 
   /// A field side shorter than 1 or longer than the largest field.
   badSize,
+
+  /// The block is already open, outside the farm, or not next to open land.
+  cannotOpen,
+
+  /// A field cannot shrink past its potatoes, nor be removed with any.
+  fieldNotEmpty,
+
+  /// The building comes with the farm and stays (the house).
+  cannotRemove,
   maxLevel,
   noPest,
   fridgeFull,

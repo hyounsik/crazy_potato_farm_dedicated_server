@@ -267,6 +267,20 @@ final class Catalog {
         open.bottom > farm.size) {
       check.issue('farm.open_area', 'must lie inside the farm');
     }
+    check.positive('farm.block_size', farm.blockSize);
+    if (farm.blockSize > 0) {
+      if (farm.size % farm.blockSize != 0) {
+        check.issue('farm.block_size', 'must divide the farm size');
+      }
+      if (open.left % farm.blockSize != 0 ||
+          open.top % farm.blockSize != 0 ||
+          open.width % farm.blockSize != 0 ||
+          open.height % farm.blockSize != 0) {
+        check.issue('farm.open_area', 'must be whole blocks');
+      }
+    }
+    check.atLeast('farm.block_food', farm.blockFood, 0);
+    check.atLeast('farm.block_step_food', farm.blockStepFood, 0);
 
     final potatoes = rules.potatoes;
     check.probability('potatoes.grade_drop_chance', potatoes.gradeDropChance);
@@ -706,6 +720,16 @@ final class Catalog {
     void missing(String file, String path, String what, String id) =>
         issues.add(CatalogIssue(file, path, 'no $what "$id"'));
 
+    for (final (index, start) in rules.newFarm.buildings.indexed) {
+      if (!buildings.containsKey(start.kind)) {
+        missing(
+          'rules',
+          'new_farm.buildings[$index].kind',
+          'building',
+          start.kind,
+        );
+      }
+    }
     for (final (index, stack) in rules.newFarm.seeds.indexed) {
       final id = stack.ability;
       if (id == null) continue;

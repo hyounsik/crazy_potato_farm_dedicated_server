@@ -14,8 +14,8 @@ final class FarmBuilding {
   final int id;
   final BuildingData data;
 
-  /// The top-left tile.
-  final TilePos origin;
+  /// The top-left tile. Changes when the building is moved.
+  TilePos origin;
 
   /// From 1 up to the number of levels in [data].
   int level;

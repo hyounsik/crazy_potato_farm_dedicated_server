@@ -3,6 +3,18 @@
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "buildings": [
     {
+      "id": "house",
+      "width": 2,
+      "height": 2,
+      "buildable": false,
+      "removable": false,
+      "levels": [
+        {
+          "cost": 0
+        }
+      ]
+    },
+    {
       "id": "training_ground",
       "width": 2,
       "height": 2,

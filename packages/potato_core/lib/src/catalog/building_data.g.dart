@@ -16,6 +16,8 @@ _BuildingData _$BuildingDataFromJson(Map<String, dynamic> json) =>
           'houses',
           (v) => $enumDecodeNullable(_$PotatoTypeEnumMap, v),
         ),
+        buildable: $checkedConvert('buildable', (v) => v as bool? ?? true),
+        removable: $checkedConvert('removable', (v) => v as bool? ?? true),
         levels: $checkedConvert(
           'levels',
           (v) => (v as List<dynamic>)
@@ -32,6 +34,8 @@ Map<String, dynamic> _$BuildingDataToJson(_BuildingData instance) =>
       'width': instance.width,
       'height': instance.height,
       'houses': _$PotatoTypeEnumMap[instance.houses],
+      'buildable': instance.buildable,
+      'removable': instance.removable,
       'levels': instance.levels.map((e) => e.toJson()).toList(),
     };
 

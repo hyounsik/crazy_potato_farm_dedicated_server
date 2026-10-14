@@ -19,12 +19,13 @@ List<CompanionStart> companionsFor(FarmSimulation farm, List<int> potatoIds) =>
     ];
 
 extension RaidHomecoming on RaidResult {
-  /// The farm command that brings this run home: food and seeds from the
-  /// bag, and every companion back to the farm, knocked down or not (they
-  /// recover at the farm). Other items have nowhere to go yet and are left.
+  /// The farm command that brings this run home: food, seeds and materials
+  /// from the bag, and every companion back to the farm, knocked down or not
+  /// (they recover at the farm).
   FarmCommand homecoming(Catalog catalog) {
     var food = 0;
     final seeds = <Seed, int>{};
+    final materials = <String, int>{};
     for (final stack in items) {
       final item = catalog.items[stack.item];
       final seed = stack.seed;
@@ -37,7 +38,13 @@ extension RaidHomecoming on RaidResult {
             (n) => n + stack.count,
             ifAbsent: () => stack.count,
           );
-        case ItemKind.seed || ItemKind.material || null:
+        case ItemKind.material:
+          materials.update(
+            stack.item,
+            (n) => n + stack.count,
+            ifAbsent: () => stack.count,
+          );
+        case ItemKind.seed || null:
           break;
       }
     }
@@ -47,6 +54,7 @@ extension RaidHomecoming on RaidResult {
         for (final MapEntry(key: seed, value: count) in seeds.entries)
           SeedCount(seed: seed, count: count),
       ],
+      materials: materials,
       potatoIds: [for (final c in companions) c.potatoId],
     );
   }

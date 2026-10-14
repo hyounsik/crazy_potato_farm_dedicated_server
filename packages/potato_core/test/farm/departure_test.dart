@@ -107,6 +107,7 @@ void main() {
 
     expect(farm.food, 190);
     expect(farm.seeds.count(rare), before + 2);
+    expect(farm.materials, {'material': 9});
     expect(farm.awayPotatoes, isEmpty);
     expect(farm.fieldSpotOf(id)!.tile, _tile);
   });

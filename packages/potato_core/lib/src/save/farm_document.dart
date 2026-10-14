@@ -7,6 +7,7 @@ import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/farm_building.dart';
 import 'package:potato_core/src/farm/farm_simulation.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
+import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
@@ -44,6 +45,14 @@ abstract class FarmDocument with _$FarmDocument {
     /// Open blocks, in block units. Null in documents from before blocks
     /// opened: those farms still have only the starting land.
     List<TilePos>? openBlocks,
+
+    /// Pouch and box sizes; null in documents from before they were kept,
+    /// which start at the catalog's sizes.
+    int? pouchSlots,
+    int? gearSlots,
+    @Default(<OverflowDocument>[]) List<OverflowDocument> overflow,
+    @Default(<String, int>{}) Map<String, int> materials,
+    @Default(<MailDocument>[]) List<MailDocument> mail,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
 
@@ -129,6 +138,14 @@ abstract class FarmDocument with _$FarmDocument {
     graves: [for (final potato in farm.graves) PotatoDocument.of(potato)],
     openBlocks: farm.openBlocks.toList()
       ..sort((a, b) => a.y != b.y ? a.y - b.y : a.x - b.x),
+    pouchSlots: farm.pouchSlots,
+    gearSlots: farm.gearSlots,
+    overflow: [
+      for (final waiting in farm.overflow)
+        OverflowDocument(seed: waiting.seed, expiresTick: waiting.expiresTick),
+    ],
+    materials: Map.of(farm.materials),
+    mail: [for (final mail in farm.mail) MailDocument.of(mail)],
     totals: farm.totals.toJson(),
   );
 
@@ -202,6 +219,14 @@ abstract class FarmDocument with _$FarmDocument {
       ],
       graves: [for (final potato in graves) potato.toPotato()],
       openBlocks: openBlocks,
+      pouchSlots: pouchSlots,
+      gearSlots: gearSlots,
+      overflow: [
+        for (final waiting in overflow)
+          OverflowSeed(seed: waiting.seed, expiresTick: waiting.expiresTick),
+      ],
+      materials: materials,
+      mail: [for (final mail in this.mail) mail.toMail()],
       totals: FarmTotals.fromJson(totals),
     );
     return farm..addMissingStartBuildings();
@@ -328,5 +353,59 @@ abstract class PotatoDocument with _$PotatoDocument {
     productionMillis: productionMillis,
     stored: stored,
     weak: weak,
+  );
+}
+
+/// A seed waiting for room in the pouch.
+@freezed
+abstract class OverflowDocument with _$OverflowDocument {
+  const factory OverflowDocument({
+    required Seed seed,
+    required int expiresTick,
+  }) = _OverflowDocument;
+
+  factory OverflowDocument.fromJson(Map<String, dynamic> json) =>
+      _$OverflowDocumentFromJson(json);
+}
+
+/// A letter in the mailbox.
+@freezed
+abstract class MailDocument with _$MailDocument {
+  const factory MailDocument({
+    required int id,
+    required MailKind kind,
+    required int tick,
+    String? building,
+    @Default(<Seed>[]) List<Seed> seeds,
+    @Default(0) int food,
+    @Default(false) bool read,
+    @Default(false) bool claimed,
+  }) = _MailDocument;
+
+  const MailDocument._();
+
+  factory MailDocument.of(Mail mail) => MailDocument(
+    id: mail.id,
+    kind: mail.kind,
+    tick: mail.tick,
+    building: mail.building,
+    seeds: mail.seeds,
+    food: mail.food,
+    read: mail.read,
+    claimed: mail.claimed,
+  );
+
+  factory MailDocument.fromJson(Map<String, dynamic> json) =>
+      _$MailDocumentFromJson(json);
+
+  Mail toMail() => Mail(
+    id: id,
+    kind: kind,
+    tick: tick,
+    building: building,
+    seeds: seeds,
+    food: food,
+    read: read,
+    claimed: claimed,
   );
 }

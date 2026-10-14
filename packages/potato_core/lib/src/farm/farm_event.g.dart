@@ -163,6 +163,59 @@ const _$GradeEnumMap = {
   Grade.legendary: 'legendary',
 };
 
+SeedOverflowed _$SeedOverflowedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('SeedOverflowed', json, ($checkedConvert) {
+      final val = SeedOverflowed(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$SeedOverflowedToJson(SeedOverflowed instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
+OverflowExpired _$OverflowExpiredFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('OverflowExpired', json, ($checkedConvert) {
+      final val = OverflowExpired(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        food: $checkedConvert('food', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$OverflowExpiredToJson(OverflowExpired instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'food': instance.food,
+      'runtimeType': instance.$type,
+    };
+
+MailArrived _$MailArrivedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('MailArrived', json, ($checkedConvert) {
+      final val = MailArrived(
+        mailId: $checkedConvert('mail_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'mailId': 'mail_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$MailArrivedToJson(MailArrived instance) =>
+    <String, dynamic>{
+      'mail_id': instance.mailId,
+      'runtimeType': instance.$type,
+    };
+
 BlockOpened _$BlockOpenedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('BlockOpened', json, ($checkedConvert) {
       final val = BlockOpened(

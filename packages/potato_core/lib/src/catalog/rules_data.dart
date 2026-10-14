@@ -17,6 +17,8 @@ abstract class RulesData with _$RulesData {
     required PestRulesData pests,
     required NewFarmData newFarm,
     required RaidRulesData raid,
+    required StorageRulesData storage,
+    required MailRulesData mail,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -255,6 +257,53 @@ abstract class PestRewardData with _$PestRewardData {
 }
 
 /// What a newly made farm starts with.
+/// The house's seed pouch and equipment box, and seeds that do not fit.
+/// Values are placeholders until the balance phase.
+@freezed
+abstract class StorageRulesData with _$StorageRulesData {
+  const factory StorageRulesData({
+    /// Seeds a new farm's pouch holds, one per slot.
+    required int pouchSlots,
+
+    /// Slots one widening adds, its price, and the most the pouch holds
+    /// (until house sizes are worked out).
+    required int pouchStep,
+    required int pouchStepFood,
+    required int pouchMax,
+
+    /// The same for the equipment box.
+    required int gearSlots,
+    required int gearStep,
+    required int gearStepFood,
+    required int gearMax,
+
+    /// How long a seed that did not fit waits before it turns into baby
+    /// potatoes.
+    required int overflowSeconds,
+
+    /// Baby potatoes a seed turns into, by grade.
+    required Map<Grade, int> seedFood,
+  }) = _StorageRulesData;
+
+  factory StorageRulesData.fromJson(Map<String, dynamic> json) =>
+      _$StorageRulesDataFromJson(json);
+}
+
+/// The mailbox. Values are placeholders until the balance phase.
+@freezed
+abstract class MailRulesData with _$MailRulesData {
+  const factory MailRulesData({
+    /// Letters kept; the oldest go first.
+    required int keep,
+
+    /// Level of the seed a letter brings when a building goes up.
+    required int buildingSeedLevel,
+  }) = _MailRulesData;
+
+  factory MailRulesData.fromJson(Map<String, dynamic> json) =>
+      _$MailRulesDataFromJson(json);
+}
+
 /// A building a new farm starts with, by its `buildings.json` id.
 @freezed
 abstract class StartBuildingData with _$StartBuildingData {

@@ -84,6 +84,34 @@ _FarmDocument _$FarmDocumentFromJson(
             ?.map((e) => TilePos.fromJson(e as Map<String, dynamic>))
             .toList(),
       ),
+      pouchSlots: $checkedConvert('pouch_slots', (v) => (v as num?)?.toInt()),
+      gearSlots: $checkedConvert('gear_slots', (v) => (v as num?)?.toInt()),
+      overflow: $checkedConvert(
+        'overflow',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => OverflowDocument.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <OverflowDocument>[],
+      ),
+      materials: $checkedConvert(
+        'materials',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(k, (e as num).toInt()),
+            ) ??
+            const <String, int>{},
+      ),
+      mail: $checkedConvert(
+        'mail',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => MailDocument.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <MailDocument>[],
+      ),
       totals: $checkedConvert(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
@@ -96,6 +124,8 @@ _FarmDocument _$FarmDocumentFromJson(
     'nextId': 'next_id',
     'randomState': 'random_state',
     'openBlocks': 'open_blocks',
+    'pouchSlots': 'pouch_slots',
+    'gearSlots': 'gear_slots',
   },
 );
 
@@ -114,6 +144,11 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'away': instance.away.map((e) => e.toJson()).toList(),
       'graves': instance.graves.map((e) => e.toJson()).toList(),
       'open_blocks': instance.openBlocks?.map((e) => e.toJson()).toList(),
+      'pouch_slots': instance.pouchSlots,
+      'gear_slots': instance.gearSlots,
+      'overflow': instance.overflow.map((e) => e.toJson()).toList(),
+      'materials': instance.materials,
+      'mail': instance.mail.map((e) => e.toJson()).toList(),
       'totals': instance.totals,
     };
 
@@ -352,4 +387,61 @@ const _$CombatStyleEnumMap = {
   CombatStyle.melee: 'melee',
   CombatStyle.ranged: 'ranged',
   CombatStyle.escort: 'escort',
+};
+
+_OverflowDocument _$OverflowDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_OverflowDocument', json, ($checkedConvert) {
+      final val = _OverflowDocument(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        expiresTick: $checkedConvert('expires_tick', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'expiresTick': 'expires_tick'});
+
+Map<String, dynamic> _$OverflowDocumentToJson(_OverflowDocument instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'expires_tick': instance.expiresTick,
+    };
+
+_MailDocument _$MailDocumentFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_MailDocument', json, ($checkedConvert) {
+      final val = _MailDocument(
+        id: $checkedConvert('id', (v) => (v as num).toInt()),
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$MailKindEnumMap, v)),
+        tick: $checkedConvert('tick', (v) => (v as num).toInt()),
+        building: $checkedConvert('building', (v) => v as String?),
+        seeds: $checkedConvert(
+          'seeds',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map((e) => Seed.fromJson(e as Map<String, dynamic>))
+                  .toList() ??
+              const <Seed>[],
+        ),
+        food: $checkedConvert('food', (v) => (v as num?)?.toInt() ?? 0),
+        read: $checkedConvert('read', (v) => v as bool? ?? false),
+        claimed: $checkedConvert('claimed', (v) => v as bool? ?? false),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$MailDocumentToJson(_MailDocument instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'kind': _$MailKindEnumMap[instance.kind]!,
+      'tick': instance.tick,
+      'building': instance.building,
+      'seeds': instance.seeds.map((e) => e.toJson()).toList(),
+      'food': instance.food,
+      'read': instance.read,
+      'claimed': instance.claimed,
+    };
+
+const _$MailKindEnumMap = {
+  MailKind.start: 'start',
+  MailKind.building: 'building',
 };

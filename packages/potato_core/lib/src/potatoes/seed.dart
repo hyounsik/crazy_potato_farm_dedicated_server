@@ -59,6 +59,9 @@ final class SeedPouch {
 
   int count(Seed seed) => _counts[seed] ?? 0;
 
+  /// Seeds held, one slot each.
+  int get total => _counts.values.fold(0, (sum, count) => sum + count);
+
   void add(Seed seed, [int count = 1]) {
     if (count < 0) throw ArgumentError.value(count, 'count');
     if (count == 0) return;

@@ -29,6 +29,14 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) =>
           'raid',
           (v) => RaidRulesData.fromJson(v as Map<String, dynamic>),
         ),
+        storage: $checkedConvert(
+          'storage',
+          (v) => StorageRulesData.fromJson(v as Map<String, dynamic>),
+        ),
+        mail: $checkedConvert(
+          'mail',
+          (v) => MailRulesData.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     }, fieldKeyMap: const {'newFarm': 'new_farm'});
@@ -40,6 +48,8 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'pests': instance.pests.toJson(),
       'new_farm': instance.newFarm.toJson(),
       'raid': instance.raid.toJson(),
+      'storage': instance.storage.toJson(),
+      'mail': instance.mail.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -415,6 +425,87 @@ Map<String, dynamic> _$PestRewardDataToJson(_PestRewardData instance) =>
       'food_min': instance.foodMin,
       'food_max': instance.foodMax,
       'seed_chance': instance.seedChance,
+    };
+
+_StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_StorageRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _StorageRulesData(
+          pouchSlots: $checkedConvert('pouch_slots', (v) => (v as num).toInt()),
+          pouchStep: $checkedConvert('pouch_step', (v) => (v as num).toInt()),
+          pouchStepFood: $checkedConvert(
+            'pouch_step_food',
+            (v) => (v as num).toInt(),
+          ),
+          pouchMax: $checkedConvert('pouch_max', (v) => (v as num).toInt()),
+          gearSlots: $checkedConvert('gear_slots', (v) => (v as num).toInt()),
+          gearStep: $checkedConvert('gear_step', (v) => (v as num).toInt()),
+          gearStepFood: $checkedConvert(
+            'gear_step_food',
+            (v) => (v as num).toInt(),
+          ),
+          gearMax: $checkedConvert('gear_max', (v) => (v as num).toInt()),
+          overflowSeconds: $checkedConvert(
+            'overflow_seconds',
+            (v) => (v as num).toInt(),
+          ),
+          seedFood: $checkedConvert(
+            'seed_food',
+            (v) => (v as Map<String, dynamic>).map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ),
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'pouchSlots': 'pouch_slots',
+        'pouchStep': 'pouch_step',
+        'pouchStepFood': 'pouch_step_food',
+        'pouchMax': 'pouch_max',
+        'gearSlots': 'gear_slots',
+        'gearStep': 'gear_step',
+        'gearStepFood': 'gear_step_food',
+        'gearMax': 'gear_max',
+        'overflowSeconds': 'overflow_seconds',
+        'seedFood': 'seed_food',
+      },
+    );
+
+Map<String, dynamic> _$StorageRulesDataToJson(
+  _StorageRulesData instance,
+) => <String, dynamic>{
+  'pouch_slots': instance.pouchSlots,
+  'pouch_step': instance.pouchStep,
+  'pouch_step_food': instance.pouchStepFood,
+  'pouch_max': instance.pouchMax,
+  'gear_slots': instance.gearSlots,
+  'gear_step': instance.gearStep,
+  'gear_step_food': instance.gearStepFood,
+  'gear_max': instance.gearMax,
+  'overflow_seconds': instance.overflowSeconds,
+  'seed_food': instance.seedFood.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
+};
+
+_MailRulesData _$MailRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_MailRulesData', json, ($checkedConvert) {
+      final val = _MailRulesData(
+        keep: $checkedConvert('keep', (v) => (v as num).toInt()),
+        buildingSeedLevel: $checkedConvert(
+          'building_seed_level',
+          (v) => (v as num).toInt(),
+        ),
+      );
+      return val;
+    }, fieldKeyMap: const {'buildingSeedLevel': 'building_seed_level'});
+
+Map<String, dynamic> _$MailRulesDataToJson(_MailRulesData instance) =>
+    <String, dynamic>{
+      'keep': instance.keep,
+      'building_seed_level': instance.buildingSeedLevel,
     };
 
 _StartBuildingData _$StartBuildingDataFromJson(Map<String, dynamic> json) =>

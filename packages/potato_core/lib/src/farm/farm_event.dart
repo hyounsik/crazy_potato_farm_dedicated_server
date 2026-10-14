@@ -55,6 +55,17 @@ sealed class FarmEvent with _$FarmEvent {
     required Seed seed,
   }) = PotatoRevived;
 
+  /// A seed came with the pouch full and waits in the overflow.
+  const factory FarmEvent.seedOverflowed({required Seed seed}) = SeedOverflowed;
+
+  /// A waiting seed ran out of time and became [food] baby potatoes.
+  const factory FarmEvent.overflowExpired({
+    required Seed seed,
+    required int food,
+  }) = OverflowExpired;
+
+  const factory FarmEvent.mailArrived({required int mailId}) = MailArrived;
+
   const factory FarmEvent.blockOpened({
     required TilePos block,
     required int food,

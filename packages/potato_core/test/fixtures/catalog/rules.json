@@ -151,5 +151,25 @@
       "regen_food_per_second": 0.75,
       "produce_per_second": 0.2
     }
+  },
+  "storage": {
+    "pouch_slots": 40,
+    "pouch_step": 5,
+    "pouch_step_food": 30,
+    "pouch_max": 60,
+    "gear_slots": 6,
+    "gear_step": 2,
+    "gear_step_food": 30,
+    "gear_max": 12,
+    "overflow_seconds": 600,
+    "seed_food": {
+      "normal": 5,
+      "rare": 15,
+      "legendary": 50
+    }
+  },
+  "mail": {
+    "keep": 5,
+    "building_seed_level": 1
   }
 }

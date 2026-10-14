@@ -370,6 +370,31 @@ final class Catalog {
     }
     check.probability('pests.reward.seed_chance', pests.reward.seedChance);
 
+    final storage = rules.storage;
+    for (final (name, value) in [
+      ('pouch_slots', storage.pouchSlots),
+      ('pouch_step', storage.pouchStep),
+      ('gear_slots', storage.gearSlots),
+      ('gear_step', storage.gearStep),
+      ('overflow_seconds', storage.overflowSeconds),
+    ]) {
+      check.positive('storage.$name', value);
+    }
+    check.atLeast('storage.pouch_step_food', storage.pouchStepFood, 0);
+    check.atLeast('storage.gear_step_food', storage.gearStepFood, 0);
+    check.atLeast('storage.pouch_max', storage.pouchMax, storage.pouchSlots);
+    check.atLeast('storage.gear_max', storage.gearMax, storage.gearSlots);
+    for (final grade in Grade.values) {
+      final food = storage.seedFood[grade];
+      if (food == null) {
+        check.issue('storage.seed_food', 'missing ${grade.name}');
+      } else {
+        check.atLeast('storage.seed_food.${grade.name}', food, 0);
+      }
+    }
+    check.positive('mail.keep', rules.mail.keep);
+    check.atLeast('mail.building_seed_level', rules.mail.buildingSeedLevel, 0);
+
     final newFarm = rules.newFarm;
     check.atLeast('new_farm.food', newFarm.food, 0);
     for (final (index, field) in newFarm.fields.indexed) {

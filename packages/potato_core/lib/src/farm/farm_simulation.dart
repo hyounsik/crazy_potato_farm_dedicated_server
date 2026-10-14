@@ -12,6 +12,7 @@ import 'package:potato_core/src/farm/farm_building.dart';
 import 'package:potato_core/src/farm/farm_command.dart';
 import 'package:potato_core/src/farm/farm_event.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
+import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
@@ -45,8 +46,18 @@ final class FarmSimulation {
     Iterable<AwayPotato> away = const [],
     Iterable<Potato> graves = const [],
     Iterable<TilePos>? openBlocks,
+    int? pouchSlots,
+    int? gearSlots,
+    Iterable<OverflowSeed> overflow = const [],
+    Map<String, int> materials = const {},
+    Iterable<Mail> mail = const [],
     FarmTotals? totals,
   }) : _graves = List.of(graves),
+       pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
+       gearSlots = gearSlots ?? catalog.rules.storage.gearSlots,
+       _overflow = List.of(overflow),
+       _materials = SplayTreeMap.of(materials),
+       _mail = List.of(mail),
        _openBlocks = {...(openBlocks ?? catalog.rules.farm.startBlocks)},
        _fields = SplayTreeMap.fromIterable(fields, key: (f) => f.id),
        _buildings = SplayTreeMap.fromIterable(buildings, key: (b) => b.id),
@@ -105,6 +116,7 @@ final class FarmSimulation {
           origin: building.origin,
         ),
     ];
+    final letters = [Mail(id: nextId++, kind: MailKind.start, tick: 0)];
     return FarmSimulation.restore(
       catalog: catalog,
       random: random,
@@ -114,6 +126,7 @@ final class FarmSimulation {
       seeds: seeds,
       fields: fields,
       buildings: buildings,
+      mail: letters,
     );
   }
 
@@ -132,6 +145,21 @@ final class FarmSimulation {
 
   /// Open blocks, in block units. Everything else is locked.
   final Set<TilePos> _openBlocks;
+
+  /// Seeds the pouch holds, one per slot.
+  int pouchSlots;
+
+  /// Pieces of equipment the box holds.
+  int gearSlots;
+
+  /// Seeds that came with the pouch full, oldest first.
+  final List<OverflowSeed> _overflow;
+
+  /// Materials kept in the house, by item id.
+  final SplayTreeMap<String, int> _materials;
+
+  /// Letters, oldest first.
+  final List<Mail> _mail;
   final SplayTreeMap<int, Guard> _guards;
   final SplayTreeMap<int, Potato> _fridge;
   final SplayTreeMap<int, AwayPotato> _away;
@@ -245,6 +273,21 @@ final class FarmSimulation {
   /// Open blocks, in block units.
   Iterable<TilePos> get openBlocks => _openBlocks;
 
+  /// Seeds waiting for room in the pouch, oldest first.
+  List<OverflowSeed> get overflow => List.unmodifiable(_overflow);
+
+  /// Materials kept in the house, by item id.
+  Map<String, int> get materials => UnmodifiableMapView(_materials);
+
+  /// Letters, oldest first.
+  List<Mail> get mail => List.unmodifiable(_mail);
+
+  /// Letters not read yet: the mailbox flag is up while any are.
+  int get unreadMail => _mail.where((m) => !m.read).length;
+
+  /// Free slots in the seed pouch.
+  int get pouchRoom => math.max(0, pouchSlots - _seeds.total);
+
   /// Whether [tile] is on the farm and in an open block.
   bool isOpen(TilePos tile) {
     final size = _rules.farm.size;
@@ -309,6 +352,12 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
+    WidenPouch() => _widen(pouch: true),
+    WidenGearBox() => _widen(pouch: false),
+    SellSeed(:final seed) => _sellSeed(seed),
+    TakeOverflow(:final seed) => _takeOverflow(seed),
+    ReadMail(:final mailId) => _readMail(mailId),
+    ClaimMail(:final mailId) => _claimMail(mailId),
     OpenBlock(:final block) => _openBlock(block),
     ResizeField(:final fieldId, :final rect) => _resizeField(fieldId, rect),
     MoveField(:final fieldId, :final origin) => _moveField(fieldId, origin),
@@ -335,11 +384,8 @@ final class FarmSimulation {
     ),
     Revive(:final potatoId) => _revive(potatoId),
     Depart(:final food, :final potatoIds) => _depart(food, potatoIds),
-    ReturnHome(:final food, :final seeds, :final potatoIds) => _returnHome(
-      food,
-      seeds,
-      potatoIds,
-    ),
+    ReturnHome(:final food, :final seeds, :final materials, :final potatoIds) =>
+      _returnHome(food, seeds, materials, potatoIds),
   };
 
   /// Advances the farm by one fixed step (`rules.farm.step_millis`).
@@ -351,6 +397,7 @@ final class FarmSimulation {
     }
     _stepGuards(millis);
     _stepFridge(millis);
+    _expireOverflow();
     if (_isDue(_rules.pests.checkEverySeconds)) _rollPests();
     if (_isDue(_rules.potatoes.upkeepEverySeconds)) _payUpkeep();
   }
@@ -718,7 +765,7 @@ final class FarmSimulation {
         ._sums(_effects)
         .apply(FarmStat.harvestRareChance, _rules.potatoes.harvestRareChance);
     final seed = _random.chance(chance) ? _fieldSeed(field) : null;
-    if (seed != null) _seeds.add(seed);
+    if (seed != null) _gainSeed(seed);
     _events.add(
       FarmEvent.harvested(fieldId: field.id, food: taken, seed: seed),
     );
@@ -847,6 +894,113 @@ final class FarmSimulation {
     _events.add(
       FarmEvent.built(buildingId: building.id, kind: kind, origin: origin),
     );
+    _send(
+      MailKind.building,
+      building: kind,
+      seeds: [
+        _roller.seed(
+          type: data.houses ?? PotatoType.food,
+          grade: Grade.normal,
+          level: _rules.mail.buildingSeedLevel,
+          random: _random,
+        ),
+      ],
+    );
+    return null;
+  }
+
+  /// Puts a letter in the mailbox, letting the oldest go past the limit.
+  void _send(
+    MailKind kind, {
+    String? building,
+    List<Seed> seeds = const [],
+    int food = 0,
+  }) {
+    final mail = Mail(
+      id: _nextId++,
+      kind: kind,
+      tick: _tick,
+      building: building,
+      seeds: seeds,
+      food: food,
+    );
+    _mail.add(mail);
+    while (_mail.length > _rules.mail.keep) {
+      _mail.removeAt(0);
+    }
+    _events.add(FarmEvent.mailArrived(mailId: mail.id));
+  }
+
+  /// A seed the farm gains: into the pouch if there is room, or else to
+  /// wait in the overflow until it runs out of time.
+  void _gainSeed(Seed seed) {
+    if (pouchRoom > 0) {
+      _seeds.add(seed);
+      return;
+    }
+    final steps =
+        _rules.storage.overflowSeconds * 1000 ~/ _rules.farm.stepMillis;
+    _overflow.add(OverflowSeed(seed: seed, expiresTick: _tick + steps));
+    _events.add(FarmEvent.seedOverflowed(seed: seed));
+  }
+
+  /// Waiting seeds whose time is up turn into baby potatoes.
+  void _expireOverflow() {
+    while (_overflow.isNotEmpty && _overflow.first.expiresTick <= _tick) {
+      final seed = _overflow.removeAt(0).seed;
+      final value = _rules.storage.seedFood[seed.grade]!;
+      food += value;
+      _events.add(FarmEvent.overflowExpired(seed: seed, food: value));
+    }
+  }
+
+  FarmRejection? _widen({required bool pouch}) {
+    final storage = _rules.storage;
+    final slots = pouch ? pouchSlots : gearSlots;
+    final max = pouch ? storage.pouchMax : storage.gearMax;
+    if (slots >= max) return FarmRejection.atMost;
+    final cost = pouch ? storage.pouchStepFood : storage.gearStepFood;
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
+    final step = pouch ? storage.pouchStep : storage.gearStep;
+    if (pouch) {
+      pouchSlots = math.min(max, slots + step);
+    } else {
+      gearSlots = math.min(max, slots + step);
+    }
+    return null;
+  }
+
+  FarmRejection? _sellSeed(Seed seed) {
+    if (!_seeds.take(seed)) return FarmRejection.noSeed;
+    food += _rules.storage.seedFood[seed.grade]!;
+    return null;
+  }
+
+  FarmRejection? _takeOverflow(Seed seed) {
+    final index = _overflow.indexWhere((o) => o.seed == seed);
+    if (index < 0) return FarmRejection.notWaiting;
+    if (pouchRoom == 0) return FarmRejection.pouchFull;
+    _seeds.add(_overflow.removeAt(index).seed);
+    return null;
+  }
+
+  FarmRejection? _readMail(int mailId) {
+    final mail = _mail.where((m) => m.id == mailId).firstOrNull;
+    if (mail == null) return FarmRejection.noMail;
+    mail.read = true;
+    return null;
+  }
+
+  FarmRejection? _claimMail(int mailId) {
+    final mail = _mail.where((m) => m.id == mailId).firstOrNull;
+    if (mail == null) return FarmRejection.noMail;
+    if (!mail.hasGift) return FarmRejection.nothingToClaim;
+    mail
+      ..read = true
+      ..claimed = true;
+    food += mail.food;
+    mail.seeds.forEach(_gainSeed);
     return null;
   }
 
@@ -1057,13 +1211,19 @@ final class FarmSimulation {
   FarmRejection? _returnHome(
     int food,
     List<SeedCount> seeds,
+    Map<String, int> materials,
     List<int> potatoIds,
   ) {
     this.food += food;
     var seedCount = 0;
     for (final stack in seeds) {
-      _seeds.add(stack.seed, stack.count);
+      for (var i = 0; i < stack.count; i++) {
+        _gainSeed(stack.seed);
+      }
       seedCount += stack.count;
+    }
+    for (final MapEntry(key: item, value: count) in materials.entries) {
+      if (count > 0) _materials[item] = (_materials[item] ?? 0) + count;
     }
     final back = <int>[];
     final toFridge = <int>[];
@@ -1176,7 +1336,7 @@ final class FarmSimulation {
         reward.foodMin + _random.nextInt(reward.foodMax - reward.foodMin + 1);
     final seed = _random.chance(reward.seedChance) ? _fieldSeed(field) : null;
     food += gained;
-    if (seed != null) _seeds.add(seed);
+    if (seed != null) _gainSeed(seed);
     if (byTap) {
       totals.pestsClearedByTap++;
     } else {
@@ -1274,7 +1434,7 @@ final class FarmSimulation {
       grade = grade.higher ?? grade;
     }
     final seed = potato.seed.copyWith(grade: grade);
-    _seeds.add(seed);
+    _gainSeed(seed);
     return seed;
   }
 

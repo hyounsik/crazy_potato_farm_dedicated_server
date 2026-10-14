@@ -263,7 +263,8 @@ void main() {
       expect(farm.seeds.count(_normal), start - 1);
       expect(farm.field(1)!.potatoAt(_tile)!.grade, Grade.normal);
       expect(farm.takeEvents(), [
-        FarmEvent.planted(fieldId: 1, tile: _tile, potatoId: 2, seed: _normal),
+        // Id 1 is the starting field and 2 the start letter.
+        FarmEvent.planted(fieldId: 1, tile: _tile, potatoId: 3, seed: _normal),
       ]);
       expect(farm.takeEvents(), isEmpty);
     });
@@ -304,7 +305,7 @@ void main() {
       farm.takeEvents();
       farm.runSteps(120);
       expect(farm.takeEvents(), [
-        FarmEvent.grown(fieldId: 1, tile: _tile, potatoId: 2),
+        FarmEvent.grown(fieldId: 1, tile: _tile, potatoId: 3),
       ]);
       expect(
         farm.apply(FarmCommand.harvestField(fieldId: 1)),

@@ -21,6 +21,7 @@ export 'src/farm/farm_command.dart';
 export 'src/farm/farm_event.dart';
 export 'src/farm/farm_simulation.dart';
 export 'src/farm/farm_totals.dart';
+export 'src/farm/mail.dart';
 export 'src/farm/pest.dart';
 export 'src/items/bag.dart';
 export 'src/map/map_chunk.dart';

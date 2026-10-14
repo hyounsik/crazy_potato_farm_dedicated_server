@@ -65,6 +65,91 @@ Map<String, dynamic> _$HarvestFieldToJson(HarvestField instance) =>
       'runtimeType': instance.$type,
     };
 
+WidenPouch _$WidenPouchFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('WidenPouch', json, ($checkedConvert) {
+      final val = WidenPouch(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$WidenPouchToJson(WidenPouch instance) =>
+    <String, dynamic>{'runtimeType': instance.$type};
+
+WidenGearBox _$WidenGearBoxFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('WidenGearBox', json, ($checkedConvert) {
+      final val = WidenGearBox(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$WidenGearBoxToJson(WidenGearBox instance) =>
+    <String, dynamic>{'runtimeType': instance.$type};
+
+SellSeed _$SellSeedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('SellSeed', json, ($checkedConvert) {
+      final val = SellSeed(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$SellSeedToJson(SellSeed instance) => <String, dynamic>{
+  'seed': instance.seed.toJson(),
+  'runtimeType': instance.$type,
+};
+
+TakeOverflow _$TakeOverflowFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('TakeOverflow', json, ($checkedConvert) {
+      final val = TakeOverflow(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$TakeOverflowToJson(TakeOverflow instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
+ReadMail _$ReadMailFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ReadMail', json, ($checkedConvert) {
+      final val = ReadMail(
+        mailId: $checkedConvert('mail_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'mailId': 'mail_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$ReadMailToJson(ReadMail instance) => <String, dynamic>{
+  'mail_id': instance.mailId,
+  'runtimeType': instance.$type,
+};
+
+ClaimMail _$ClaimMailFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ClaimMail', json, ($checkedConvert) {
+      final val = ClaimMail(
+        mailId: $checkedConvert('mail_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'mailId': 'mail_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$ClaimMailToJson(ClaimMail instance) => <String, dynamic>{
+  'mail_id': instance.mailId,
+  'runtimeType': instance.$type,
+};
+
 OpenBlock _$OpenBlockFromJson(Map<String, dynamic> json) =>
     $checkedCreate('OpenBlock', json, ($checkedConvert) {
       final val = OpenBlock(
@@ -389,6 +474,14 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) =>
                   .toList() ??
               const <SeedCount>[],
         ),
+        materials: $checkedConvert(
+          'materials',
+          (v) =>
+              (v as Map<String, dynamic>?)?.map(
+                (k, e) => MapEntry(k, (e as num).toInt()),
+              ) ??
+              const <String, int>{},
+        ),
         potatoIds: $checkedConvert(
           'potato_ids',
           (v) =>
@@ -404,6 +497,7 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
     <String, dynamic>{
       'food': instance.food,
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
+      'materials': instance.materials,
       'potato_ids': instance.potatoIds,
       'runtimeType': instance.$type,
     };

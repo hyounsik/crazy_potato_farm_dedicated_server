@@ -24,6 +24,25 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
+  /// Widens the seed pouch by one step, for baby potatoes.
+  const factory FarmCommand.widenPouch() = WidenPouch;
+
+  /// Widens the equipment box by one step, for baby potatoes.
+  const factory FarmCommand.widenGearBox() = WidenGearBox;
+
+  /// Turns one [seed] from the pouch into baby potatoes.
+  const factory FarmCommand.sellSeed({required Seed seed}) = SellSeed;
+
+  /// Moves one waiting [seed] that did not fit into the pouch, if there is
+  /// room now.
+  const factory FarmCommand.takeOverflow({required Seed seed}) = TakeOverflow;
+
+  /// Marks letter [mailId] read.
+  const factory FarmCommand.readMail({required int mailId}) = ReadMail;
+
+  /// Takes what letter [mailId] brings.
+  const factory FarmCommand.claimMail({required int mailId}) = ClaimMail;
+
   /// Opens the locked [block] (in block units) next to open land, paying
   /// more the more blocks have been opened.
   const factory FarmCommand.openBlock({required TilePos block}) = OpenBlock;
@@ -113,6 +132,9 @@ sealed class FarmCommand with _$FarmCommand {
   const factory FarmCommand.returnHome({
     required int food,
     @Default(<SeedCount>[]) List<SeedCount> seeds,
+
+    /// Materials brought back, by item id.
+    @Default(<String, int>{}) Map<String, int> materials,
     @Default(<int>[]) List<int> potatoIds,
   }) = ReturnHome;
 
@@ -152,6 +174,19 @@ enum FarmRejection {
 
   /// The building comes with the farm and stays (the house).
   cannotRemove,
+
+  /// The pouch or box is as large as it can get.
+  atMost,
+
+  /// The pouch has no free slot.
+  pouchFull,
+
+  /// No such waiting seed, or no such letter.
+  notWaiting,
+  noMail,
+
+  /// The letter's gift was already taken, or it brings nothing.
+  nothingToClaim,
   maxLevel,
   noPest,
   fridgeFull,

@@ -114,6 +114,8 @@ void main() {
           kind: 'training_ground',
           origin: const TilePos(8, 8),
         ),
+        // A letter with a seed comes for every building.
+        FarmEvent.mailArrived(mailId: farm.mail.last.id),
       ]);
     });
 

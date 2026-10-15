@@ -100,7 +100,7 @@ void main() {
         ItemStack('seed_food_rare', 1, seed: rare),
         ItemStack('material', 9),
       ],
-      companions: [(potatoId: id, down: true)],
+      companions: [(potatoId: id, down: true, gone: false)],
       score: 3,
       lost: false,
     );
@@ -122,7 +122,7 @@ void main() {
     final result = RaidResult(
       outcome: RaidOutcome.fainted,
       items: [ItemStack('food', 30), ItemStack('material', 9)],
-      companions: [(potatoId: id, down: false)],
+      companions: [(potatoId: id, down: false, gone: false)],
       score: 12,
       lost: true,
     );
@@ -137,6 +137,24 @@ void main() {
     final returned = farm.takeEvents().whereType<Returned>().single;
     expect(returned.lost, [id]);
     expect(returned.potatoIds, isEmpty);
+  });
+
+  test('a companion that fell in a danger zone stays gone after leaving', () {
+    final id = growOne();
+    farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
+    farm.takeEvents();
+    final result = RaidResult(
+      outcome: RaidOutcome.extracted,
+      items: [ItemStack('food', 10)],
+      companions: [(potatoId: id, down: true, gone: true)],
+      score: 12,
+      lost: false,
+    );
+    expect(farm.apply(result.homecoming(catalog)), isNull);
+    expect(farm.potatoById(id), isNull);
+    expect(farm.awayPotatoes, isEmpty);
+    expect(farm.progress, 12);
+    expect(farm.takeEvents().whereType<Returned>().single.lost, [id]);
   });
 
   test('progress follows the best successful run and never drops', () {

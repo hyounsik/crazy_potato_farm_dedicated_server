@@ -149,7 +149,39 @@
       "regen_delay_seconds": 4,
       "regen_percent_per_second": 0.05,
       "regen_food_per_second": 0.75,
-      "produce_per_second": 0.2
+      "produce_per_second": 0.2,
+      "attack_range": 4.6,
+      "defense_range": 2.2,
+      "styles": {
+        "melee": {
+          "max_hp": 70,
+          "damage": 9,
+          "interval": 0.7,
+          "speed_multiplier": 1.1,
+          "preferred_distance": 0.3,
+          "reach": 0.2
+        },
+        "ranged": {
+          "max_hp": 50,
+          "damage": 7,
+          "interval": 0.9,
+          "speed_multiplier": 0.9,
+          "preferred_distance": 2.2,
+          "range": 2.8,
+          "bullet_speed": 7
+        },
+        "escort": {
+          "max_hp": 70,
+          "damage": 6,
+          "interval": 0.8,
+          "speed_multiplier": 1.0,
+          "preferred_distance": 0.8,
+          "reach": 0.2
+        }
+      },
+      "level_hp_permille": 30,
+      "level_attack_permille": 30,
+      "aggro_pulse_range": 3
     }
   },
   "storage": {

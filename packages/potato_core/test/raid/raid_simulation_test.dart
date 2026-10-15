@@ -42,6 +42,79 @@ void main() {
       'hungry_damage_per_second': 10,
     };
     zones.add(danger);
+    // Combat seeds, which a fallen combat potato leaves.
+    ((files['items']! as Map<String, dynamic>)['items'] as List<Object?>).add({
+      'id': 'seed_combat_normal',
+      'kind': 'seed',
+      'stack': 1,
+      'seed': {'type': 'combat', 'grade': 'normal'},
+    });
+    // A gun that never reaches, so only companions fight.
+    ((files['weapons']! as Map<String, dynamic>)['weapons'] as List<Object?>)
+        .add({
+          'id': 'blank',
+          'range': 0.01,
+          'interval': 1,
+          'damage': 1,
+          'bullet_speed': 1,
+        });
+    // Run-only abilities for the companion tests.
+    final abilities =
+        (files['potato_abilities']! as Map<String, dynamic>)['abilities']
+            as List<Object?>;
+    Map<String, Object?> effect(
+      String target,
+      String kind,
+      Map<String, Object?> rest,
+    ) => {'context': 'explore', 'target': target, 'kind': kind, ...rest};
+    abilities.addAll([
+      {
+        'id': 'combat.fury',
+        'pool': 'combat',
+        'rarity': 'very_low',
+        'effects': [
+          effect('self', 'stat', {
+            'stat': 'unit.attack',
+            'op': 'mul',
+            'value': 1.5,
+            'condition': {'type': 'hp_below', 'ratio': 0.5},
+          }),
+        ],
+      },
+      {
+        'id': 'buff.rally',
+        'pool': 'buff',
+        'rarity': 'very_low',
+        'effects': [
+          effect('party', 'stat', {
+            'stat': 'unit.attack',
+            'op': 'mul',
+            'value': 1.2,
+          }),
+          effect('party', 'periodic', {
+            'interval_sec': 5,
+            'action': 'heal_percent',
+            'value': 10,
+          }),
+        ],
+      },
+      {
+        'id': 'food.loud',
+        'pool': 'food',
+        'rarity': 'very_low',
+        'effects': [
+          effect('self', 'periodic', {
+            'interval_sec': 5,
+            'action': 'say',
+            'text': 'eek',
+          }),
+          effect('self', 'periodic', {
+            'interval_sec': 5,
+            'action': 'aggro_pulse',
+          }),
+        ],
+      },
+    ]);
     final result = Catalog.load(files);
     expect(result.issues, isEmpty);
     catalog = result.catalog!;
@@ -280,7 +353,11 @@ void main() {
       lessThan(2),
     );
     together.apply(const GoHome());
-    expect(together.result!.companions.single, (potatoId: 7, down: false));
+    expect(together.result!.companions.single, (
+      potatoId: 7,
+      down: false,
+      gone: false,
+    ));
   });
 
   test('saving mid-run and going on equals never stopping', () {
@@ -448,5 +525,265 @@ void main() {
       expect(restored.outcome, RaidOutcome.extracted);
       expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
     });
+  });
+
+  group('companions', () {
+    CompanionStart fighter(
+      CombatStyle style, {
+      CompanionMode mode = CompanionMode.attack,
+      int level = 0,
+      List<String> abilities = const ['combat.plain'],
+    }) => CompanionStart(
+      potatoId: 1,
+      type: PotatoType.combat,
+      grade: Grade.normal,
+      level: level,
+      abilities: abilities,
+      style: style,
+      mode: mode,
+    );
+
+    /// A run with the player's gun swapped for one that cannot reach, so only
+    /// companions fight.
+    RaidSimulation unarmed(List<CompanionStart> team, {String zone = 'open'}) {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: zone,
+        seed: 1,
+        food: 100,
+        companions: team,
+      );
+      run.player.weapon = 'blank';
+      return run;
+    }
+
+    test('a combat potato gets its style\'s health, raised by level', () {
+      final style = catalog.rules.raid.companion.styles[CombatStyle.melee]!;
+      final low = unarmed([fighter(CombatStyle.melee)]).companions.single;
+      final high = unarmed([fighter(CombatStyle.melee, level: 10)])
+          .companions
+          .single;
+      // combat.plain: +5% health.
+      expect(low.maxHp, closeTo(style.maxHp * 1.05, 1e-9));
+      final perLevel = catalog.rules.raid.companion.levelHpPermille / 1000;
+      expect(
+        high.maxHp,
+        closeTo(style.maxHp * (1 + 10 * perLevel) * 1.05, 1e-9),
+      );
+    });
+
+    test('in attack mode a melee potato runs at a calm enemy and hits it', () {
+      final run = unarmed([fighter(CombatStyle.melee)]);
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(2, 0),
+      );
+      runFor(run, 3);
+      expect(brute.hp, lessThan(brute.maxHp));
+      expect(
+        brute.target,
+        run.companions.single.id,
+        reason: 'it goes for whoever hit it',
+      );
+    });
+
+    test('in defense mode it leaves calm enemies alone', () {
+      final run = unarmed([
+        fighter(CombatStyle.melee, mode: CompanionMode.defense),
+      ]);
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(1.5, 0),
+      );
+      runFor(run, 3);
+      expect(brute.hp, brute.maxHp);
+      expect(run.companions.single.target, isNull);
+    });
+
+    test('in defense mode it takes on what goes for the player', () {
+      final run = unarmed([
+        fighter(CombatStyle.melee, mode: CompanionMode.defense),
+      ]);
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(1.5, 0),
+      )..target = run.player.id;
+      runFor(run, 3);
+      expect(brute.hp, lessThan(brute.maxHp));
+    });
+
+    test('a ranged potato shoots from a distance', () {
+      final run = unarmed([fighter(CombatStyle.ranged)]);
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(2.5, 0),
+      );
+      runFor(run, 2);
+      expect(brute.hp, lessThan(brute.maxHp));
+      final companion = run.companions.single;
+      expect(companion.position.distanceTo(brute.position), greaterThan(1));
+    });
+
+    test('an escort stands between the player and the enemy', () {
+      final run = unarmed([fighter(CombatStyle.escort)]);
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(2, 0),
+      )..target = run.player.id;
+      runFor(run, 0.6);
+      final companion = run.companions.single;
+      expect(companion.position.x, greaterThan(run.player.position.x));
+      expect(companion.position.x, lessThan(brute.position.x));
+    });
+
+    test(
+      'the mode changes mid-run; only standing combat potatoes have one',
+      () {
+        final run = unarmed([
+          fighter(CombatStyle.melee, mode: CompanionMode.defense),
+          const CompanionStart(
+            potatoId: 2,
+            type: PotatoType.food,
+            grade: Grade.normal,
+          ),
+        ]);
+        final [combat, food] = run.companions;
+        expect(
+          run.apply(SetCompanionMode(combat.id, CompanionMode.attack)),
+          isNull,
+        );
+        expect(combat.mode, CompanionMode.attack);
+        expect(
+          run.apply(SetCompanionMode(food.id, CompanionMode.attack)),
+          RaidRejection.noSuchCompanion,
+        );
+      },
+    );
+
+    test('abilities with a condition count only while it holds', () {
+      final run = unarmed([
+        fighter(
+          CombatStyle.melee,
+          abilities: const ['combat.plain', 'combat.fury'],
+        ),
+      ]);
+      final companion = run.companions.single;
+      final full = run.companionDamage(companion);
+      companion.hp = companion.maxHp * 0.4;
+      expect(run.companionDamage(companion), closeTo(full * 1.5, 1e-9));
+    });
+
+    test('a buff potato strengthens and heals the whole party', () {
+      const buff = CompanionStart(
+        potatoId: 3,
+        type: PotatoType.buff,
+        grade: Grade.normal,
+        abilities: ['buff.rally'],
+      );
+      final plain = unarmed([fighter(CombatStyle.melee)]);
+      final run = unarmed([fighter(CombatStyle.melee), buff]);
+      run.step();
+      plain.step();
+      expect(
+        run.companionDamage(run.companions.first),
+        closeTo(plain.companionDamage(plain.companions.first) * 1.2, 1e-9),
+      );
+      expect(run.playerShotDamage, closeTo(plain.playerShotDamage * 1.2, 1e-9));
+
+      run.player
+        ..hp = 50
+        ..sinceHit = 0;
+      runFor(run, 5);
+      expect(
+        run.player.hp,
+        greaterThanOrEqualTo(50 + run.player.maxHp * 0.1 - 1e-9),
+      );
+    });
+
+    test('a loud potato speaks and calls nearby enemies', () {
+      final run = unarmed([
+        const CompanionStart(
+          potatoId: 4,
+          type: PotatoType.food,
+          grade: Grade.normal,
+          abilities: ['food.loud'],
+        ),
+      ]);
+      final potato = run.companions.single;
+      final rat = addEnemy(run, 'brute', potato.position + const Vec2(0, 2.5));
+      runFor(run, 5.05);
+      final said = run.takeEvents().whereType<CompanionSaid>().single;
+      expect((said.companion, said.text), (potato.id, 'eek'));
+      expect(rat.target, potato.id);
+    });
+
+    test('fallen in a danger zone it leaves its seed and is gone', () {
+      final run = unarmed([
+        fighter(CombatStyle.melee, level: 4),
+      ], zone: 'danger_open');
+      final companion = run.companions.single;
+      addEnemy(run, 'brute', companion.position + const Vec2(0.4, 0)).target =
+          companion.id;
+      companion.hp = 1;
+      runFor(run, 2);
+      expect(companion.isDown, isTrue);
+      final pile = run.piles.single;
+      final seed = pile.loot.items.single.seed!;
+      expect(
+        (seed.type, seed.level, seed.style),
+        (PotatoType.combat, 4, CombatStyle.melee),
+      );
+      expect(pile.position, companion.position);
+
+      final standIn = run.exits.first;
+      run.player.position = standIn.position;
+      run.apply(const Signal());
+      runFor(run, 6);
+      expect(run.outcome, RaidOutcome.extracted);
+      expect(run.result!.companions.single.gone, isTrue);
+    });
+
+    test('fallen in a safe zone it only faints', () {
+      final run = unarmed([fighter(CombatStyle.melee)]);
+      final companion = run.companions.single;
+      addEnemy(run, 'brute', companion.position + const Vec2(0.4, 0)).target =
+          companion.id;
+      companion.hp = 1;
+      runFor(run, 2);
+      expect(companion.isDown, isTrue);
+      expect(run.piles, isEmpty);
+      run.apply(const GoHome());
+      expect(run.result!.companions.single.gone, isFalse);
+    });
+
+    test(
+      'saving with fighting companions and going on equals never stopping',
+      () {
+        RaidSimulation start() => unarmed([
+          fighter(CombatStyle.ranged),
+          const CompanionStart(
+            potatoId: 3,
+            type: PotatoType.buff,
+            grade: Grade.normal,
+            abilities: ['buff.rally'],
+          ),
+        ], zone: 'sample_zone');
+        final straight = start();
+        runFor(straight, 20);
+        final saved = start();
+        runFor(saved, 8);
+        final restored = RaidSimulation.fromJson(
+          jsonDecode(jsonEncode(saved.toJson())) as Map<String, dynamic>,
+          catalog,
+        );
+        runFor(restored, 12);
+        expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
+      },
+    );
   });
 }

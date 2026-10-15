@@ -2,6 +2,7 @@ import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Which side a body or shot is on. Shots only hurt the other side.
 enum RaidSide { player, wild }
@@ -182,9 +183,14 @@ final class RaidEnemy extends RaidBody {
   };
 }
 
-/// A potato brought from the farm. It follows the player and fights for it
-/// only by being there: enemies may go for it. Food potatoes put food in the
-/// bag. Knocked down, it stays down until the run ends.
+/// What a combat potato fights: in [attack] mode any enemy near the player,
+/// in [defense] mode only enemies going for the party.
+enum CompanionMode { attack, defense }
+
+/// A potato brought from the farm. It follows the player; combat potatoes
+/// fight by their mode and style, food potatoes put food in the bag, and
+/// buff potatoes' abilities reach the party. Knocked down, it stays down
+/// until the run ends (in a danger zone it is gone, leaving its seed).
 final class RaidCompanion extends RaidBody {
   RaidCompanion({
     required super.id,
@@ -194,11 +200,18 @@ final class RaidCompanion extends RaidBody {
     required this.potatoId,
     required this.type,
     required this.grade,
+    required this.level,
+    required this.abilities,
     required this.slot,
+    required this.lifeLeft,
+    this.style,
+    this.mode = CompanionMode.defense,
     super.hp,
     this.produced = 0,
     this.foodOwed = 0,
     this.sinceHit = double.infinity,
+    this.target,
+    this.attackCooldown = 0,
   });
 
   factory RaidCompanion.fromJson(Map<String, dynamic> json) => RaidCompanion(
@@ -210,24 +223,59 @@ final class RaidCompanion extends RaidBody {
     potatoId: json['potato_id'] as int,
     type: PotatoType.values.byName(json['type'] as String),
     grade: Grade.values.byName(json['grade'] as String),
+    level: json['level'] as int,
+    abilities: (json['abilities'] as List<Object?>).cast<String>(),
     slot: json['slot'] as int,
+    lifeLeft: (json['life_left'] as num).toDouble(),
+    style: switch (json['style']) {
+      final String style => CombatStyle.values.byName(style),
+      _ => null,
+    },
+    mode: CompanionMode.values.byName(json['mode'] as String),
     produced: (json['produced'] as num).toDouble(),
     foodOwed: (json['food_owed'] as num).toDouble(),
     sinceHit: _seconds(json['since_hit']),
+    target: json['target'] as int?,
+    attackCooldown: (json['attack_cooldown'] as num).toDouble(),
   );
 
   /// The farm potato's id, to send it back home.
   final int potatoId;
   final PotatoType type;
   final Grade grade;
+  final int level;
+
+  /// Ability ids, the first from its seed.
+  final List<String> abilities;
 
   /// Which spot behind the player it keeps.
   final int slot;
+
+  /// Its farm potato's life left, 0 to 1, when the run began.
+  final double lifeLeft;
+
+  /// Combat potatoes only.
+  final CombatStyle? style;
+  CompanionMode mode;
 
   /// Food made but not yet put in the bag.
   double produced;
   double foodOwed;
   double sinceHit;
+
+  /// The body it is fighting (combat potatoes).
+  int? target;
+  double attackCooldown;
+
+  /// The seed it leaves when it falls in a danger zone, before any grade
+  /// change.
+  Seed get seed => Seed(
+    type: type,
+    grade: grade,
+    level: level,
+    ability: abilities.first,
+    style: style,
+  );
 
   @override
   RaidSide get side => RaidSide.player;
@@ -241,10 +289,17 @@ final class RaidCompanion extends RaidBody {
     'potato_id': potatoId,
     'type': type.name,
     'grade': grade.name,
+    'level': level,
+    'abilities': abilities,
     'slot': slot,
+    'life_left': lifeLeft,
+    'style': style?.name,
+    'mode': mode.name,
     'produced': produced,
     'food_owed': foodOwed,
     'since_hit': _secondsJson(sinceHit),
+    'target': target,
+    'attack_cooldown': attackCooldown,
   };
 }
 

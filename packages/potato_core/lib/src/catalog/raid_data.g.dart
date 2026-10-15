@@ -194,6 +194,35 @@ _CompanionRulesData _$CompanionRulesDataFromJson(Map<String, dynamic> json) =>
             'produce_per_second',
             (v) => (v as num).toDouble(),
           ),
+          attackRange: $checkedConvert(
+            'attack_range',
+            (v) => (v as num).toDouble(),
+          ),
+          defenseRange: $checkedConvert(
+            'defense_range',
+            (v) => (v as num).toDouble(),
+          ),
+          styles: $checkedConvert(
+            'styles',
+            (v) => (v as Map<String, dynamic>).map(
+              (k, e) => MapEntry(
+                $enumDecode(_$CombatStyleEnumMap, k),
+                CompanionStyleData.fromJson(e as Map<String, dynamic>),
+              ),
+            ),
+          ),
+          levelHpPermille: $checkedConvert(
+            'level_hp_permille',
+            (v) => (v as num).toInt(),
+          ),
+          levelAttackPermille: $checkedConvert(
+            'level_attack_permille',
+            (v) => (v as num).toInt(),
+          ),
+          aggroPulseRange: $checkedConvert(
+            'aggro_pulse_range',
+            (v) => (v as num).toDouble(),
+          ),
         );
         return val;
       },
@@ -206,6 +235,11 @@ _CompanionRulesData _$CompanionRulesDataFromJson(Map<String, dynamic> json) =>
         'regenPercentPerSecond': 'regen_percent_per_second',
         'regenFoodPerSecond': 'regen_food_per_second',
         'producePerSecond': 'produce_per_second',
+        'attackRange': 'attack_range',
+        'defenseRange': 'defense_range',
+        'levelHpPermille': 'level_hp_permille',
+        'levelAttackPermille': 'level_attack_permille',
+        'aggroPulseRange': 'aggro_pulse_range',
       },
     );
 
@@ -220,6 +254,67 @@ Map<String, dynamic> _$CompanionRulesDataToJson(_CompanionRulesData instance) =>
       'regen_percent_per_second': instance.regenPercentPerSecond,
       'regen_food_per_second': instance.regenFoodPerSecond,
       'produce_per_second': instance.producePerSecond,
+      'attack_range': instance.attackRange,
+      'defense_range': instance.defenseRange,
+      'styles': instance.styles.map(
+        (k, e) => MapEntry(_$CombatStyleEnumMap[k]!, e.toJson()),
+      ),
+      'level_hp_permille': instance.levelHpPermille,
+      'level_attack_permille': instance.levelAttackPermille,
+      'aggro_pulse_range': instance.aggroPulseRange,
+    };
+
+const _$CombatStyleEnumMap = {
+  CombatStyle.melee: 'melee',
+  CombatStyle.ranged: 'ranged',
+  CombatStyle.escort: 'escort',
+};
+
+_CompanionStyleData _$CompanionStyleDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_CompanionStyleData',
+  json,
+  ($checkedConvert) {
+    final val = _CompanionStyleData(
+      maxHp: $checkedConvert('max_hp', (v) => (v as num).toDouble()),
+      damage: $checkedConvert('damage', (v) => (v as num).toDouble()),
+      interval: $checkedConvert('interval', (v) => (v as num).toDouble()),
+      speedMultiplier: $checkedConvert(
+        'speed_multiplier',
+        (v) => (v as num).toDouble(),
+      ),
+      preferredDistance: $checkedConvert(
+        'preferred_distance',
+        (v) => (v as num).toDouble(),
+      ),
+      reach: $checkedConvert('reach', (v) => (v as num?)?.toDouble() ?? 0.0),
+      range: $checkedConvert('range', (v) => (v as num?)?.toDouble() ?? 0.0),
+      bulletSpeed: $checkedConvert(
+        'bullet_speed',
+        (v) => (v as num?)?.toDouble() ?? 0.0,
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'maxHp': 'max_hp',
+    'speedMultiplier': 'speed_multiplier',
+    'preferredDistance': 'preferred_distance',
+    'bulletSpeed': 'bullet_speed',
+  },
+);
+
+Map<String, dynamic> _$CompanionStyleDataToJson(_CompanionStyleData instance) =>
+    <String, dynamic>{
+      'max_hp': instance.maxHp,
+      'damage': instance.damage,
+      'interval': instance.interval,
+      'speed_multiplier': instance.speedMultiplier,
+      'preferred_distance': instance.preferredDistance,
+      'reach': instance.reach,
+      'range': instance.range,
+      'bullet_speed': instance.bulletSpeed,
     };
 
 _WeaponData _$WeaponDataFromJson(Map<String, dynamic> json) => $checkedCreate(

@@ -1,5 +1,6 @@
 import 'dart:math' as math;
 
+import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -8,12 +9,15 @@ import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
+import 'package:potato_core/src/potatoes/potato_effects.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 import 'package:potato_core/src/map/map_chunk.dart';
 import 'package:potato_core/src/map/map_data.dart';
 import 'package:potato_core/src/map/map_generator.dart';
 import 'package:potato_core/src/map/map_physics.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
 import 'package:potato_core/src/raid/raid_command.dart';
+import 'package:potato_core/src/raid/raid_effects.dart';
 
 /// A farm potato taken along on a run.
 final class CompanionStart {
@@ -21,11 +25,33 @@ final class CompanionStart {
     required this.potatoId,
     required this.type,
     required this.grade,
+    this.level = 0,
+    this.abilities = const [],
+    this.style,
+    this.mode = CompanionMode.defense,
+    this.lifeLeft = 1,
   });
 
   final int potatoId;
   final PotatoType type;
   final Grade grade;
+  final int level;
+  final List<String> abilities;
+
+  /// Combat potatoes only.
+  final CombatStyle? style;
+  final CompanionMode mode;
+
+  /// The farm potato's life left, 0 to 1.
+  final double lifeLeft;
+
+  CompanionTraits get traits => (
+    type: type,
+    level: level,
+    abilities: abilities,
+    hpRatio: 1,
+    lifeLeft: lifeLeft,
+  );
 }
 
 /// What a finished run brings home.
@@ -50,8 +76,9 @@ final class RaidResult {
   /// Everything in the bag, food included.
   final List<ItemStack> items;
 
-  /// Each companion's farm potato id and whether it was knocked down.
-  final List<({int potatoId, bool down})> companions;
+  /// Each companion's farm potato id, whether it was knocked down, and
+  /// whether it is gone: fallen in a danger zone, it left its seed instead.
+  final List<({int potatoId, bool down, bool gone})> companions;
 }
 
 /// One exploration run, advanced in fixed steps.
@@ -101,11 +128,13 @@ final class RaidSimulation {
     final entry = Vec2(map.entry.x + 0.5, map.entry.y + 0.5);
     var nextId = 1;
 
+    final effects = RaidEffects(catalog);
+    final party = effects.party([for (final c in companions) c.traits]);
     final player = RaidPlayer(
       id: nextId++,
       position: entry,
       radius: rules.player.radius,
-      maxHp: rules.player.maxHp,
+      maxHp: party.apply(RaidStat.hp, rules.player.maxHp),
       weapon: rules.startWeapon,
       weaponLevel: weaponLevel,
     );
@@ -122,10 +151,15 @@ final class RaidSimulation {
             rules.companion.radius,
           ),
           radius: rules.companion.radius,
-          maxHp: rules.companion.maxHp,
+          maxHp: _startHp(catalog, start, effects.own(start.traits), party),
           potatoId: start.potatoId,
           type: start.type,
           grade: start.grade,
+          level: start.level,
+          abilities: start.abilities,
+          style: start.type == PotatoType.combat ? start.style : null,
+          mode: start.mode,
+          lifeLeft: start.lifeLeft,
           slot: slot,
         ),
     ];
@@ -145,6 +179,7 @@ final class RaidSimulation {
       entry,
       random,
       () => nextId++,
+      party.apply(RaidStat.lootRareChance, 1),
     );
     final exits = _openExits(zoneData, map, random, () => nextId++);
 
@@ -167,10 +202,32 @@ final class RaidSimulation {
   }
 
   /// What one of the player's bullets does: the weapon's damage, raised
-  /// by its workbench level.
-  double get playerShotDamage =>
-      catalog.weapons[player.weapon]!.damage *
-      (1 + player.weaponLevel * catalog.rules.workbench.damagePercent / 100);
+  /// by its workbench level and buff potatoes.
+  double get playerShotDamage => _party.apply(
+    RaidStat.attack,
+    catalog.weapons[player.weapon]!.damage *
+        (1 + player.weaponLevel * catalog.rules.workbench.damagePercent / 100),
+  );
+
+  /// A companion's max health at the start: its style's (or the plain
+  /// companion's), raised by level for combat potatoes, then abilities.
+  static double _startHp(
+    Catalog catalog,
+    CompanionStart start,
+    StatSums own,
+    StatSums party,
+  ) {
+    final rules = catalog.rules.raid.companion;
+    final style = start.type == PotatoType.combat
+        ? rules.styles[start.style]
+        : null;
+    var hp = style?.maxHp ?? rules.maxHp;
+    if (style != null) hp *= 1 + start.level * rules.levelHpPermille / 1000;
+    final sums = <String, StatSum>{}
+      ..addAll(own)
+      ..addAll(party);
+    return sums.apply(RaidStat.hp, hp);
+  }
 
   /// Rebuilds a run saved with [toJson].
   factory RaidSimulation.fromJson(Map<String, dynamic> json, Catalog catalog) {
@@ -217,7 +274,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 3;
+  static const int formatVersion = 4;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -244,6 +301,49 @@ final class RaidSimulation {
   final List<RaidEvent> _events = [];
 
   RaidRulesData get rules => catalog.rules.raid;
+
+  late final RaidEffects _effects = RaidEffects(catalog);
+
+  /// Buff potatoes' effects on the whole party, worked out each step from
+  /// those still standing.
+  StatSums _party = {};
+
+  static CompanionTraits _traitsOf(RaidCompanion c) => (
+    type: c.type,
+    level: c.level,
+    abilities: c.abilities,
+    hpRatio: c.hp / c.maxHp,
+    lifeLeft: c.lifeLeft,
+  );
+
+  /// [companion]'s own effects plus the party's.
+  StatSums statsOf(RaidCompanion companion) => <String, StatSum>{}
+    ..addAll(_effects.own(_traitsOf(companion)))
+    ..addAll(_party);
+
+  /// How fast [companion] moves now.
+  double companionSpeed(RaidCompanion companion) {
+    final base =
+        rules.companion.styles[companion.style]?.speedMultiplier ??
+        rules.companion.speedMultiplier;
+    return statsOf(companion)
+        .apply(RaidStat.moveSpeed, rules.player.speed * base);
+  }
+
+  /// What one hit or shot of combat [companion] does now.
+  double companionDamage(RaidCompanion companion) {
+    final style = rules.companion.styles[companion.style];
+    if (style == null) return 0;
+    final base =
+        style.damage *
+        (1 + companion.level * rules.companion.levelAttackPermille / 1000);
+    return statsOf(companion).apply(RaidStat.attack, base);
+  }
+
+  void _updateParty() => _party = _effects.party([
+    for (final c in companions)
+      if (!c.isDown) _traitsOf(c),
+  ]);
 
   /// Seconds one step covers.
   double get stepSeconds => rules.stepMillis / 1000;
@@ -296,7 +396,8 @@ final class RaidSimulation {
       outcome: outcome,
       items: [for (final s in bag.slots) ?s],
       companions: [
-        for (final c in companions) (potatoId: c.potatoId, down: c.isDown),
+        for (final c in companions)
+          (potatoId: c.potatoId, down: c.isDown, gone: isDanger && c.isDown),
       ],
       score: zone.score,
       lost: isDanger && outcome != RaidOutcome.extracted,
@@ -339,6 +440,16 @@ final class RaidSimulation {
         if (isDanger) return RaidRejection.wrongZone;
         _end(RaidOutcome.wentHome);
         return null;
+      case SetCompanionMode(:final companion, :final mode):
+        for (final c in companions) {
+          if (c.id != companion) continue;
+          if (c.type != PotatoType.combat || c.isDown) break;
+          c
+            ..mode = mode
+            ..target = null;
+          return null;
+        }
+        return RaidRejection.noSuchCompanion;
       case Signal():
         if (!isDanger) return RaidRejection.wrongZone;
         if (signal != null) return RaidRejection.signalling;
@@ -399,11 +510,13 @@ final class RaidSimulation {
     if (_outcome != null) return;
     _tick++;
     final dt = stepSeconds;
+    _updateParty();
     _updatePlayer(dt);
     if (_outcome != null) return;
     for (final companion in companions) {
       if (!companion.isDown) _updateCompanion(companion, dt);
     }
+    _runPeriodic();
     for (final enemy in enemies) {
       if (!enemy.isDown) _updateEnemy(enemy, dt);
     }
@@ -482,7 +595,8 @@ final class RaidSimulation {
     } else if (!_move.isZero) {
       player.facing = _move.normalized();
       final speed =
-          spec.speed * (isHungry ? rules.food.hungrySpeedMultiplier : 1);
+          _party.apply(RaidStat.moveSpeed, spec.speed) *
+          (isHungry ? rules.food.hungrySpeedMultiplier : 1);
       player.position = map.move(
         player.position,
         _move * (speed * dt),
@@ -514,9 +628,11 @@ final class RaidSimulation {
     final spec = rules.player;
     var rate = food.perSecond;
     if (player.sinceHit >= spec.regenDelaySeconds && player.hp < player.maxHp) {
-      player.hp = math.min(player.maxHp, player.hp + spec.regenPerSecond * dt);
+      final regen = _party.apply(RaidStat.regenSpeed, spec.regenPerSecond);
+      player.hp = math.min(player.maxHp, player.hp + regen * dt);
       rate += food.regenExtraPerSecond;
     }
+    rate = _party.apply(RaidStat.foodConsumption, rate);
     player.foodOwed += rate * dt;
     final whole = player.foodOwed.floor();
     if (whole > 0) {
@@ -587,9 +703,17 @@ final class RaidSimulation {
 
   void _updateCompanion(RaidCompanion companion, double dt) {
     final spec = rules.companion;
-    companion.sinceHit += dt;
+    final stats = statsOf(companion);
+    companion
+      ..sinceHit += dt
+      ..attackCooldown -= dt;
     if (companion.type == PotatoType.food) {
-      companion.produced += spec.producePerSecond * dt;
+      final level = catalog.rules.potatoes.level.foodYieldPermille;
+      final rate = stats.apply(
+        FarmStat.foodYield,
+        spec.producePerSecond * (1 + companion.level * level / 1000),
+      );
+      companion.produced += rate * dt;
       final whole = companion.produced.floor();
       if (whole > 0) {
         companion.produced -= whole;
@@ -600,9 +724,13 @@ final class RaidSimulation {
     if (!isHungry &&
         companion.sinceHit >= spec.regenDelaySeconds &&
         companion.hp < companion.maxHp) {
+      final share = stats.apply(
+        RaidStat.regenSpeed,
+        spec.regenPercentPerSecond,
+      );
       companion.hp = math.min(
         companion.maxHp,
-        companion.hp + companion.maxHp * spec.regenPercentPerSecond * dt,
+        companion.hp + companion.maxHp * share * dt,
       );
       companion.foodOwed += spec.regenFoodPerSecond * dt;
       final whole = companion.foodOwed.floor();
@@ -611,18 +739,178 @@ final class RaidSimulation {
         bag.remove(rules.food.item, whole);
       }
     }
+    final target = companion.type == PotatoType.combat
+        ? _pickTarget(companion)
+        : null;
+    if (target != null) {
+      _fight(companion, target, dt);
+    } else {
+      _follow(companion, dt);
+    }
+  }
+
+  void _follow(RaidCompanion companion, double dt) {
+    final spec = rules.companion;
     final goal = player.position + _followOffset(companion.slot);
     final away = goal - companion.position;
     final distance = away.length;
     if (distance < 0.1) return;
     final far =
         companion.position.distanceTo(player.position) > spec.catchUpDistance;
-    final speed = rules.player.speed * spec.speedMultiplier * (far ? 1.5 : 1);
+    final speed = companionSpeed(companion) * (far ? 1.5 : 1);
     companion.position = map.move(
       companion.position,
       away.scaledTo(math.min(speed * dt, distance)),
       companion.radius,
     );
+  }
+
+  /// Attack mode: the enemy nearest the player within the attack range.
+  /// Defense mode: only enemies going for the party, within the narrow
+  /// range. Too far from the player, it stops fighting and comes back.
+  RaidEnemy? _pickTarget(RaidCompanion companion) {
+    final spec = rules.companion;
+    if (companion.position.distanceTo(player.position) > spec.catchUpDistance) {
+      companion.target = null;
+      return null;
+    }
+    final range = companion.mode == CompanionMode.attack
+        ? spec.attackRange
+        : spec.defenseRange;
+    if (_body(companion.target ?? -1) case final RaidEnemy current
+        when !current.isDown &&
+            current.position.distanceTo(player.position) <= range + 0.5) {
+      return current;
+    }
+    RaidEnemy? best;
+    var bestDistance = range;
+    for (final enemy in enemies) {
+      if (enemy.isDown) continue;
+      final d = enemy.position.distanceTo(player.position);
+      if (d > bestDistance) continue;
+      if (companion.mode == CompanionMode.defense && !_goesForUs(enemy)) {
+        continue;
+      }
+      best = enemy;
+      bestDistance = d;
+    }
+    companion.target = best?.id;
+    return best;
+  }
+
+  bool _goesForUs(RaidEnemy enemy) =>
+      enemy.target != null && _body(enemy.target!)?.side == RaidSide.player;
+
+  /// Melee closes in and hits; ranged keeps back and shoots when it sees
+  /// the enemy; guard stands between the player and the enemy and hits
+  /// what comes close.
+  void _fight(RaidCompanion companion, RaidEnemy target, double dt) {
+    final style = rules.companion.styles[companion.style];
+    if (style == null) return _follow(companion, dt);
+    final speed = companionSpeed(companion);
+    final d = companion.position.distanceTo(target.position);
+    final touch = companion.radius + target.radius + style.reach;
+    switch (companion.style!) {
+      case CombatStyle.melee:
+        if (d > touch) {
+          _walk(companion, target.position, speed, dt);
+        } else {
+          _strike(companion, target);
+        }
+      case CombatStyle.ranged:
+        final seen = map.hasLineOfSight(companion.position, target.position);
+        if (d > style.range || !seen) {
+          _walk(companion, target.position, speed, dt);
+        } else {
+          if (d < style.preferredDistance - 0.3) {
+            final back = companion.position - target.position;
+            _walk(companion, companion.position + back, speed, dt);
+          }
+          _shoot(companion, target, style);
+        }
+      case CombatStyle.escort:
+        final toward = target.position - player.position;
+        final out = math.min(style.preferredDistance, toward.length / 2);
+        final spot = toward.isZero
+            ? player.position
+            : player.position + toward.scaledTo(out);
+        _walk(companion, spot, speed, dt);
+        if (d <= touch) _strike(companion, target);
+    }
+  }
+
+  void _walk(RaidCompanion companion, Vec2 goal, double speed, double dt) {
+    final delta = goal - companion.position;
+    final distance = delta.length;
+    if (distance < 0.05) return;
+    companion.position = map.move(
+      companion.position,
+      delta.scaledTo(math.min(speed * dt, distance)),
+      companion.radius,
+    );
+  }
+
+  void _strike(RaidCompanion companion, RaidEnemy target) {
+    if (companion.attackCooldown > 0) return;
+    _hurt(target, companionDamage(companion), companion);
+    companion.attackCooldown =
+        rules.companion.styles[companion.style]!.interval;
+  }
+
+  void _shoot(
+    RaidCompanion companion,
+    RaidEnemy target,
+    CompanionStyleData style,
+  ) {
+    if (companion.attackCooldown > 0) return;
+    final direction = (target.position - companion.position).normalized();
+    bullets.add(
+      RaidBullet(
+        id: _newId(),
+        position: companion.position + direction * companion.radius,
+        velocity: direction * style.bulletSpeed,
+        damage: companionDamage(companion),
+        owner: companion.id,
+        side: RaidSide.player,
+        remaining: style.range * 1.2,
+      ),
+    );
+    companion.attackCooldown = style.interval;
+  }
+
+  /// Fires the companions' periodic abilities when their interval comes
+  /// round in run time: speech, healing the party, calling enemies.
+  void _runPeriodic() {
+    final before = (_tick - 1) * rules.stepMillis;
+    final now = _tick * rules.stepMillis;
+    for (final companion in companions) {
+      if (companion.isDown) continue;
+      for (final (:effect, :power) in _effects.periodic(_traitsOf(companion))) {
+        final every = effect.intervalInUse;
+        if (every == null || every <= 0) continue;
+        if (now ~/ (every * 1000) == before ~/ (every * 1000)) continue;
+        switch (effect.action) {
+          case FarmAction.say:
+            _events.add(CompanionSaid(companion.id, effect.text ?? ''));
+          case RaidAction.healPercent:
+            final percent = (effect.valueInUse ?? 0) * power;
+            for (final body in _wildTargets) {
+              body.hp = math.min(
+                body.maxHp,
+                body.hp + body.maxHp * percent / 100,
+              );
+            }
+          case RaidAction.aggroPulse:
+            final range = rules.companion.aggroPulseRange;
+            for (final enemy in enemies) {
+              if (enemy.isDown || enemy.target != null) continue;
+              if (enemy.position.distanceTo(companion.position) <= range) {
+                enemy.target = companion.id;
+              }
+            }
+        }
+      }
+    }
   }
 
   // Enemies ------------------------------------------------------------------
@@ -676,15 +964,23 @@ final class RaidSimulation {
 
   RaidBody? _nearestInSight(RaidEnemy enemy, double sight) {
     RaidBody? best;
-    var bestDistance = sight;
+    var bestDistance = double.infinity;
     for (final body in _wildTargets) {
       final d = body.position.distanceTo(enemy.position);
-      if (d > bestDistance) continue;
+      if (d > _noticeRange(body, sight) || d > bestDistance) continue;
       best = body;
       bestDistance = d;
     }
     return best;
   }
+
+  /// How far enemies seeing [sight] notice [body]: some abilities make a
+  /// potato easier to notice.
+  double _noticeRange(RaidBody body, double sight) => switch (body) {
+    final RaidCompanion c =>
+      _effects.own(_traitsOf(c)).apply(RaidStat.detectRange, sight),
+    _ => sight,
+  };
 
   void _engage(RaidEnemy enemy, EnemyData spec, RaidBody target, double dt) {
     final d = target.position.distanceTo(enemy.position);
@@ -758,11 +1054,47 @@ final class RaidSimulation {
         target.sinceHit = 0;
       case RaidCompanion():
         target.sinceHit = 0;
-        if (target.isDown) _events.add(CompanionDown(target.id));
+        // Being hit counts as "going for us" in either mode.
+        if (target.type == PotatoType.combat &&
+            target.target == null &&
+            from is RaidEnemy) {
+          target.target = from.id;
+        }
+        if (target.isDown) {
+          _events.add(CompanionDown(target.id));
+          if (isDanger) _leaveSeed(target);
+        }
       case RaidEnemy():
         target.sinceHit = 0;
         if (from != null && from.side != target.side) target.target = from.id;
     }
+  }
+
+  /// A companion fallen in a danger zone leaves its seed in a bundle where
+  /// it fell, as the graveyard would: sometimes a grade lower, or higher
+  /// with an ability for it.
+  void _leaveSeed(RaidCompanion companion) {
+    if (companion.abilities.isEmpty) return;
+    var grade = companion.grade;
+    final upChance = _effects
+        .own(_traitsOf(companion))
+        .apply(FarmStat.deathSeedGradeUpChance, 0);
+    if (_random.chance(catalog.rules.potatoes.gradeDropChance)) {
+      grade = grade.lower ?? grade;
+    } else if (upChance > 0 && _random.chance(upChance)) {
+      grade = grade.higher ?? grade;
+    }
+    final seed = companion.seed.copyWith(grade: grade);
+    final item = catalog.seedItemOf(seed.type, seed.grade);
+    if (item == null) return;
+    piles.add(
+      RaidPile(
+        id: _newId(),
+        position: companion.position,
+        kind: PileKind.bundle,
+        loot: LootPile([ItemStack(item, 1, seed: seed)]),
+      ),
+    );
   }
 
   void _updateBullets(double dt) {
@@ -822,6 +1154,7 @@ final class RaidSimulation {
               catalog.stackOf,
               _random,
               makeSeed: _seedMaker(catalog, zone, _random),
+              weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
             ),
           ),
         );
@@ -831,6 +1164,7 @@ final class RaidSimulation {
           catalog.stackOf,
           _random,
           makeSeed: _seedMaker(catalog, zone, _random),
+          weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
         );
         for (final stack in loot.items) {
           floorItems.add(
@@ -952,6 +1286,16 @@ final class RaidSimulation {
     };
   }
 
+  /// Luck: rare and legendary seeds weigh [factor] times as much.
+  static int Function(String, int)? _luck(Catalog catalog, double factor) {
+    if (factor == 1) return null;
+    return (item, weight) {
+      final seed = catalog.items[item]?.seed;
+      if (seed == null || seed.grade == Grade.normal) return weight;
+      return math.max(1, (weight * factor).round());
+    };
+  }
+
   static List<RaidPile> _placeSpots(
     Catalog catalog,
     ZoneData zone,
@@ -959,6 +1303,7 @@ final class RaidSimulation {
     Vec2 entry,
     GameRandom random,
     int Function() newId,
+    double luck,
   ) {
     final spec = zone.gathering;
     final table = catalog.lootTables[spec.loot]!;
@@ -977,6 +1322,7 @@ final class RaidSimulation {
             catalog.stackOf,
             random,
             makeSeed: _seedMaker(catalog, zone, random),
+            weigh: _luck(catalog, luck),
           ),
         ),
       );

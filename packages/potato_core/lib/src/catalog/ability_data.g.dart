@@ -6,6 +6,30 @@ part of 'ability_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_EffectConditionData _$EffectConditionDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_EffectConditionData', json, ($checkedConvert) {
+      final val = _EffectConditionData(
+        type: $checkedConvert(
+          'type',
+          (v) => $enumDecode(_$EffectConditionTypeEnumMap, v),
+        ),
+        ratio: $checkedConvert('ratio', (v) => (v as num).toDouble()),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$EffectConditionDataToJson(
+  _EffectConditionData instance,
+) => <String, dynamic>{
+  'type': _$EffectConditionTypeEnumMap[instance.type]!,
+  'ratio': instance.ratio,
+};
+
+const _$EffectConditionTypeEnumMap = {
+  EffectConditionType.hpBelow: 'hp_below',
+  EffectConditionType.lifespanBelow: 'lifespan_below',
+};
+
 _AbilityData _$AbilityDataFromJson(Map<String, dynamic> json) => $checkedCreate(
   '_AbilityData',
   json,
@@ -64,6 +88,12 @@ _AbilityEffectData _$AbilityEffectDataFromJson(
       ),
       value: $checkedConvert('value', (v) => (v as num?)?.toDouble()),
       tempValue: $checkedConvert('temp_value', (v) => (v as num?)?.toDouble()),
+      condition: $checkedConvert(
+        'condition',
+        (v) => v == null
+            ? null
+            : EffectConditionData.fromJson(v as Map<String, dynamic>),
+      ),
       intervalSec: $checkedConvert('interval_sec', (v) => (v as num?)?.toInt()),
       tempIntervalSec: $checkedConvert(
         'temp_interval_sec',
@@ -90,6 +120,7 @@ Map<String, dynamic> _$AbilityEffectDataToJson(_AbilityEffectData instance) =>
       'op': _$EffectOpEnumMap[instance.op],
       'value': instance.value,
       'temp_value': instance.tempValue,
+      'condition': instance.condition?.toJson(),
       'interval_sec': instance.intervalSec,
       'temp_interval_sec': instance.tempIntervalSec,
       'action': instance.action,

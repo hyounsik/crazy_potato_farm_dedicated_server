@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
+import 'package:potato_core/src/potatoes/seed.dart';
 
 part 'raid_data.freezed.dart';
 part 'raid_data.g.dart';
@@ -97,10 +98,53 @@ abstract class CompanionRulesData with _$CompanionRulesData {
 
     /// Food a food potato makes per second.
     required double producePerSecond,
+
+    /// How far from the player combat potatoes take on enemies: in attack
+    /// mode any enemy, in defense mode only those going for the party.
+    required double attackRange,
+    required double defenseRange,
+
+    /// How each combat style fights. Other potatoes use [maxHp] and
+    /// [speedMultiplier] and do not fight.
+    required Map<CombatStyle, CompanionStyleData> styles,
+
+    /// What each level adds to a companion's health and attack, in
+    /// thousandths: 30 means +3% per level.
+    required int levelHpPermille,
+    required int levelAttackPermille,
+
+    /// Enemies this close to a potato that calls them come for it.
+    required double aggroPulseRange,
   }) = _CompanionRulesData;
 
   factory CompanionRulesData.fromJson(Map<String, dynamic> json) =>
       _$CompanionRulesDataFromJson(json);
+}
+
+/// One combat style's fighting values. Melee and guard hit within [reach];
+/// ranged shoots up to [range].
+@freezed
+abstract class CompanionStyleData with _$CompanionStyleData {
+  const factory CompanionStyleData({
+    required double maxHp,
+    required double damage,
+
+    /// Seconds between attacks.
+    required double interval,
+
+    /// Speed share of the player's.
+    required double speedMultiplier,
+
+    /// The gap it keeps: melee next to the enemy, ranged back from it,
+    /// guard this far out from the player toward the enemy.
+    required double preferredDistance,
+    @Default(0.0) double reach,
+    @Default(0.0) double range,
+    @Default(0.0) double bulletSpeed,
+  }) = _CompanionStyleData;
+
+  factory CompanionStyleData.fromJson(Map<String, dynamic> json) =>
+      _$CompanionStyleDataFromJson(json);
 }
 
 /// An auto-aiming weapon (`weapons.json`).

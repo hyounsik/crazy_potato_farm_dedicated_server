@@ -73,6 +73,49 @@ abstract final class FarmAction {
   static const String harvestFood = 'harvest_food';
 }
 
+/// Stats a run reads (see also [FarmStat]).
+abstract final class RaidStat {
+  static const String hp = 'unit.hp';
+  static const String attack = 'unit.attack';
+  static const String moveSpeed = 'unit.move_speed';
+  static const String regenSpeed = 'unit.regen_speed';
+  static const String foodConsumption = 'user.food_consumption';
+  static const String lootRareChance = 'explore.loot_rare_chance';
+
+  /// How far enemies notice this body.
+  static const String detectRange = 'unit.detect_range_by_enemy';
+}
+
+/// Periodic actions in a run. [FarmAction.say] works there too.
+abstract final class RaidAction {
+  /// Heals the party by the value, in percent of each one's max health.
+  static const String healPercent = 'heal_percent';
+
+  /// Calls nearby enemies to this potato.
+  static const String aggroPulse = 'aggro_pulse';
+}
+
+@JsonEnum(fieldRename: FieldRename.snake)
+enum EffectConditionType {
+  /// Health under [EffectConditionData.ratio] of max.
+  hpBelow,
+
+  /// Life left under [EffectConditionData.ratio].
+  lifespanBelow,
+}
+
+/// When an effect holds; without one it always does.
+@freezed
+abstract class EffectConditionData with _$EffectConditionData {
+  const factory EffectConditionData({
+    required EffectConditionType type,
+    required double ratio,
+  }) = _EffectConditionData;
+
+  factory EffectConditionData.fromJson(Map<String, dynamic> json) =>
+      _$EffectConditionDataFromJson(json);
+}
+
 /// One ability (`potato_abilities.json`). Player-facing text lives in the
 /// same file but only the client reads it.
 @freezed
@@ -107,6 +150,9 @@ abstract class AbilityEffectData with _$AbilityEffectData {
     /// Null until the balance phase sets it; [tempValue] stands in meanwhile.
     double? value,
     double? tempValue,
+
+    /// Only while this holds.
+    EffectConditionData? condition,
 
     /// For [EffectKind.periodic]: every so many seconds, run [action].
     /// Null until the balance phase; [tempIntervalSec] stands in.

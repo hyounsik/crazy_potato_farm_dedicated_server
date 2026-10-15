@@ -3,26 +3,38 @@ import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/farm/farm_command.dart';
 import 'package:potato_core/src/farm/farm_simulation.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
+import 'package:potato_core/src/raid/raid_bodies.dart';
 import 'package:potato_core/src/raid/raid_simulation.dart';
 
-/// The farm potatoes [potatoIds] as companions for a run, in that order.
-/// Ids that are not on the farm are skipped.
-List<CompanionStart> companionsFor(FarmSimulation farm, List<int> potatoIds) =>
-    [
-      for (final id in potatoIds)
-        if (farm.potatoById(id) case final potato?)
-          CompanionStart(
-            potatoId: potato.id,
-            type: potato.type,
-            grade: potato.grade,
-          ),
-    ];
+/// The farm potatoes [potatoIds] as companions for a run, in that order,
+/// with their level, abilities and style. Combat potatoes take their mode
+/// from [modes], defense by default. Ids that are not on the farm are
+/// skipped.
+List<CompanionStart> companionsFor(
+  FarmSimulation farm,
+  List<int> potatoIds, {
+  Map<int, CompanionMode> modes = const {},
+}) => [
+  for (final id in potatoIds)
+    if (farm.potatoById(id) case final potato?)
+      CompanionStart(
+        potatoId: potato.id,
+        type: potato.type,
+        grade: potato.grade,
+        level: potato.level,
+        abilities: potato.abilities,
+        style: potato.style,
+        mode: modes[potato.id] ?? CompanionMode.defense,
+        lifeLeft: potato.lifeLeft,
+      ),
+];
 
 extension RaidHomecoming on RaidResult {
   /// The farm command that brings this run home: food, seeds and materials
   /// from the bag, and every companion back to the farm, knocked down or not
   /// (they recover at the farm). A lost danger run brings nothing and the
-  /// companions are gone.
+  /// companions are gone; so are companions that fell in a danger zone
+  /// (their seed came home in the bag instead, if picked up).
   FarmCommand homecoming(Catalog catalog) {
     if (lost) {
       return FarmCommand.returnHome(
@@ -62,7 +74,14 @@ extension RaidHomecoming on RaidResult {
           SeedCount(seed: seed, count: count),
       ],
       materials: materials,
-      potatoIds: [for (final c in companions) c.potatoId],
+      potatoIds: [
+        for (final c in companions)
+          if (!c.gone) c.potatoId,
+      ],
+      lostPotatoIds: [
+        for (final c in companions)
+          if (c.gone) c.potatoId,
+      ],
       score: outcome.succeeded ? score : null,
     );
   }

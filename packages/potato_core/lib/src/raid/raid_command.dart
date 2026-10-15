@@ -1,4 +1,5 @@
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/raid/raid_bodies.dart';
 
 /// Something the player asks a run to do. Stick movement is not a command:
 /// it is continuous input set with `RaidSimulation.setMove`.
@@ -20,6 +21,15 @@ final class GoHome extends RaidCommand {
 /// zones only.
 final class Signal extends RaidCommand {
   const Signal();
+}
+
+/// Sets combat companion [companion]'s mode.
+final class SetCompanionMode extends RaidCommand {
+  const SetCompanionMode(this.companion, this.mode);
+
+  /// The companion's body id in the run.
+  final int companion;
+  final CompanionMode mode;
 }
 
 /// Moves item [index] of pile [pile] into the bag as far as it fits.
@@ -71,6 +81,9 @@ enum RaidRejection {
 
   /// A signal is already counting down.
   signalling,
+
+  /// No standing combat companion with that id.
+  noSuchCompanion,
 }
 
 /// What happened in a run, collected with `RaidSimulation.takeEvents`.
@@ -96,6 +109,14 @@ final class CompanionDown extends RaidEvent {
   const CompanionDown(this.companion);
 
   final int companion;
+}
+
+/// Companion [companion] says [text] (a speech bubble).
+final class CompanionSaid extends RaidEvent {
+  const CompanionSaid(this.companion, this.text);
+
+  final int companion;
+  final String text;
 }
 
 /// Something walked over was put in the bag.

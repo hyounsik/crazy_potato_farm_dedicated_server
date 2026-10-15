@@ -14,6 +14,279 @@ part of 'ability_data.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$EffectConditionData {
+
+ EffectConditionType get type; double get ratio;
+/// Create a copy of EffectConditionData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$EffectConditionDataCopyWith<EffectConditionData> get copyWith => _$EffectConditionDataCopyWithImpl<EffectConditionData>(this as EffectConditionData, _$identity);
+
+  /// Serializes this EffectConditionData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as EffectConditionData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EffectConditionData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.ratio, _this.ratio) || other.ratio == _this.ratio));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as EffectConditionData;
+  return Object.hash(runtimeType,_this.type,_this.ratio);
+}
+
+@override
+String toString() {
+  final _this = this as EffectConditionData;
+  return 'EffectConditionData(type: ${_this.type}, ratio: ${_this.ratio})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $EffectConditionDataCopyWith<$Res>  {
+  factory $EffectConditionDataCopyWith(EffectConditionData value, $Res Function(EffectConditionData) _then) = _$EffectConditionDataCopyWithImpl;
+@useResult
+$Res call({
+ EffectConditionType type, double ratio
+});
+
+
+
+
+}
+/// @nodoc
+class _$EffectConditionDataCopyWithImpl<$Res>
+    implements $EffectConditionDataCopyWith<$Res> {
+  _$EffectConditionDataCopyWithImpl(this._self, this._then);
+
+  final EffectConditionData _self;
+  final $Res Function(EffectConditionData) _then;
+
+/// Create a copy of EffectConditionData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? ratio = null,}) {
+  return _then(EffectConditionData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as EffectConditionType,ratio: null == ratio ? _self.ratio : ratio // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [EffectConditionData].
+extension EffectConditionDataPatterns on EffectConditionData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _EffectConditionData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _EffectConditionData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _EffectConditionData value)  $default,){
+final _that = this;
+switch (_that) {
+case _EffectConditionData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _EffectConditionData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _EffectConditionData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EffectConditionType type,  double ratio)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _EffectConditionData() when $default != null:
+return $default(_that.type,_that.ratio);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EffectConditionType type,  double ratio)  $default,) {final _that = this;
+switch (_that) {
+case _EffectConditionData():
+return $default(_that.type,_that.ratio);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EffectConditionType type,  double ratio)?  $default,) {final _that = this;
+switch (_that) {
+case _EffectConditionData() when $default != null:
+return $default(_that.type,_that.ratio);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _EffectConditionData implements EffectConditionData {
+  const _EffectConditionData({required this.type, required this.ratio});
+  factory _EffectConditionData.fromJson(Map<String, dynamic> json) => _$EffectConditionDataFromJson(json);
+
+@override final  EffectConditionType type;
+@override final  double ratio;
+
+/// Create a copy of EffectConditionData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$EffectConditionDataCopyWith<_EffectConditionData> get copyWith => __$EffectConditionDataCopyWithImpl<_EffectConditionData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$EffectConditionDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EffectConditionData&&(identical(other.type, type) || other.type == type)&&(identical(other.ratio, ratio) || other.ratio == ratio));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,type,ratio);
+}
+
+@override
+String toString() {
+    return 'EffectConditionData(type: $type, ratio: $ratio)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$EffectConditionDataCopyWith<$Res> implements $EffectConditionDataCopyWith<$Res> {
+  factory _$EffectConditionDataCopyWith(_EffectConditionData value, $Res Function(_EffectConditionData) _then) = __$EffectConditionDataCopyWithImpl;
+@override @useResult
+$Res call({
+ EffectConditionType type, double ratio
+});
+
+
+
+
+}
+/// @nodoc
+class __$EffectConditionDataCopyWithImpl<$Res>
+    implements _$EffectConditionDataCopyWith<$Res> {
+  __$EffectConditionDataCopyWithImpl(this._self, this._then);
+
+  final _EffectConditionData _self;
+  final $Res Function(_EffectConditionData) _then;
+
+/// Create a copy of EffectConditionData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? ratio = null,}) {
+  return _then(_EffectConditionData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as EffectConditionType,ratio: null == ratio ? _self.ratio : ratio // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$AbilityData {
 
 /// `<pool>.<name>`.
@@ -310,7 +583,8 @@ mixin _$AbilityEffectData {
 
  EffectContext get context; EffectTarget get target; EffectKind get kind;/// For [EffectKind.stat].
  String? get stat; EffectOp? get op;/// Null until the balance phase sets it; [tempValue] stands in meanwhile.
- double? get value; double? get tempValue;/// For [EffectKind.periodic]: every so many seconds, run [action].
+ double? get value; double? get tempValue;/// Only while this holds.
+ EffectConditionData? get condition;/// For [EffectKind.periodic]: every so many seconds, run [action].
 /// Null until the balance phase; [tempIntervalSec] stands in.
  int? get intervalSec; int? get tempIntervalSec; String? get action;/// The line a `say` action shows. Screens only; no rule reads it.
  String? get text;
@@ -327,20 +601,20 @@ $AbilityEffectDataCopyWith<AbilityEffectData> get copyWith => _$AbilityEffectDat
 @override
 bool operator ==(Object other) {
   final _this = this as AbilityEffectData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbilityEffectData&&(identical(other.context, _this.context) || other.context == _this.context)&&(identical(other.target, _this.target) || other.target == _this.target)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.stat, _this.stat) || other.stat == _this.stat)&&(identical(other.op, _this.op) || other.op == _this.op)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.tempValue, _this.tempValue) || other.tempValue == _this.tempValue)&&(identical(other.intervalSec, _this.intervalSec) || other.intervalSec == _this.intervalSec)&&(identical(other.tempIntervalSec, _this.tempIntervalSec) || other.tempIntervalSec == _this.tempIntervalSec)&&(identical(other.action, _this.action) || other.action == _this.action)&&(identical(other.text, _this.text) || other.text == _this.text));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbilityEffectData&&(identical(other.context, _this.context) || other.context == _this.context)&&(identical(other.target, _this.target) || other.target == _this.target)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.stat, _this.stat) || other.stat == _this.stat)&&(identical(other.op, _this.op) || other.op == _this.op)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.tempValue, _this.tempValue) || other.tempValue == _this.tempValue)&&(identical(other.condition, _this.condition) || other.condition == _this.condition)&&(identical(other.intervalSec, _this.intervalSec) || other.intervalSec == _this.intervalSec)&&(identical(other.tempIntervalSec, _this.tempIntervalSec) || other.tempIntervalSec == _this.tempIntervalSec)&&(identical(other.action, _this.action) || other.action == _this.action)&&(identical(other.text, _this.text) || other.text == _this.text));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as AbilityEffectData;
-  return Object.hash(runtimeType,_this.context,_this.target,_this.kind,_this.stat,_this.op,_this.value,_this.tempValue,_this.intervalSec,_this.tempIntervalSec,_this.action,_this.text);
+  return Object.hash(runtimeType,_this.context,_this.target,_this.kind,_this.stat,_this.op,_this.value,_this.tempValue,_this.condition,_this.intervalSec,_this.tempIntervalSec,_this.action,_this.text);
 }
 
 @override
 String toString() {
   final _this = this as AbilityEffectData;
-  return 'AbilityEffectData(context: ${_this.context}, target: ${_this.target}, kind: ${_this.kind}, stat: ${_this.stat}, op: ${_this.op}, value: ${_this.value}, tempValue: ${_this.tempValue}, intervalSec: ${_this.intervalSec}, tempIntervalSec: ${_this.tempIntervalSec}, action: ${_this.action}, text: ${_this.text})';
+  return 'AbilityEffectData(context: ${_this.context}, target: ${_this.target}, kind: ${_this.kind}, stat: ${_this.stat}, op: ${_this.op}, value: ${_this.value}, tempValue: ${_this.tempValue}, condition: ${_this.condition}, intervalSec: ${_this.intervalSec}, tempIntervalSec: ${_this.tempIntervalSec}, action: ${_this.action}, text: ${_this.text})';
 }
 
 
@@ -351,11 +625,11 @@ abstract mixin class $AbilityEffectDataCopyWith<$Res>  {
   factory $AbilityEffectDataCopyWith(AbilityEffectData value, $Res Function(AbilityEffectData) _then) = _$AbilityEffectDataCopyWithImpl;
 @useResult
 $Res call({
- EffectContext context, EffectTarget target, EffectKind kind, String? stat, EffectOp? op, double? value, double? tempValue, int? intervalSec, int? tempIntervalSec, String? action, String? text
+ EffectContext context, EffectTarget target, EffectKind kind, String? stat, EffectOp? op, double? value, double? tempValue, EffectConditionData? condition, int? intervalSec, int? tempIntervalSec, String? action, String? text
 });
 
 
-
+$EffectConditionDataCopyWith<$Res>? get condition;
 
 }
 /// @nodoc
@@ -368,7 +642,7 @@ class _$AbilityEffectDataCopyWithImpl<$Res>
 
 /// Create a copy of AbilityEffectData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? context = null,Object? target = null,Object? kind = null,Object? stat = freezed,Object? op = freezed,Object? value = freezed,Object? tempValue = freezed,Object? intervalSec = freezed,Object? tempIntervalSec = freezed,Object? action = freezed,Object? text = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? context = null,Object? target = null,Object? kind = null,Object? stat = freezed,Object? op = freezed,Object? value = freezed,Object? tempValue = freezed,Object? condition = freezed,Object? intervalSec = freezed,Object? tempIntervalSec = freezed,Object? action = freezed,Object? text = freezed,}) {
   return _then(AbilityEffectData(
 context: null == context ? _self.context : context // ignore: cast_nullable_to_non_nullable
 as EffectContext,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
@@ -377,14 +651,27 @@ as EffectKind,stat: freezed == stat ? _self.stat : stat // ignore: cast_nullable
 as String?,op: freezed == op ? _self.op : op // ignore: cast_nullable_to_non_nullable
 as EffectOp?,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as double?,tempValue: freezed == tempValue ? _self.tempValue : tempValue // ignore: cast_nullable_to_non_nullable
-as double?,intervalSec: freezed == intervalSec ? _self.intervalSec : intervalSec // ignore: cast_nullable_to_non_nullable
+as double?,condition: freezed == condition ? _self.condition : condition // ignore: cast_nullable_to_non_nullable
+as EffectConditionData?,intervalSec: freezed == intervalSec ? _self.intervalSec : intervalSec // ignore: cast_nullable_to_non_nullable
 as int?,tempIntervalSec: freezed == tempIntervalSec ? _self.tempIntervalSec : tempIntervalSec // ignore: cast_nullable_to_non_nullable
 as int?,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,text: freezed == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
 as String?,
   ));
 }
+/// Create a copy of AbilityEffectData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EffectConditionDataCopyWith<$Res>? get condition {
+    if (_self.condition == null) {
+    return null;
+  }
 
+  return $EffectConditionDataCopyWith<$Res>(_self.condition!, (value) {
+    return _then(_self.copyWith(condition: value));
+  });
+}
 }
 
 
@@ -466,10 +753,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  EffectConditionData? condition,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AbilityEffectData() when $default != null:
-return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
+return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.condition,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
   return orElse();
 
 }
@@ -487,10 +774,10 @@ return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  EffectConditionData? condition,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)  $default,) {final _that = this;
 switch (_that) {
 case _AbilityEffectData():
-return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
+return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.condition,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -507,10 +794,10 @@ return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( EffectContext context,  EffectTarget target,  EffectKind kind,  String? stat,  EffectOp? op,  double? value,  double? tempValue,  EffectConditionData? condition,  int? intervalSec,  int? tempIntervalSec,  String? action,  String? text)?  $default,) {final _that = this;
 switch (_that) {
 case _AbilityEffectData() when $default != null:
-return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
+return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.value,_that.tempValue,_that.condition,_that.intervalSec,_that.tempIntervalSec,_that.action,_that.text);case _:
   return null;
 
 }
@@ -522,7 +809,7 @@ return $default(_that.context,_that.target,_that.kind,_that.stat,_that.op,_that.
 @JsonSerializable()
 
 class _AbilityEffectData extends AbilityEffectData {
-  const _AbilityEffectData({required this.context, required this.target, required this.kind, this.stat, this.op, this.value, this.tempValue, this.intervalSec, this.tempIntervalSec, this.action, this.text}): super._();
+  const _AbilityEffectData({required this.context, required this.target, required this.kind, this.stat, this.op, this.value, this.tempValue, this.condition, this.intervalSec, this.tempIntervalSec, this.action, this.text}): super._();
   factory _AbilityEffectData.fromJson(Map<String, dynamic> json) => _$AbilityEffectDataFromJson(json);
 
 @override final  EffectContext context;
@@ -534,6 +821,8 @@ class _AbilityEffectData extends AbilityEffectData {
 /// Null until the balance phase sets it; [tempValue] stands in meanwhile.
 @override final  double? value;
 @override final  double? tempValue;
+/// Only while this holds.
+@override final  EffectConditionData? condition;
 /// For [EffectKind.periodic]: every so many seconds, run [action].
 /// Null until the balance phase; [tempIntervalSec] stands in.
 @override final  int? intervalSec;
@@ -555,18 +844,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbilityEffectData&&(identical(other.context, context) || other.context == context)&&(identical(other.target, target) || other.target == target)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.stat, stat) || other.stat == stat)&&(identical(other.op, op) || other.op == op)&&(identical(other.value, value) || other.value == value)&&(identical(other.tempValue, tempValue) || other.tempValue == tempValue)&&(identical(other.intervalSec, intervalSec) || other.intervalSec == intervalSec)&&(identical(other.tempIntervalSec, tempIntervalSec) || other.tempIntervalSec == tempIntervalSec)&&(identical(other.action, action) || other.action == action)&&(identical(other.text, text) || other.text == text));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbilityEffectData&&(identical(other.context, context) || other.context == context)&&(identical(other.target, target) || other.target == target)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.stat, stat) || other.stat == stat)&&(identical(other.op, op) || other.op == op)&&(identical(other.value, value) || other.value == value)&&(identical(other.tempValue, tempValue) || other.tempValue == tempValue)&&(identical(other.condition, condition) || other.condition == condition)&&(identical(other.intervalSec, intervalSec) || other.intervalSec == intervalSec)&&(identical(other.tempIntervalSec, tempIntervalSec) || other.tempIntervalSec == tempIntervalSec)&&(identical(other.action, action) || other.action == action)&&(identical(other.text, text) || other.text == text));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,context,target,kind,stat,op,value,tempValue,intervalSec,tempIntervalSec,action,text);
+    return Object.hash(runtimeType,context,target,kind,stat,op,value,tempValue,condition,intervalSec,tempIntervalSec,action,text);
 }
 
 @override
 String toString() {
-    return 'AbilityEffectData(context: $context, target: $target, kind: $kind, stat: $stat, op: $op, value: $value, tempValue: $tempValue, intervalSec: $intervalSec, tempIntervalSec: $tempIntervalSec, action: $action, text: $text)';
+    return 'AbilityEffectData(context: $context, target: $target, kind: $kind, stat: $stat, op: $op, value: $value, tempValue: $tempValue, condition: $condition, intervalSec: $intervalSec, tempIntervalSec: $tempIntervalSec, action: $action, text: $text)';
 }
 
 
@@ -577,11 +866,11 @@ abstract mixin class _$AbilityEffectDataCopyWith<$Res> implements $AbilityEffect
   factory _$AbilityEffectDataCopyWith(_AbilityEffectData value, $Res Function(_AbilityEffectData) _then) = __$AbilityEffectDataCopyWithImpl;
 @override @useResult
 $Res call({
- EffectContext context, EffectTarget target, EffectKind kind, String? stat, EffectOp? op, double? value, double? tempValue, int? intervalSec, int? tempIntervalSec, String? action, String? text
+ EffectContext context, EffectTarget target, EffectKind kind, String? stat, EffectOp? op, double? value, double? tempValue, EffectConditionData? condition, int? intervalSec, int? tempIntervalSec, String? action, String? text
 });
 
 
-
+@override $EffectConditionDataCopyWith<$Res>? get condition;
 
 }
 /// @nodoc
@@ -594,7 +883,7 @@ class __$AbilityEffectDataCopyWithImpl<$Res>
 
 /// Create a copy of AbilityEffectData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? context = null,Object? target = null,Object? kind = null,Object? stat = freezed,Object? op = freezed,Object? value = freezed,Object? tempValue = freezed,Object? intervalSec = freezed,Object? tempIntervalSec = freezed,Object? action = freezed,Object? text = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? context = null,Object? target = null,Object? kind = null,Object? stat = freezed,Object? op = freezed,Object? value = freezed,Object? tempValue = freezed,Object? condition = freezed,Object? intervalSec = freezed,Object? tempIntervalSec = freezed,Object? action = freezed,Object? text = freezed,}) {
   return _then(_AbilityEffectData(
 context: null == context ? _self.context : context // ignore: cast_nullable_to_non_nullable
 as EffectContext,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
@@ -603,7 +892,8 @@ as EffectKind,stat: freezed == stat ? _self.stat : stat // ignore: cast_nullable
 as String?,op: freezed == op ? _self.op : op // ignore: cast_nullable_to_non_nullable
 as EffectOp?,value: freezed == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
 as double?,tempValue: freezed == tempValue ? _self.tempValue : tempValue // ignore: cast_nullable_to_non_nullable
-as double?,intervalSec: freezed == intervalSec ? _self.intervalSec : intervalSec // ignore: cast_nullable_to_non_nullable
+as double?,condition: freezed == condition ? _self.condition : condition // ignore: cast_nullable_to_non_nullable
+as EffectConditionData?,intervalSec: freezed == intervalSec ? _self.intervalSec : intervalSec // ignore: cast_nullable_to_non_nullable
 as int?,tempIntervalSec: freezed == tempIntervalSec ? _self.tempIntervalSec : tempIntervalSec // ignore: cast_nullable_to_non_nullable
 as int?,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
 as String?,text: freezed == text ? _self.text : text // ignore: cast_nullable_to_non_nullable
@@ -611,7 +901,19 @@ as String?,
   ));
 }
 
+/// Create a copy of AbilityEffectData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EffectConditionDataCopyWith<$Res>? get condition {
+    if (_self.condition == null) {
+    return null;
+  }
 
+  return $EffectConditionDataCopyWith<$Res>(_self.condition!, (value) {
+    return _then(_self.copyWith(condition: value));
+  });
+}
 }
 
 

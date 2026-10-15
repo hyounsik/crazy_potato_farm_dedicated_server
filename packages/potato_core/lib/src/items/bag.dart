@@ -118,21 +118,25 @@ final class LootPile {
   LootPile([List<ItemStack>? items]) : items = items ?? [];
 
   /// Rolls [table] and merges the same items into as few stacks as fit.
-  /// Seed items get a seed each from [makeSeed].
+  /// Seed items get a seed each from [makeSeed]. [weigh] may change an
+  /// entry's weight (from its item id and table weight), such as luck
+  /// favouring better seeds.
   factory LootPile.roll(
     LootTableData table,
     StackSize stackSize,
     GameRandom random, {
     SeedMaker? makeSeed,
+    int Function(String item, int weight)? weigh,
   }) {
     final pile = LootPile();
-    final total = table.entries.fold(0, (sum, e) => sum + e.weight);
+    int weightOf(LootEntryData e) => weigh?.call(e.item, e.weight) ?? e.weight;
+    final total = table.entries.fold(0, (sum, e) => sum + weightOf(e));
     final rolls =
         table.rollsMin + random.nextInt(table.rollsMax - table.rollsMin + 1);
     for (var i = 0; i < rolls; i++) {
       var roll = random.nextInt(total);
       final entry = table.entries.firstWhere((e) {
-        roll -= e.weight;
+        roll -= weightOf(e);
         return roll < 0;
       });
       final count = entry.min + random.nextInt(entry.max - entry.min + 1);

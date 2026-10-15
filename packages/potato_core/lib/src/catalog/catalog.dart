@@ -81,6 +81,17 @@ final class Catalog {
   /// How many of [item] fit in one bag slot.
   int stackOf(String item) => items[item]!.stack;
 
+  /// The item id of seeds of [type] at [grade], if there is one.
+  String? seedItemOf(PotatoType type, Grade grade) {
+    for (final item in items.values) {
+      final seed = item.seed;
+      if (seed != null && seed.type == type && seed.grade == grade) {
+        return item.id;
+      }
+    }
+    return null;
+  }
+
   /// Builds a catalog from decoded data files keyed by file name without the
   /// extension (`rules`, `potato_types`, ...).
   ///
@@ -494,6 +505,37 @@ final class Catalog {
       'raid.companion.catch_up_distance',
       companion.catchUpDistance,
     );
+    check.positiveNumber('raid.companion.attack_range', companion.attackRange);
+    check.positiveNumber(
+      'raid.companion.defense_range',
+      companion.defenseRange,
+    );
+    check.atLeast(
+      'raid.companion.level_hp_permille',
+      companion.levelHpPermille,
+      0,
+    );
+    check.atLeast(
+      'raid.companion.level_attack_permille',
+      companion.levelAttackPermille,
+      0,
+    );
+    for (final style in CombatStyle.values) {
+      final data = companion.styles[style];
+      final at = 'raid.companion.styles.${style.name}';
+      if (data == null) {
+        check.issue(at, 'is missing');
+        continue;
+      }
+      check.positiveNumber('$at.max_hp', data.maxHp);
+      check.positiveNumber('$at.damage', data.damage);
+      check.positiveNumber('$at.interval', data.interval);
+      check.positiveNumber('$at.speed_multiplier', data.speedMultiplier);
+      if (style == CombatStyle.ranged) {
+        check.positiveNumber('$at.range', data.range);
+        check.positiveNumber('$at.bullet_speed', data.bulletSpeed);
+      }
+    }
   }
 
   static void _checkPotatoType(

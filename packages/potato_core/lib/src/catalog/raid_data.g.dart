@@ -35,6 +35,10 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
             'companion',
             (v) => CompanionRulesData.fromJson(v as Map<String, dynamic>),
           ),
+          clones: $checkedConvert(
+            'clones',
+            (v) => CloneRulesData.fromJson(v as Map<String, dynamic>),
+          ),
         );
         return val;
       },
@@ -57,6 +61,7 @@ Map<String, dynamic> _$RaidRulesDataToJson(_RaidRulesData instance) =>
       'start_weapon': instance.startWeapon,
       'enemy_alert_seconds': instance.enemyAlertSeconds,
       'companion': instance.companion.toJson(),
+      'clones': instance.clones.toJson(),
     };
 
 _PlayerRulesData _$PlayerRulesDataFromJson(Map<String, dynamic> json) =>
@@ -270,6 +275,158 @@ const _$CombatStyleEnumMap = {
   CombatStyle.escort: 'escort',
 };
 
+_CloneRulesData _$CloneRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_CloneRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _CloneRulesData(
+          sightMultiplier: $checkedConvert(
+            'sight_multiplier',
+            (v) => (v as num).toDouble(),
+          ),
+          speedMultiplier: $checkedConvert(
+            'speed_multiplier',
+            (v) => (v as num).toDouble(),
+          ),
+          maxHp: $checkedConvert('max_hp', (v) => (v as num).toDouble()),
+          radius: $checkedConvert('radius', (v) => (v as num).toDouble()),
+          lowHpRatio: $checkedConvert(
+            'low_hp_ratio',
+            (v) => (v as num).toDouble(),
+          ),
+          staySecondsMin: $checkedConvert(
+            'stay_seconds_min',
+            (v) => (v as num).toDouble(),
+          ),
+          staySecondsMax: $checkedConvert(
+            'stay_seconds_max',
+            (v) => (v as num).toDouble(),
+          ),
+          waitSightMultiplier: $checkedConvert(
+            'wait_sight_multiplier',
+            (v) => (v as num).toDouble(),
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'sightMultiplier': 'sight_multiplier',
+        'speedMultiplier': 'speed_multiplier',
+        'maxHp': 'max_hp',
+        'lowHpRatio': 'low_hp_ratio',
+        'staySecondsMin': 'stay_seconds_min',
+        'staySecondsMax': 'stay_seconds_max',
+        'waitSightMultiplier': 'wait_sight_multiplier',
+      },
+    );
+
+Map<String, dynamic> _$CloneRulesDataToJson(_CloneRulesData instance) =>
+    <String, dynamic>{
+      'sight_multiplier': instance.sightMultiplier,
+      'speed_multiplier': instance.speedMultiplier,
+      'max_hp': instance.maxHp,
+      'radius': instance.radius,
+      'low_hp_ratio': instance.lowHpRatio,
+      'stay_seconds_min': instance.staySecondsMin,
+      'stay_seconds_max': instance.staySecondsMax,
+      'wait_sight_multiplier': instance.waitSightMultiplier,
+    };
+
+_DefaultCloneData _$DefaultCloneDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_DefaultCloneData',
+      json,
+      ($checkedConvert) {
+        final val = _DefaultCloneData(
+          id: $checkedConvert('id', (v) => v as String),
+          name: $checkedConvert('name', (v) => v as String),
+          weapon: $checkedConvert('weapon', (v) => v as String),
+          weaponLevel: $checkedConvert(
+            'weapon_level',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
+          bagSlots: $checkedConvert('bag_slots', (v) => (v as num).toInt()),
+          scoreMin: $checkedConvert('score_min', (v) => (v as num).toInt()),
+          scoreMax: $checkedConvert('score_max', (v) => (v as num).toInt()),
+          companions: $checkedConvert(
+            'companions',
+            (v) =>
+                (v as List<dynamic>?)
+                    ?.map(
+                      (e) => CloneCompanionData.fromJson(
+                        e as Map<String, dynamic>,
+                      ),
+                    )
+                    .toList() ??
+                const <CloneCompanionData>[],
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'weaponLevel': 'weapon_level',
+        'bagSlots': 'bag_slots',
+        'scoreMin': 'score_min',
+        'scoreMax': 'score_max',
+      },
+    );
+
+Map<String, dynamic> _$DefaultCloneDataToJson(_DefaultCloneData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'name': instance.name,
+      'weapon': instance.weapon,
+      'weapon_level': instance.weaponLevel,
+      'bag_slots': instance.bagSlots,
+      'score_min': instance.scoreMin,
+      'score_max': instance.scoreMax,
+      'companions': instance.companions.map((e) => e.toJson()).toList(),
+    };
+
+_CloneCompanionData _$CloneCompanionDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_CloneCompanionData', json, ($checkedConvert) {
+      final val = _CloneCompanionData(
+        type: $checkedConvert(
+          'type',
+          (v) => $enumDecode(_$PotatoTypeEnumMap, v),
+        ),
+        grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
+        level: $checkedConvert('level', (v) => (v as num?)?.toInt() ?? 0),
+        abilities: $checkedConvert(
+          'abilities',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+        style: $checkedConvert(
+          'style',
+          (v) => $enumDecodeNullable(_$CombatStyleEnumMap, v),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$CloneCompanionDataToJson(_CloneCompanionData instance) =>
+    <String, dynamic>{
+      'type': _$PotatoTypeEnumMap[instance.type]!,
+      'grade': _$GradeEnumMap[instance.grade]!,
+      'level': instance.level,
+      'abilities': instance.abilities,
+      'style': _$CombatStyleEnumMap[instance.style],
+    };
+
+const _$PotatoTypeEnumMap = {
+  PotatoType.food: 'food',
+  PotatoType.combat: 'combat',
+  PotatoType.breeding: 'breeding',
+  PotatoType.buff: 'buff',
+};
+
+const _$GradeEnumMap = {
+  Grade.normal: 'normal',
+  Grade.rare: 'rare',
+  Grade.legendary: 'legendary',
+};
+
 _CompanionStyleData _$CompanionStyleDataFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate(
@@ -339,6 +496,10 @@ _WeaponData _$WeaponDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'aim_seconds',
         (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
+      preferredDistance: $checkedConvert(
+        'preferred_distance',
+        (v) => (v as num?)?.toDouble() ?? 1.5,
+      ),
     );
     return val;
   },
@@ -346,6 +507,7 @@ _WeaponData _$WeaponDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'bulletSpeed': 'bullet_speed',
     'spreadDegrees': 'spread_degrees',
     'aimSeconds': 'aim_seconds',
+    'preferredDistance': 'preferred_distance',
   },
 );
 
@@ -359,6 +521,7 @@ Map<String, dynamic> _$WeaponDataToJson(_WeaponData instance) =>
       'pellets': instance.pellets,
       'spread_degrees': instance.spreadDegrees,
       'aim_seconds': instance.aimSeconds,
+      'preferred_distance': instance.preferredDistance,
     };
 
 _EnemyData _$EnemyDataFromJson(Map<String, dynamic> json) => $checkedCreate(
@@ -596,6 +759,18 @@ _ZoneDangerData _$ZoneDangerDataFromJson(Map<String, dynamic> json) =>
             'hungry_damage_per_second',
             (v) => (v as num).toDouble(),
           ),
+          clonesAtStart: $checkedConvert(
+            'clones_at_start',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
+          cloneEverySeconds: $checkedConvert(
+            'clone_every_seconds',
+            (v) => (v as num?)?.toDouble() ?? 0.0,
+          ),
+          clonesMax: $checkedConvert(
+            'clones_max',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
         );
         return val;
       },
@@ -606,6 +781,9 @@ _ZoneDangerData _$ZoneDangerDataFromJson(Map<String, dynamic> json) =>
         'countdownSeconds': 'countdown_seconds',
         'waitSightMultiplier': 'wait_sight_multiplier',
         'hungryDamagePerSecond': 'hungry_damage_per_second',
+        'clonesAtStart': 'clones_at_start',
+        'cloneEverySeconds': 'clone_every_seconds',
+        'clonesMax': 'clones_max',
       },
     );
 
@@ -617,6 +795,9 @@ Map<String, dynamic> _$ZoneDangerDataToJson(_ZoneDangerData instance) =>
       'countdown_seconds': instance.countdownSeconds,
       'wait_sight_multiplier': instance.waitSightMultiplier,
       'hungry_damage_per_second': instance.hungryDamagePerSecond,
+      'clones_at_start': instance.clonesAtStart,
+      'clone_every_seconds': instance.cloneEverySeconds,
+      'clones_max': instance.clonesMax,
     };
 
 _ZoneDropsData _$ZoneDropsDataFromJson(Map<String, dynamic> json) =>

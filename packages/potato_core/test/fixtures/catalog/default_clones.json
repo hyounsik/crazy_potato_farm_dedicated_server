@@ -1,0 +1,33 @@
+{
+  "version": 1,
+  "note": "Sample data for tests only.",
+  "default_clones": [
+    {
+      "id": "sample_clone",
+      "name": "Sample",
+      "weapon": "rapid",
+      "bag_slots": 6,
+      "score_min": 0,
+      "score_max": 10,
+      "companions": [
+        {
+          "type": "combat",
+          "grade": "normal",
+          "level": 0,
+          "abilities": [
+            "combat.plain"
+          ],
+          "style": "melee"
+        }
+      ]
+    },
+    {
+      "id": "sample_far",
+      "name": "Far",
+      "weapon": "rapid",
+      "bag_slots": 6,
+      "score_min": 50,
+      "score_max": 99
+    }
+  ]
+}

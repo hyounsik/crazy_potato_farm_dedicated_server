@@ -27,7 +27,9 @@ final class Catalog {
     required Map<String, WeaponData> weapons,
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
-  }) : _potatoTypes = Map.unmodifiable(potatoTypes),
+    required Map<String, DefaultCloneData> defaultClones,
+  }) : defaultClones = Map.unmodifiable(defaultClones),
+       _potatoTypes = Map.unmodifiable(potatoTypes),
        buildings = Map.unmodifiable(buildings),
        abilities = Map.unmodifiable(abilities),
        items = Map.unmodifiable(items),
@@ -50,6 +52,7 @@ final class Catalog {
     'weapons': 1,
     'enemies': 1,
     'zones': 2,
+    'default_clones': 1,
   };
 
   final RulesData rules;
@@ -68,6 +71,9 @@ final class Catalog {
   final Map<String, WeaponData> weapons;
   final Map<String, EnemyData> enemies;
   final Map<String, ZoneData> zones;
+
+  /// Clones shipped with the game, in file order.
+  final Map<String, DefaultCloneData> defaultClones;
 
   PotatoTypeData potatoType(PotatoType type) => _potatoTypes[type]!;
 
@@ -217,6 +223,14 @@ final class Catalog {
       (z) => z.id,
       _checkZone,
     );
+    final defaultClones = _readEntries(
+      files,
+      'default_clones',
+      issues,
+      DefaultCloneData.fromJson,
+      (c) => c.id,
+      _checkDefaultClone,
+    );
 
     if (rules == null ||
         potatoTypes == null ||
@@ -226,7 +240,8 @@ final class Catalog {
         lootTables == null ||
         weapons == null ||
         enemies == null ||
-        zones == null) {
+        zones == null ||
+        defaultClones == null) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
     }
     _checkReferences(
@@ -240,6 +255,7 @@ final class Catalog {
       weapons: weapons,
       enemies: enemies,
       zones: zones,
+      defaultClones: defaultClones,
     );
     if (issues.isNotEmpty) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
@@ -256,6 +272,7 @@ final class Catalog {
         weapons: weapons,
         enemies: enemies,
         zones: zones,
+        defaultClones: defaultClones,
       ),
       const [],
     );
@@ -834,6 +851,7 @@ final class Catalog {
     required Map<String, WeaponData> weapons,
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
+    required Map<String, DefaultCloneData> defaultClones,
   }) {
     void missing(String file, String path, String what, String id) =>
         issues.add(CatalogIssue(file, path, 'no $what "$id"'));
@@ -933,6 +951,47 @@ final class Catalog {
         if (!lootTables.containsKey(table)) {
           missing('zones', '$at.$path', 'loot table', table);
         }
+      }
+    }
+    for (final clone in defaultClones.values) {
+      final at = clone.id;
+      if (!weapons.containsKey(clone.weapon)) {
+        missing('default_clones', '$at.weapon', 'weapon', clone.weapon);
+      }
+      for (final (i, potato) in clone.companions.indexed) {
+        for (final (j, ability) in potato.abilities.indexed) {
+          if (!abilities.containsKey(ability)) {
+            missing(
+              'default_clones',
+              '$at.companions[$i].abilities[$j]',
+              'ability',
+              ability,
+            );
+          }
+        }
+      }
+    }
+  }
+
+  static void _checkDefaultClone(
+    _FileCheck check,
+    String path,
+    DefaultCloneData clone,
+  ) {
+    check.atLeast('$path.weapon_level', clone.weaponLevel, 0);
+    check.positive('$path.bag_slots', clone.bagSlots);
+    check.atLeast('$path.score_min', clone.scoreMin, 0);
+    if (clone.scoreMax < clone.scoreMin) {
+      check.issue('$path.score_max', 'must be at least score_min');
+    }
+    for (final (i, potato) in clone.companions.indexed) {
+      final at = '$path.companions[$i]';
+      if (potato.abilities.isEmpty) check.issue('$at.abilities', 'is empty');
+      if (potato.type == PotatoType.breeding) {
+        check.issue('$at.type', 'breeding potatoes do not come along');
+      }
+      if ((potato.type == PotatoType.combat) != (potato.style != null)) {
+        check.issue('$at.style', 'combat potatoes only, and they need one');
       }
     }
   }

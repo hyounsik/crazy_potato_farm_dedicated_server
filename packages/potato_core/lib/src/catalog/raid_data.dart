@@ -1,4 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -25,6 +27,7 @@ abstract class RaidRulesData with _$RaidRulesData {
     /// How long an enemy keeps chasing whoever hit it, even out of sight.
     required double enemyAlertSeconds,
     required CompanionRulesData companion,
+    required CloneRulesData clones,
   }) = _RaidRulesData;
 
   factory RaidRulesData.fromJson(Map<String, dynamic> json) =>
@@ -121,6 +124,71 @@ abstract class CompanionRulesData with _$CompanionRulesData {
       _$CompanionRulesDataFromJson(json);
 }
 
+/// Clones: competitors playing by the player's rules, a little slower and
+/// shorter-sighted so the player can always get away.
+@freezed
+abstract class CloneRulesData with _$CloneRulesData {
+  const factory CloneRulesData({
+    /// Shares of the player's sight and speed.
+    required double sightMultiplier,
+    required double speedMultiplier,
+    required double maxHp,
+    required double radius,
+
+    /// Below this share of health (after a fight) it heads out.
+    required double lowHpRatio,
+
+    /// How long one stays before heading out, picked between these.
+    required double staySecondsMin,
+    required double staySecondsMax,
+
+    /// While the player's signal counts down, clone sight grows up to this
+    /// share at zero.
+    required double waitSightMultiplier,
+  }) = _CloneRulesData;
+
+  factory CloneRulesData.fromJson(Map<String, dynamic> json) =>
+      _$CloneRulesDataFromJson(json);
+}
+
+/// A clone that ships with the game (`default_clones.json`), used until a
+/// pool of real players' clones exists, and whenever the pool lacks one.
+@freezed
+abstract class DefaultCloneData with _$DefaultCloneData {
+  const factory DefaultCloneData({
+    required String id,
+
+    /// Shown over its head.
+    required String name,
+    required String weapon,
+    @Default(0) int weaponLevel,
+    required int bagSlots,
+
+    /// Zone scores it fits, both ends included.
+    required int scoreMin,
+    required int scoreMax,
+    @Default(<CloneCompanionData>[]) List<CloneCompanionData> companions,
+  }) = _DefaultCloneData;
+
+  factory DefaultCloneData.fromJson(Map<String, dynamic> json) =>
+      _$DefaultCloneDataFromJson(json);
+}
+
+/// A potato a clone brings along.
+@freezed
+abstract class CloneCompanionData with _$CloneCompanionData {
+  const factory CloneCompanionData({
+    required PotatoType type,
+    required Grade grade,
+    @Default(0) int level,
+    required List<String> abilities,
+    CombatStyle? style,
+  }) = _CloneCompanionData;
+
+  factory CloneCompanionData.fromJson(Map<String, dynamic> json) =>
+      _$CloneCompanionDataFromJson(json);
+}
+
 /// One combat style's fighting values. Melee and guard hit within [reach];
 /// ranged shoots up to [range].
 @freezed
@@ -169,6 +237,9 @@ abstract class WeaponData with _$WeaponData {
     /// Seconds of aiming at one target before a shot; switching targets
     /// starts over. Zero fires right away.
     @Default(0.0) double aimSeconds,
+
+    /// The gap a clone with this weapon keeps from what it fights.
+    @Default(1.5) double preferredDistance,
   }) = _WeaponData;
 
   factory WeaponData.fromJson(Map<String, dynamic> json) =>
@@ -312,6 +383,12 @@ abstract class ZoneDangerData with _$ZoneDangerData {
 
     /// Health lost per second while hungry. There is no walking home.
     required double hungryDamagePerSecond,
+
+    /// Clones walking in with the player, then one more every
+    /// [cloneEverySeconds] until [clonesMax] have come in all.
+    @Default(0) int clonesAtStart,
+    @Default(0.0) double cloneEverySeconds,
+    @Default(0) int clonesMax,
   }) = _ZoneDangerData;
 
   factory ZoneDangerData.fromJson(Map<String, dynamic> json) =>

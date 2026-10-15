@@ -60,6 +60,24 @@ void main() {
     );
   });
 
+  test('clone entry sites are picked, spaced and kept as a marker', () {
+    final recipe = sampleRecipe().copyWith(
+      exitSites: 2,
+      exitSpacing: 6,
+      cloneEntrySites: 3,
+    );
+    for (var seed = 0; seed < 10; seed++) {
+      final map = generate(seed, recipe: recipe);
+      final entries = map.markers[cloneEntryMarker]!;
+      expect(entries, hasLength(3), reason: 'seed $seed');
+      final reached = map.reachableFrom(map.entry);
+      expect(entries.every(reached.contains), isTrue);
+      for (final site in entries) {
+        expect(map.exits, isNot(contains(site)));
+      }
+    }
+  });
+
   test('scattered obstacles keep a free tile around them', () {
     for (var seed = 0; seed < 20; seed++) {
       final map = generate(seed);

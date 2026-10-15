@@ -15,6 +15,7 @@ import 'package:potato_core/src/map/map_chunk.dart';
 import 'package:potato_core/src/map/map_data.dart';
 import 'package:potato_core/src/map/map_generator.dart';
 import 'package:potato_core/src/map/map_physics.dart';
+import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
 import 'package:potato_core/src/raid/raid_command.dart';
 import 'package:potato_core/src/raid/raid_effects.dart';
@@ -101,10 +102,13 @@ final class RaidSimulation {
     required this.piles,
     required this.floorItems,
     required this.exits,
+    required this.clones,
     required this._nextId,
     required this._tick,
     this.signal,
     this._revealed = false,
+    this._clonesIn = 0,
+    this._nextCloneAt = 0,
     this._outcome,
   });
 
@@ -183,7 +187,7 @@ final class RaidSimulation {
     );
     final exits = _openExits(zoneData, map, random, () => nextId++);
 
-    return RaidSimulation._(
+    final run = RaidSimulation._(
       catalog: catalog,
       zone: zoneData,
       map: map,
@@ -196,9 +200,12 @@ final class RaidSimulation {
       piles: piles,
       floorItems: [],
       exits: exits,
+      clones: [],
       nextId: nextId,
       tick: 0,
     );
+    run._nextCloneAt = zoneData.danger?.cloneEverySeconds ?? 0;
+    return run;
   }
 
   /// What one of the player's bullets does: the weapon's damage, raised
@@ -261,6 +268,9 @@ final class RaidSimulation {
       piles: list('piles', RaidPile.fromJson),
       floorItems: list('floor_items', RaidFloorItem.fromJson),
       exits: list('exits', RaidExit.fromJson),
+      clones: list('clones', (j) => RaidClone.fromJson(j, catalog.stackOf)),
+      clonesIn: json['clones_in'] as int,
+      nextCloneAt: (json['next_clone_at'] as num).toDouble(),
       signal: switch (json['signal']) {
         final Map<String, dynamic> signal => RaidSignal.fromJson(signal),
         _ => null,
@@ -274,7 +284,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 4;
+  static const int formatVersion = 5;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -291,9 +301,17 @@ final class RaidSimulation {
   /// Exits open in this run; empty in a safe zone.
   final List<RaidExit> exits;
 
+  /// Clones in the run now (danger zones). Each carries its companions.
+  final List<RaidClone> clones;
+
   /// The countdown after a signal, if one is running.
   RaidSignal? signal;
   bool _revealed;
+
+  /// How many clones have walked in, and the run time (seconds) the next
+  /// one comes.
+  int _clonesIn;
+  double _nextCloneAt;
   int _nextId;
   int _tick;
   RaidOutcome? _outcome;
@@ -304,9 +322,10 @@ final class RaidSimulation {
 
   late final RaidEffects _effects = RaidEffects(catalog);
 
-  /// Buff potatoes' effects on the whole party, worked out each step from
-  /// those still standing.
-  StatSums _party = {};
+  /// Buff potatoes' effects on the player's party, worked out each step
+  /// from those still standing; [_parties] holds each team's.
+  StatSums get _party => _parties[playerTeam] ?? const {};
+  Map<int, StatSums> _parties = {};
 
   static CompanionTraits _traitsOf(RaidCompanion c) => (
     type: c.type,
@@ -316,10 +335,10 @@ final class RaidSimulation {
     lifeLeft: c.lifeLeft,
   );
 
-  /// [companion]'s own effects plus the party's.
+  /// [companion]'s own effects plus its party's.
   StatSums statsOf(RaidCompanion companion) => <String, StatSum>{}
     ..addAll(_effects.own(_traitsOf(companion)))
-    ..addAll(_party);
+    ..addAll(_parties[companion.team] ?? const {});
 
   /// How fast [companion] moves now.
   double companionSpeed(RaidCompanion companion) {
@@ -340,10 +359,17 @@ final class RaidSimulation {
     return statsOf(companion).apply(RaidStat.attack, base);
   }
 
-  void _updateParty() => _party = _effects.party([
-    for (final c in companions)
-      if (!c.isDown) _traitsOf(c),
-  ]);
+  void _updateParty() => _parties = {
+    playerTeam: _effects.party([
+      for (final c in companions)
+        if (!c.isDown) _traitsOf(c),
+    ]),
+    for (final clone in clones)
+      clone.id: _effects.party([
+        for (final c in clone.companions)
+          if (!c.isDown) _traitsOf(c),
+      ]),
+  };
 
   /// Seconds one step covers.
   double get stepSeconds => rules.stepMillis / 1000;
@@ -362,15 +388,30 @@ final class RaidSimulation {
   double get enemySight => rules.player.sight * zone.enemies.sightMultiplier;
   double get enemySpeed => rules.player.speed * zone.enemies.speedMultiplier;
 
+  /// How far into the player's signal countdown the run is, 0 to 1; 0
+  /// without one.
+  double get _waitPassed {
+    final danger = zone.danger;
+    final signal = this.signal;
+    if (danger == null || signal == null) return 0;
+    return 1 - signal.left / danger.countdownSeconds;
+  }
+
   /// How far aggressive enemies see now: wider during a signal's countdown,
   /// the more the closer it is to zero.
   double get aggressiveSight {
-    final danger = zone.danger;
-    final signal = this.signal;
-    if (danger == null || signal == null) return enemySight;
-    final passed = 1 - signal.left / danger.countdownSeconds;
-    return enemySight * (1 + (danger.waitSightMultiplier - 1) * passed);
+    final grow = (zone.danger?.waitSightMultiplier ?? 1) - 1;
+    return enemySight * (1 + grow * _waitPassed);
   }
+
+  /// How far clones see now; it grows like [aggressiveSight].
+  double get cloneSight {
+    final clone = rules.clones;
+    final base = rules.player.sight * clone.sightMultiplier;
+    return base * (1 + (clone.waitSightMultiplier - 1) * _waitPassed);
+  }
+
+  double get _cloneSpeed => rules.player.speed * rules.clones.speedMultiplier;
 
   bool get isDanger => zone.danger != null;
 
@@ -514,7 +555,10 @@ final class RaidSimulation {
     _updatePlayer(dt);
     if (_outcome != null) return;
     for (final companion in companions) {
-      if (!companion.isDown) _updateCompanion(companion, dt);
+      if (!companion.isDown) _updateCompanion(companion, player, dt);
+    }
+    for (final clone in List.of(clones)) {
+      _updateClone(clone, dt);
     }
     _runPeriodic();
     for (final enemy in enemies) {
@@ -523,11 +567,26 @@ final class RaidSimulation {
     _updateBullets(dt);
     _pickUpFloorItems();
     _clearDefeated();
+    _clearClones();
+    _markSeen();
     if (player.isDown) {
       _end(RaidOutcome.fainted);
       return;
     }
-    if (isDanger) _updateExits(dt);
+    if (isDanger) {
+      _updateExits(dt);
+      _bringClones();
+    }
+  }
+
+  /// Piles the player has in sight now stay on the minimap.
+  void _markSeen() {
+    for (final pile in piles) {
+      if (!pile.seen &&
+          pile.position.distanceTo(player.position) <= rules.player.sight) {
+        pile.seen = true;
+      }
+    }
   }
 
   // Exits --------------------------------------------------------------------
@@ -641,25 +700,28 @@ final class RaidSimulation {
     }
   }
 
-  /// Fires at the nearest enemy in range that no obstacle hides. Charging
-  /// weapons must stay on one target for a while first.
-  void _autoFire(double dt) {
-    final gun = weapon;
-    player.fireCooldown -= dt;
-    final target = autoAimTarget();
+  /// The player fires at what auto-aim picks.
+  void _autoFire(double dt) =>
+      _fire(player, autoAimTarget(), playerShotDamage, dt);
+
+  /// [shooter] fires at [target] (null holds fire). Charging weapons must
+  /// stay on one target for a while first.
+  void _fire(RaidShooter shooter, RaidBody? target, double damage, double dt) {
+    final gun = catalog.weapons[shooter.weapon]!;
+    shooter.fireCooldown -= dt;
     if (gun.aimSeconds > 0) {
-      if (target?.id != player.aimTarget) player.aimProgress = 0;
-      player.aimTarget = target?.id;
+      if (target?.id != shooter.aimTarget) shooter.aimProgress = 0;
+      shooter.aimTarget = target?.id;
       if (target == null) return;
-      player.aimProgress = math.min(gun.aimSeconds, player.aimProgress + dt);
-      final charged = player.aimProgress >= gun.aimSeconds;
-      if (player.fireCooldown > 0 || !charged) return;
-      player.aimProgress = 0;
+      shooter.aimProgress = math.min(gun.aimSeconds, shooter.aimProgress + dt);
+      final charged = shooter.aimProgress >= gun.aimSeconds;
+      if (shooter.fireCooldown > 0 || !charged) return;
+      shooter.aimProgress = 0;
     } else {
-      player.aimTarget = null;
-      if (player.fireCooldown > 0 || target == null) return;
+      shooter.aimTarget = null;
+      if (shooter.fireCooldown > 0 || target == null) return;
     }
-    final aim = (target.position - player.position).normalized();
+    final aim = (target.position - shooter.position).normalized();
     final spread = gun.spreadDegrees * math.pi / 180;
     for (var i = 0; i < gun.pellets; i++) {
       final angle = gun.pellets == 1
@@ -669,45 +731,67 @@ final class RaidSimulation {
       bullets.add(
         RaidBullet(
           id: _newId(),
-          position: player.position + direction * player.radius,
+          position: shooter.position + direction * shooter.radius,
           velocity: direction * gun.bulletSpeed,
-          damage: playerShotDamage,
-          owner: player.id,
-          side: RaidSide.player,
+          damage: damage,
+          owner: shooter.id,
+          side: shooter.side,
+          team: shooter.team,
           remaining: gun.range * 1.15,
         ),
       );
     }
-    player.fireCooldown = gun.interval;
+    shooter.fireCooldown = gun.interval;
   }
 
-  /// The enemy auto-aim would shoot now, for drawing an aim line too.
-  RaidEnemy? autoAimTarget() {
-    RaidEnemy? best;
-    var bestDistance = weapon.range;
-    for (final enemy in enemies) {
-      if (enemy.isDown) continue;
-      final d = enemy.position.distanceTo(player.position);
+  /// The body auto-aim would shoot now, for drawing an aim line too.
+  RaidBody? autoAimTarget() => _nearestInRange(player, weapon.range);
+
+  /// The standing opponent of [from] nearest to it within [range] that no
+  /// obstacle hides.
+  RaidBody? _nearestInRange(RaidBody from, double range) {
+    RaidBody? best;
+    var bestDistance = range;
+    for (final body in _opponentsOf(from.team)) {
+      final d = body.position.distanceTo(from.position);
       if (d > bestDistance) continue;
-      if (!map.hasLineOfSight(player.position, enemy.position)) continue;
-      best = enemy;
+      if (!map.hasLineOfSight(from.position, body.position)) continue;
+      best = body;
       bestDistance = d;
     }
     return best;
   }
+
+  /// Every body in the run, standing or not.
+  Iterable<RaidBody> get _bodies sync* {
+    yield player;
+    yield* companions;
+    yield* enemies;
+    for (final clone in clones) {
+      yield clone;
+      yield* clone.companions;
+    }
+  }
+
+  /// Standing bodies of every team but [team].
+  Iterable<RaidBody> _opponentsOf(int team) =>
+      _bodies.where((b) => !b.isDown && b.team != team);
 
   // Companions ---------------------------------------------------------------
 
   static Vec2 _followOffset(int slot) =>
       const [Vec2(-0.7, 0.15), Vec2(0.15, -0.7), Vec2(-0.55, -0.55)][slot % 3];
 
-  void _updateCompanion(RaidCompanion companion, double dt) {
+  /// [owner] is who it follows: the player, or its clone. Only the player's
+  /// potatoes make food and heal (from the player's bag).
+  void _updateCompanion(RaidCompanion companion, RaidShooter owner, double dt) {
     final spec = rules.companion;
     final stats = statsOf(companion);
+    final mine = companion.team == playerTeam;
     companion
       ..sinceHit += dt
       ..attackCooldown -= dt;
-    if (companion.type == PotatoType.food) {
+    if (mine && companion.type == PotatoType.food) {
       final level = catalog.rules.potatoes.level.foodYieldPermille;
       final rate = stats.apply(
         FarmStat.foodYield,
@@ -721,7 +805,8 @@ final class RaidSimulation {
       }
     }
     // Heals like the player, eating from the bag; not while hungry.
-    if (!isHungry &&
+    if (mine &&
+        !isHungry &&
         companion.sinceHit >= spec.regenDelaySeconds &&
         companion.hp < companion.maxHp) {
       final share = stats.apply(
@@ -740,23 +825,23 @@ final class RaidSimulation {
       }
     }
     final target = companion.type == PotatoType.combat
-        ? _pickTarget(companion)
+        ? _pickTarget(companion, owner)
         : null;
     if (target != null) {
-      _fight(companion, target, dt);
+      _fight(companion, owner, target, dt);
     } else {
-      _follow(companion, dt);
+      _follow(companion, owner, dt);
     }
   }
 
-  void _follow(RaidCompanion companion, double dt) {
+  void _follow(RaidCompanion companion, RaidShooter owner, double dt) {
     final spec = rules.companion;
-    final goal = player.position + _followOffset(companion.slot);
+    final goal = owner.position + _followOffset(companion.slot);
     final away = goal - companion.position;
     final distance = away.length;
     if (distance < 0.1) return;
     final far =
-        companion.position.distanceTo(player.position) > spec.catchUpDistance;
+        companion.position.distanceTo(owner.position) > spec.catchUpDistance;
     final speed = companionSpeed(companion) * (far ? 1.5 : 1);
     companion.position = map.move(
       companion.position,
@@ -765,48 +850,62 @@ final class RaidSimulation {
     );
   }
 
-  /// Attack mode: the enemy nearest the player within the attack range.
-  /// Defense mode: only enemies going for the party, within the narrow
-  /// range. Too far from the player, it stops fighting and comes back.
-  RaidEnemy? _pickTarget(RaidCompanion companion) {
+  /// Attack mode: the opponent nearest its owner within the attack range.
+  /// Defense mode: only opponents going for its team, within the narrow
+  /// range. Too far from its owner, it stops fighting and comes back.
+  RaidBody? _pickTarget(RaidCompanion companion, RaidShooter owner) {
     final spec = rules.companion;
-    if (companion.position.distanceTo(player.position) > spec.catchUpDistance) {
+    if (companion.position.distanceTo(owner.position) > spec.catchUpDistance) {
       companion.target = null;
       return null;
     }
     final range = companion.mode == CompanionMode.attack
         ? spec.attackRange
         : spec.defenseRange;
-    if (_body(companion.target ?? -1) case final RaidEnemy current
+    if (_body(companion.target ?? -1) case final current?
         when !current.isDown &&
-            current.position.distanceTo(player.position) <= range + 0.5) {
+            current.team != companion.team &&
+            current.position.distanceTo(owner.position) <= range + 0.5) {
       return current;
     }
-    RaidEnemy? best;
+    RaidBody? best;
     var bestDistance = range;
-    for (final enemy in enemies) {
-      if (enemy.isDown) continue;
-      final d = enemy.position.distanceTo(player.position);
+    for (final other in _opponentsOf(companion.team)) {
+      final d = other.position.distanceTo(owner.position);
       if (d > bestDistance) continue;
-      if (companion.mode == CompanionMode.defense && !_goesForUs(enemy)) {
+      if (companion.mode == CompanionMode.defense &&
+          !_goesFor(other, companion.team)) {
         continue;
       }
-      best = enemy;
+      best = other;
       bestDistance = d;
     }
     companion.target = best?.id;
     return best;
   }
 
-  bool _goesForUs(RaidEnemy enemy) =>
-      enemy.target != null && _body(enemy.target!)?.side == RaidSide.player;
+  /// Whether [other] is going for a body of [team].
+  bool _goesFor(RaidBody other, int team) {
+    final aim = switch (other) {
+      RaidEnemy(:final target) => target,
+      RaidClone(:final target) => target,
+      RaidCompanion(:final target) => target,
+      RaidPlayer() => null,
+    };
+    return aim != null && _body(aim)?.team == team;
+  }
 
   /// Melee closes in and hits; ranged keeps back and shoots when it sees
-  /// the enemy; guard stands between the player and the enemy and hits
+  /// the target; escort stands between its owner and the target and hits
   /// what comes close.
-  void _fight(RaidCompanion companion, RaidEnemy target, double dt) {
+  void _fight(
+    RaidCompanion companion,
+    RaidShooter owner,
+    RaidBody target,
+    double dt,
+  ) {
     final style = rules.companion.styles[companion.style];
-    if (style == null) return _follow(companion, dt);
+    if (style == null) return _follow(companion, owner, dt);
     final speed = companionSpeed(companion);
     final d = companion.position.distanceTo(target.position);
     final touch = companion.radius + target.radius + style.reach;
@@ -829,11 +928,11 @@ final class RaidSimulation {
           _shoot(companion, target, style);
         }
       case CombatStyle.escort:
-        final toward = target.position - player.position;
+        final toward = target.position - owner.position;
         final out = math.min(style.preferredDistance, toward.length / 2);
         final spot = toward.isZero
-            ? player.position
-            : player.position + toward.scaledTo(out);
+            ? owner.position
+            : owner.position + toward.scaledTo(out);
         _walk(companion, spot, speed, dt);
         if (d <= touch) _strike(companion, target);
     }
@@ -850,7 +949,7 @@ final class RaidSimulation {
     );
   }
 
-  void _strike(RaidCompanion companion, RaidEnemy target) {
+  void _strike(RaidCompanion companion, RaidBody target) {
     if (companion.attackCooldown > 0) return;
     _hurt(target, companionDamage(companion), companion);
     companion.attackCooldown =
@@ -859,7 +958,7 @@ final class RaidSimulation {
 
   void _shoot(
     RaidCompanion companion,
-    RaidEnemy target,
+    RaidBody target,
     CompanionStyleData style,
   ) {
     if (companion.attackCooldown > 0) return;
@@ -871,7 +970,8 @@ final class RaidSimulation {
         velocity: direction * style.bulletSpeed,
         damage: companionDamage(companion),
         owner: companion.id,
-        side: RaidSide.player,
+        side: companion.side,
+        team: companion.team,
         remaining: style.range * 1.2,
       ),
     );
@@ -883,7 +983,10 @@ final class RaidSimulation {
   void _runPeriodic() {
     final before = (_tick - 1) * rules.stepMillis;
     final now = _tick * rules.stepMillis;
-    for (final companion in companions) {
+    for (final companion in [
+      ...companions,
+      for (final clone in clones) ...clone.companions,
+    ]) {
       if (companion.isDown) continue;
       for (final (:effect, :power) in _effects.periodic(_traitsOf(companion))) {
         final every = effect.intervalInUse;
@@ -894,7 +997,10 @@ final class RaidSimulation {
             _events.add(CompanionSaid(companion.id, effect.text ?? ''));
           case RaidAction.healPercent:
             final percent = (effect.valueInUse ?? 0) * power;
-            for (final body in _wildTargets) {
+            final party = _bodies.where(
+              (b) => !b.isDown && b.team == companion.team,
+            );
+            for (final body in party) {
               body.hp = math.min(
                 body.maxHp,
                 body.hp + body.maxHp * percent / 100,
@@ -915,21 +1021,12 @@ final class RaidSimulation {
 
   // Enemies ------------------------------------------------------------------
 
-  /// The bodies wild enemies may go for: the player and standing companions.
-  Iterable<RaidBody> get _wildTargets sync* {
-    if (!player.isDown) yield player;
-    for (final c in companions) {
-      if (!c.isDown) yield c;
-    }
-  }
+  /// The bodies wild enemies may go for: every standing body not wild.
+  Iterable<RaidBody> get _wildTargets => _opponentsOf(wildTeam);
 
   RaidBody? _body(int id) {
-    if (player.id == id) return player;
-    for (final c in companions) {
-      if (c.id == id) return c;
-    }
-    for (final e in enemies) {
-      if (e.id == id) return e;
+    for (final body in _bodies) {
+      if (body.id == id) return body;
     }
     return null;
   }
@@ -1007,6 +1104,7 @@ final class RaidSimulation {
                 damage: spec.damage * zone.enemies.damageMultiplier,
                 owner: enemy.id,
                 side: RaidSide.wild,
+                team: wildTeam,
                 remaining: spec.range * 1.3,
               ),
             );
@@ -1049,24 +1147,28 @@ final class RaidSimulation {
     if (target is RaidPlayer && target.isDashing) return;
     target.hp = math.max(0, target.hp - amount);
     _events.add(BodyHit(target.id, amount));
+    final foe = from != null && from.team != target.team ? from : null;
     switch (target) {
       case RaidPlayer():
         target.sinceHit = 0;
+      case RaidClone():
+        target.sinceHit = 0;
+        if (foe != null) target.target = foe.id;
       case RaidCompanion():
         target.sinceHit = 0;
         // Being hit counts as "going for us" in either mode.
         if (target.type == PotatoType.combat &&
             target.target == null &&
-            from is RaidEnemy) {
-          target.target = from.id;
+            foe != null) {
+          target.target = foe.id;
         }
-        if (target.isDown) {
+        if (target.isDown && target.team == playerTeam) {
           _events.add(CompanionDown(target.id));
           if (isDanger) _leaveSeed(target);
         }
       case RaidEnemy():
         target.sinceHit = 0;
-        if (from != null && from.side != target.side) target.target = from.id;
+        if (foe != null) target.target = foe.id;
     }
   }
 
@@ -1107,10 +1209,7 @@ final class RaidSimulation {
           map.isBlocked(bullet.position.x.floor(), bullet.position.y.floor())) {
         return true;
       }
-      final targets = bullet.side == RaidSide.player
-          ? enemies.where((e) => !e.isDown)
-          : _wildTargets;
-      for (final target in targets) {
+      for (final target in _opponentsOf(bullet.team)) {
         if (target.position.distanceTo(bullet.position) <=
             target.radius + 0.05) {
           _hurt(target, bullet.damage, _body(bullet.owner));
@@ -1172,6 +1271,355 @@ final class RaidSimulation {
           );
         }
       }
+      return true;
+    });
+  }
+
+  // Clones -------------------------------------------------------------------
+
+  /// Brings in the first clones on the first step (with the player, and
+  /// announced like the rest), then one more whenever its time comes, until
+  /// the zone's number have come in.
+  void _bringClones() {
+    final danger = zone.danger!;
+    while (_clonesIn < danger.clonesAtStart) {
+      final before = _clonesIn;
+      _spawnClone();
+      if (_clonesIn == before) break;
+    }
+    if (_clonesIn >= danger.clonesMax || danger.cloneEverySeconds <= 0) return;
+    if (_tick * stepSeconds < _nextCloneAt) return;
+    _nextCloneAt += danger.cloneEverySeconds;
+    _spawnClone();
+  }
+
+  /// A default clone fitting the zone's score walks in at an entry site out
+  /// of the player's sight (any site if none is), with its potatoes.
+  void _spawnClone() {
+    final danger = zone.danger;
+    if (danger == null || _clonesIn >= danger.clonesMax) return;
+    final data = _pickDefaultClone();
+    if (data == null) return;
+    _clonesIn++;
+
+    final sites = map.markers[cloneEntryMarker] ?? [map.entry];
+    final hidden = [
+      for (final site in sites)
+        if (Vec2(site.x + 0.5, site.y + 0.5).distanceTo(player.position) >
+            rules.player.sight)
+          site,
+    ];
+    final pool = hidden.isEmpty ? sites : hidden;
+    final site = pool[_random.nextInt(pool.length)];
+    final at = Vec2(site.x + 0.5, site.y + 0.5);
+
+    final starts = [
+      for (final c in data.companions)
+        CompanionStart(
+          potatoId: 0,
+          type: c.type,
+          grade: c.grade,
+          level: c.level,
+          abilities: c.abilities,
+          style: c.style,
+        ),
+    ];
+    final party = _effects.party([for (final c in starts) c.traits]);
+    final clone = RaidClone(
+      id: _newId(),
+      position: at,
+      radius: rules.clones.radius,
+      maxHp: party.apply(RaidStat.hp, rules.clones.maxHp),
+      weapon: data.weapon,
+      weaponLevel: data.weaponLevel,
+      cloneId: data.id,
+      name: data.name,
+      bag: Bag(data.bagSlots, catalog.stackOf),
+      stayLeft:
+          rules.clones.staySecondsMin +
+          _random.nextDouble() *
+              (rules.clones.staySecondsMax - rules.clones.staySecondsMin),
+    );
+    for (final (slot, start) in starts.indexed) {
+      clone.companions.add(
+        RaidCompanion(
+          id: _newId(),
+          position: map.move(at, _followOffset(slot), rules.companion.radius),
+          radius: rules.companion.radius,
+          maxHp: _startHp(catalog, start, _effects.own(start.traits), party),
+          potatoId: 0,
+          type: start.type,
+          grade: start.grade,
+          level: start.level,
+          abilities: start.abilities,
+          style: start.style,
+          lifeLeft: 1,
+          slot: slot,
+          team: clone.id,
+        ),
+      );
+    }
+    clones.add(clone);
+    _events.add(CloneEntered(clone.id));
+  }
+
+  /// A default clone for this zone's score, preferring ones not in the run;
+  /// the nearest by score when none fits.
+  DefaultCloneData? _pickDefaultClone() {
+    final all = catalog.defaultClones.values.toList();
+    if (all.isEmpty) return null;
+    final score = zone.score;
+    int gap(DefaultCloneData c) => score < c.scoreMin
+        ? c.scoreMin - score
+        : score > c.scoreMax
+        ? score - c.scoreMax
+        : 0;
+    final best = all.map(gap).reduce(math.min);
+    final fitting = [
+      for (final c in all)
+        if (gap(c) == best) c,
+    ];
+    final inRun = {for (final c in clones) c.cloneId};
+    final fresh = [
+      for (final c in fitting)
+        if (!inRun.contains(c.id)) c,
+    ];
+    final pool = fresh.isEmpty ? fitting : fresh;
+    return pool[_random.nextInt(pool.length)];
+  }
+
+  /// What one of [clone]'s bullets does.
+  double cloneShotDamage(
+    RaidClone clone,
+  ) => (_parties[clone.id] ?? const {}).apply(
+    RaidStat.attack,
+    catalog.weapons[clone.weapon]!.damage *
+        (1 + clone.weaponLevel * catalog.rules.workbench.damagePercent / 100),
+  );
+
+  /// Gathers, fights what comes into its sight keeping its weapon's
+  /// distance, and leaves through the nearest open exit when its bag is
+  /// full, its stay runs out or its health is low (checked between
+  /// fights). It never runs from a fight, uses no dash or cover, and does
+  /// not heal.
+  void _updateClone(RaidClone clone, double dt) {
+    for (final companion in clone.companions) {
+      if (!companion.isDown) _updateCompanion(companion, clone, dt);
+    }
+    if (clone.isDown) return;
+    clone
+      ..sinceHit += dt
+      ..stayLeft -= dt
+      ..repath -= dt;
+    final speed = (_parties[clone.id] ?? const {}).apply(
+      RaidStat.moveSpeed,
+      _cloneSpeed,
+    );
+    final gun = catalog.weapons[clone.weapon]!;
+
+    if (clone.mode == CloneMode.waiting) {
+      _fire(
+        clone,
+        _nearestInRange(clone, gun.range),
+        cloneShotDamage(clone),
+        dt,
+      );
+      clone.waitLeft -= dt;
+      if (clone.waitLeft <= 0) {
+        clones.remove(clone);
+        _events.add(CloneEscaped(clone.id));
+      }
+      return;
+    }
+
+    final target = _cloneTarget(clone);
+    if (target != null) {
+      final d = clone.position.distanceTo(target.position);
+      final keep = gun.preferredDistance;
+      final seen = map.hasLineOfSight(clone.position, target.position);
+      if (d > keep + 0.25 || !seen) {
+        _walkPath(clone, target.position, speed, dt, every: 0.6);
+      } else if (d < keep - 0.25) {
+        final back = (clone.position - target.position).scaledTo(speed * dt);
+        clone.position = map.move(clone.position, back, clone.radius);
+      }
+    } else {
+      if (clone.mode == CloneMode.gather && _wantsToLeave(clone)) {
+        clone.mode = CloneMode.extract;
+      }
+      if (clone.mode == CloneMode.gather) {
+        _cloneGather(clone, speed, dt);
+      } else {
+        _cloneExtract(clone, speed, dt);
+      }
+    }
+    _fire(clone, _nearestInRange(clone, gun.range), cloneShotDamage(clone), dt);
+  }
+
+  bool _wantsToLeave(RaidClone clone) =>
+      clone.bag.slots.every((s) => s != null) ||
+      clone.stayLeft <= 0 ||
+      clone.hp / clone.maxHp < rules.clones.lowHpRatio;
+
+  /// Keeps fighting what it fights until that falls or leaves its sight
+  /// (past the alert time); otherwise takes on the nearest opponent in
+  /// sight.
+  RaidBody? _cloneTarget(RaidClone clone) {
+    final sight = cloneSight;
+    if (clone.target case final id?) {
+      final current = _body(id);
+      final lost =
+          current == null ||
+          current.isDown ||
+          (current.position.distanceTo(clone.position) > sight &&
+              clone.sinceHit > rules.enemyAlertSeconds);
+      if (!lost) return current;
+      clone.target = null;
+    }
+    RaidBody? best;
+    var bestDistance = sight;
+    for (final other in _opponentsOf(clone.team)) {
+      final d = other.position.distanceTo(clone.position);
+      if (d > bestDistance) continue;
+      best = other;
+      bestDistance = d;
+    }
+    clone.target = best?.id;
+    return best;
+  }
+
+  /// Walks to the nearest gathering spot with something left and takes all
+  /// it can. A spot it cannot reach or empty in time is skipped; one it
+  /// cannot empty means the bag is full.
+  void _cloneGather(RaidClone clone, double speed, double dt) {
+    RaidPile? spot;
+    for (final pile in piles) {
+      if (pile.id == clone.spot) spot = pile;
+    }
+    if (spot == null || spot.loot.isEmpty || clone.goalTimer <= 0) {
+      if (spot != null && !spot.loot.isEmpty) clone.skipped.add(spot.id);
+      final next = _nearestSpot(clone);
+      clone
+        ..spot = next?.id
+        ..goalTimer = 25;
+      if (next == null) clone.mode = CloneMode.extract;
+      return;
+    }
+    clone.goalTimer -= dt;
+    if (spot.position.distanceTo(clone.position) <= rules.pickupRadius) {
+      spot.loot.takeAllInto(clone.bag);
+      if (!spot.loot.isEmpty) clone.mode = CloneMode.extract;
+      clone.spot = null;
+      return;
+    }
+    if (!_walkPath(clone, spot.position, speed, dt)) {
+      clone
+        ..skipped.add(spot.id)
+        ..spot = null;
+    }
+  }
+
+  RaidPile? _nearestSpot(RaidClone clone) {
+    RaidPile? best;
+    var bestDistance = double.infinity;
+    for (final pile in piles) {
+      if (pile.kind != PileKind.spot || pile.loot.isEmpty) continue;
+      if (clone.skipped.contains(pile.id)) continue;
+      final d = pile.position.distanceTo(clone.position);
+      if (d >= bestDistance) continue;
+      best = pile;
+      bestDistance = d;
+    }
+    return best;
+  }
+
+  /// Clones know every open exit: walks to the nearest and signals there.
+  void _cloneExtract(RaidClone clone, double speed, double dt) {
+    if (exits.isEmpty) return;
+    RaidExit? goal;
+    for (final exit in exits) {
+      if (exit.id == clone.exit) goal = exit;
+    }
+    goal ??= exits.reduce(
+      (a, b) =>
+          a.position.distanceTo(clone.position) <=
+              b.position.distanceTo(clone.position)
+          ? a
+          : b,
+    );
+    clone.exit = goal.id;
+    final radius = zone.danger?.exitRadius ?? 0;
+    if (goal.position.distanceTo(clone.position) <= radius) {
+      clone
+        ..mode = CloneMode.waiting
+        ..waitLeft = zone.danger!.countdownSeconds;
+      _events.add(CloneSignalled(clone.id, goal.id));
+      return;
+    }
+    _walkPath(clone, goal.position, speed, dt);
+  }
+
+  /// Steps [clone] along a tile path to [goal], planning again every
+  /// [every] seconds or when the goal moves. False when there is no way.
+  bool _walkPath(
+    RaidClone clone,
+    Vec2 goal,
+    double speed,
+    double dt, {
+    double every = 2,
+  }) {
+    final planned = clone.pathGoal;
+    if (clone.repath <= 0 ||
+        planned == null ||
+        planned.distanceTo(goal) > 0.5) {
+      clone
+        ..path = map.findPath(clone.position, goal)
+        ..pathGoal = goal
+        ..repath = every;
+      if (clone.path.isEmpty) return false;
+    }
+    if (clone.path.isEmpty) return false;
+    var step = speed * dt;
+    while (step > 0 && clone.path.isNotEmpty) {
+      final delta = clone.path.first - clone.position;
+      final distance = delta.length;
+      if (distance <= step) {
+        clone.position = map.move(clone.position, delta, clone.radius);
+        step -= distance;
+        clone.path.removeAt(0);
+      } else {
+        clone.position = map.move(
+          clone.position,
+          delta.scaledTo(step),
+          clone.radius,
+        );
+        step = 0;
+      }
+    }
+    if (clone.path.isNotEmpty) {
+      final ahead = clone.path.first - clone.position;
+      if (!ahead.isZero) clone.facing = ahead.normalized();
+    }
+    return true;
+  }
+
+  /// Fallen clones leave what they gathered in a bundle; their potatoes go
+  /// with them.
+  void _clearClones() {
+    clones.removeWhere((clone) {
+      if (!clone.isDown) return false;
+      final items = [for (final s in clone.bag.slots) ?s];
+      if (items.isNotEmpty) {
+        piles.add(
+          RaidPile(
+            id: _newId(),
+            position: clone.position,
+            kind: PileKind.cloneBundle,
+            loot: LootPile(items),
+          ),
+        );
+      }
+      _events.add(CloneDown(clone.id));
       return true;
     });
   }
@@ -1345,6 +1793,9 @@ final class RaidSimulation {
     'piles': [for (final p in piles) p.toJson()],
     'floor_items': [for (final f in floorItems) f.toJson()],
     'exits': [for (final e in exits) e.toJson()],
+    'clones': [for (final c in clones) c.toJson()],
+    'clones_in': _clonesIn,
+    'next_clone_at': _nextCloneAt,
     'signal': signal?.toJson(),
     'revealed': _revealed,
     'outcome': _outcome?.name,

@@ -27,6 +27,10 @@ abstract class MapRecipe with _$MapRecipe {
     @Default(0) int exitSites,
     @Default(0) int exitSpacing,
 
+    /// Places clones walk in from, picked per seed like exit sites and kept
+    /// as the [cloneEntryMarker] marker.
+    @Default(0) int cloneEntrySites,
+
     /// Scattered obstacles stay at least this many tiles (Chebyshev) from
     /// [entry], [exits] and chunk markers.
     required int clearRadius,
@@ -44,6 +48,9 @@ abstract class MapRecipe with _$MapRecipe {
   factory MapRecipe.fromJson(Map<String, dynamic> json) =>
       _$MapRecipeFromJson(json);
 }
+
+/// The map marker holding the clone entry sites.
+const String cloneEntryMarker = 'clone_entry';
 
 /// Loose obstacles sprinkled over open ground.
 @freezed

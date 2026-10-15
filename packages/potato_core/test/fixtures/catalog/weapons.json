@@ -8,7 +8,8 @@
       "interval": 0.16,
       "damage": 5,
       "bullet_speed": 9,
-      "spread_degrees": 8
+      "spread_degrees": 8,
+      "preferred_distance": 1.8
     },
     {
       "id": "spread",

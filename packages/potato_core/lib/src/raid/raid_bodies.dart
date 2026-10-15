@@ -4,8 +4,15 @@ import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
-/// Which side a body or shot is on. Shots only hurt the other side.
-enum RaidSide { player, wild }
+/// Which side a body or shot is on, for drawing. Who hurts whom goes by
+/// [RaidBody.team].
+enum RaidSide { player, wild, clone }
+
+/// The team of the player and their companions.
+const int playerTeam = 0;
+
+/// The team of every wild enemy.
+const int wildTeam = -1;
 
 /// Anything in a run that has a position, a round body and health.
 ///
@@ -28,11 +35,16 @@ sealed class RaidBody {
   double hp;
 
   RaidSide get side;
+
+  /// Bodies of one team never hurt each other: [playerTeam], [wildTeam],
+  /// or a clone's own id for the clone and its companions.
+  int get team;
   bool get isDown => hp <= 0;
 }
 
-final class RaidPlayer extends RaidBody {
-  RaidPlayer({
+/// A body with an auto-aiming gun: the player or a clone.
+sealed class RaidShooter extends RaidBody {
+  RaidShooter({
     required super.id,
     required super.position,
     required super.radius,
@@ -41,15 +53,43 @@ final class RaidPlayer extends RaidBody {
     this.weaponLevel = 0,
     super.hp,
     this.facing = const Vec2(1, 0),
+    this.fireCooldown = 0,
+    this.aimTarget,
+    this.aimProgress = 0,
+  });
+
+  /// The weapon's catalog id.
+  String weapon;
+
+  /// How far the weapon was strengthened at the workbench.
+  int weaponLevel;
+  Vec2 facing;
+  double fireCooldown;
+
+  /// Charging weapons: the body being aimed at and for how long.
+  int? aimTarget;
+  double aimProgress;
+}
+
+final class RaidPlayer extends RaidShooter {
+  RaidPlayer({
+    required super.id,
+    required super.position,
+    required super.radius,
+    required super.maxHp,
+    required super.weapon,
+    super.weaponLevel,
+    super.hp,
+    super.facing,
     this.dashLeft = 0,
     this.dashCooldown = 0,
     this.dashDirection = Vec2.zero,
     this.sinceHit = double.infinity,
     this.foodOwed = 0,
     this.hungrySeconds = 0,
-    this.fireCooldown = 0,
-    this.aimTarget,
-    this.aimProgress = 0,
+    super.fireCooldown,
+    super.aimTarget,
+    super.aimProgress,
   });
 
   factory RaidPlayer.fromJson(Map<String, dynamic> json) => RaidPlayer(
@@ -72,12 +112,6 @@ final class RaidPlayer extends RaidBody {
     aimProgress: (json['aim_progress'] as num).toDouble(),
   );
 
-  /// The weapon's catalog id.
-  String weapon;
-
-  /// How far the weapon was strengthened at the workbench.
-  int weaponLevel;
-  Vec2 facing;
   double dashLeft;
   double dashCooldown;
   Vec2 dashDirection;
@@ -88,16 +122,14 @@ final class RaidPlayer extends RaidBody {
 
   /// How long the bag has been out of food.
   double hungrySeconds;
-  double fireCooldown;
-
-  /// Charging weapons: the body being aimed at and for how long.
-  int? aimTarget;
-  double aimProgress;
 
   bool get isDashing => dashLeft > 0;
 
   @override
   RaidSide get side => RaidSide.player;
+
+  @override
+  int get team => playerTeam;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -167,6 +199,9 @@ final class RaidEnemy extends RaidBody {
   @override
   RaidSide get side => RaidSide.wild;
 
+  @override
+  int get team => wildTeam;
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'position': position.toJson(),
@@ -212,6 +247,7 @@ final class RaidCompanion extends RaidBody {
     this.sinceHit = double.infinity,
     this.target,
     this.attackCooldown = 0,
+    this.team = playerTeam,
   });
 
   factory RaidCompanion.fromJson(Map<String, dynamic> json) => RaidCompanion(
@@ -237,9 +273,10 @@ final class RaidCompanion extends RaidBody {
     sinceHit: _seconds(json['since_hit']),
     target: json['target'] as int?,
     attackCooldown: (json['attack_cooldown'] as num).toDouble(),
+    team: json['team'] as int,
   );
 
-  /// The farm potato's id, to send it back home.
+  /// The farm potato's id, to send it back home (0 for a clone's).
   final int potatoId;
   final PotatoType type;
   final Grade grade;
@@ -277,8 +314,12 @@ final class RaidCompanion extends RaidBody {
     style: style,
   );
 
+  /// [playerTeam], or the id of the clone it follows.
   @override
-  RaidSide get side => RaidSide.player;
+  final int team;
+
+  @override
+  RaidSide get side => team == playerTeam ? RaidSide.player : RaidSide.clone;
 
   Map<String, dynamic> toJson() => {
     'id': id,
@@ -286,6 +327,7 @@ final class RaidCompanion extends RaidBody {
     'radius': radius,
     'max_hp': maxHp,
     'hp': hp,
+    'team': team,
     'potato_id': potatoId,
     'type': type.name,
     'grade': grade.name,
@@ -303,6 +345,167 @@ final class RaidCompanion extends RaidBody {
   };
 }
 
+enum CloneMode {
+  /// Walking to gathering spots and emptying them.
+  gather,
+
+  /// Heading for the nearest open exit.
+  extract,
+
+  /// Signalled from an exit; gone when the count ends.
+  waiting,
+}
+
+/// A competitor: another player's gear and potatoes, played by the run.
+/// It gathers, fights whatever comes into its sight, and leaves through an
+/// exit; knocked down, it drops what it gathered in a bundle.
+final class RaidClone extends RaidShooter {
+  RaidClone({
+    required super.id,
+    required super.position,
+    required super.radius,
+    required super.maxHp,
+    required super.weapon,
+    required this.cloneId,
+    required this.name,
+    required this.bag,
+    required this.stayLeft,
+    super.weaponLevel,
+    super.hp,
+    super.facing,
+    super.fireCooldown,
+    super.aimTarget,
+    super.aimProgress,
+    List<RaidCompanion>? companions,
+    this.mode = CloneMode.gather,
+    this.target,
+    this.sinceHit = double.infinity,
+    this.spot,
+    Set<int>? skipped,
+    this.goalTimer = 0,
+    this.exit,
+    this.waitLeft = 0,
+    List<Vec2>? path,
+    this.pathGoal,
+    this.repath = 0,
+  }) : companions = companions ?? [],
+       skipped = skipped ?? {},
+       path = path ?? [];
+
+  factory RaidClone.fromJson(Map<String, dynamic> json, StackSize stackSize) =>
+      RaidClone(
+        id: json['id'] as int,
+        position: Vec2.fromJson(json['position'] as List<Object?>),
+        radius: (json['radius'] as num).toDouble(),
+        maxHp: (json['max_hp'] as num).toDouble(),
+        hp: (json['hp'] as num).toDouble(),
+        weapon: json['weapon'] as String,
+        weaponLevel: json['weapon_level'] as int,
+        cloneId: json['clone_id'] as String,
+        name: json['name'] as String,
+        bag: Bag.restore([
+          for (final s in json['bag'] as List<Object?>)
+            s == null ? null : ItemStack.fromJson(s as Map<String, dynamic>),
+        ], stackSize),
+        stayLeft: (json['stay_left'] as num).toDouble(),
+        facing: Vec2.fromJson(json['facing'] as List<Object?>),
+        fireCooldown: (json['fire_cooldown'] as num).toDouble(),
+        aimTarget: json['aim_target'] as int?,
+        aimProgress: (json['aim_progress'] as num).toDouble(),
+        companions: [
+          for (final c in json['companions'] as List<Object?>)
+            RaidCompanion.fromJson(c! as Map<String, dynamic>),
+        ],
+        mode: CloneMode.values.byName(json['mode'] as String),
+        target: json['target'] as int?,
+        sinceHit: _seconds(json['since_hit']),
+        spot: json['spot'] as int?,
+        skipped: {...(json['skipped'] as List<Object?>).cast<int>()},
+        goalTimer: (json['goal_timer'] as num).toDouble(),
+        exit: json['exit'] as int?,
+        waitLeft: (json['wait_left'] as num).toDouble(),
+        path: [
+          for (final p in json['path'] as List<Object?>)
+            Vec2.fromJson(p! as List<Object?>),
+        ],
+        pathGoal: switch (json['path_goal']) {
+          final List<Object?> goal => Vec2.fromJson(goal),
+          _ => null,
+        },
+        repath: (json['repath'] as num).toDouble(),
+      );
+
+  /// Its default clone's catalog id.
+  final String cloneId;
+
+  /// Shown over its head.
+  final String name;
+
+  /// Filled from gathering spots only; dropped when it falls.
+  final Bag bag;
+
+  /// Seconds before it decides to leave.
+  double stayLeft;
+
+  /// Its potatoes; they follow it and leave or vanish with it.
+  final List<RaidCompanion> companions;
+  CloneMode mode;
+
+  /// The body it is fighting.
+  int? target;
+  double sinceHit;
+
+  /// The gathering spot it is walking to, and spots it gave up on.
+  int? spot;
+  final Set<int> skipped;
+  double goalTimer;
+
+  /// The exit it is heading for or waiting at.
+  int? exit;
+  double waitLeft;
+
+  /// Waypoints toward [pathGoal], planned again every so often.
+  List<Vec2> path;
+  Vec2? pathGoal;
+  double repath;
+
+  @override
+  RaidSide get side => RaidSide.clone;
+
+  @override
+  int get team => id;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'position': position.toJson(),
+    'radius': radius,
+    'max_hp': maxHp,
+    'hp': hp,
+    'weapon': weapon,
+    'weapon_level': weaponLevel,
+    'clone_id': cloneId,
+    'name': name,
+    'bag': bag.toJson(),
+    'stay_left': stayLeft,
+    'facing': facing.toJson(),
+    'fire_cooldown': fireCooldown,
+    'aim_target': aimTarget,
+    'aim_progress': aimProgress,
+    'companions': [for (final c in companions) c.toJson()],
+    'mode': mode.name,
+    'target': target,
+    'since_hit': _secondsJson(sinceHit),
+    'spot': spot,
+    'skipped': [...skipped],
+    'goal_timer': goalTimer,
+    'exit': exit,
+    'wait_left': waitLeft,
+    'path': [for (final p in path) p.toJson()],
+    'path_goal': pathGoal?.toJson(),
+    'repath': repath,
+  };
+}
+
 /// A shot in flight. Obstacles stop it; it hits the first body of the other
 /// side it touches.
 final class RaidBullet {
@@ -313,6 +516,7 @@ final class RaidBullet {
     required this.damage,
     required this.owner,
     required this.side,
+    required this.team,
     required this.remaining,
   });
 
@@ -323,6 +527,7 @@ final class RaidBullet {
     damage: (json['damage'] as num).toDouble(),
     owner: json['owner'] as int,
     side: RaidSide.values.byName(json['side'] as String),
+    team: json['team'] as int,
     remaining: (json['remaining'] as num).toDouble(),
   );
 
@@ -337,6 +542,9 @@ final class RaidBullet {
   final int owner;
   final RaidSide side;
 
+  /// The shooter's team; it hurts bodies of every other team.
+  final int team;
+
   /// Distance it may still travel.
   double remaining;
 
@@ -347,6 +555,7 @@ final class RaidBullet {
     'damage': damage,
     'owner': owner,
     'side': side.name,
+    'team': team,
     'remaining': remaining,
   };
 }
@@ -355,8 +564,11 @@ enum PileKind {
   /// A gathering spot placed at the start.
   spot,
 
-  /// Left by a defeated enemy.
+  /// Left by a defeated enemy (or a fallen companion's seed).
   bundle,
+
+  /// What a fallen clone gathered.
+  cloneBundle,
 }
 
 /// Loot opened by standing next to it.
@@ -366,6 +578,7 @@ final class RaidPile {
     required this.position,
     required this.kind,
     required this.loot,
+    this.seen = false,
   });
 
   factory RaidPile.fromJson(Map<String, dynamic> json) => RaidPile(
@@ -373,6 +586,7 @@ final class RaidPile {
     position: Vec2.fromJson(json['position'] as List<Object?>),
     kind: PileKind.values.byName(json['kind'] as String),
     loot: LootPile.fromJson(json['loot'] as List<Object?>),
+    seen: json['seen'] as bool,
   );
 
   final int id;
@@ -380,11 +594,15 @@ final class RaidPile {
   final PileKind kind;
   final LootPile loot;
 
+  /// The player has had it in sight: bundles stay on the minimap.
+  bool seen;
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'position': position.toJson(),
     'kind': kind.name,
     'loot': loot.toJson(),
+    'seen': seen,
   };
 }
 

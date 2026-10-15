@@ -121,7 +121,8 @@
           "big_chance": 0.25
         },
         "exit_sites": 4,
-        "exit_spacing": 8
+        "exit_spacing": 8,
+        "clone_entry_sites": 4
       },
       "enemies": {
         "count": 30,
@@ -169,7 +170,10 @@
         "exit_radius": 0.9,
         "countdown_seconds": 10,
         "wait_sight_multiplier": 2,
-        "hungry_damage_per_second": 2
+        "hungry_damage_per_second": 2,
+        "clones_at_start": 2,
+        "clone_every_seconds": 30,
+        "clones_max": 4
       }
     }
   ]

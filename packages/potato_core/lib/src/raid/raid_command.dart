@@ -119,6 +119,35 @@ final class CompanionSaid extends RaidEvent {
   final String text;
 }
 
+/// Clone [clone] walked in. Screens say only that someone came in.
+final class CloneEntered extends RaidEvent {
+  const CloneEntered(this.clone);
+
+  final int clone;
+}
+
+/// Clone [clone] signalled from exit [exit]; it leaves when the count ends.
+final class CloneSignalled extends RaidEvent {
+  const CloneSignalled(this.clone, this.exit);
+
+  final int clone;
+  final int exit;
+}
+
+/// Clone [clone] left with what it gathered.
+final class CloneEscaped extends RaidEvent {
+  const CloneEscaped(this.clone);
+
+  final int clone;
+}
+
+/// Clone [clone] fell, dropping what it gathered.
+final class CloneDown extends RaidEvent {
+  const CloneDown(this.clone);
+
+  final int clone;
+}
+
 /// Something walked over was put in the bag.
 final class ItemPicked extends RaidEvent {
   const ItemPicked(this.stack);

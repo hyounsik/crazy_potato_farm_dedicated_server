@@ -182,6 +182,16 @@
       "level_hp_permille": 30,
       "level_attack_permille": 30,
       "aggro_pulse_range": 3
+    },
+    "clones": {
+      "sight_multiplier": 0.9,
+      "speed_multiplier": 0.9,
+      "max_hp": 100,
+      "radius": 0.22,
+      "low_hp_ratio": 0.4,
+      "stay_seconds_min": 90,
+      "stay_seconds_max": 180,
+      "wait_sight_multiplier": 2
     }
   },
   "storage": {

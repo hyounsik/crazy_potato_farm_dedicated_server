@@ -32,6 +32,10 @@ _MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
         'exit_spacing',
         (v) => (v as num?)?.toInt() ?? 0,
       ),
+      cloneEntrySites: $checkedConvert(
+        'clone_entry_sites',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
       clearRadius: $checkedConvert('clear_radius', (v) => (v as num).toInt()),
       terrain: $checkedConvert(
         'terrain',
@@ -52,6 +56,7 @@ _MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
   fieldKeyMap: const {
     'exitSites': 'exit_sites',
     'exitSpacing': 'exit_spacing',
+    'cloneEntrySites': 'clone_entry_sites',
     'clearRadius': 'clear_radius',
   },
 );
@@ -63,6 +68,7 @@ Map<String, dynamic> _$MapRecipeToJson(_MapRecipe instance) =>
       'exits': instance.exits.map((e) => e.toJson()).toList(),
       'exit_sites': instance.exitSites,
       'exit_spacing': instance.exitSpacing,
+      'clone_entry_sites': instance.cloneEntrySites,
       'clear_radius': instance.clearRadius,
       'terrain': instance.terrain.map((e) => e.toJson()).toList(),
       'scatter': instance.scatter.toJson(),

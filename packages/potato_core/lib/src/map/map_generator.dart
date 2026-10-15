@@ -84,18 +84,24 @@ final class _Builder {
   /// The recipe's fixed exits, then the sites picked for this seed.
   final List<TilePos> exits = [];
 
-  /// Picks the recipe's exit sites on open ground with an open ring around
-  /// them, spaced from the entry and each other. Fewer when room runs out.
+  /// Picks the recipe's exit sites, then its clone entry sites, on open
+  /// ground with an open ring around them, spaced from the entry and each
+  /// other. Fewer when room runs out.
   void _pickExitSites() {
     exits.addAll(recipe.exits);
-    final spacing = recipe.exitSpacing;
     final taken = [recipe.entry, ...exits];
-    var picked = 0;
-    for (
-      var tries = 0;
-      picked < recipe.exitSites && tries < recipe.exitSites * 200;
-      tries++
-    ) {
+    exits.addAll(_pickSites(recipe.exitSites, taken));
+    if (recipe.cloneEntrySites > 0) {
+      markers[cloneEntryMarker] = _pickSites(recipe.cloneEntrySites, taken);
+    }
+  }
+
+  /// [count] open sites at least `exitSpacing` from [taken] and each other;
+  /// each one picked joins [taken].
+  List<TilePos> _pickSites(int count, List<TilePos> taken) {
+    final spacing = recipe.exitSpacing;
+    final picked = <TilePos>[];
+    for (var tries = 0; picked.length < count && tries < count * 200; tries++) {
       final at = TilePos(
         1 + random.nextInt(size - 2),
         1 + random.nextInt(size - 2),
@@ -104,10 +110,10 @@ final class _Builder {
         (p) => (p.x - at.x).abs() < spacing && (p.y - at.y).abs() < spacing,
       );
       if (near || !_freeAround(at.x, at.y, 1)) continue;
-      exits.add(at);
+      picked.add(at);
       taken.add(at);
-      picked++;
     }
+    return picked;
   }
 
   bool _inside(int x, int y) => x >= 0 && y >= 0 && x < size && y < size;

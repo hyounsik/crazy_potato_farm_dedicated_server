@@ -42,6 +42,13 @@ void main() {
       'hungry_damage_per_second': 10,
     };
     zones.add(danger);
+    // The same with one clone walking in (at the entry: there are no sites).
+    final cloneZone = jsonDecode(jsonEncode(danger)) as Map<String, dynamic>;
+    cloneZone['id'] = 'clone_open';
+    (cloneZone['danger'] as Map)
+      ..['clones_at_start'] = 1
+      ..['clones_max'] = 1;
+    zones.add(cloneZone);
     // Combat seeds, which a fallen combat potato leaves.
     ((files['items']! as Map<String, dynamic>)['items'] as List<Object?>).add({
       'id': 'seed_combat_normal',
@@ -785,5 +792,157 @@ void main() {
         expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
       },
     );
+  });
+
+  group('clones', () {
+    RaidSimulation cloneRun() {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'clone_open',
+        seed: 1,
+        food: 100,
+      );
+      run
+        ..player.weapon = 'blank'
+        ..step()
+        ..takeEvents();
+      return run;
+    }
+
+    /// Moves the clone away from the player, out of its sight.
+    RaidClone farClone(RaidSimulation run, {Vec2 offset = const Vec2(-7, 6)}) {
+      final clone = run.clones.single;
+      clone.position = run.player.position + offset;
+      for (final c in clone.companions) {
+        c.position = clone.position;
+      }
+      return clone;
+    }
+
+    test('come in at entry sites out of sight, more as time passes', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_danger',
+        seed: 7,
+      );
+      final danger = catalog.zones['sample_danger']!.danger!;
+      expect(run.clones, isEmpty, reason: 'they walk in on the first step');
+      run.step();
+      expect(run.clones, hasLength(danger.clonesAtStart));
+      final sites = run.map.markers[cloneEntryMarker]!;
+      for (final clone in run.clones) {
+        expect(clone.cloneId, 'sample_clone', reason: 'fits score 3');
+        expect(clone.name, 'Sample');
+        expect(
+          sites.any(
+            (t) => Vec2(t.x + 0.5, t.y + 0.5).distanceTo(clone.position) < 0.01,
+          ),
+          isTrue,
+        );
+        expect(clone.companions.single.team, clone.id);
+      }
+      expect(run.takeEvents().whereType<CloneEntered>(), hasLength(2));
+      final before = run.clones.length;
+      runFor(run, danger.cloneEverySeconds + 0.1);
+      expect(
+        run.clones.length +
+            run.takeEvents().whereType<CloneEscaped>().length +
+            run.takeEvents().whereType<CloneDown>().length,
+        greaterThanOrEqualTo(before),
+      );
+    });
+
+    test('gather from spots into their own bag', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      final spot = RaidPile(
+        id: 7000,
+        position: clone.position + const Vec2(2, 0),
+        kind: PileKind.spot,
+        loot: LootPile([ItemStack('food', 10)]),
+      );
+      run.piles.add(spot);
+      runFor(run, 3);
+      expect(spot.loot.isEmpty, isTrue);
+      expect(clone.bag.countOf('food'), 10);
+      expect(run.bag.countOf('food'), lessThan(100), reason: 'not the player');
+    });
+
+    test('fight wild enemies in their sight', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      final brute = addEnemy(run, 'brute', clone.position + const Vec2(1.5, 0));
+      runFor(run, 2);
+      expect(brute.hp, lessThan(brute.maxHp));
+      expect(brute.target, clone.id, reason: 'it goes for whoever hit it');
+    });
+
+    test('shoot the player who comes into their sight', () {
+      final run = cloneRun();
+      final clone = farClone(run, offset: const Vec2(1.5, 0));
+      runFor(run, 2);
+      expect(clone.target, run.player.id);
+      expect(run.player.hp, lessThan(run.player.maxHp));
+    });
+
+    test('see farther as the player\'s signal runs down', () {
+      final run = cloneRun();
+      final sight = run.cloneSight;
+      final exit = run.exits.firstWhere((e) => e.position.x > 10);
+      run.player.position = exit.position;
+      farClone(run);
+      run.apply(const Signal());
+      runFor(run, 2.5);
+      expect(run.cloneSight, closeTo(sight * 1.5, sight * 0.02));
+    });
+
+    test('leave through an exit when their stay runs out', () {
+      final run = cloneRun();
+      final clone = farClone(run)..stayLeft = 0;
+      runFor(run, 20);
+      final events = run.takeEvents();
+      expect(events.whereType<CloneSignalled>().single.clone, clone.id);
+      expect(events.whereType<CloneEscaped>().single.clone, clone.id);
+      expect(run.clones, isEmpty);
+    });
+
+    test('fallen, they leave what they gathered in a purple bundle', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      clone.bag.addFrom(ItemStack('food', 12));
+      clone.hp = 0;
+      run.step();
+      expect(run.clones, isEmpty);
+      final bundle = run.piles.singleWhere(
+        (p) => p.kind == PileKind.cloneBundle,
+      );
+      expect(bundle.loot.items.single.count, 12);
+      expect(run.takeEvents().whereType<CloneDown>().single.clone, clone.id);
+    });
+
+    test('saving with clones about and going on equals never stopping', () {
+      RaidSimulation start() => RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_danger',
+        seed: 11,
+        food: 100,
+      );
+      void steps(RaidSimulation run, int n) {
+        for (var i = 0; i < n; i++) {
+          run.step();
+        }
+      }
+
+      final straight = start();
+      steps(straight, 1200);
+      final saved = start();
+      steps(saved, 450);
+      final restored = RaidSimulation.fromJson(
+        jsonDecode(jsonEncode(saved.toJson())) as Map<String, dynamic>,
+        catalog,
+      );
+      steps(restored, 750);
+      expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
+    });
   });
 }

@@ -20,7 +20,7 @@ mixin _$RaidRulesData {
  int get stepMillis; PlayerRulesData get player; int get bagSlots;/// How close the player must stand to open a pile or a gathering spot.
  double get pickupRadius; FoodRulesData get food;/// The weapon every run starts with, until equipment exists.
  String get startWeapon;/// How long an enemy keeps chasing whoever hit it, even out of sight.
- double get enemyAlertSeconds; CompanionRulesData get companion;
+ double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones;
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -34,20 +34,20 @@ $RaidRulesDataCopyWith<RaidRulesData> get copyWith => _$RaidRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as RaidRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.bagSlots, _this.bagSlots) || other.bagSlots == _this.bagSlots)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.startWeapon, _this.startWeapon) || other.startWeapon == _this.startWeapon)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.bagSlots, _this.bagSlots) || other.bagSlots == _this.bagSlots)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.startWeapon, _this.startWeapon) || other.startWeapon == _this.startWeapon)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RaidRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.bagSlots,_this.pickupRadius,_this.food,_this.startWeapon,_this.enemyAlertSeconds,_this.companion);
+  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.bagSlots,_this.pickupRadius,_this.food,_this.startWeapon,_this.enemyAlertSeconds,_this.companion,_this.clones);
 }
 
 @override
 String toString() {
   final _this = this as RaidRulesData;
-  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, bagSlots: ${_this.bagSlots}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, startWeapon: ${_this.startWeapon}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion})';
+  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, bagSlots: ${_this.bagSlots}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, startWeapon: ${_this.startWeapon}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones})';
 }
 
 
@@ -58,11 +58,11 @@ abstract mixin class $RaidRulesDataCopyWith<$Res>  {
   factory $RaidRulesDataCopyWith(RaidRulesData value, $Res Function(RaidRulesData) _then) = _$RaidRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion
+ int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
 });
 
 
-$PlayerRulesDataCopyWith<$Res> get player;$FoodRulesDataCopyWith<$Res> get food;$CompanionRulesDataCopyWith<$Res> get companion;
+$PlayerRulesDataCopyWith<$Res> get player;$FoodRulesDataCopyWith<$Res> get food;$CompanionRulesDataCopyWith<$Res> get companion;$CloneRulesDataCopyWith<$Res> get clones;
 
 }
 /// @nodoc
@@ -75,7 +75,7 @@ class _$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
   return _then(RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -85,7 +85,8 @@ as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non
 as FoodRulesData,startWeapon: null == startWeapon ? _self.startWeapon : startWeapon // ignore: cast_nullable_to_non_nullable
 as String,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
-as CompanionRulesData,
+as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
+as CloneRulesData,
   ));
 }
 /// Create a copy of RaidRulesData
@@ -114,6 +115,15 @@ $CompanionRulesDataCopyWith<$Res> get companion {
   
   return $CompanionRulesDataCopyWith<$Res>(_self.companion, (value) {
     return _then(_self.copyWith(companion: value));
+  });
+}/// Create a copy of RaidRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CloneRulesDataCopyWith<$Res> get clones {
+  
+  return $CloneRulesDataCopyWith<$Res>(_self.clones, (value) {
+    return _then(_self.copyWith(clones: value));
   });
 }
 }
@@ -197,10 +207,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion);case _:
+return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   return orElse();
 
 }
@@ -218,10 +228,10 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData():
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion);case _:
+return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -238,10 +248,10 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion);case _:
+return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   return null;
 
 }
@@ -253,7 +263,7 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 @JsonSerializable()
 
 class _RaidRulesData implements RaidRulesData {
-  const _RaidRulesData({required this.stepMillis, required this.player, required this.bagSlots, required this.pickupRadius, required this.food, required this.startWeapon, required this.enemyAlertSeconds, required this.companion});
+  const _RaidRulesData({required this.stepMillis, required this.player, required this.bagSlots, required this.pickupRadius, required this.food, required this.startWeapon, required this.enemyAlertSeconds, required this.companion, required this.clones});
   factory _RaidRulesData.fromJson(Map<String, dynamic> json) => _$RaidRulesDataFromJson(json);
 
 /// Game time one run `step` covers.
@@ -268,6 +278,7 @@ class _RaidRulesData implements RaidRulesData {
 /// How long an enemy keeps chasing whoever hit it, even out of sight.
 @override final  double enemyAlertSeconds;
 @override final  CompanionRulesData companion;
+@override final  CloneRulesData clones;
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -282,18 +293,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.bagSlots, bagSlots) || other.bagSlots == bagSlots)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.startWeapon, startWeapon) || other.startWeapon == startWeapon)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.bagSlots, bagSlots) || other.bagSlots == bagSlots)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.startWeapon, startWeapon) || other.startWeapon == startWeapon)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,player,bagSlots,pickupRadius,food,startWeapon,enemyAlertSeconds,companion);
+    return Object.hash(runtimeType,stepMillis,player,bagSlots,pickupRadius,food,startWeapon,enemyAlertSeconds,companion,clones);
 }
 
 @override
 String toString() {
-    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, bagSlots: $bagSlots, pickupRadius: $pickupRadius, food: $food, startWeapon: $startWeapon, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion)';
+    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, bagSlots: $bagSlots, pickupRadius: $pickupRadius, food: $food, startWeapon: $startWeapon, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones)';
 }
 
 
@@ -304,11 +315,11 @@ abstract mixin class _$RaidRulesDataCopyWith<$Res> implements $RaidRulesDataCopy
   factory _$RaidRulesDataCopyWith(_RaidRulesData value, $Res Function(_RaidRulesData) _then) = __$RaidRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion
+ int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
 });
 
 
-@override $PlayerRulesDataCopyWith<$Res> get player;@override $FoodRulesDataCopyWith<$Res> get food;@override $CompanionRulesDataCopyWith<$Res> get companion;
+@override $PlayerRulesDataCopyWith<$Res> get player;@override $FoodRulesDataCopyWith<$Res> get food;@override $CompanionRulesDataCopyWith<$Res> get companion;@override $CloneRulesDataCopyWith<$Res> get clones;
 
 }
 /// @nodoc
@@ -321,7 +332,7 @@ class __$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
   return _then(_RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -331,7 +342,8 @@ as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non
 as FoodRulesData,startWeapon: null == startWeapon ? _self.startWeapon : startWeapon // ignore: cast_nullable_to_non_nullable
 as String,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
-as CompanionRulesData,
+as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
+as CloneRulesData,
   ));
 }
 
@@ -361,6 +373,15 @@ $CompanionRulesDataCopyWith<$Res> get companion {
   
   return $CompanionRulesDataCopyWith<$Res>(_self.companion, (value) {
     return _then(_self.copyWith(companion: value));
+  });
+}/// Create a copy of RaidRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CloneRulesDataCopyWith<$Res> get clones {
+  
+  return $CloneRulesDataCopyWith<$Res>(_self.clones, (value) {
+    return _then(_self.copyWith(clones: value));
   });
 }
 }
@@ -1299,6 +1320,896 @@ as double,
 
 
 /// @nodoc
+mixin _$CloneRulesData {
+
+/// Shares of the player's sight and speed.
+ double get sightMultiplier; double get speedMultiplier; double get maxHp; double get radius;/// Below this share of health (after a fight) it heads out.
+ double get lowHpRatio;/// How long one stays before heading out, picked between these.
+ double get staySecondsMin; double get staySecondsMax;/// While the player's signal counts down, clone sight grows up to this
+/// share at zero.
+ double get waitSightMultiplier;
+/// Create a copy of CloneRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CloneRulesDataCopyWith<CloneRulesData> get copyWith => _$CloneRulesDataCopyWithImpl<CloneRulesData>(this as CloneRulesData, _$identity);
+
+  /// Serializes this CloneRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CloneRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneRulesData&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.lowHpRatio, _this.lowHpRatio) || other.lowHpRatio == _this.lowHpRatio)&&(identical(other.staySecondsMin, _this.staySecondsMin) || other.staySecondsMin == _this.staySecondsMin)&&(identical(other.staySecondsMax, _this.staySecondsMax) || other.staySecondsMax == _this.staySecondsMax)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as CloneRulesData;
+  return Object.hash(runtimeType,_this.sightMultiplier,_this.speedMultiplier,_this.maxHp,_this.radius,_this.lowHpRatio,_this.staySecondsMin,_this.staySecondsMax,_this.waitSightMultiplier);
+}
+
+@override
+String toString() {
+  final _this = this as CloneRulesData;
+  return 'CloneRulesData(sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, lowHpRatio: ${_this.lowHpRatio}, staySecondsMin: ${_this.staySecondsMin}, staySecondsMax: ${_this.staySecondsMax}, waitSightMultiplier: ${_this.waitSightMultiplier})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CloneRulesDataCopyWith<$Res>  {
+  factory $CloneRulesDataCopyWith(CloneRulesData value, $Res Function(CloneRulesData) _then) = _$CloneRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier
+});
+
+
+
+
+}
+/// @nodoc
+class _$CloneRulesDataCopyWithImpl<$Res>
+    implements $CloneRulesDataCopyWith<$Res> {
+  _$CloneRulesDataCopyWithImpl(this._self, this._then);
+
+  final CloneRulesData _self;
+  final $Res Function(CloneRulesData) _then;
+
+/// Create a copy of CloneRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,}) {
+  return _then(CloneRulesData(
+sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
+as double,maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,lowHpRatio: null == lowHpRatio ? _self.lowHpRatio : lowHpRatio // ignore: cast_nullable_to_non_nullable
+as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySecondsMin // ignore: cast_nullable_to_non_nullable
+as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
+as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CloneRulesData].
+extension CloneRulesDataPatterns on CloneRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CloneRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CloneRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CloneRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _CloneRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CloneRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CloneRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CloneRulesData() when $default != null:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)  $default,) {final _that = this;
+switch (_that) {
+case _CloneRulesData():
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)?  $default,) {final _that = this;
+switch (_that) {
+case _CloneRulesData() when $default != null:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CloneRulesData implements CloneRulesData {
+  const _CloneRulesData({required this.sightMultiplier, required this.speedMultiplier, required this.maxHp, required this.radius, required this.lowHpRatio, required this.staySecondsMin, required this.staySecondsMax, required this.waitSightMultiplier});
+  factory _CloneRulesData.fromJson(Map<String, dynamic> json) => _$CloneRulesDataFromJson(json);
+
+/// Shares of the player's sight and speed.
+@override final  double sightMultiplier;
+@override final  double speedMultiplier;
+@override final  double maxHp;
+@override final  double radius;
+/// Below this share of health (after a fight) it heads out.
+@override final  double lowHpRatio;
+/// How long one stays before heading out, picked between these.
+@override final  double staySecondsMin;
+@override final  double staySecondsMax;
+/// While the player's signal counts down, clone sight grows up to this
+/// share at zero.
+@override final  double waitSightMultiplier;
+
+/// Create a copy of CloneRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CloneRulesDataCopyWith<_CloneRulesData> get copyWith => __$CloneRulesDataCopyWithImpl<_CloneRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CloneRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneRulesData&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.lowHpRatio, lowHpRatio) || other.lowHpRatio == lowHpRatio)&&(identical(other.staySecondsMin, staySecondsMin) || other.staySecondsMin == staySecondsMin)&&(identical(other.staySecondsMax, staySecondsMax) || other.staySecondsMax == staySecondsMax)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,sightMultiplier,speedMultiplier,maxHp,radius,lowHpRatio,staySecondsMin,staySecondsMax,waitSightMultiplier);
+}
+
+@override
+String toString() {
+    return 'CloneRulesData(sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, maxHp: $maxHp, radius: $radius, lowHpRatio: $lowHpRatio, staySecondsMin: $staySecondsMin, staySecondsMax: $staySecondsMax, waitSightMultiplier: $waitSightMultiplier)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CloneRulesDataCopyWith<$Res> implements $CloneRulesDataCopyWith<$Res> {
+  factory _$CloneRulesDataCopyWith(_CloneRulesData value, $Res Function(_CloneRulesData) _then) = __$CloneRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier
+});
+
+
+
+
+}
+/// @nodoc
+class __$CloneRulesDataCopyWithImpl<$Res>
+    implements _$CloneRulesDataCopyWith<$Res> {
+  __$CloneRulesDataCopyWithImpl(this._self, this._then);
+
+  final _CloneRulesData _self;
+  final $Res Function(_CloneRulesData) _then;
+
+/// Create a copy of CloneRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,}) {
+  return _then(_CloneRulesData(
+sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
+as double,maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,lowHpRatio: null == lowHpRatio ? _self.lowHpRatio : lowHpRatio // ignore: cast_nullable_to_non_nullable
+as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySecondsMin // ignore: cast_nullable_to_non_nullable
+as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
+as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$DefaultCloneData {
+
+ String get id;/// Shown over its head.
+ String get name; String get weapon; int get weaponLevel; int get bagSlots;/// Zone scores it fits, both ends included.
+ int get scoreMin; int get scoreMax; List<CloneCompanionData> get companions;
+/// Create a copy of DefaultCloneData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DefaultCloneDataCopyWith<DefaultCloneData> get copyWith => _$DefaultCloneDataCopyWithImpl<DefaultCloneData>(this as DefaultCloneData, _$identity);
+
+  /// Serializes this DefaultCloneData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as DefaultCloneData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DefaultCloneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.weapon, _this.weapon) || other.weapon == _this.weapon)&&(identical(other.weaponLevel, _this.weaponLevel) || other.weaponLevel == _this.weaponLevel)&&(identical(other.bagSlots, _this.bagSlots) || other.bagSlots == _this.bagSlots)&&(identical(other.scoreMin, _this.scoreMin) || other.scoreMin == _this.scoreMin)&&(identical(other.scoreMax, _this.scoreMax) || other.scoreMax == _this.scoreMax)&&const DeepCollectionEquality().equals(other.companions, _this.companions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as DefaultCloneData;
+  return Object.hash(runtimeType,_this.id,_this.name,_this.weapon,_this.weaponLevel,_this.bagSlots,_this.scoreMin,_this.scoreMax,const DeepCollectionEquality().hash(_this.companions));
+}
+
+@override
+String toString() {
+  final _this = this as DefaultCloneData;
+  return 'DefaultCloneData(id: ${_this.id}, name: ${_this.name}, weapon: ${_this.weapon}, weaponLevel: ${_this.weaponLevel}, bagSlots: ${_this.bagSlots}, scoreMin: ${_this.scoreMin}, scoreMax: ${_this.scoreMax}, companions: ${_this.companions})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DefaultCloneDataCopyWith<$Res>  {
+  factory $DefaultCloneDataCopyWith(DefaultCloneData value, $Res Function(DefaultCloneData) _then) = _$DefaultCloneDataCopyWithImpl;
+@useResult
+$Res call({
+ String id, String name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
+});
+
+
+
+
+}
+/// @nodoc
+class _$DefaultCloneDataCopyWithImpl<$Res>
+    implements $DefaultCloneDataCopyWith<$Res> {
+  _$DefaultCloneDataCopyWithImpl(this._self, this._then);
+
+  final DefaultCloneData _self;
+  final $Res Function(DefaultCloneData) _then;
+
+/// Create a copy of DefaultCloneData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? name = null,Object? weapon = null,Object? weaponLevel = null,Object? bagSlots = null,Object? scoreMin = null,Object? scoreMax = null,Object? companions = null,}) {
+  return _then(DefaultCloneData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
+as String,weaponLevel: null == weaponLevel ? _self.weaponLevel : weaponLevel // ignore: cast_nullable_to_non_nullable
+as int,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
+as int,scoreMin: null == scoreMin ? _self.scoreMin : scoreMin // ignore: cast_nullable_to_non_nullable
+as int,scoreMax: null == scoreMax ? _self.scoreMax : scoreMax // ignore: cast_nullable_to_non_nullable
+as int,companions: null == companions ? _self.companions : companions // ignore: cast_nullable_to_non_nullable
+as List<CloneCompanionData>,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [DefaultCloneData].
+extension DefaultCloneDataPatterns on DefaultCloneData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _DefaultCloneData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _DefaultCloneData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _DefaultCloneData value)  $default,){
+final _that = this;
+switch (_that) {
+case _DefaultCloneData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _DefaultCloneData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _DefaultCloneData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _DefaultCloneData() when $default != null:
+return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)  $default,) {final _that = this;
+switch (_that) {
+case _DefaultCloneData():
+return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,) {final _that = this;
+switch (_that) {
+case _DefaultCloneData() when $default != null:
+return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _DefaultCloneData implements DefaultCloneData {
+  const _DefaultCloneData({required this.id, required this.name, required this.weapon, this.weaponLevel = 0, required this.bagSlots, required this.scoreMin, required this.scoreMax,  List<CloneCompanionData> companions = const <CloneCompanionData>[]}): _companions = companions;
+  factory _DefaultCloneData.fromJson(Map<String, dynamic> json) => _$DefaultCloneDataFromJson(json);
+
+@override final  String id;
+/// Shown over its head.
+@override final  String name;
+@override final  String weapon;
+@override@JsonKey() final  int weaponLevel;
+@override final  int bagSlots;
+/// Zone scores it fits, both ends included.
+@override final  int scoreMin;
+@override final  int scoreMax;
+ final  List<CloneCompanionData> _companions;
+@override@JsonKey() List<CloneCompanionData> get companions {
+  if (_companions is EqualUnmodifiableListView) return _companions;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_companions);
+}
+
+
+/// Create a copy of DefaultCloneData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DefaultCloneDataCopyWith<_DefaultCloneData> get copyWith => __$DefaultCloneDataCopyWithImpl<_DefaultCloneData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$DefaultCloneDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DefaultCloneData&&(identical(other.id, id) || other.id == id)&&(identical(other.name, name) || other.name == name)&&(identical(other.weapon, weapon) || other.weapon == weapon)&&(identical(other.weaponLevel, weaponLevel) || other.weaponLevel == weaponLevel)&&(identical(other.bagSlots, bagSlots) || other.bagSlots == bagSlots)&&(identical(other.scoreMin, scoreMin) || other.scoreMin == scoreMin)&&(identical(other.scoreMax, scoreMax) || other.scoreMax == scoreMax)&&const DeepCollectionEquality().equals(other.companions, _companions));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,name,weapon,weaponLevel,bagSlots,scoreMin,scoreMax,const DeepCollectionEquality().hash(_companions));
+}
+
+@override
+String toString() {
+    return 'DefaultCloneData(id: $id, name: $name, weapon: $weapon, weaponLevel: $weaponLevel, bagSlots: $bagSlots, scoreMin: $scoreMin, scoreMax: $scoreMax, companions: $companions)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DefaultCloneDataCopyWith<$Res> implements $DefaultCloneDataCopyWith<$Res> {
+  factory _$DefaultCloneDataCopyWith(_DefaultCloneData value, $Res Function(_DefaultCloneData) _then) = __$DefaultCloneDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, String name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
+});
+
+
+
+
+}
+/// @nodoc
+class __$DefaultCloneDataCopyWithImpl<$Res>
+    implements _$DefaultCloneDataCopyWith<$Res> {
+  __$DefaultCloneDataCopyWithImpl(this._self, this._then);
+
+  final _DefaultCloneData _self;
+  final $Res Function(_DefaultCloneData) _then;
+
+/// Create a copy of DefaultCloneData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? name = null,Object? weapon = null,Object? weaponLevel = null,Object? bagSlots = null,Object? scoreMin = null,Object? scoreMax = null,Object? companions = null,}) {
+  return _then(_DefaultCloneData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
+as String,weaponLevel: null == weaponLevel ? _self.weaponLevel : weaponLevel // ignore: cast_nullable_to_non_nullable
+as int,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
+as int,scoreMin: null == scoreMin ? _self.scoreMin : scoreMin // ignore: cast_nullable_to_non_nullable
+as int,scoreMax: null == scoreMax ? _self.scoreMax : scoreMax // ignore: cast_nullable_to_non_nullable
+as int,companions: null == companions ? _self._companions : companions // ignore: cast_nullable_to_non_nullable
+as List<CloneCompanionData>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$CloneCompanionData {
+
+ PotatoType get type; Grade get grade; int get level; List<String> get abilities; CombatStyle? get style;
+/// Create a copy of CloneCompanionData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CloneCompanionDataCopyWith<CloneCompanionData> get copyWith => _$CloneCompanionDataCopyWithImpl<CloneCompanionData>(this as CloneCompanionData, _$identity);
+
+  /// Serializes this CloneCompanionData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CloneCompanionData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneCompanionData&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.level, _this.level) || other.level == _this.level)&&const DeepCollectionEquality().equals(other.abilities, _this.abilities)&&(identical(other.style, _this.style) || other.style == _this.style));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as CloneCompanionData;
+  return Object.hash(runtimeType,_this.type,_this.grade,_this.level,const DeepCollectionEquality().hash(_this.abilities),_this.style);
+}
+
+@override
+String toString() {
+  final _this = this as CloneCompanionData;
+  return 'CloneCompanionData(type: ${_this.type}, grade: ${_this.grade}, level: ${_this.level}, abilities: ${_this.abilities}, style: ${_this.style})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CloneCompanionDataCopyWith<$Res>  {
+  factory $CloneCompanionDataCopyWith(CloneCompanionData value, $Res Function(CloneCompanionData) _then) = _$CloneCompanionDataCopyWithImpl;
+@useResult
+$Res call({
+ PotatoType type, Grade grade, int level, List<String> abilities, CombatStyle? style
+});
+
+
+
+
+}
+/// @nodoc
+class _$CloneCompanionDataCopyWithImpl<$Res>
+    implements $CloneCompanionDataCopyWith<$Res> {
+  _$CloneCompanionDataCopyWithImpl(this._self, this._then);
+
+  final CloneCompanionData _self;
+  final $Res Function(CloneCompanionData) _then;
+
+/// Create a copy of CloneCompanionData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? abilities = null,Object? style = freezed,}) {
+  return _then(CloneCompanionData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
+as int,abilities: null == abilities ? _self.abilities : abilities // ignore: cast_nullable_to_non_nullable
+as List<String>,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as CombatStyle?,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CloneCompanionData].
+extension CloneCompanionDataPatterns on CloneCompanionData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CloneCompanionData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CloneCompanionData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CloneCompanionData value)  $default,){
+final _that = this;
+switch (_that) {
+case _CloneCompanionData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CloneCompanionData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CloneCompanionData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  List<String> abilities,  CombatStyle? style)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CloneCompanionData() when $default != null:
+return $default(_that.type,_that.grade,_that.level,_that.abilities,_that.style);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  List<String> abilities,  CombatStyle? style)  $default,) {final _that = this;
+switch (_that) {
+case _CloneCompanionData():
+return $default(_that.type,_that.grade,_that.level,_that.abilities,_that.style);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade,  int level,  List<String> abilities,  CombatStyle? style)?  $default,) {final _that = this;
+switch (_that) {
+case _CloneCompanionData() when $default != null:
+return $default(_that.type,_that.grade,_that.level,_that.abilities,_that.style);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CloneCompanionData implements CloneCompanionData {
+  const _CloneCompanionData({required this.type, required this.grade, this.level = 0, required  List<String> abilities, this.style}): _abilities = abilities;
+  factory _CloneCompanionData.fromJson(Map<String, dynamic> json) => _$CloneCompanionDataFromJson(json);
+
+@override final  PotatoType type;
+@override final  Grade grade;
+@override@JsonKey() final  int level;
+ final  List<String> _abilities;
+@override List<String> get abilities {
+  if (_abilities is EqualUnmodifiableListView) return _abilities;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_abilities);
+}
+
+@override final  CombatStyle? style;
+
+/// Create a copy of CloneCompanionData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CloneCompanionDataCopyWith<_CloneCompanionData> get copyWith => __$CloneCompanionDataCopyWithImpl<_CloneCompanionData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CloneCompanionDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneCompanionData&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.abilities, _abilities)&&(identical(other.style, style) || other.style == style));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,type,grade,level,const DeepCollectionEquality().hash(_abilities),style);
+}
+
+@override
+String toString() {
+    return 'CloneCompanionData(type: $type, grade: $grade, level: $level, abilities: $abilities, style: $style)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CloneCompanionDataCopyWith<$Res> implements $CloneCompanionDataCopyWith<$Res> {
+  factory _$CloneCompanionDataCopyWith(_CloneCompanionData value, $Res Function(_CloneCompanionData) _then) = __$CloneCompanionDataCopyWithImpl;
+@override @useResult
+$Res call({
+ PotatoType type, Grade grade, int level, List<String> abilities, CombatStyle? style
+});
+
+
+
+
+}
+/// @nodoc
+class __$CloneCompanionDataCopyWithImpl<$Res>
+    implements _$CloneCompanionDataCopyWith<$Res> {
+  __$CloneCompanionDataCopyWithImpl(this._self, this._then);
+
+  final _CloneCompanionData _self;
+  final $Res Function(_CloneCompanionData) _then;
+
+/// Create a copy of CloneCompanionData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? abilities = null,Object? style = freezed,}) {
+  return _then(_CloneCompanionData(
+type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
+as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
+as int,abilities: null == abilities ? _self._abilities : abilities // ignore: cast_nullable_to_non_nullable
+as List<String>,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
+as CombatStyle?,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$CompanionStyleData {
 
  double get maxHp; double get damage;/// Seconds between attacks.
@@ -1606,7 +2517,8 @@ mixin _$WeaponData {
 /// wobbles randomly within it.
  int get pellets; double get spreadDegrees;/// Seconds of aiming at one target before a shot; switching targets
 /// starts over. Zero fires right away.
- double get aimSeconds;
+ double get aimSeconds;/// The gap a clone with this weapon keeps from what it fights.
+ double get preferredDistance;
 /// Create a copy of WeaponData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1620,20 +2532,20 @@ $WeaponDataCopyWith<WeaponData> get copyWith => _$WeaponDataCopyWithImpl<WeaponD
 @override
 bool operator ==(Object other) {
   final _this = this as WeaponData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is WeaponData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.range, _this.range) || other.range == _this.range)&&(identical(other.interval, _this.interval) || other.interval == _this.interval)&&(identical(other.damage, _this.damage) || other.damage == _this.damage)&&(identical(other.bulletSpeed, _this.bulletSpeed) || other.bulletSpeed == _this.bulletSpeed)&&(identical(other.pellets, _this.pellets) || other.pellets == _this.pellets)&&(identical(other.spreadDegrees, _this.spreadDegrees) || other.spreadDegrees == _this.spreadDegrees)&&(identical(other.aimSeconds, _this.aimSeconds) || other.aimSeconds == _this.aimSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is WeaponData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.range, _this.range) || other.range == _this.range)&&(identical(other.interval, _this.interval) || other.interval == _this.interval)&&(identical(other.damage, _this.damage) || other.damage == _this.damage)&&(identical(other.bulletSpeed, _this.bulletSpeed) || other.bulletSpeed == _this.bulletSpeed)&&(identical(other.pellets, _this.pellets) || other.pellets == _this.pellets)&&(identical(other.spreadDegrees, _this.spreadDegrees) || other.spreadDegrees == _this.spreadDegrees)&&(identical(other.aimSeconds, _this.aimSeconds) || other.aimSeconds == _this.aimSeconds)&&(identical(other.preferredDistance, _this.preferredDistance) || other.preferredDistance == _this.preferredDistance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as WeaponData;
-  return Object.hash(runtimeType,_this.id,_this.range,_this.interval,_this.damage,_this.bulletSpeed,_this.pellets,_this.spreadDegrees,_this.aimSeconds);
+  return Object.hash(runtimeType,_this.id,_this.range,_this.interval,_this.damage,_this.bulletSpeed,_this.pellets,_this.spreadDegrees,_this.aimSeconds,_this.preferredDistance);
 }
 
 @override
 String toString() {
   final _this = this as WeaponData;
-  return 'WeaponData(id: ${_this.id}, range: ${_this.range}, interval: ${_this.interval}, damage: ${_this.damage}, bulletSpeed: ${_this.bulletSpeed}, pellets: ${_this.pellets}, spreadDegrees: ${_this.spreadDegrees}, aimSeconds: ${_this.aimSeconds})';
+  return 'WeaponData(id: ${_this.id}, range: ${_this.range}, interval: ${_this.interval}, damage: ${_this.damage}, bulletSpeed: ${_this.bulletSpeed}, pellets: ${_this.pellets}, spreadDegrees: ${_this.spreadDegrees}, aimSeconds: ${_this.aimSeconds}, preferredDistance: ${_this.preferredDistance})';
 }
 
 
@@ -1644,7 +2556,7 @@ abstract mixin class $WeaponDataCopyWith<$Res>  {
   factory $WeaponDataCopyWith(WeaponData value, $Res Function(WeaponData) _then) = _$WeaponDataCopyWithImpl;
 @useResult
 $Res call({
- String id, double range, double interval, double damage, double bulletSpeed, int pellets, double spreadDegrees, double aimSeconds
+ String id, double range, double interval, double damage, double bulletSpeed, int pellets, double spreadDegrees, double aimSeconds, double preferredDistance
 });
 
 
@@ -1661,7 +2573,7 @@ class _$WeaponDataCopyWithImpl<$Res>
 
 /// Create a copy of WeaponData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? range = null,Object? interval = null,Object? damage = null,Object? bulletSpeed = null,Object? pellets = null,Object? spreadDegrees = null,Object? aimSeconds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? range = null,Object? interval = null,Object? damage = null,Object? bulletSpeed = null,Object? pellets = null,Object? spreadDegrees = null,Object? aimSeconds = null,Object? preferredDistance = null,}) {
   return _then(WeaponData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
@@ -1671,6 +2583,7 @@ as double,bulletSpeed: null == bulletSpeed ? _self.bulletSpeed : bulletSpeed // 
 as double,pellets: null == pellets ? _self.pellets : pellets // ignore: cast_nullable_to_non_nullable
 as int,spreadDegrees: null == spreadDegrees ? _self.spreadDegrees : spreadDegrees // ignore: cast_nullable_to_non_nullable
 as double,aimSeconds: null == aimSeconds ? _self.aimSeconds : aimSeconds // ignore: cast_nullable_to_non_nullable
+as double,preferredDistance: null == preferredDistance ? _self.preferredDistance : preferredDistance // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -1756,10 +2669,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds,  double preferredDistance)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _WeaponData() when $default != null:
-return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds);case _:
+return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds,_that.preferredDistance);case _:
   return orElse();
 
 }
@@ -1777,10 +2690,10 @@ return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpe
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds,  double preferredDistance)  $default,) {final _that = this;
 switch (_that) {
 case _WeaponData():
-return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds);case _:
+return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds,_that.preferredDistance);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1797,10 +2710,10 @@ return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpe
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  double range,  double interval,  double damage,  double bulletSpeed,  int pellets,  double spreadDegrees,  double aimSeconds,  double preferredDistance)?  $default,) {final _that = this;
 switch (_that) {
 case _WeaponData() when $default != null:
-return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds);case _:
+return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpeed,_that.pellets,_that.spreadDegrees,_that.aimSeconds,_that.preferredDistance);case _:
   return null;
 
 }
@@ -1812,7 +2725,7 @@ return $default(_that.id,_that.range,_that.interval,_that.damage,_that.bulletSpe
 @JsonSerializable()
 
 class _WeaponData implements WeaponData {
-  const _WeaponData({required this.id, required this.range, required this.interval, required this.damage, required this.bulletSpeed, this.pellets = 1, this.spreadDegrees = 0.0, this.aimSeconds = 0.0});
+  const _WeaponData({required this.id, required this.range, required this.interval, required this.damage, required this.bulletSpeed, this.pellets = 1, this.spreadDegrees = 0.0, this.aimSeconds = 0.0, this.preferredDistance = 1.5});
   factory _WeaponData.fromJson(Map<String, dynamic> json) => _$WeaponDataFromJson(json);
 
 @override final  String id;
@@ -1829,6 +2742,8 @@ class _WeaponData implements WeaponData {
 /// Seconds of aiming at one target before a shot; switching targets
 /// starts over. Zero fires right away.
 @override@JsonKey() final  double aimSeconds;
+/// The gap a clone with this weapon keeps from what it fights.
+@override@JsonKey() final  double preferredDistance;
 
 /// Create a copy of WeaponData
 /// with the given fields replaced by the non-null parameter values.
@@ -1843,18 +2758,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WeaponData&&(identical(other.id, id) || other.id == id)&&(identical(other.range, range) || other.range == range)&&(identical(other.interval, interval) || other.interval == interval)&&(identical(other.damage, damage) || other.damage == damage)&&(identical(other.bulletSpeed, bulletSpeed) || other.bulletSpeed == bulletSpeed)&&(identical(other.pellets, pellets) || other.pellets == pellets)&&(identical(other.spreadDegrees, spreadDegrees) || other.spreadDegrees == spreadDegrees)&&(identical(other.aimSeconds, aimSeconds) || other.aimSeconds == aimSeconds));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _WeaponData&&(identical(other.id, id) || other.id == id)&&(identical(other.range, range) || other.range == range)&&(identical(other.interval, interval) || other.interval == interval)&&(identical(other.damage, damage) || other.damage == damage)&&(identical(other.bulletSpeed, bulletSpeed) || other.bulletSpeed == bulletSpeed)&&(identical(other.pellets, pellets) || other.pellets == pellets)&&(identical(other.spreadDegrees, spreadDegrees) || other.spreadDegrees == spreadDegrees)&&(identical(other.aimSeconds, aimSeconds) || other.aimSeconds == aimSeconds)&&(identical(other.preferredDistance, preferredDistance) || other.preferredDistance == preferredDistance));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,range,interval,damage,bulletSpeed,pellets,spreadDegrees,aimSeconds);
+    return Object.hash(runtimeType,id,range,interval,damage,bulletSpeed,pellets,spreadDegrees,aimSeconds,preferredDistance);
 }
 
 @override
 String toString() {
-    return 'WeaponData(id: $id, range: $range, interval: $interval, damage: $damage, bulletSpeed: $bulletSpeed, pellets: $pellets, spreadDegrees: $spreadDegrees, aimSeconds: $aimSeconds)';
+    return 'WeaponData(id: $id, range: $range, interval: $interval, damage: $damage, bulletSpeed: $bulletSpeed, pellets: $pellets, spreadDegrees: $spreadDegrees, aimSeconds: $aimSeconds, preferredDistance: $preferredDistance)';
 }
 
 
@@ -1865,7 +2780,7 @@ abstract mixin class _$WeaponDataCopyWith<$Res> implements $WeaponDataCopyWith<$
   factory _$WeaponDataCopyWith(_WeaponData value, $Res Function(_WeaponData) _then) = __$WeaponDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, double range, double interval, double damage, double bulletSpeed, int pellets, double spreadDegrees, double aimSeconds
+ String id, double range, double interval, double damage, double bulletSpeed, int pellets, double spreadDegrees, double aimSeconds, double preferredDistance
 });
 
 
@@ -1882,7 +2797,7 @@ class __$WeaponDataCopyWithImpl<$Res>
 
 /// Create a copy of WeaponData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? range = null,Object? interval = null,Object? damage = null,Object? bulletSpeed = null,Object? pellets = null,Object? spreadDegrees = null,Object? aimSeconds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? range = null,Object? interval = null,Object? damage = null,Object? bulletSpeed = null,Object? pellets = null,Object? spreadDegrees = null,Object? aimSeconds = null,Object? preferredDistance = null,}) {
   return _then(_WeaponData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
@@ -1892,6 +2807,7 @@ as double,bulletSpeed: null == bulletSpeed ? _self.bulletSpeed : bulletSpeed // 
 as double,pellets: null == pellets ? _self.pellets : pellets // ignore: cast_nullable_to_non_nullable
 as int,spreadDegrees: null == spreadDegrees ? _self.spreadDegrees : spreadDegrees // ignore: cast_nullable_to_non_nullable
 as double,aimSeconds: null == aimSeconds ? _self.aimSeconds : aimSeconds // ignore: cast_nullable_to_non_nullable
+as double,preferredDistance: null == preferredDistance ? _self.preferredDistance : preferredDistance // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -3479,7 +4395,9 @@ mixin _$ZoneDangerData {
  double get countdownSeconds;/// Aggressive enemies' sight grows during the wait, up to this share at
 /// zero.
  double get waitSightMultiplier;/// Health lost per second while hungry. There is no walking home.
- double get hungryDamagePerSecond;
+ double get hungryDamagePerSecond;/// Clones walking in with the player, then one more every
+/// [cloneEverySeconds] until [clonesMax] have come in all.
+ int get clonesAtStart; double get cloneEverySeconds; int get clonesMax;
 /// Create a copy of ZoneDangerData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3493,20 +4411,20 @@ $ZoneDangerDataCopyWith<ZoneDangerData> get copyWith => _$ZoneDangerDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneDangerData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneDangerData&&(identical(other.openExits, _this.openExits) || other.openExits == _this.openExits)&&(identical(other.revealSeconds, _this.revealSeconds) || other.revealSeconds == _this.revealSeconds)&&(identical(other.exitRadius, _this.exitRadius) || other.exitRadius == _this.exitRadius)&&(identical(other.countdownSeconds, _this.countdownSeconds) || other.countdownSeconds == _this.countdownSeconds)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, _this.hungryDamagePerSecond) || other.hungryDamagePerSecond == _this.hungryDamagePerSecond));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneDangerData&&(identical(other.openExits, _this.openExits) || other.openExits == _this.openExits)&&(identical(other.revealSeconds, _this.revealSeconds) || other.revealSeconds == _this.revealSeconds)&&(identical(other.exitRadius, _this.exitRadius) || other.exitRadius == _this.exitRadius)&&(identical(other.countdownSeconds, _this.countdownSeconds) || other.countdownSeconds == _this.countdownSeconds)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, _this.hungryDamagePerSecond) || other.hungryDamagePerSecond == _this.hungryDamagePerSecond)&&(identical(other.clonesAtStart, _this.clonesAtStart) || other.clonesAtStart == _this.clonesAtStart)&&(identical(other.cloneEverySeconds, _this.cloneEverySeconds) || other.cloneEverySeconds == _this.cloneEverySeconds)&&(identical(other.clonesMax, _this.clonesMax) || other.clonesMax == _this.clonesMax));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneDangerData;
-  return Object.hash(runtimeType,_this.openExits,_this.revealSeconds,_this.exitRadius,_this.countdownSeconds,_this.waitSightMultiplier,_this.hungryDamagePerSecond);
+  return Object.hash(runtimeType,_this.openExits,_this.revealSeconds,_this.exitRadius,_this.countdownSeconds,_this.waitSightMultiplier,_this.hungryDamagePerSecond,_this.clonesAtStart,_this.cloneEverySeconds,_this.clonesMax);
 }
 
 @override
 String toString() {
   final _this = this as ZoneDangerData;
-  return 'ZoneDangerData(openExits: ${_this.openExits}, revealSeconds: ${_this.revealSeconds}, exitRadius: ${_this.exitRadius}, countdownSeconds: ${_this.countdownSeconds}, waitSightMultiplier: ${_this.waitSightMultiplier}, hungryDamagePerSecond: ${_this.hungryDamagePerSecond})';
+  return 'ZoneDangerData(openExits: ${_this.openExits}, revealSeconds: ${_this.revealSeconds}, exitRadius: ${_this.exitRadius}, countdownSeconds: ${_this.countdownSeconds}, waitSightMultiplier: ${_this.waitSightMultiplier}, hungryDamagePerSecond: ${_this.hungryDamagePerSecond}, clonesAtStart: ${_this.clonesAtStart}, cloneEverySeconds: ${_this.cloneEverySeconds}, clonesMax: ${_this.clonesMax})';
 }
 
 
@@ -3517,7 +4435,7 @@ abstract mixin class $ZoneDangerDataCopyWith<$Res>  {
   factory $ZoneDangerDataCopyWith(ZoneDangerData value, $Res Function(ZoneDangerData) _then) = _$ZoneDangerDataCopyWithImpl;
 @useResult
 $Res call({
- int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond
+ int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond, int clonesAtStart, double cloneEverySeconds, int clonesMax
 });
 
 
@@ -3534,7 +4452,7 @@ class _$ZoneDangerDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneDangerData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,Object? clonesAtStart = null,Object? cloneEverySeconds = null,Object? clonesMax = null,}) {
   return _then(ZoneDangerData(
 openExits: null == openExits ? _self.openExits : openExits // ignore: cast_nullable_to_non_nullable
 as int,revealSeconds: null == revealSeconds ? _self.revealSeconds : revealSeconds // ignore: cast_nullable_to_non_nullable
@@ -3542,7 +4460,10 @@ as double,exitRadius: null == exitRadius ? _self.exitRadius : exitRadius // igno
 as double,countdownSeconds: null == countdownSeconds ? _self.countdownSeconds : countdownSeconds // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,hungryDamagePerSecond: null == hungryDamagePerSecond ? _self.hungryDamagePerSecond : hungryDamagePerSecond // ignore: cast_nullable_to_non_nullable
-as double,
+as double,clonesAtStart: null == clonesAtStart ? _self.clonesAtStart : clonesAtStart // ignore: cast_nullable_to_non_nullable
+as int,cloneEverySeconds: null == cloneEverySeconds ? _self.cloneEverySeconds : cloneEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,clonesMax: null == clonesMax ? _self.clonesMax : clonesMax // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -3627,10 +4548,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond,  int clonesAtStart,  double cloneEverySeconds,  int clonesMax)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneDangerData() when $default != null:
-return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond,_that.clonesAtStart,_that.cloneEverySeconds,_that.clonesMax);case _:
   return orElse();
 
 }
@@ -3648,10 +4569,10 @@ return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.count
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond,  int clonesAtStart,  double cloneEverySeconds,  int clonesMax)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneDangerData():
-return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond,_that.clonesAtStart,_that.cloneEverySeconds,_that.clonesMax);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3668,10 +4589,10 @@ return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.count
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond,  int clonesAtStart,  double cloneEverySeconds,  int clonesMax)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneDangerData() when $default != null:
-return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond,_that.clonesAtStart,_that.cloneEverySeconds,_that.clonesMax);case _:
   return null;
 
 }
@@ -3683,7 +4604,7 @@ return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.count
 @JsonSerializable()
 
 class _ZoneDangerData implements ZoneDangerData {
-  const _ZoneDangerData({required this.openExits, required this.revealSeconds, required this.exitRadius, required this.countdownSeconds, required this.waitSightMultiplier, required this.hungryDamagePerSecond});
+  const _ZoneDangerData({required this.openExits, required this.revealSeconds, required this.exitRadius, required this.countdownSeconds, required this.waitSightMultiplier, required this.hungryDamagePerSecond, this.clonesAtStart = 0, this.cloneEverySeconds = 0.0, this.clonesMax = 0});
   factory _ZoneDangerData.fromJson(Map<String, dynamic> json) => _$ZoneDangerDataFromJson(json);
 
 /// How many of the map's exits open in a run.
@@ -3700,6 +4621,11 @@ class _ZoneDangerData implements ZoneDangerData {
 @override final  double waitSightMultiplier;
 /// Health lost per second while hungry. There is no walking home.
 @override final  double hungryDamagePerSecond;
+/// Clones walking in with the player, then one more every
+/// [cloneEverySeconds] until [clonesMax] have come in all.
+@override@JsonKey() final  int clonesAtStart;
+@override@JsonKey() final  double cloneEverySeconds;
+@override@JsonKey() final  int clonesMax;
 
 /// Create a copy of ZoneDangerData
 /// with the given fields replaced by the non-null parameter values.
@@ -3714,18 +4640,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneDangerData&&(identical(other.openExits, openExits) || other.openExits == openExits)&&(identical(other.revealSeconds, revealSeconds) || other.revealSeconds == revealSeconds)&&(identical(other.exitRadius, exitRadius) || other.exitRadius == exitRadius)&&(identical(other.countdownSeconds, countdownSeconds) || other.countdownSeconds == countdownSeconds)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, hungryDamagePerSecond) || other.hungryDamagePerSecond == hungryDamagePerSecond));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneDangerData&&(identical(other.openExits, openExits) || other.openExits == openExits)&&(identical(other.revealSeconds, revealSeconds) || other.revealSeconds == revealSeconds)&&(identical(other.exitRadius, exitRadius) || other.exitRadius == exitRadius)&&(identical(other.countdownSeconds, countdownSeconds) || other.countdownSeconds == countdownSeconds)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, hungryDamagePerSecond) || other.hungryDamagePerSecond == hungryDamagePerSecond)&&(identical(other.clonesAtStart, clonesAtStart) || other.clonesAtStart == clonesAtStart)&&(identical(other.cloneEverySeconds, cloneEverySeconds) || other.cloneEverySeconds == cloneEverySeconds)&&(identical(other.clonesMax, clonesMax) || other.clonesMax == clonesMax));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,openExits,revealSeconds,exitRadius,countdownSeconds,waitSightMultiplier,hungryDamagePerSecond);
+    return Object.hash(runtimeType,openExits,revealSeconds,exitRadius,countdownSeconds,waitSightMultiplier,hungryDamagePerSecond,clonesAtStart,cloneEverySeconds,clonesMax);
 }
 
 @override
 String toString() {
-    return 'ZoneDangerData(openExits: $openExits, revealSeconds: $revealSeconds, exitRadius: $exitRadius, countdownSeconds: $countdownSeconds, waitSightMultiplier: $waitSightMultiplier, hungryDamagePerSecond: $hungryDamagePerSecond)';
+    return 'ZoneDangerData(openExits: $openExits, revealSeconds: $revealSeconds, exitRadius: $exitRadius, countdownSeconds: $countdownSeconds, waitSightMultiplier: $waitSightMultiplier, hungryDamagePerSecond: $hungryDamagePerSecond, clonesAtStart: $clonesAtStart, cloneEverySeconds: $cloneEverySeconds, clonesMax: $clonesMax)';
 }
 
 
@@ -3736,7 +4662,7 @@ abstract mixin class _$ZoneDangerDataCopyWith<$Res> implements $ZoneDangerDataCo
   factory _$ZoneDangerDataCopyWith(_ZoneDangerData value, $Res Function(_ZoneDangerData) _then) = __$ZoneDangerDataCopyWithImpl;
 @override @useResult
 $Res call({
- int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond
+ int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond, int clonesAtStart, double cloneEverySeconds, int clonesMax
 });
 
 
@@ -3753,7 +4679,7 @@ class __$ZoneDangerDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneDangerData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,Object? clonesAtStart = null,Object? cloneEverySeconds = null,Object? clonesMax = null,}) {
   return _then(_ZoneDangerData(
 openExits: null == openExits ? _self.openExits : openExits // ignore: cast_nullable_to_non_nullable
 as int,revealSeconds: null == revealSeconds ? _self.revealSeconds : revealSeconds // ignore: cast_nullable_to_non_nullable
@@ -3761,7 +4687,10 @@ as double,exitRadius: null == exitRadius ? _self.exitRadius : exitRadius // igno
 as double,countdownSeconds: null == countdownSeconds ? _self.countdownSeconds : countdownSeconds // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,hungryDamagePerSecond: null == hungryDamagePerSecond ? _self.hungryDamagePerSecond : hungryDamagePerSecond // ignore: cast_nullable_to_non_nullable
-as double,
+as double,clonesAtStart: null == clonesAtStart ? _self.clonesAtStart : clonesAtStart // ignore: cast_nullable_to_non_nullable
+as int,cloneEverySeconds: null == cloneEverySeconds ? _self.cloneEverySeconds : cloneEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,clonesMax: null == clonesMax ? _self.clonesMax : clonesMax // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

@@ -173,6 +173,9 @@ sealed class FarmEvent with _$FarmEvent {
     required int seeds,
     required List<int> potatoIds,
     @Default(<int>[]) List<int> toFridge,
+
+    /// Companions lost in a failed danger run: gone, no grave, no seed.
+    @Default(<int>[]) List<int> lost,
   }) = Returned;
 
   factory FarmEvent.fromJson(Map<String, dynamic> json) =>

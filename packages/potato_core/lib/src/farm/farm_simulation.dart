@@ -53,6 +53,7 @@ final class FarmSimulation {
     Map<String, int> materials = const {},
     Iterable<Mail> mail = const [],
     this.weaponLevel = 0,
+    this.progress = 0,
     int? totemLimit,
     FarmTotals? totals,
   }) : _graves = List.of(graves),
@@ -171,6 +172,10 @@ final class FarmSimulation {
 
   /// How far the weapon was strengthened at the workbench.
   int weaponLevel;
+
+  /// The highest zone score of a successful run: equipment and seeds up to
+  /// this plus a margin may be used. Never goes down.
+  int progress;
 
   /// Totems that may stand on the farm.
   int totemLimit;
@@ -416,8 +421,15 @@ final class FarmSimulation {
     ),
     Revive(:final potatoId) => _revive(potatoId),
     Depart(:final food, :final potatoIds) => _depart(food, potatoIds),
-    ReturnHome(:final food, :final seeds, :final materials, :final potatoIds) =>
-      _returnHome(food, seeds, materials, potatoIds),
+    ReturnHome(
+      :final food,
+      :final seeds,
+      :final materials,
+      :final potatoIds,
+      :final lostPotatoIds,
+      :final score,
+    ) =>
+      _returnHome(food, seeds, materials, potatoIds, lostPotatoIds, score),
   };
 
   /// Advances the farm by one fixed step (`rules.farm.step_millis`).
@@ -1449,8 +1461,15 @@ final class FarmSimulation {
     List<SeedCount> seeds,
     Map<String, int> materials,
     List<int> potatoIds,
+    List<int> lostPotatoIds,
+    int? score,
   ) {
     this.food += food;
+    if (score != null && score > progress) progress = score;
+    final lost = [
+      for (final id in lostPotatoIds)
+        if (_away.remove(id) != null) id,
+    ];
     var seedCount = 0;
     for (final stack in seeds) {
       for (var i = 0; i < stack.count; i++) {
@@ -1478,6 +1497,7 @@ final class FarmSimulation {
         seeds: seedCount,
         potatoIds: back,
         toFridge: toFridge,
+        lost: lost,
       ),
     );
     return null;

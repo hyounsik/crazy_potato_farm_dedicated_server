@@ -21,8 +21,15 @@ List<CompanionStart> companionsFor(FarmSimulation farm, List<int> potatoIds) =>
 extension RaidHomecoming on RaidResult {
   /// The farm command that brings this run home: food, seeds and materials
   /// from the bag, and every companion back to the farm, knocked down or not
-  /// (they recover at the farm).
+  /// (they recover at the farm). A lost danger run brings nothing and the
+  /// companions are gone.
   FarmCommand homecoming(Catalog catalog) {
+    if (lost) {
+      return FarmCommand.returnHome(
+        food: 0,
+        lostPotatoIds: [for (final c in companions) c.potatoId],
+      );
+    }
     var food = 0;
     final seeds = <Seed, int>{};
     final materials = <String, int>{};
@@ -56,6 +63,7 @@ extension RaidHomecoming on RaidResult {
       ],
       materials: materials,
       potatoIds: [for (final c in companions) c.potatoId],
+      score: outcome.succeeded ? score : null,
     );
   }
 }

@@ -1866,7 +1866,9 @@ as double,
 mixin _$ZoneData {
 
  String get id;/// The region score: the level of the seeds found here.
- int get score; MapRecipe get map; ZoneEnemiesData get enemies; ZoneGatheringData get gathering; ZoneDropsData get drops;
+ int get score; MapRecipe get map; ZoneEnemiesData get enemies; ZoneGatheringData get gathering; ZoneDropsData get drops;/// Set for a danger zone: leaving takes an open exit and a signal, and
+/// failing loses what was brought. Null for a safe zone.
+ ZoneDangerData? get danger;
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1880,20 +1882,20 @@ $ZoneDataCopyWith<ZoneData> get copyWith => _$ZoneDataCopyWithImpl<ZoneData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops)&&(identical(other.danger, _this.danger) || other.danger == _this.danger));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneData;
-  return Object.hash(runtimeType,_this.id,_this.score,_this.map,_this.enemies,_this.gathering,_this.drops);
+  return Object.hash(runtimeType,_this.id,_this.score,_this.map,_this.enemies,_this.gathering,_this.drops,_this.danger);
 }
 
 @override
 String toString() {
   final _this = this as ZoneData;
-  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops})';
+  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops}, danger: ${_this.danger})';
 }
 
 
@@ -1904,11 +1906,11 @@ abstract mixin class $ZoneDataCopyWith<$Res>  {
   factory $ZoneDataCopyWith(ZoneData value, $Res Function(ZoneData) _then) = _$ZoneDataCopyWithImpl;
 @useResult
 $Res call({
- String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger
 });
 
 
-$MapRecipeCopyWith<$Res> get map;$ZoneEnemiesDataCopyWith<$Res> get enemies;$ZoneGatheringDataCopyWith<$Res> get gathering;$ZoneDropsDataCopyWith<$Res> get drops;
+$MapRecipeCopyWith<$Res> get map;$ZoneEnemiesDataCopyWith<$Res> get enemies;$ZoneGatheringDataCopyWith<$Res> get gathering;$ZoneDropsDataCopyWith<$Res> get drops;$ZoneDangerDataCopyWith<$Res>? get danger;
 
 }
 /// @nodoc
@@ -1921,7 +1923,7 @@ class _$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,}) {
   return _then(ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -1929,7 +1931,8 @@ as int,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullab
 as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_nullable_to_non_nullable
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable
-as ZoneDropsData,
+as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
+as ZoneDangerData?,
   ));
 }
 /// Create a copy of ZoneData
@@ -1967,6 +1970,18 @@ $ZoneDropsDataCopyWith<$Res> get drops {
   
   return $ZoneDropsDataCopyWith<$Res>(_self.drops, (value) {
     return _then(_self.copyWith(drops: value));
+  });
+}/// Create a copy of ZoneData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneDangerDataCopyWith<$Res>? get danger {
+    if (_self.danger == null) {
+    return null;
+  }
+
+  return $ZoneDangerDataCopyWith<$Res>(_self.danger!, (value) {
+    return _then(_self.copyWith(danger: value));
   });
 }
 }
@@ -2050,10 +2065,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
   return orElse();
 
 }
@@ -2071,10 +2086,10 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData():
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2091,10 +2106,10 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
   return null;
 
 }
@@ -2106,7 +2121,7 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 @JsonSerializable()
 
 class _ZoneData implements ZoneData {
-  const _ZoneData({required this.id, required this.score, required this.map, required this.enemies, required this.gathering, required this.drops});
+  const _ZoneData({required this.id, required this.score, required this.map, required this.enemies, required this.gathering, required this.drops, this.danger});
   factory _ZoneData.fromJson(Map<String, dynamic> json) => _$ZoneDataFromJson(json);
 
 @override final  String id;
@@ -2116,6 +2131,9 @@ class _ZoneData implements ZoneData {
 @override final  ZoneEnemiesData enemies;
 @override final  ZoneGatheringData gathering;
 @override final  ZoneDropsData drops;
+/// Set for a danger zone: leaving takes an open exit and a signal, and
+/// failing loses what was brought. Null for a safe zone.
+@override final  ZoneDangerData? danger;
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
@@ -2130,18 +2148,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops)&&(identical(other.danger, danger) || other.danger == danger));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,score,map,enemies,gathering,drops);
+    return Object.hash(runtimeType,id,score,map,enemies,gathering,drops,danger);
 }
 
 @override
 String toString() {
-    return 'ZoneData(id: $id, score: $score, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops)';
+    return 'ZoneData(id: $id, score: $score, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops, danger: $danger)';
 }
 
 
@@ -2152,11 +2170,11 @@ abstract mixin class _$ZoneDataCopyWith<$Res> implements $ZoneDataCopyWith<$Res>
   factory _$ZoneDataCopyWith(_ZoneData value, $Res Function(_ZoneData) _then) = __$ZoneDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger
 });
 
 
-@override $MapRecipeCopyWith<$Res> get map;@override $ZoneEnemiesDataCopyWith<$Res> get enemies;@override $ZoneGatheringDataCopyWith<$Res> get gathering;@override $ZoneDropsDataCopyWith<$Res> get drops;
+@override $MapRecipeCopyWith<$Res> get map;@override $ZoneEnemiesDataCopyWith<$Res> get enemies;@override $ZoneGatheringDataCopyWith<$Res> get gathering;@override $ZoneDropsDataCopyWith<$Res> get drops;@override $ZoneDangerDataCopyWith<$Res>? get danger;
 
 }
 /// @nodoc
@@ -2169,7 +2187,7 @@ class __$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,}) {
   return _then(_ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -2177,7 +2195,8 @@ as int,map: null == map ? _self.map : map // ignore: cast_nullable_to_non_nullab
 as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_nullable_to_non_nullable
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable
-as ZoneDropsData,
+as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
+as ZoneDangerData?,
   ));
 }
 
@@ -2217,6 +2236,18 @@ $ZoneDropsDataCopyWith<$Res> get drops {
   return $ZoneDropsDataCopyWith<$Res>(_self.drops, (value) {
     return _then(_self.copyWith(drops: value));
   });
+}/// Create a copy of ZoneData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneDangerDataCopyWith<$Res>? get danger {
+    if (_self.danger == null) {
+    return null;
+  }
+
+  return $ZoneDangerDataCopyWith<$Res>(_self.danger!, (value) {
+    return _then(_self.copyWith(danger: value));
+  });
 }
 }
 
@@ -2228,7 +2259,9 @@ mixin _$ZoneEnemiesData {
  int get count; List<WeightedEnemyData> get kinds;/// Groups standing close together.
  int get packs; int get packSizeMin; int get packSizeMax; List<String> get packKinds;/// No enemy starts closer than this to the entry.
  double get keepAway;/// Shares of the player's sight and speed.
- double get sightMultiplier; double get speedMultiplier;
+ double get sightMultiplier; double get speedMultiplier;/// Shares of each kind's health and damage: the same enemies, stronger
+/// in harder zones.
+ double get hpMultiplier; double get damageMultiplier;
 /// Create a copy of ZoneEnemiesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2242,20 +2275,20 @@ $ZoneEnemiesDataCopyWith<ZoneEnemiesData> get copyWith => _$ZoneEnemiesDataCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneEnemiesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneEnemiesData&&(identical(other.count, _this.count) || other.count == _this.count)&&const DeepCollectionEquality().equals(other.kinds, _this.kinds)&&(identical(other.packs, _this.packs) || other.packs == _this.packs)&&(identical(other.packSizeMin, _this.packSizeMin) || other.packSizeMin == _this.packSizeMin)&&(identical(other.packSizeMax, _this.packSizeMax) || other.packSizeMax == _this.packSizeMax)&&const DeepCollectionEquality().equals(other.packKinds, _this.packKinds)&&(identical(other.keepAway, _this.keepAway) || other.keepAway == _this.keepAway)&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneEnemiesData&&(identical(other.count, _this.count) || other.count == _this.count)&&const DeepCollectionEquality().equals(other.kinds, _this.kinds)&&(identical(other.packs, _this.packs) || other.packs == _this.packs)&&(identical(other.packSizeMin, _this.packSizeMin) || other.packSizeMin == _this.packSizeMin)&&(identical(other.packSizeMax, _this.packSizeMax) || other.packSizeMax == _this.packSizeMax)&&const DeepCollectionEquality().equals(other.packKinds, _this.packKinds)&&(identical(other.keepAway, _this.keepAway) || other.keepAway == _this.keepAway)&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.hpMultiplier, _this.hpMultiplier) || other.hpMultiplier == _this.hpMultiplier)&&(identical(other.damageMultiplier, _this.damageMultiplier) || other.damageMultiplier == _this.damageMultiplier));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneEnemiesData;
-  return Object.hash(runtimeType,_this.count,const DeepCollectionEquality().hash(_this.kinds),_this.packs,_this.packSizeMin,_this.packSizeMax,const DeepCollectionEquality().hash(_this.packKinds),_this.keepAway,_this.sightMultiplier,_this.speedMultiplier);
+  return Object.hash(runtimeType,_this.count,const DeepCollectionEquality().hash(_this.kinds),_this.packs,_this.packSizeMin,_this.packSizeMax,const DeepCollectionEquality().hash(_this.packKinds),_this.keepAway,_this.sightMultiplier,_this.speedMultiplier,_this.hpMultiplier,_this.damageMultiplier);
 }
 
 @override
 String toString() {
   final _this = this as ZoneEnemiesData;
-  return 'ZoneEnemiesData(count: ${_this.count}, kinds: ${_this.kinds}, packs: ${_this.packs}, packSizeMin: ${_this.packSizeMin}, packSizeMax: ${_this.packSizeMax}, packKinds: ${_this.packKinds}, keepAway: ${_this.keepAway}, sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier})';
+  return 'ZoneEnemiesData(count: ${_this.count}, kinds: ${_this.kinds}, packs: ${_this.packs}, packSizeMin: ${_this.packSizeMin}, packSizeMax: ${_this.packSizeMax}, packKinds: ${_this.packKinds}, keepAway: ${_this.keepAway}, sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, hpMultiplier: ${_this.hpMultiplier}, damageMultiplier: ${_this.damageMultiplier})';
 }
 
 
@@ -2266,7 +2299,7 @@ abstract mixin class $ZoneEnemiesDataCopyWith<$Res>  {
   factory $ZoneEnemiesDataCopyWith(ZoneEnemiesData value, $Res Function(ZoneEnemiesData) _then) = _$ZoneEnemiesDataCopyWithImpl;
 @useResult
 $Res call({
- int count, List<WeightedEnemyData> kinds, int packs, int packSizeMin, int packSizeMax, List<String> packKinds, double keepAway, double sightMultiplier, double speedMultiplier
+ int count, List<WeightedEnemyData> kinds, int packs, int packSizeMin, int packSizeMax, List<String> packKinds, double keepAway, double sightMultiplier, double speedMultiplier, double hpMultiplier, double damageMultiplier
 });
 
 
@@ -2283,7 +2316,7 @@ class _$ZoneEnemiesDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneEnemiesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? count = null,Object? kinds = null,Object? packs = null,Object? packSizeMin = null,Object? packSizeMax = null,Object? packKinds = null,Object? keepAway = null,Object? sightMultiplier = null,Object? speedMultiplier = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? count = null,Object? kinds = null,Object? packs = null,Object? packSizeMin = null,Object? packSizeMax = null,Object? packKinds = null,Object? keepAway = null,Object? sightMultiplier = null,Object? speedMultiplier = null,Object? hpMultiplier = null,Object? damageMultiplier = null,}) {
   return _then(ZoneEnemiesData(
 count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
 as int,kinds: null == kinds ? _self.kinds : kinds // ignore: cast_nullable_to_non_nullable
@@ -2294,6 +2327,8 @@ as int,packKinds: null == packKinds ? _self.packKinds : packKinds // ignore: cas
 as List<String>,keepAway: null == keepAway ? _self.keepAway : keepAway // ignore: cast_nullable_to_non_nullable
 as double,sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
+as double,hpMultiplier: null == hpMultiplier ? _self.hpMultiplier : hpMultiplier // ignore: cast_nullable_to_non_nullable
+as double,damageMultiplier: null == damageMultiplier ? _self.damageMultiplier : damageMultiplier // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -2379,10 +2414,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier,  double hpMultiplier,  double damageMultiplier)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneEnemiesData() when $default != null:
-return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier);case _:
+return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier,_that.hpMultiplier,_that.damageMultiplier);case _:
   return orElse();
 
 }
@@ -2400,10 +2435,10 @@ return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.pack
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier,  double hpMultiplier,  double damageMultiplier)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneEnemiesData():
-return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier);case _:
+return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier,_that.hpMultiplier,_that.damageMultiplier);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2420,10 +2455,10 @@ return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.pack
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int count,  List<WeightedEnemyData> kinds,  int packs,  int packSizeMin,  int packSizeMax,  List<String> packKinds,  double keepAway,  double sightMultiplier,  double speedMultiplier,  double hpMultiplier,  double damageMultiplier)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneEnemiesData() when $default != null:
-return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier);case _:
+return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.packSizeMax,_that.packKinds,_that.keepAway,_that.sightMultiplier,_that.speedMultiplier,_that.hpMultiplier,_that.damageMultiplier);case _:
   return null;
 
 }
@@ -2435,7 +2470,7 @@ return $default(_that.count,_that.kinds,_that.packs,_that.packSizeMin,_that.pack
 @JsonSerializable()
 
 class _ZoneEnemiesData implements ZoneEnemiesData {
-  const _ZoneEnemiesData({required this.count, required  List<WeightedEnemyData> kinds, this.packs = 0, this.packSizeMin = 0, this.packSizeMax = 0,  List<String> packKinds = const <String>[], required this.keepAway, required this.sightMultiplier, required this.speedMultiplier}): _kinds = kinds,_packKinds = packKinds;
+  const _ZoneEnemiesData({required this.count, required  List<WeightedEnemyData> kinds, this.packs = 0, this.packSizeMin = 0, this.packSizeMax = 0,  List<String> packKinds = const <String>[], required this.keepAway, required this.sightMultiplier, required this.speedMultiplier, this.hpMultiplier = 1.0, this.damageMultiplier = 1.0}): _kinds = kinds,_packKinds = packKinds;
   factory _ZoneEnemiesData.fromJson(Map<String, dynamic> json) => _$ZoneEnemiesDataFromJson(json);
 
 /// Lone enemies, each picked by weight from [kinds].
@@ -2463,6 +2498,10 @@ class _ZoneEnemiesData implements ZoneEnemiesData {
 /// Shares of the player's sight and speed.
 @override final  double sightMultiplier;
 @override final  double speedMultiplier;
+/// Shares of each kind's health and damage: the same enemies, stronger
+/// in harder zones.
+@override@JsonKey() final  double hpMultiplier;
+@override@JsonKey() final  double damageMultiplier;
 
 /// Create a copy of ZoneEnemiesData
 /// with the given fields replaced by the non-null parameter values.
@@ -2477,18 +2516,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneEnemiesData&&(identical(other.count, count) || other.count == count)&&const DeepCollectionEquality().equals(other.kinds, _kinds)&&(identical(other.packs, packs) || other.packs == packs)&&(identical(other.packSizeMin, packSizeMin) || other.packSizeMin == packSizeMin)&&(identical(other.packSizeMax, packSizeMax) || other.packSizeMax == packSizeMax)&&const DeepCollectionEquality().equals(other.packKinds, _packKinds)&&(identical(other.keepAway, keepAway) || other.keepAway == keepAway)&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneEnemiesData&&(identical(other.count, count) || other.count == count)&&const DeepCollectionEquality().equals(other.kinds, _kinds)&&(identical(other.packs, packs) || other.packs == packs)&&(identical(other.packSizeMin, packSizeMin) || other.packSizeMin == packSizeMin)&&(identical(other.packSizeMax, packSizeMax) || other.packSizeMax == packSizeMax)&&const DeepCollectionEquality().equals(other.packKinds, _packKinds)&&(identical(other.keepAway, keepAway) || other.keepAway == keepAway)&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.hpMultiplier, hpMultiplier) || other.hpMultiplier == hpMultiplier)&&(identical(other.damageMultiplier, damageMultiplier) || other.damageMultiplier == damageMultiplier));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,count,const DeepCollectionEquality().hash(_kinds),packs,packSizeMin,packSizeMax,const DeepCollectionEquality().hash(_packKinds),keepAway,sightMultiplier,speedMultiplier);
+    return Object.hash(runtimeType,count,const DeepCollectionEquality().hash(_kinds),packs,packSizeMin,packSizeMax,const DeepCollectionEquality().hash(_packKinds),keepAway,sightMultiplier,speedMultiplier,hpMultiplier,damageMultiplier);
 }
 
 @override
 String toString() {
-    return 'ZoneEnemiesData(count: $count, kinds: $kinds, packs: $packs, packSizeMin: $packSizeMin, packSizeMax: $packSizeMax, packKinds: $packKinds, keepAway: $keepAway, sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier)';
+    return 'ZoneEnemiesData(count: $count, kinds: $kinds, packs: $packs, packSizeMin: $packSizeMin, packSizeMax: $packSizeMax, packKinds: $packKinds, keepAway: $keepAway, sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, hpMultiplier: $hpMultiplier, damageMultiplier: $damageMultiplier)';
 }
 
 
@@ -2499,7 +2538,7 @@ abstract mixin class _$ZoneEnemiesDataCopyWith<$Res> implements $ZoneEnemiesData
   factory _$ZoneEnemiesDataCopyWith(_ZoneEnemiesData value, $Res Function(_ZoneEnemiesData) _then) = __$ZoneEnemiesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int count, List<WeightedEnemyData> kinds, int packs, int packSizeMin, int packSizeMax, List<String> packKinds, double keepAway, double sightMultiplier, double speedMultiplier
+ int count, List<WeightedEnemyData> kinds, int packs, int packSizeMin, int packSizeMax, List<String> packKinds, double keepAway, double sightMultiplier, double speedMultiplier, double hpMultiplier, double damageMultiplier
 });
 
 
@@ -2516,7 +2555,7 @@ class __$ZoneEnemiesDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneEnemiesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? count = null,Object? kinds = null,Object? packs = null,Object? packSizeMin = null,Object? packSizeMax = null,Object? packKinds = null,Object? keepAway = null,Object? sightMultiplier = null,Object? speedMultiplier = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? count = null,Object? kinds = null,Object? packs = null,Object? packSizeMin = null,Object? packSizeMax = null,Object? packKinds = null,Object? keepAway = null,Object? sightMultiplier = null,Object? speedMultiplier = null,Object? hpMultiplier = null,Object? damageMultiplier = null,}) {
   return _then(_ZoneEnemiesData(
 count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
 as int,kinds: null == kinds ? _self._kinds : kinds // ignore: cast_nullable_to_non_nullable
@@ -2527,6 +2566,8 @@ as int,packKinds: null == packKinds ? _self._packKinds : packKinds // ignore: ca
 as List<String>,keepAway: null == keepAway ? _self.keepAway : keepAway // ignore: cast_nullable_to_non_nullable
 as double,sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
+as double,hpMultiplier: null == hpMultiplier ? _self.hpMultiplier : hpMultiplier // ignore: cast_nullable_to_non_nullable
+as double,damageMultiplier: null == damageMultiplier ? _self.damageMultiplier : damageMultiplier // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -3081,6 +3122,307 @@ count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nulla
 as int,spacing: null == spacing ? _self.spacing : spacing // ignore: cast_nullable_to_non_nullable
 as double,loot: null == loot ? _self.loot : loot // ignore: cast_nullable_to_non_nullable
 as String,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ZoneDangerData {
+
+/// How many of the map's exits open in a run.
+ int get openExits;/// Open exits stay hidden until seen; after this long all show.
+ double get revealSeconds;/// How close to an exit's centre counts as standing in it.
+ double get exitRadius;/// The wait after a signal. It runs out whatever happens; the player
+/// leaves only when standing in that exit at zero.
+ double get countdownSeconds;/// Aggressive enemies' sight grows during the wait, up to this share at
+/// zero.
+ double get waitSightMultiplier;/// Health lost per second while hungry. There is no walking home.
+ double get hungryDamagePerSecond;
+/// Create a copy of ZoneDangerData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ZoneDangerDataCopyWith<ZoneDangerData> get copyWith => _$ZoneDangerDataCopyWithImpl<ZoneDangerData>(this as ZoneDangerData, _$identity);
+
+  /// Serializes this ZoneDangerData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ZoneDangerData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneDangerData&&(identical(other.openExits, _this.openExits) || other.openExits == _this.openExits)&&(identical(other.revealSeconds, _this.revealSeconds) || other.revealSeconds == _this.revealSeconds)&&(identical(other.exitRadius, _this.exitRadius) || other.exitRadius == _this.exitRadius)&&(identical(other.countdownSeconds, _this.countdownSeconds) || other.countdownSeconds == _this.countdownSeconds)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, _this.hungryDamagePerSecond) || other.hungryDamagePerSecond == _this.hungryDamagePerSecond));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ZoneDangerData;
+  return Object.hash(runtimeType,_this.openExits,_this.revealSeconds,_this.exitRadius,_this.countdownSeconds,_this.waitSightMultiplier,_this.hungryDamagePerSecond);
+}
+
+@override
+String toString() {
+  final _this = this as ZoneDangerData;
+  return 'ZoneDangerData(openExits: ${_this.openExits}, revealSeconds: ${_this.revealSeconds}, exitRadius: ${_this.exitRadius}, countdownSeconds: ${_this.countdownSeconds}, waitSightMultiplier: ${_this.waitSightMultiplier}, hungryDamagePerSecond: ${_this.hungryDamagePerSecond})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ZoneDangerDataCopyWith<$Res>  {
+  factory $ZoneDangerDataCopyWith(ZoneDangerData value, $Res Function(ZoneDangerData) _then) = _$ZoneDangerDataCopyWithImpl;
+@useResult
+$Res call({
+ int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond
+});
+
+
+
+
+}
+/// @nodoc
+class _$ZoneDangerDataCopyWithImpl<$Res>
+    implements $ZoneDangerDataCopyWith<$Res> {
+  _$ZoneDangerDataCopyWithImpl(this._self, this._then);
+
+  final ZoneDangerData _self;
+  final $Res Function(ZoneDangerData) _then;
+
+/// Create a copy of ZoneDangerData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,}) {
+  return _then(ZoneDangerData(
+openExits: null == openExits ? _self.openExits : openExits // ignore: cast_nullable_to_non_nullable
+as int,revealSeconds: null == revealSeconds ? _self.revealSeconds : revealSeconds // ignore: cast_nullable_to_non_nullable
+as double,exitRadius: null == exitRadius ? _self.exitRadius : exitRadius // ignore: cast_nullable_to_non_nullable
+as double,countdownSeconds: null == countdownSeconds ? _self.countdownSeconds : countdownSeconds // ignore: cast_nullable_to_non_nullable
+as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,hungryDamagePerSecond: null == hungryDamagePerSecond ? _self.hungryDamagePerSecond : hungryDamagePerSecond // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ZoneDangerData].
+extension ZoneDangerDataPatterns on ZoneDangerData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ZoneDangerData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ZoneDangerData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ZoneDangerData value)  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneDangerData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ZoneDangerData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneDangerData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ZoneDangerData() when $default != null:
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)  $default,) {final _that = this;
+switch (_that) {
+case _ZoneDangerData():
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int openExits,  double revealSeconds,  double exitRadius,  double countdownSeconds,  double waitSightMultiplier,  double hungryDamagePerSecond)?  $default,) {final _that = this;
+switch (_that) {
+case _ZoneDangerData() when $default != null:
+return $default(_that.openExits,_that.revealSeconds,_that.exitRadius,_that.countdownSeconds,_that.waitSightMultiplier,_that.hungryDamagePerSecond);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ZoneDangerData implements ZoneDangerData {
+  const _ZoneDangerData({required this.openExits, required this.revealSeconds, required this.exitRadius, required this.countdownSeconds, required this.waitSightMultiplier, required this.hungryDamagePerSecond});
+  factory _ZoneDangerData.fromJson(Map<String, dynamic> json) => _$ZoneDangerDataFromJson(json);
+
+/// How many of the map's exits open in a run.
+@override final  int openExits;
+/// Open exits stay hidden until seen; after this long all show.
+@override final  double revealSeconds;
+/// How close to an exit's centre counts as standing in it.
+@override final  double exitRadius;
+/// The wait after a signal. It runs out whatever happens; the player
+/// leaves only when standing in that exit at zero.
+@override final  double countdownSeconds;
+/// Aggressive enemies' sight grows during the wait, up to this share at
+/// zero.
+@override final  double waitSightMultiplier;
+/// Health lost per second while hungry. There is no walking home.
+@override final  double hungryDamagePerSecond;
+
+/// Create a copy of ZoneDangerData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ZoneDangerDataCopyWith<_ZoneDangerData> get copyWith => __$ZoneDangerDataCopyWithImpl<_ZoneDangerData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ZoneDangerDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneDangerData&&(identical(other.openExits, openExits) || other.openExits == openExits)&&(identical(other.revealSeconds, revealSeconds) || other.revealSeconds == revealSeconds)&&(identical(other.exitRadius, exitRadius) || other.exitRadius == exitRadius)&&(identical(other.countdownSeconds, countdownSeconds) || other.countdownSeconds == countdownSeconds)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.hungryDamagePerSecond, hungryDamagePerSecond) || other.hungryDamagePerSecond == hungryDamagePerSecond));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,openExits,revealSeconds,exitRadius,countdownSeconds,waitSightMultiplier,hungryDamagePerSecond);
+}
+
+@override
+String toString() {
+    return 'ZoneDangerData(openExits: $openExits, revealSeconds: $revealSeconds, exitRadius: $exitRadius, countdownSeconds: $countdownSeconds, waitSightMultiplier: $waitSightMultiplier, hungryDamagePerSecond: $hungryDamagePerSecond)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ZoneDangerDataCopyWith<$Res> implements $ZoneDangerDataCopyWith<$Res> {
+  factory _$ZoneDangerDataCopyWith(_ZoneDangerData value, $Res Function(_ZoneDangerData) _then) = __$ZoneDangerDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int openExits, double revealSeconds, double exitRadius, double countdownSeconds, double waitSightMultiplier, double hungryDamagePerSecond
+});
+
+
+
+
+}
+/// @nodoc
+class __$ZoneDangerDataCopyWithImpl<$Res>
+    implements _$ZoneDangerDataCopyWith<$Res> {
+  __$ZoneDangerDataCopyWithImpl(this._self, this._then);
+
+  final _ZoneDangerData _self;
+  final $Res Function(_ZoneDangerData) _then;
+
+/// Create a copy of ZoneDangerData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? openExits = null,Object? revealSeconds = null,Object? exitRadius = null,Object? countdownSeconds = null,Object? waitSightMultiplier = null,Object? hungryDamagePerSecond = null,}) {
+  return _then(_ZoneDangerData(
+openExits: null == openExits ? _self.openExits : openExits // ignore: cast_nullable_to_non_nullable
+as int,revealSeconds: null == revealSeconds ? _self.revealSeconds : revealSeconds // ignore: cast_nullable_to_non_nullable
+as double,exitRadius: null == exitRadius ? _self.exitRadius : exitRadius // ignore: cast_nullable_to_non_nullable
+as double,countdownSeconds: null == countdownSeconds ? _self.countdownSeconds : countdownSeconds // ignore: cast_nullable_to_non_nullable
+as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,hungryDamagePerSecond: null == hungryDamagePerSecond ? _self.hungryDamagePerSecond : hungryDamagePerSecond // ignore: cast_nullable_to_non_nullable
+as double,
   ));
 }
 

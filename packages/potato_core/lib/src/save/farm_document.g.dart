@@ -126,6 +126,7 @@ _FarmDocument _$FarmDocumentFromJson(
         'weapon_level',
         (v) => (v as num?)?.toInt() ?? 0,
       ),
+      progress: $checkedConvert('progress', (v) => (v as num?)?.toInt() ?? 0),
       totemLimit: $checkedConvert('totem_limit', (v) => (v as num?)?.toInt()),
       totals: $checkedConvert(
         'totals',
@@ -168,6 +169,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'materials': instance.materials,
       'mail': instance.mail.map((e) => e.toJson()).toList(),
       'weapon_level': instance.weaponLevel,
+      'progress': instance.progress,
       'totem_limit': instance.totemLimit,
       'totals': instance.totals,
     };

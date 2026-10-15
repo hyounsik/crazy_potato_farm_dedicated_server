@@ -80,6 +80,97 @@
         "item_chance": 0.35,
         "item": "drop"
       }
+    },
+    {
+      "id": "sample_danger",
+      "score": 3,
+      "map": {
+        "size": 40,
+        "entry": {
+          "x": 20,
+          "y": 36
+        },
+        "exits": [],
+        "clear_radius": 2,
+        "terrain": [
+          {
+            "type": "blob",
+            "center": {
+              "x": 20,
+              "y": 18
+            },
+            "area": 40
+          },
+          {
+            "type": "ring",
+            "center": {
+              "x": 9,
+              "y": 10
+            },
+            "radius": 6,
+            "thickness": 2,
+            "facing": {
+              "x": 0,
+              "y": 1
+            },
+            "gap": 3
+          }
+        ],
+        "scatter": {
+          "count": 60,
+          "big_chance": 0.25
+        },
+        "exit_sites": 4,
+        "exit_spacing": 8
+      },
+      "enemies": {
+        "count": 30,
+        "kinds": [
+          {
+            "enemy": "biter",
+            "weight": 5
+          },
+          {
+            "enemy": "brute",
+            "weight": 1
+          },
+          {
+            "enemy": "spitter",
+            "weight": 3
+          }
+        ],
+        "packs": 4,
+        "pack_size_min": 3,
+        "pack_size_max": 4,
+        "pack_kinds": [
+          "biter",
+          "spitter"
+        ],
+        "keep_away": 4.5,
+        "sight_multiplier": 0.8,
+        "speed_multiplier": 0.85,
+        "hp_multiplier": 1.5,
+        "damage_multiplier": 1.3
+      },
+      "gathering": {
+        "count": 20,
+        "spacing": 4,
+        "loot": "spot"
+      },
+      "drops": {
+        "bundle_chance": 0.06,
+        "bundle": "bundle",
+        "item_chance": 0.35,
+        "item": "drop"
+      },
+      "danger": {
+        "open_exits": 2,
+        "reveal_seconds": 120,
+        "exit_radius": 0.9,
+        "countdown_seconds": 10,
+        "wait_sight_multiplier": 2,
+        "hungry_damage_per_second": 2
+      }
     }
   ]
 }

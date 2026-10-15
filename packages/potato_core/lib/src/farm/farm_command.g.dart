@@ -523,36 +523,51 @@ Map<String, dynamic> _$DepartToJson(Depart instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
-ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('ReturnHome', json, ($checkedConvert) {
-      final val = ReturnHome(
-        food: $checkedConvert('food', (v) => (v as num).toInt()),
-        seeds: $checkedConvert(
-          'seeds',
-          (v) =>
-              (v as List<dynamic>?)
-                  ?.map((e) => SeedCount.fromJson(e as Map<String, dynamic>))
-                  .toList() ??
-              const <SeedCount>[],
-        ),
-        materials: $checkedConvert(
-          'materials',
-          (v) =>
-              (v as Map<String, dynamic>?)?.map(
-                (k, e) => MapEntry(k, (e as num).toInt()),
-              ) ??
-              const <String, int>{},
-        ),
-        potatoIds: $checkedConvert(
-          'potato_ids',
-          (v) =>
-              (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
-              const <int>[],
-        ),
-        $type: $checkedConvert('runtimeType', (v) => v as String?),
-      );
-      return val;
-    }, fieldKeyMap: const {'potatoIds': 'potato_ids', r'$type': 'runtimeType'});
+ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'ReturnHome',
+  json,
+  ($checkedConvert) {
+    final val = ReturnHome(
+      food: $checkedConvert('food', (v) => (v as num).toInt()),
+      seeds: $checkedConvert(
+        'seeds',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => SeedCount.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <SeedCount>[],
+      ),
+      materials: $checkedConvert(
+        'materials',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(k, (e as num).toInt()),
+            ) ??
+            const <String, int>{},
+      ),
+      potatoIds: $checkedConvert(
+        'potato_ids',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
+            const <int>[],
+      ),
+      lostPotatoIds: $checkedConvert(
+        'lost_potato_ids',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
+            const <int>[],
+      ),
+      score: $checkedConvert('score', (v) => (v as num?)?.toInt()),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'potatoIds': 'potato_ids',
+    'lostPotatoIds': 'lost_potato_ids',
+    r'$type': 'runtimeType',
+  },
+);
 
 Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
     <String, dynamic>{
@@ -560,5 +575,7 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
       'materials': instance.materials,
       'potato_ids': instance.potatoIds,
+      'lost_potato_ids': instance.lostPotatoIds,
+      'score': instance.score,
       'runtimeType': instance.$type,
     };

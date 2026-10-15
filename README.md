@@ -20,6 +20,13 @@ dart run bin/server.dart        # listens on PORT (default 8080)
 curl localhost:8080/health      # -> ok
 ```
 
+With Docker (first draft, not yet tested):
+
+```sh
+docker build -t potato-server .
+docker run --rm -p 8080:8080 potato-server
+```
+
 ## License
 
 [Apache 2.0](LICENSE)

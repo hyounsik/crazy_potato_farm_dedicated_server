@@ -348,6 +348,12 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) =>
           'drops',
           (v) => ZoneDropsData.fromJson(v as Map<String, dynamic>),
         ),
+        danger: $checkedConvert(
+          'danger',
+          (v) => v == null
+              ? null
+              : ZoneDangerData.fromJson(v as Map<String, dynamic>),
+        ),
       );
       return val;
     });
@@ -359,6 +365,7 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'enemies': instance.enemies.toJson(),
   'gathering': instance.gathering.toJson(),
   'drops': instance.drops.toJson(),
+  'danger': instance.danger?.toJson(),
 };
 
 _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>
@@ -400,6 +407,14 @@ _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>
             'speed_multiplier',
             (v) => (v as num).toDouble(),
           ),
+          hpMultiplier: $checkedConvert(
+            'hp_multiplier',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
+          damageMultiplier: $checkedConvert(
+            'damage_multiplier',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
         );
         return val;
       },
@@ -410,6 +425,8 @@ _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>
         'keepAway': 'keep_away',
         'sightMultiplier': 'sight_multiplier',
         'speedMultiplier': 'speed_multiplier',
+        'hpMultiplier': 'hp_multiplier',
+        'damageMultiplier': 'damage_multiplier',
       },
     );
 
@@ -424,6 +441,8 @@ Map<String, dynamic> _$ZoneEnemiesDataToJson(_ZoneEnemiesData instance) =>
       'keep_away': instance.keepAway,
       'sight_multiplier': instance.sightMultiplier,
       'speed_multiplier': instance.speedMultiplier,
+      'hp_multiplier': instance.hpMultiplier,
+      'damage_multiplier': instance.damageMultiplier,
     };
 
 _WeightedEnemyData _$WeightedEnemyDataFromJson(Map<String, dynamic> json) =>
@@ -453,6 +472,56 @@ Map<String, dynamic> _$ZoneGatheringDataToJson(_ZoneGatheringData instance) =>
       'count': instance.count,
       'spacing': instance.spacing,
       'loot': instance.loot,
+    };
+
+_ZoneDangerData _$ZoneDangerDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_ZoneDangerData',
+      json,
+      ($checkedConvert) {
+        final val = _ZoneDangerData(
+          openExits: $checkedConvert('open_exits', (v) => (v as num).toInt()),
+          revealSeconds: $checkedConvert(
+            'reveal_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          exitRadius: $checkedConvert(
+            'exit_radius',
+            (v) => (v as num).toDouble(),
+          ),
+          countdownSeconds: $checkedConvert(
+            'countdown_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          waitSightMultiplier: $checkedConvert(
+            'wait_sight_multiplier',
+            (v) => (v as num).toDouble(),
+          ),
+          hungryDamagePerSecond: $checkedConvert(
+            'hungry_damage_per_second',
+            (v) => (v as num).toDouble(),
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'openExits': 'open_exits',
+        'revealSeconds': 'reveal_seconds',
+        'exitRadius': 'exit_radius',
+        'countdownSeconds': 'countdown_seconds',
+        'waitSightMultiplier': 'wait_sight_multiplier',
+        'hungryDamagePerSecond': 'hungry_damage_per_second',
+      },
+    );
+
+Map<String, dynamic> _$ZoneDangerDataToJson(_ZoneDangerData instance) =>
+    <String, dynamic>{
+      'open_exits': instance.openExits,
+      'reveal_seconds': instance.revealSeconds,
+      'exit_radius': instance.exitRadius,
+      'countdown_seconds': instance.countdownSeconds,
+      'wait_sight_multiplier': instance.waitSightMultiplier,
+      'hungry_damage_per_second': instance.hungryDamagePerSecond,
     };
 
 _ZoneDropsData _$ZoneDropsDataFromJson(Map<String, dynamic> json) =>

@@ -142,7 +142,9 @@ sealed class FarmCommand with _$FarmCommand {
 
   /// Comes back from exploring: [food] and [seeds] go into the farm, and
   /// the companions [potatoIds] go back to where they were, or to the fridge
-  /// when that place is gone or taken.
+  /// when that place is gone or taken. Companions [lostPotatoIds] were lost
+  /// in a failed danger run and leave the farm for good. A successful run
+  /// gives its zone [score], which raises the farm's progress.
   const factory FarmCommand.returnHome({
     required int food,
     @Default(<SeedCount>[]) List<SeedCount> seeds,
@@ -150,6 +152,8 @@ sealed class FarmCommand with _$FarmCommand {
     /// Materials brought back, by item id.
     @Default(<String, int>{}) Map<String, int> materials,
     @Default(<int>[]) List<int> potatoIds,
+    @Default(<int>[]) List<int> lostPotatoIds,
+    int? score,
   }) = ReturnHome;
 
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>

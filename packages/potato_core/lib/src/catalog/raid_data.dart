@@ -177,6 +177,10 @@ abstract class ZoneData with _$ZoneData {
     required ZoneEnemiesData enemies,
     required ZoneGatheringData gathering,
     required ZoneDropsData drops,
+
+    /// Set for a danger zone: leaving takes an open exit and a signal, and
+    /// failing loses what was brought. Null for a safe zone.
+    ZoneDangerData? danger,
   }) = _ZoneData;
 
   factory ZoneData.fromJson(Map<String, dynamic> json) =>
@@ -202,6 +206,11 @@ abstract class ZoneEnemiesData with _$ZoneEnemiesData {
     /// Shares of the player's sight and speed.
     required double sightMultiplier,
     required double speedMultiplier,
+
+    /// Shares of each kind's health and damage: the same enemies, stronger
+    /// in harder zones.
+    @Default(1.0) double hpMultiplier,
+    @Default(1.0) double damageMultiplier,
   }) = _ZoneEnemiesData;
 
   factory ZoneEnemiesData.fromJson(Map<String, dynamic> json) =>
@@ -234,6 +243,35 @@ abstract class ZoneGatheringData with _$ZoneGatheringData {
 
   factory ZoneGatheringData.fromJson(Map<String, dynamic> json) =>
       _$ZoneGatheringDataFromJson(json);
+}
+
+/// How a danger zone is left, and what hunger does there.
+@freezed
+abstract class ZoneDangerData with _$ZoneDangerData {
+  const factory ZoneDangerData({
+    /// How many of the map's exits open in a run.
+    required int openExits,
+
+    /// Open exits stay hidden until seen; after this long all show.
+    required double revealSeconds,
+
+    /// How close to an exit's centre counts as standing in it.
+    required double exitRadius,
+
+    /// The wait after a signal. It runs out whatever happens; the player
+    /// leaves only when standing in that exit at zero.
+    required double countdownSeconds,
+
+    /// Aggressive enemies' sight grows during the wait, up to this share at
+    /// zero.
+    required double waitSightMultiplier,
+
+    /// Health lost per second while hungry. There is no walking home.
+    required double hungryDamagePerSecond,
+  }) = _ZoneDangerData;
+
+  factory ZoneDangerData.fromJson(Map<String, dynamic> json) =>
+      _$ZoneDangerDataFromJson(json);
 }
 
 /// What a defeated enemy leaves: rarely a bundle (opened like a spot),

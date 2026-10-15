@@ -16,6 +16,12 @@ final class GoHome extends RaidCommand {
   const GoHome();
 }
 
+/// Sends the leaving signal from the open exit the player stands in. Danger
+/// zones only.
+final class Signal extends RaidCommand {
+  const Signal();
+}
+
 /// Moves item [index] of pile [pile] into the bag as far as it fits.
 final class TakeLoot extends RaidCommand {
   const TakeLoot(this.pile, this.index);
@@ -56,6 +62,15 @@ enum RaidRejection {
 
   /// Dashing, or the dash is not ready yet.
   dashNotReady,
+
+  /// Not here: going home is for safe zones, signals for danger zones.
+  wrongZone,
+
+  /// The player is not standing in an open exit.
+  notAtExit,
+
+  /// A signal is already counting down.
+  signalling,
 }
 
 /// What happened in a run, collected with `RaidSimulation.takeEvents`.
@@ -90,6 +105,33 @@ final class ItemPicked extends RaidEvent {
   final ItemStack stack;
 }
 
+/// The player first saw open exit [exit].
+final class ExitFound extends RaidEvent {
+  const ExitFound(this.exit);
+
+  final int exit;
+}
+
+/// Time is up: every open exit now shows.
+final class ExitsRevealed extends RaidEvent {
+  const ExitsRevealed();
+}
+
+/// A signal went up from exit [exit]; the countdown started.
+final class SignalSent extends RaidEvent {
+  const SignalSent(this.exit);
+
+  final int exit;
+}
+
+/// The countdown reached zero with the player outside exit [exit]; the
+/// signal is gone and must be sent again.
+final class SignalLost extends RaidEvent {
+  const SignalLost(this.exit);
+
+  final int exit;
+}
+
 /// The run is over; see `RaidSimulation.outcome`.
 final class RaidEnded extends RaidEvent {
   const RaidEnded(this.outcome);
@@ -101,9 +143,16 @@ enum RaidOutcome {
   /// The player chose to go home.
   wentHome,
 
-  /// Knocked down: carried home with what the bag holds.
+  /// Knocked down. In a safe zone the player is carried home with the bag;
+  /// in a danger zone everything brought is lost.
   fainted,
 
-  /// Out of food too long: walked home with the bag.
+  /// Out of food too long in a safe zone: walked home with the bag.
   starved,
+
+  /// Left a danger zone through an exit, with everything carried.
+  extracted;
+
+  /// Whether the run counts as a success: it raises the farm's progress.
+  bool get succeeded => this == wentHome || this == extracted;
 }

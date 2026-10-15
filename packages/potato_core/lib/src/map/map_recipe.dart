@@ -21,6 +21,12 @@ abstract class MapRecipe with _$MapRecipe {
     /// Places the player may leave from, all reachable from [entry].
     @Default(<TilePos>[]) List<TilePos> exits,
 
+    /// Extra exit sites the generator picks per seed on open ground, at
+    /// least [exitSpacing] tiles (Chebyshev) from the entry and each other.
+    /// They follow the fixed [exits] in the built map.
+    @Default(0) int exitSites,
+    @Default(0) int exitSpacing,
+
     /// Scattered obstacles stay at least this many tiles (Chebyshev) from
     /// [entry], [exits] and chunk markers.
     required int clearRadius,

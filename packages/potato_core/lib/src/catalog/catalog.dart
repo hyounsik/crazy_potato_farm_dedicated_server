@@ -720,6 +720,8 @@ final class Catalog {
           break;
       }
     }
+    check.atLeast('$path.map.exit_sites', map.exitSites, 0);
+    check.atLeast('$path.map.exit_spacing', map.exitSpacing, 0);
     check.atLeast('$path.map.scatter.count', map.scatter.count, 0);
     check.probability('$path.map.scatter.big_chance', map.scatter.bigChance);
 
@@ -748,6 +750,30 @@ final class Catalog {
       '$path.enemies.speed_multiplier',
       enemies.speedMultiplier,
     );
+    check.positiveNumber('$path.enemies.hp_multiplier', enemies.hpMultiplier);
+    check.positiveNumber(
+      '$path.enemies.damage_multiplier',
+      enemies.damageMultiplier,
+    );
+    if (zone.danger case final danger?) {
+      final at = '$path.danger';
+      check.positive('$at.open_exits', danger.openExits);
+      if (map.exits.length + map.exitSites < danger.openExits) {
+        check.issue('$at.open_exits', 'must not exceed the map\'s exits');
+      }
+      check.atLeastNumber('$at.reveal_seconds', danger.revealSeconds, 0);
+      check.positiveNumber('$at.exit_radius', danger.exitRadius);
+      check.positiveNumber('$at.countdown_seconds', danger.countdownSeconds);
+      check.positiveNumber(
+        '$at.wait_sight_multiplier',
+        danger.waitSightMultiplier,
+      );
+      check.atLeastNumber(
+        '$at.hungry_damage_per_second',
+        danger.hungryDamagePerSecond,
+        0,
+      );
+    }
     check.atLeast('$path.gathering.count', zone.gathering.count, 0);
     check.probability('$path.drops.bundle_chance', zone.drops.bundleChance);
     check.probability('$path.drops.item_chance', zone.drops.itemChance);

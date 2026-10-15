@@ -76,8 +76,38 @@ final class _Builder {
           _chunk(piece);
       }
     }
+    _pickExitSites();
     _scatter(scatterCount);
     return _turned(turns);
+  }
+
+  /// The recipe's fixed exits, then the sites picked for this seed.
+  final List<TilePos> exits = [];
+
+  /// Picks the recipe's exit sites on open ground with an open ring around
+  /// them, spaced from the entry and each other. Fewer when room runs out.
+  void _pickExitSites() {
+    exits.addAll(recipe.exits);
+    final spacing = recipe.exitSpacing;
+    final taken = [recipe.entry, ...exits];
+    var picked = 0;
+    for (
+      var tries = 0;
+      picked < recipe.exitSites && tries < recipe.exitSites * 200;
+      tries++
+    ) {
+      final at = TilePos(
+        1 + random.nextInt(size - 2),
+        1 + random.nextInt(size - 2),
+      );
+      final near = taken.any(
+        (p) => (p.x - at.x).abs() < spacing && (p.y - at.y).abs() < spacing,
+      );
+      if (near || !_freeAround(at.x, at.y, 1)) continue;
+      exits.add(at);
+      taken.add(at);
+      picked++;
+    }
   }
 
   bool _inside(int x, int y) => x >= 0 && y >= 0 && x < size && y < size;
@@ -203,7 +233,7 @@ final class _Builder {
   void _scatter(int count) {
     final keepClear = [
       recipe.entry,
-      ...recipe.exits,
+      ...exits,
       for (final points in markers.values) ...points,
     ];
     final clear = recipe.clearRadius;
@@ -260,7 +290,7 @@ final class _Builder {
       size: size,
       tiles: turned,
       entry: turn(recipe.entry),
-      exits: [for (final e in recipe.exits) turn(e)],
+      exits: [for (final e in exits) turn(e)],
       markers: {
         for (final MapEntry(:key, :value) in markers.entries)
           key: [for (final t in value) turn(t)],

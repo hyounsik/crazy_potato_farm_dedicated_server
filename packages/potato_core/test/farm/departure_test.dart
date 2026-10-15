@@ -101,6 +101,8 @@ void main() {
         ItemStack('material', 9),
       ],
       companions: [(potatoId: id, down: true)],
+      score: 3,
+      lost: false,
     );
     final command = result.homecoming(catalog);
     expect(farm.apply(command), isNull);
@@ -110,6 +112,49 @@ void main() {
     expect(farm.materials, {'material': 9});
     expect(farm.awayPotatoes, isEmpty);
     expect(farm.fieldSpotOf(id)!.tile, _tile);
+    expect(farm.progress, 3, reason: 'going home from a safe zone succeeds');
+  });
+
+  test('a lost danger run brings nothing and the companions are gone', () {
+    final id = growOne();
+    farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
+    farm.takeEvents();
+    final result = RaidResult(
+      outcome: RaidOutcome.fainted,
+      items: [ItemStack('food', 30), ItemStack('material', 9)],
+      companions: [(potatoId: id, down: false)],
+      score: 12,
+      lost: true,
+    );
+    expect(farm.apply(result.homecoming(catalog)), isNull);
+
+    expect(farm.food, 160);
+    expect(farm.materials, isEmpty);
+    expect(farm.awayPotatoes, isEmpty);
+    expect(farm.potatoById(id), isNull);
+    expect(farm.graves, isEmpty, reason: 'lost companions leave no grave');
+    expect(farm.progress, 0);
+    final returned = farm.takeEvents().whereType<Returned>().single;
+    expect(returned.lost, [id]);
+    expect(returned.potatoIds, isEmpty);
+  });
+
+  test('progress follows the best successful run and never drops', () {
+    RaidResult run(RaidOutcome outcome, int score) => RaidResult(
+      outcome: outcome,
+      items: const [],
+      companions: const [],
+      score: score,
+      lost: false,
+    );
+    farm.apply(run(RaidOutcome.extracted, 12).homecoming(catalog));
+    expect(farm.progress, 12);
+    farm.apply(run(RaidOutcome.wentHome, 3).homecoming(catalog));
+    expect(farm.progress, 12);
+    farm.apply(run(RaidOutcome.starved, 20).homecoming(catalog));
+    expect(farm.progress, 12, reason: 'starving home is not a success');
+    final saved = FarmDocument.of(farm).toSimulation(catalog);
+    expect(saved.progress, 12);
   });
 
   test('companions carry their farm potato over to the run', () {

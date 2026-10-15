@@ -1,0 +1,9 @@
+.git
+.github
+.dart_tool
+**/.dart_tool
+build
+coverage
+pubspec_overrides.yaml
+**/pubspec_overrides.yaml
+.DS_Store

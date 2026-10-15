@@ -6,45 +6,63 @@ part of 'map_recipe.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_MapRecipe', json, ($checkedConvert) {
-      final val = _MapRecipe(
-        size: $checkedConvert('size', (v) => (v as num).toInt()),
-        entry: $checkedConvert(
-          'entry',
-          (v) => TilePos.fromJson(v as Map<String, dynamic>),
-        ),
-        exits: $checkedConvert(
-          'exits',
-          (v) =>
-              (v as List<dynamic>?)
-                  ?.map((e) => TilePos.fromJson(e as Map<String, dynamic>))
-                  .toList() ??
-              const <TilePos>[],
-        ),
-        clearRadius: $checkedConvert('clear_radius', (v) => (v as num).toInt()),
-        terrain: $checkedConvert(
-          'terrain',
-          (v) =>
-              (v as List<dynamic>?)
-                  ?.map((e) => TerrainPiece.fromJson(e as Map<String, dynamic>))
-                  .toList() ??
-              const <TerrainPiece>[],
-        ),
-        scatter: $checkedConvert(
-          'scatter',
-          (v) => ScatterRule.fromJson(v as Map<String, dynamic>),
-        ),
-        rotate: $checkedConvert('rotate', (v) => v as bool? ?? true),
-      );
-      return val;
-    }, fieldKeyMap: const {'clearRadius': 'clear_radius'});
+_MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_MapRecipe',
+  json,
+  ($checkedConvert) {
+    final val = _MapRecipe(
+      size: $checkedConvert('size', (v) => (v as num).toInt()),
+      entry: $checkedConvert(
+        'entry',
+        (v) => TilePos.fromJson(v as Map<String, dynamic>),
+      ),
+      exits: $checkedConvert(
+        'exits',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => TilePos.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <TilePos>[],
+      ),
+      exitSites: $checkedConvert(
+        'exit_sites',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      exitSpacing: $checkedConvert(
+        'exit_spacing',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      clearRadius: $checkedConvert('clear_radius', (v) => (v as num).toInt()),
+      terrain: $checkedConvert(
+        'terrain',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => TerrainPiece.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <TerrainPiece>[],
+      ),
+      scatter: $checkedConvert(
+        'scatter',
+        (v) => ScatterRule.fromJson(v as Map<String, dynamic>),
+      ),
+      rotate: $checkedConvert('rotate', (v) => v as bool? ?? true),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'exitSites': 'exit_sites',
+    'exitSpacing': 'exit_spacing',
+    'clearRadius': 'clear_radius',
+  },
+);
 
 Map<String, dynamic> _$MapRecipeToJson(_MapRecipe instance) =>
     <String, dynamic>{
       'size': instance.size,
       'entry': instance.entry.toJson(),
       'exits': instance.exits.map((e) => e.toJson()).toList(),
+      'exit_sites': instance.exitSites,
+      'exit_spacing': instance.exitSpacing,
       'clear_radius': instance.clearRadius,
       'terrain': instance.terrain.map((e) => e.toJson()).toList(),
       'scatter': instance.scatter.toJson(),

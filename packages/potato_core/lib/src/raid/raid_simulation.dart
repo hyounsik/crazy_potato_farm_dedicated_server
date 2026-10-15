@@ -34,9 +34,18 @@ final class RaidResult {
     required this.outcome,
     required this.items,
     required this.companions,
+    required this.score,
+    required this.lost,
   });
 
   final RaidOutcome outcome;
+
+  /// The zone's score; a successful run raises the farm's progress to it.
+  final int score;
+
+  /// A failed danger run: the bag and every companion are gone, and
+  /// [items] and [companions] say what was lost.
+  final bool lost;
 
   /// Everything in the bag, food included.
   final List<ItemStack> items;
@@ -64,8 +73,11 @@ final class RaidSimulation {
     required this.bullets,
     required this.piles,
     required this.floorItems,
+    required this.exits,
     required this._nextId,
     required this._tick,
+    this.signal,
+    this._revealed = false,
     this._outcome,
   });
 
@@ -134,6 +146,7 @@ final class RaidSimulation {
       random,
       () => nextId++,
     );
+    final exits = _openExits(zoneData, map, random, () => nextId++);
 
     return RaidSimulation._(
       catalog: catalog,
@@ -147,6 +160,7 @@ final class RaidSimulation {
       bullets: [],
       piles: piles,
       floorItems: [],
+      exits: exits,
       nextId: nextId,
       tick: 0,
     );
@@ -189,6 +203,12 @@ final class RaidSimulation {
       bullets: list('bullets', RaidBullet.fromJson),
       piles: list('piles', RaidPile.fromJson),
       floorItems: list('floor_items', RaidFloorItem.fromJson),
+      exits: list('exits', RaidExit.fromJson),
+      signal: switch (json['signal']) {
+        final Map<String, dynamic> signal => RaidSignal.fromJson(signal),
+        _ => null,
+      },
+      revealed: json['revealed'] as bool,
       nextId: json['next_id'] as int,
       tick: json['tick'] as int,
       outcome: outcome == null ? null : RaidOutcome.values.byName(outcome),
@@ -197,7 +217,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 2;
+  static const int formatVersion = 3;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -210,6 +230,13 @@ final class RaidSimulation {
   final List<RaidBullet> bullets;
   final List<RaidPile> piles;
   final List<RaidFloorItem> floorItems;
+
+  /// Exits open in this run; empty in a safe zone.
+  final List<RaidExit> exits;
+
+  /// The countdown after a signal, if one is running.
+  RaidSignal? signal;
+  bool _revealed;
   int _nextId;
   int _tick;
   RaidOutcome? _outcome;
@@ -235,6 +262,30 @@ final class RaidSimulation {
   double get enemySight => rules.player.sight * zone.enemies.sightMultiplier;
   double get enemySpeed => rules.player.speed * zone.enemies.speedMultiplier;
 
+  /// How far aggressive enemies see now: wider during a signal's countdown,
+  /// the more the closer it is to zero.
+  double get aggressiveSight {
+    final danger = zone.danger;
+    final signal = this.signal;
+    if (danger == null || signal == null) return enemySight;
+    final passed = 1 - signal.left / danger.countdownSeconds;
+    return enemySight * (1 + (danger.waitSightMultiplier - 1) * passed);
+  }
+
+  bool get isDanger => zone.danger != null;
+
+  /// Whether every open exit has been revealed by time.
+  bool get exitsRevealed => _revealed;
+
+  /// The open exit the player stands in, if any.
+  RaidExit? exitHere() {
+    final radius = zone.danger?.exitRadius ?? 0;
+    for (final exit in exits) {
+      if (exit.position.distanceTo(player.position) <= radius) return exit;
+    }
+    return null;
+  }
+
   bool get isHungry => bag.countOf(rules.food.item) == 0;
 
   /// What the run brings home, once it is over.
@@ -247,6 +298,8 @@ final class RaidSimulation {
       companions: [
         for (final c in companions) (potatoId: c.potatoId, down: c.isDown),
       ],
+      score: zone.score,
+      lost: isDanger && outcome != RaidOutcome.extracted,
     );
   }
 
@@ -283,7 +336,17 @@ final class RaidSimulation {
           ..dashCooldown = rules.player.dashCooldownSeconds;
         return null;
       case GoHome():
+        if (isDanger) return RaidRejection.wrongZone;
         _end(RaidOutcome.wentHome);
+        return null;
+      case Signal():
+        if (!isDanger) return RaidRejection.wrongZone;
+        if (signal != null) return RaidRejection.signalling;
+        final exit = exitHere();
+        if (exit == null) return RaidRejection.notAtExit;
+        exit.found = true;
+        signal = RaidSignal(exit: exit.id, left: zone.danger!.countdownSeconds);
+        _events.add(SignalSent(exit.id));
         return null;
       case TakeLoot(:final pile, :final index):
         final found = _reachablePile(pile);
@@ -347,7 +410,44 @@ final class RaidSimulation {
     _updateBullets(dt);
     _pickUpFloorItems();
     _clearDefeated();
-    if (player.isDown) _end(RaidOutcome.fainted);
+    if (player.isDown) {
+      _end(RaidOutcome.fainted);
+      return;
+    }
+    if (isDanger) _updateExits(dt);
+  }
+
+  // Exits --------------------------------------------------------------------
+
+  /// Finds exits the player sees, reveals all once time is up, and runs the
+  /// signal's countdown: at zero the player leaves when standing in that
+  /// exit, otherwise the signal goes out.
+  void _updateExits(double dt) {
+    final danger = zone.danger!;
+    for (final exit in exits) {
+      if (exit.found) continue;
+      if (exit.position.distanceTo(player.position) <= rules.player.sight) {
+        exit.found = true;
+        _events.add(ExitFound(exit.id));
+      }
+    }
+    if (!_revealed && elapsed.inMilliseconds >= danger.revealSeconds * 1000) {
+      _revealed = true;
+      for (final exit in exits) {
+        exit.found = true;
+      }
+      _events.add(const ExitsRevealed());
+    }
+    final signal = this.signal;
+    if (signal == null) return;
+    signal.left -= dt;
+    if (signal.left > 0) return;
+    this.signal = null;
+    if (exitHere()?.id == signal.exit) {
+      _end(RaidOutcome.extracted);
+    } else {
+      _events.add(SignalLost(signal.exit));
+    }
   }
 
   /// Returns the events since the last call and forgets them.
@@ -402,7 +502,10 @@ final class RaidSimulation {
       player
         ..foodOwed = 0
         ..hungrySeconds += dt;
-      if (player.hungrySeconds >= food.hungryReturnSeconds) {
+      if (zone.danger case final danger?) {
+        // No walking home from a danger zone: hunger wears health down.
+        player.hp = math.max(0, player.hp - danger.hungryDamagePerSecond * dt);
+      } else if (player.hungrySeconds >= food.hungryReturnSeconds) {
         _end(RaidOutcome.starved);
       }
       return;
@@ -549,14 +652,17 @@ final class RaidSimulation {
       ..attackCooldown -= dt
       ..sinceHit += dt;
     if (enemy.target == null && spec.temper == EnemyTemper.aggressive) {
-      enemy.target = _nearestInSight(enemy)?.id;
+      enemy.target = _nearestInSight(enemy, aggressiveSight)?.id;
     }
     final target = enemy.target == null ? null : _body(enemy.target!);
     if (enemy.target != null) {
       final lost =
           target == null ||
           target.isDown ||
-          (target.position.distanceTo(enemy.position) > enemySight &&
+          (target.position.distanceTo(enemy.position) >
+                  (spec.temper == EnemyTemper.aggressive
+                      ? aggressiveSight
+                      : enemySight) &&
               enemy.sinceHit > rules.enemyAlertSeconds);
       if (lost) {
         enemy.target = null;
@@ -568,9 +674,9 @@ final class RaidSimulation {
     _wander(enemy, dt);
   }
 
-  RaidBody? _nearestInSight(RaidEnemy enemy) {
+  RaidBody? _nearestInSight(RaidEnemy enemy, double sight) {
     RaidBody? best;
-    var bestDistance = enemySight;
+    var bestDistance = sight;
     for (final body in _wildTargets) {
       final d = body.position.distanceTo(enemy.position);
       if (d > bestDistance) continue;
@@ -586,7 +692,7 @@ final class RaidSimulation {
       case EnemyAttack.melee:
         if (d <= enemy.radius + target.radius + spec.reach) {
           if (enemy.attackCooldown <= 0) {
-            _hurt(target, spec.damage, enemy);
+            _hurt(target, spec.damage * zone.enemies.damageMultiplier, enemy);
             enemy.attackCooldown = spec.attackInterval;
           }
         } else {
@@ -602,7 +708,7 @@ final class RaidSimulation {
                 id: _newId(),
                 position: enemy.position + direction * enemy.radius,
                 velocity: direction * spec.bulletSpeed,
-                damage: spec.damage,
+                damage: spec.damage * zone.enemies.damageMultiplier,
                 owner: enemy.id,
                 side: RaidSide.wild,
                 remaining: spec.range * 1.3,
@@ -764,7 +870,7 @@ final class RaidSimulation {
           id: newId(),
           position: at,
           radius: data.radius,
-          maxHp: data.maxHp,
+          maxHp: data.maxHp * spec.hpMultiplier,
           kind: kind,
           home: at,
         ),
@@ -804,6 +910,26 @@ final class RaidSimulation {
       loners++;
     }
     return placed;
+  }
+
+  /// Danger zones open some of the map's exits at random; safe zones none.
+  static List<RaidExit> _openExits(
+    ZoneData zone,
+    MapData map,
+    GameRandom random,
+    int Function() newId,
+  ) {
+    final danger = zone.danger;
+    if (danger == null) return [];
+    final sites = List.of(map.exits);
+    final open = <RaidExit>[];
+    while (open.length < danger.openExits && sites.isNotEmpty) {
+      final site = sites.removeAt(random.nextInt(sites.length));
+      open.add(
+        RaidExit(id: newId(), position: Vec2(site.x + 0.5, site.y + 0.5)),
+      );
+    }
+    return open;
   }
 
   /// Gathering spots on free tiles, spaced apart, each with loot rolled now.
@@ -872,6 +998,9 @@ final class RaidSimulation {
     'bullets': [for (final b in bullets) b.toJson()],
     'piles': [for (final p in piles) p.toJson()],
     'floor_items': [for (final f in floorItems) f.toJson()],
+    'exits': [for (final e in exits) e.toJson()],
+    'signal': signal?.toJson(),
+    'revealed': _revealed,
     'outcome': _outcome?.name,
   };
 }

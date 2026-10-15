@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math' as math;
 
 import 'package:potato_core/potato_core.dart';
 import 'package:test/test.dart';
@@ -36,6 +37,27 @@ void main() {
         }
       }
     }
+  });
+
+  test('picked exit sites are open, spaced and reachable', () {
+    final recipe = sampleRecipe().copyWith(exitSites: 4, exitSpacing: 8);
+    for (var seed = 0; seed < 20; seed++) {
+      final map = generate(seed, recipe: recipe);
+      final sites = [map.entry, ...map.exits];
+      expect(map.exits, hasLength(recipe.exits.length + 4));
+      final reached = map.reachableFrom(map.entry);
+      for (final (i, a) in sites.indexed) {
+        expect(reached, contains(a), reason: 'seed $seed $a');
+        for (final b in sites.skip(i + 1)) {
+          final apart = math.max((a.x - b.x).abs(), (a.y - b.y).abs());
+          expect(apart, greaterThanOrEqualTo(8), reason: 'seed $seed $a $b');
+        }
+      }
+    }
+    expect(
+      generate(3, recipe: recipe).toJson(),
+      generate(3, recipe: recipe).toJson(),
+    );
   });
 
   test('scattered obstacles keep a free tile around them', () {

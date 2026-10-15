@@ -26,6 +26,22 @@ void main() {
     (open['enemies'] as Map)['packs'] = 0;
     (open['gathering'] as Map)['count'] = 0;
     zones.add(open);
+    // The same open map as a danger zone with two exits, both open.
+    final danger = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
+    danger['id'] = 'danger_open';
+    (danger['map'] as Map)['exits'] = [
+      {'x': 16, 'y': 10},
+      {'x': 3, 'y': 10},
+    ];
+    danger['danger'] = {
+      'open_exits': 2,
+      'reveal_seconds': 60,
+      'exit_radius': 0.9,
+      'countdown_seconds': 5,
+      'wait_sight_multiplier': 2,
+      'hungry_damage_per_second': 10,
+    };
+    zones.add(danger);
     final result = Catalog.load(files);
     expect(result.issues, isEmpty);
     catalog = result.catalog!;
@@ -303,5 +319,134 @@ void main() {
   test('a run from another format is refused', () {
     final json = openRun().toJson()..['format_version'] = 99;
     expect(() => RaidSimulation.fromJson(json, catalog), throwsFormatException);
+  });
+
+  group('a danger zone', () {
+    RaidSimulation dangerRun({int food = 100}) => RaidSimulation.start(
+      catalog: catalog,
+      zone: 'danger_open',
+      seed: 1,
+      food: food,
+    );
+
+    /// Puts the player in the exit east of the entry.
+    RaidExit standInEast(RaidSimulation run) {
+      final exit = run.exits.firstWhere((e) => e.position.x > 10);
+      run.player.position = exit.position;
+      return exit;
+    }
+
+    test('opens some generated exit sites, the same for the same seed', () {
+      RaidSimulation start() => RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_danger',
+        seed: 7,
+      );
+      final run = start();
+      final zone = catalog.zones['sample_danger']!;
+      expect(run.map.exits, hasLength(zone.map.exitSites));
+      expect(run.exits, hasLength(zone.danger!.openExits));
+      expect(run.exits.every((e) => !e.found), isTrue);
+      expect(jsonEncode(run.toJson()), jsonEncode(start().toJson()));
+      final reached = run.map.reachableFrom(run.map.entry);
+      expect(run.map.exits.every(reached.contains), isTrue);
+    });
+
+    test('makes enemies stronger', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_danger',
+        seed: 7,
+      );
+      final enemy = run.enemies.first;
+      final multiplier = catalog.zones['sample_danger']!.enemies.hpMultiplier;
+      expect(enemy.maxHp, catalog.enemies[enemy.kind]!.maxHp * multiplier);
+    });
+
+    test('exits show once seen, and all once time is up', () {
+      final run = dangerRun();
+      expect(run.exits.any((e) => e.found), isFalse);
+      final east = run.exits.firstWhere((e) => e.position.x > 10);
+      run.player.position = east.position - const Vec2(2, 0);
+      run.step();
+      expect(east.found, isTrue);
+      expect(run.takeEvents().whereType<ExitFound>().single.exit, east.id);
+      expect(run.exits.where((e) => !e.found), hasLength(1));
+
+      runFor(run, 60);
+      expect(run.exitsRevealed, isTrue);
+      expect(run.exits.every((e) => e.found), isTrue);
+      expect(run.takeEvents().whereType<ExitsRevealed>(), hasLength(1));
+    });
+
+    test('there is no going home; a signal needs an open exit', () {
+      final run = dangerRun();
+      expect(run.apply(const GoHome()), RaidRejection.wrongZone);
+      expect(run.apply(const Signal()), RaidRejection.notAtExit);
+      expect(openRun().apply(const Signal()), RaidRejection.wrongZone);
+    });
+
+    test('standing in the exit when the count ends leaves with the bag', () {
+      final run = dangerRun(food: 30);
+      final exit = standInEast(run);
+      expect(run.apply(const Signal()), isNull);
+      expect(run.apply(const Signal()), RaidRejection.signalling);
+      expect(run.takeEvents().whereType<SignalSent>().single.exit, exit.id);
+      runFor(run, 4.9);
+      expect(run.outcome, isNull);
+      runFor(run, 0.2);
+      expect(run.outcome, RaidOutcome.extracted);
+      final result = run.result!;
+      expect(result.lost, isFalse);
+      expect(result.score, catalog.zones['danger_open']!.score);
+      expect(result.items.single.item, 'food');
+    });
+
+    test('the count runs out outside the exit: the signal is lost', () {
+      final run = dangerRun();
+      final exit = standInEast(run);
+      run.apply(const Signal());
+      runFor(run, 2);
+      // Wandering off is allowed; the count keeps going.
+      run.player.position = exit.position - const Vec2(3, 0);
+      runFor(run, 3.5);
+      expect(run.outcome, isNull);
+      expect(run.signal, isNull);
+      expect(run.takeEvents().whereType<SignalLost>().single.exit, exit.id);
+    });
+
+    test('aggressive enemies see farther as the count runs down', () {
+      final run = dangerRun();
+      standInEast(run);
+      final sight = run.enemySight;
+      expect(run.aggressiveSight, sight);
+      run.apply(const Signal());
+      runFor(run, 2.5);
+      expect(run.aggressiveSight, closeTo(sight * 1.5, sight * 0.02));
+    });
+
+    test('hunger wears health down until everything is lost', () {
+      final run = dangerRun(food: 0);
+      runFor(run, 5);
+      expect(run.player.hp, closeTo(run.player.maxHp - 50, 1));
+      runFor(run, 6);
+      expect(run.outcome, RaidOutcome.fainted);
+      expect(run.result!.lost, isTrue);
+    });
+
+    test('saving mid-count and going on equals never stopping', () {
+      final straight = dangerRun();
+      standInEast(straight);
+      straight.apply(const Signal());
+      runFor(straight, 2);
+      final restored = RaidSimulation.fromJson(
+        jsonDecode(jsonEncode(straight.toJson())) as Map<String, dynamic>,
+        catalog,
+      );
+      runFor(straight, 4);
+      runFor(restored, 4);
+      expect(restored.outcome, RaidOutcome.extracted);
+      expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
+    });
   });
 }

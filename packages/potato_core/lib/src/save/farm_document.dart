@@ -55,6 +55,7 @@ abstract class FarmDocument with _$FarmDocument {
     @Default(<String, int>{}) Map<String, int> materials,
     @Default(<MailDocument>[]) List<MailDocument> mail,
     @Default(0) int weaponLevel,
+    @Default(0) int progress,
     int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
   }) = _FarmDocument;
@@ -160,6 +161,7 @@ abstract class FarmDocument with _$FarmDocument {
     materials: Map.of(farm.materials),
     mail: [for (final mail in farm.mail) MailDocument.of(mail)],
     weaponLevel: farm.weaponLevel,
+    progress: farm.progress,
     totemLimit: farm.totemLimit,
     totals: farm.totals.toJson(),
   );
@@ -253,6 +255,7 @@ abstract class FarmDocument with _$FarmDocument {
       materials: materials,
       mail: [for (final mail in this.mail) mail.toMail()],
       weaponLevel: weaponLevel,
+      progress: progress,
       totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),
     );

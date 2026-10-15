@@ -358,6 +358,49 @@ final class RaidFloorItem {
   };
 }
 
+/// An exit open in this run (danger zones). Hidden until [found].
+final class RaidExit {
+  RaidExit({required this.id, required this.position, this.found = false});
+
+  factory RaidExit.fromJson(Map<String, dynamic> json) => RaidExit(
+    id: json['id'] as int,
+    position: Vec2.fromJson(json['position'] as List<Object?>),
+    found: json['found'] as bool,
+  );
+
+  final int id;
+
+  /// The exit tile's centre.
+  final Vec2 position;
+
+  /// Seen by the player, or shown when every exit is revealed.
+  bool found;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'position': position.toJson(),
+    'found': found,
+  };
+}
+
+/// A signal sent from exit [exit], counting down to leaving.
+final class RaidSignal {
+  RaidSignal({required this.exit, required this.left});
+
+  factory RaidSignal.fromJson(Map<String, dynamic> json) => RaidSignal(
+    exit: json['exit'] as int,
+    left: (json['left'] as num).toDouble(),
+  );
+
+  /// The [RaidExit.id] it was sent from.
+  final int exit;
+
+  /// Seconds until zero.
+  double left;
+
+  Map<String, dynamic> toJson() => {'exit': exit, 'left': left};
+}
+
 // JSON has no infinity: "never hit" is stored as null.
 double _seconds(Object? json) =>
     json == null ? double.infinity : (json as num).toDouble();

@@ -666,6 +666,12 @@ Returned _$ReturnedFromJson(Map<String, dynamic> json) => $checkedCreate(
             (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
             const <int>[],
       ),
+      lost: $checkedConvert(
+        'lost',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
+            const <int>[],
+      ),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -682,5 +688,6 @@ Map<String, dynamic> _$ReturnedToJson(Returned instance) => <String, dynamic>{
   'seeds': instance.seeds,
   'potato_ids': instance.potatoIds,
   'to_fridge': instance.toFridge,
+  'lost': instance.lost,
   'runtimeType': instance.$type,
 };

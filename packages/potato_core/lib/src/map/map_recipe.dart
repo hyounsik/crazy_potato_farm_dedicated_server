@@ -100,6 +100,15 @@ sealed class TerrainPiece with _$TerrainPiece {
     required int gap,
   }) = RingPiece;
 
+  /// High ground of about [area] open tiles grown from [center] (its shape
+  /// from the map seed), reached by [ramps] ramp tiles on its edge, spaced
+  /// apart. Terrain placed earlier stays; tiles stay walkable.
+  const factory TerrainPiece.plateau({
+    required TilePos center,
+    required int area,
+    @Default(2) int ramps,
+  }) = PlateauPiece;
+
   /// A hand-made [MapChunk] named [chunk], its top-left at [origin], turned
   /// [quarterTurns] times clockwise.
   const factory TerrainPiece.chunk({

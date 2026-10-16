@@ -166,6 +166,28 @@ Map<String, dynamic> _$RingPieceToJson(RingPiece instance) => <String, dynamic>{
   'type': instance.$type,
 };
 
+PlateauPiece _$PlateauPieceFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('PlateauPiece', json, ($checkedConvert) {
+      final val = PlateauPiece(
+        center: $checkedConvert(
+          'center',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        area: $checkedConvert('area', (v) => (v as num).toInt()),
+        ramps: $checkedConvert('ramps', (v) => (v as num?)?.toInt() ?? 2),
+        $type: $checkedConvert('type', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'type'});
+
+Map<String, dynamic> _$PlateauPieceToJson(PlateauPiece instance) =>
+    <String, dynamic>{
+      'center': instance.center.toJson(),
+      'area': instance.area,
+      'ramps': instance.ramps,
+      'type': instance.$type,
+    };
+
 ChunkPiece _$ChunkPieceFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ChunkPiece', json, ($checkedConvert) {
       final val = ChunkPiece(

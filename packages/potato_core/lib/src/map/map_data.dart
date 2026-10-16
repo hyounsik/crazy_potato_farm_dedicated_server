@@ -37,6 +37,20 @@ abstract class MapObstacle with _$MapObstacle {
       _$MapObstacleFromJson(json);
 }
 
+/// How high a tile is. Bodies move between [low] and [high] only over
+/// [ramp] tiles; from [low] ground nothing on [high] ground can be seen.
+enum MapHeight {
+  low('0'),
+  high('1'),
+
+  /// A slope joining low and high ground; seen as low.
+  ramp('/');
+
+  const MapHeight(this.symbol);
+
+  final String symbol;
+}
+
 /// A finished exploration map, wherever it came from (generated or drawn).
 ///
 /// Game code only reads this. A run's save keeps the map itself rather than
@@ -50,7 +64,11 @@ final class MapData {
     List<TilePos> exits = const [],
     Map<String, List<TilePos>> markers = const {},
     List<MapObstacle> obstacles = const [],
+    List<MapHeight>? heights,
   }) : _tiles = List.unmodifiable(tiles),
+       _heights = List.unmodifiable(
+         heights ?? List.filled(size * size, MapHeight.low),
+       ),
        exits = List.unmodifiable(exits),
        markers = UnmodifiableMapView({
          for (final MapEntry(:key, :value) in markers.entries)
@@ -59,6 +77,9 @@ final class MapData {
        obstacles = List.unmodifiable(obstacles) {
     if (tiles.length != size * size) {
       throw ArgumentError.value(tiles.length, 'tiles', 'must be size²');
+    }
+    if (_heights.length != size * size) {
+      throw ArgumentError.value(_heights.length, 'heights', 'must be size²');
     }
   }
 
@@ -95,11 +116,24 @@ final class MapData {
         for (final o in json['obstacles'] as List<Object?>)
           MapObstacle.fromJson(o! as Map<String, dynamic>),
       ],
+      heights: switch (json['heights']) {
+        final List<Object?> rows => [
+          for (final row in rows.cast<String>())
+            for (final symbol in row.split(''))
+              MapHeight.values.firstWhere(
+                (h) => h.symbol == symbol,
+                orElse: () =>
+                    throw FormatException('Unknown map height "$symbol"'),
+              ),
+        ],
+        _ => null,
+      },
     );
   }
 
   final int size;
   final List<MapTile> _tiles;
+  final List<MapHeight> _heights;
   final TilePos entry;
   final List<TilePos> exits;
 
@@ -116,15 +150,35 @@ final class MapData {
   bool isBlocked(int x, int y) =>
       !isInside(x, y) || _tiles[y * size + x] != MapTile.open;
 
-  /// Open tiles a walker can reach from [from] stepping along the grid.
+  /// Outside the map counts as low.
+  MapHeight heightAt(int x, int y) =>
+      isInside(x, y) ? _heights[y * size + x] : MapHeight.low;
+
+  /// Whether the map has any high ground.
+  bool get hasHeights => _heights.any((h) => h != MapHeight.low);
+
+  /// Whether a walker may step from tile (fx, fy) to the open tile (tx, ty):
+  /// on the same level, or onto or off a ramp.
+  bool canStep(int fx, int fy, int tx, int ty) {
+    if (isBlocked(tx, ty)) return false;
+    final from = heightAt(fx, fy);
+    final to = heightAt(tx, ty);
+    return from == to || from == MapHeight.ramp || to == MapHeight.ramp;
+  }
+
+  /// Open tiles a walker can reach from [from] stepping along the grid
+  /// (over ramps between levels).
   Set<TilePos> reachableFrom(TilePos from) {
     final reached = <TilePos>{};
     if (isBlocked(from.x, from.y)) return reached;
     final queue = Queue<TilePos>()..add(from);
     reached.add(from);
     while (queue.isNotEmpty) {
-      for (final next in queue.removeFirst().neighbors4) {
-        if (!isBlocked(next.x, next.y) && reached.add(next)) queue.add(next);
+      final at = queue.removeFirst();
+      for (final next in at.neighbors4) {
+        if (canStep(at.x, at.y, next.x, next.y) && reached.add(next)) {
+          queue.add(next);
+        }
       }
     }
     return reached;
@@ -143,5 +197,10 @@ final class MapData {
         key: [for (final t in value) t.toJson()],
     },
     'obstacles': [for (final o in obstacles) o.toJson()],
+    if (hasHeights)
+      'heights': [
+        for (var y = 0; y < size; y++)
+          [for (var x = 0; x < size; x++) heightAt(x, y).symbol].join(),
+      ],
   };
 }

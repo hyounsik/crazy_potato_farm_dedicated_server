@@ -6,15 +6,37 @@ import 'package:potato_core/src/map/map_data.dart';
 /// Movement, collision, sight and paths over a map's blocked tiles. Bodies
 /// are circles in tile coordinates.
 extension MapPhysics on MapData {
-  /// Whether a circle at [center] overlaps any blocked tile.
-  bool overlapsCircle(Vec2 center, double radius) {
+  /// The level a body standing at [at] moves on, or null on a ramp (it may
+  /// step either way).
+  MapHeight? levelAt(Vec2 at) {
+    final height = heightAt(at.x.floor(), at.y.floor());
+    return height == MapHeight.ramp ? null : height;
+  }
+
+  /// Whether one standing at [a] can see one at [b] by height: low ground
+  /// and ramps never see high ground. Obstacles are [hasLineOfSight]'s.
+  bool seesLevel(Vec2 a, Vec2 b) =>
+      heightAt(b.x.floor(), b.y.floor()) != MapHeight.high ||
+      heightAt(a.x.floor(), a.y.floor()) == MapHeight.high;
+
+  /// Whether one at [a] can see and shoot one at [b]: by height, and with
+  /// no obstacle between.
+  bool canSee(Vec2 a, Vec2 b) => seesLevel(a, b) && hasLineOfSight(a, b);
+
+  /// Whether a circle at [center] overlaps any blocked tile, or, for a
+  /// body moving on [level], any tile of the other level (cliffs).
+  bool overlapsCircle(Vec2 center, double radius, {MapHeight? level}) {
     final minX = (center.x - radius).floor();
     final maxX = (center.x + radius).floor();
     final minY = (center.y - radius).floor();
     final maxY = (center.y + radius).floor();
     for (var y = minY; y <= maxY; y++) {
       for (var x = minX; x <= maxX; x++) {
-        if (!isBlocked(x, y)) continue;
+        final cliff =
+            level != null &&
+            heightAt(x, y) != level &&
+            heightAt(x, y) != MapHeight.ramp;
+        if (!isBlocked(x, y) && !cliff) continue;
         final dx = center.x - center.x.clamp(x.toDouble(), x + 1.0);
         final dy = center.y - center.y.clamp(y.toDouble(), y + 1.0);
         if (dx * dx + dy * dy < radius * radius) return true;
@@ -24,13 +46,14 @@ extension MapPhysics on MapData {
   }
 
   /// Moves a circle by [delta] one axis at a time, so it slides along walls
-  /// instead of sticking to them.
+  /// (and cliffs, for the level it stands on) instead of sticking to them.
   Vec2 move(Vec2 from, Vec2 delta, double radius) {
+    final level = levelAt(from);
     var next = from;
     final stepX = Vec2(next.x + delta.x, next.y);
-    if (!overlapsCircle(stepX, radius)) next = stepX;
+    if (!overlapsCircle(stepX, radius, level: level)) next = stepX;
     final stepY = Vec2(next.x, next.y + delta.y);
-    if (!overlapsCircle(stepY, radius)) next = stepY;
+    if (!overlapsCircle(stepY, radius, level: level)) next = stepY;
     return next;
   }
 
@@ -56,6 +79,8 @@ extension MapPhysics on MapData {
     final gx = to.x.floor();
     final gy = to.y.floor();
     if (isBlocked(gx, gy)) return const [];
+    // Straight-line shortcuts must not hop a cliff either.
+    bool clear(Vec2 a, Vec2 b) => hasLineOfSight(a, b) && _sameWalk(a, b);
     if (sx == gx && sy == gy) return [to];
 
     int key(int x, int y) => y * size + x;
@@ -83,9 +108,11 @@ extension MapPhysics on MapData {
           if (dx == 0 && dy == 0) continue;
           final nx = cx + dx;
           final ny = cy + dy;
-          if (isBlocked(nx, ny)) continue;
+          if (!canStep(cx, cy, nx, ny)) continue;
           final diagonal = dx != 0 && dy != 0;
-          if (diagonal && (isBlocked(cx + dx, cy) || isBlocked(cx, cy + dy))) {
+          if (diagonal &&
+              (!canStep(cx, cy, cx + dx, cy) ||
+                  !canStep(cx, cy, cx, cy + dy))) {
             continue;
           }
           final next = key(nx, ny);
@@ -107,11 +134,29 @@ extension MapPhysics on MapData {
     final smooth = <Vec2>[];
     var anchor = from;
     for (var i = 0; i < path.length; i++) {
-      if (i == path.length - 1 || !hasLineOfSight(anchor, path[i + 1])) {
+      if (i == path.length - 1 || !clear(anchor, path[i + 1])) {
         smooth.add(path[i]);
         anchor = path[i];
       }
     }
     return smooth;
+  }
+
+  /// Whether walking straight from [a] to [b] never steps between levels
+  /// except over ramps.
+  bool _sameWalk(Vec2 a, Vec2 b) {
+    final steps = math.max(1, (a.distanceTo(b) / 0.1).ceil());
+    var px = a.x.floor();
+    var py = a.y.floor();
+    for (var i = 1; i <= steps; i++) {
+      final t = i / steps;
+      final x = (a.x + (b.x - a.x) * t).floor();
+      final y = (a.y + (b.y - a.y) * t).floor();
+      if (x == px && y == py) continue;
+      if (!canStep(px, py, x, y)) return false;
+      px = x;
+      py = y;
+    }
+    return true;
   }
 }

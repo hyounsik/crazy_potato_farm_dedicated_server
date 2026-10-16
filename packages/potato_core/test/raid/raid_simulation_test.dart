@@ -86,6 +86,25 @@ void main() {
       'scatter': {'count': 0},
     };
     zones.add(bossZone);
+    // An open map with one plateau to the east, reached by one ramp.
+    final hillZone = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
+    hillZone['id'] = 'hill_open';
+    hillZone['map'] = {
+      'size': 20,
+      'entry': {'x': 3, 'y': 10},
+      'clear_radius': 1,
+      'rotate': false,
+      'terrain': [
+        {
+          'type': 'plateau',
+          'center': {'x': 14, 'y': 10},
+          'area': 60,
+          'ramps': 1,
+        },
+      ],
+      'scatter': {'count': 0},
+    };
+    zones.add(hillZone);
     // Run-only abilities for the companion tests.
     final abilities =
         (files['potato_abilities']! as Map<String, dynamic>)['abilities']
@@ -1107,6 +1126,79 @@ void main() {
       runFor(run, 1);
       expect(boss.target, clone.id);
       expect(boss.hp, lessThan(boss.maxHp));
+    });
+  });
+
+  group('high ground', () {
+    late RaidSimulation run;
+
+    /// A low tile and a high tile two apart, side by side.
+    late Vec2 low;
+    late Vec2 high;
+
+    setUp(() {
+      run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'hill_open',
+        seed: 1,
+        food: 100,
+      );
+      final map = run.map;
+      for (var y = 1; y < 19; y++) {
+        for (var x = 1; x < 17; x++) {
+          if (map.heightAt(x, y) == MapHeight.low &&
+              map.heightAt(x + 1, y) == MapHeight.low &&
+              map.heightAt(x + 2, y) == MapHeight.high &&
+              map.heightAt(x + 3, y) == MapHeight.high) {
+            low = Vec2(x + 0.5, y + 0.5);
+            high = Vec2(x + 3.5, y + 0.5);
+            return;
+          }
+        }
+      }
+      fail('no cliff found');
+    });
+
+    test('enemies below do not notice the player above', () {
+      run.player.position = high;
+      final rat = addEnemy(run, 'biter', low);
+      run.step();
+      expect(rat.target, isNull);
+      // Down on the same level, it does.
+      run.player.position = low + const Vec2(0, 1);
+      run.step();
+      expect(rat.target, run.player.id);
+    });
+
+    test('auto-aim from below finds nothing above; from above it does', () {
+      // A gun that reaches across the two tiles between.
+      run.player
+        ..weapon = 'charge'
+        ..position = low + const Vec2(1, 0);
+      final enemy = addEnemy(run, 'brute', high);
+      expect(run.autoAimTarget(), isNull);
+      run.player.position = high;
+      enemy.position = low + const Vec2(1, 0);
+      expect(run.autoAimTarget(), enemy);
+    });
+
+    test('shots from below stop at the cliff', () {
+      final enemy = addEnemy(run, 'brute', high);
+      run.bullets.add(
+        RaidBullet(
+          id: 9999,
+          position: low,
+          velocity: const Vec2(8, 0),
+          damage: 50,
+          owner: run.player.id,
+          side: RaidSide.player,
+          team: playerTeam,
+          remaining: 5,
+        ),
+      );
+      runFor(run, 1);
+      expect(enemy.hp, enemy.maxHp);
+      expect(run.bullets.where((b) => b.id == 9999), isEmpty);
     });
   });
 }

@@ -331,7 +331,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 7;
+  static const int formatVersion = 8;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -774,7 +774,8 @@ final class RaidSimulation {
   void _markSeen() {
     for (final pile in piles) {
       if (!pile.seen &&
-          pile.position.distanceTo(player.position) <= rules.player.sight) {
+          pile.position.distanceTo(player.position) <= rules.player.sight &&
+          map.seesLevel(player.position, pile.position)) {
         pile.seen = true;
       }
     }
@@ -789,7 +790,8 @@ final class RaidSimulation {
     final danger = zone.danger!;
     for (final exit in exits) {
       if (exit.found) continue;
-      if (exit.position.distanceTo(player.position) <= rules.player.sight) {
+      if (exit.position.distanceTo(player.position) <= rules.player.sight &&
+          map.seesLevel(player.position, exit.position)) {
         exit.found = true;
         _events.add(ExitFound(exit.id));
       }
@@ -957,7 +959,7 @@ final class RaidSimulation {
     for (final body in _opponentsOf(from.team)) {
       final d = body.position.distanceTo(from.position);
       if (d > bestDistance) continue;
-      if (!map.hasLineOfSight(from.position, body.position)) continue;
+      if (!map.canSee(from.position, body.position)) continue;
       best = body;
       bestDistance = d;
     }
@@ -1077,6 +1079,7 @@ final class RaidSimulation {
     for (final other in _opponentsOf(companion.team)) {
       final d = other.position.distanceTo(owner.position);
       if (d > bestDistance) continue;
+      if (!map.seesLevel(companion.position, other.position)) continue;
       if (companion.mode == CompanionMode.defense &&
           !_goesFor(other, companion.team)) {
         continue;
@@ -1127,7 +1130,7 @@ final class RaidSimulation {
           _strike(companion, target);
         }
       case CombatStyle.ranged:
-        final seen = map.hasLineOfSight(companion.position, target.position);
+        final seen = map.canSee(companion.position, target.position);
         if (d > style.range || !seen) {
           _walk(companion, target.position, speed, dt);
         } else {
@@ -1255,10 +1258,11 @@ final class RaidSimulation {
       final lost =
           target == null ||
           target.isDown ||
-          (target.position.distanceTo(enemy.position) >
-                  (spec.temper == EnemyTemper.aggressive
-                      ? aggressiveSight
-                      : enemySight) &&
+          ((target.position.distanceTo(enemy.position) >
+                      (spec.temper == EnemyTemper.aggressive
+                          ? aggressiveSight
+                          : enemySight) ||
+                  !map.seesLevel(enemy.position, target.position)) &&
               enemy.sinceHit > rules.enemyAlertSeconds);
       if (lost) {
         enemy.target = null;
@@ -1385,6 +1389,7 @@ final class RaidSimulation {
     for (final body in _wildTargets) {
       final d = body.position.distanceTo(enemy.position);
       if (d > _noticeRange(body, sight) || d > bestDistance) continue;
+      if (!map.seesLevel(enemy.position, body.position)) continue;
       best = body;
       bestDistance = d;
     }
@@ -1412,8 +1417,7 @@ final class RaidSimulation {
           _moveToward(enemy, target.position, enemySpeed, dt);
         }
       case EnemyAttack.ranged:
-        if (d <= spec.range &&
-            map.hasLineOfSight(enemy.position, target.position)) {
+        if (d <= spec.range && map.canSee(enemy.position, target.position)) {
           if (enemy.attackCooldown <= 0) {
             final direction = (target.position - enemy.position).normalized();
             bullets.add(
@@ -1522,6 +1526,7 @@ final class RaidSimulation {
   void _updateBullets(double dt) {
     bullets.removeWhere((bullet) {
       final move = bullet.velocity * dt;
+      final from = bullet.position;
       bullet
         ..position = bullet.position + move
         ..remaining -= move.length;
@@ -1529,6 +1534,8 @@ final class RaidSimulation {
           map.isBlocked(bullet.position.x.floor(), bullet.position.y.floor())) {
         return true;
       }
+      // Shots from below stop at the cliff.
+      if (!map.seesLevel(from, bullet.position)) return true;
       for (final target in _opponentsOf(bullet.team)) {
         if (target.position.distanceTo(bullet.position) <=
             target.radius + 0.05) {
@@ -1776,7 +1783,7 @@ final class RaidSimulation {
     if (target != null) {
       final d = clone.position.distanceTo(target.position);
       final keep = gun.preferredDistance;
-      final seen = map.hasLineOfSight(clone.position, target.position);
+      final seen = map.canSee(clone.position, target.position);
       if (d > keep + 0.25 || !seen) {
         _walkPath(clone, target.position, speed, dt, every: 0.6);
       } else if (d < keep - 0.25) {
@@ -1811,7 +1818,8 @@ final class RaidSimulation {
       final lost =
           current == null ||
           current.isDown ||
-          (current.position.distanceTo(clone.position) > sight &&
+          ((current.position.distanceTo(clone.position) > sight ||
+                  !map.seesLevel(clone.position, current.position)) &&
               clone.sinceHit > rules.enemyAlertSeconds);
       if (!lost) return current;
       clone.target = null;
@@ -1821,6 +1829,7 @@ final class RaidSimulation {
     for (final other in _opponentsOf(clone.team)) {
       final d = other.position.distanceTo(clone.position);
       if (d > bestDistance) continue;
+      if (!map.seesLevel(clone.position, other.position)) continue;
       best = other;
       bestDistance = d;
     }

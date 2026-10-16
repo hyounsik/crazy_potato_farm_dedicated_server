@@ -52,13 +52,18 @@ bool _allReachable(MapData map) {
 final class _Builder {
   _Builder(this.recipe, this.chunks, this.random)
     : size = recipe.size,
-      tiles = List.filled(recipe.size * recipe.size, MapTile.open);
+      tiles = List.filled(recipe.size * recipe.size, MapTile.open),
+      heights = List.filled(recipe.size * recipe.size, MapHeight.low);
 
   final MapRecipe recipe;
   final Map<String, MapChunk> chunks;
   final GameRandom random;
   final int size;
   final List<MapTile> tiles;
+  final List<MapHeight> heights;
+
+  /// Ramp tiles, kept clear of scattered obstacles.
+  final List<TilePos> ramps = [];
   final Map<String, List<TilePos>> markers = {};
   final List<MapObstacle> obstacles = [];
 
@@ -74,6 +79,8 @@ final class _Builder {
           _ring(piece);
         case ChunkPiece():
           _chunk(piece);
+        case PlateauPiece():
+          _plateau(piece);
       }
     }
     _pickExitSites();
@@ -138,6 +145,48 @@ final class _Builder {
     for (final tile in grown) {
       _set(tile.x, tile.y, MapTile.terrain);
     }
+  }
+
+  /// Grows high ground over open tiles like a blob, then turns up to
+  /// `ramps` edge tiles next to open low ground into ramps, spaced apart.
+  void _plateau(PlateauPiece piece) {
+    if (!_inside(piece.center.x, piece.center.y)) return;
+    if (_at(piece.center.x, piece.center.y) != MapTile.open) return;
+    final grown = <TilePos>[piece.center];
+    final inside = {piece.center};
+    final limit = piece.area * 20;
+    for (var i = 0; i < limit && grown.length < piece.area; i++) {
+      final from = grown[random.nextInt(grown.length)];
+      final next = from.neighbors4[random.nextInt(4)];
+      if (!_inside(next.x, next.y) || _at(next.x, next.y) != MapTile.open) {
+        continue;
+      }
+      if (inside.add(next)) grown.add(next);
+    }
+    for (final tile in grown) {
+      heights[tile.y * size + tile.x] = MapHeight.high;
+    }
+    final edges = [
+      for (final tile in grown)
+        if (tile.neighbors4.any(
+          (n) =>
+              _inside(n.x, n.y) &&
+              _at(n.x, n.y) == MapTile.open &&
+              heights[n.y * size + n.x] == MapHeight.low,
+        ))
+          tile,
+    ];
+    final picked = <TilePos>[];
+    for (var tries = 0; picked.length < piece.ramps && tries < 200; tries++) {
+      if (edges.isEmpty) break;
+      final at = edges[random.nextInt(edges.length)];
+      if (picked.any((p) => (p.x - at.x).abs() + (p.y - at.y).abs() < 6)) {
+        continue;
+      }
+      picked.add(at);
+      heights[at.y * size + at.x] = MapHeight.ramp;
+    }
+    ramps.addAll(picked);
   }
 
   void _wall(WallPiece piece) {
@@ -240,6 +289,7 @@ final class _Builder {
     final keepClear = [
       recipe.entry,
       ...exits,
+      ...ramps,
       for (final points in markers.values) ...points,
     ];
     final clear = recipe.clearRadius;
@@ -286,15 +336,18 @@ final class _Builder {
   MapData _turned(int turns) {
     TilePos turn(TilePos tile) => turnInBox(tile, size, size, turns);
     final turned = List.filled(size * size, MapTile.open);
+    final turnedHeights = List.filled(size * size, MapHeight.low);
     for (var y = 0; y < size; y++) {
       for (var x = 0; x < size; x++) {
         final at = turn(TilePos(x, y));
         turned[at.y * size + at.x] = _at(x, y);
+        turnedHeights[at.y * size + at.x] = heights[y * size + x];
       }
     }
     return MapData(
       size: size,
       tiles: turned,
+      heights: turnedHeights,
       entry: turn(recipe.entry),
       exits: [for (final e in exits) turn(e)],
       markers: {

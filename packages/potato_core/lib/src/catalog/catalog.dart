@@ -815,6 +815,9 @@ final class Catalog {
           check.positive('$at.radius', radius);
           check.positive('$at.thickness', thickness);
           check.positive('$at.gap', gap);
+        case PlateauPiece(:final area, :final ramps):
+          check.positive('$at.area', area);
+          check.positive('$at.ramps', ramps);
         case ChunkPiece():
           break;
       }

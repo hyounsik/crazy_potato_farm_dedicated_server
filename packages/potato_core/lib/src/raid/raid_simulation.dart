@@ -6,6 +6,7 @@ import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
+import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
@@ -284,7 +285,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 5;
+  static const int formatVersion = 6;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -414,6 +415,22 @@ final class RaidSimulation {
   double get _cloneSpeed => rules.player.speed * rules.clones.speedMultiplier;
 
   bool get isDanger => zone.danger != null;
+
+  /// The boss area: the map's clearing tiles. Empty without one.
+  late final Set<TilePos> bossArea = {...?map.markers[bossAreaMarker]};
+
+  bool inBossArea(Vec2 at) =>
+      bossArea.contains(TilePos(at.x.floor(), at.y.floor()));
+
+  /// The standing boss, if the zone has one.
+  RaidEnemy? get boss {
+    final kind = zone.boss?.enemy;
+    if (kind == null) return null;
+    for (final enemy in enemies) {
+      if (enemy.kind == kind && !enemy.isDown) return enemy;
+    }
+    return null;
+  }
 
   /// Whether every open exit has been revealed by time.
   bool get exitsRevealed => _revealed;
@@ -877,6 +894,12 @@ final class RaidSimulation {
           !_goesFor(other, companion.team)) {
         continue;
       }
+      // Attack mode stays out of the boss area unless its owner is in it.
+      if (other is RaidEnemy &&
+          inBossArea(other.position) &&
+          !inBossArea(owner.position)) {
+        continue;
+      }
       best = other;
       bestDistance = d;
     }
@@ -1033,6 +1056,7 @@ final class RaidSimulation {
 
   void _updateEnemy(RaidEnemy enemy, double dt) {
     final spec = catalog.enemies[enemy.kind]!;
+    if (spec.boss case final boss?) return _updateBoss(enemy, spec, boss, dt);
     enemy
       ..attackCooldown -= dt
       ..sinceHit += dt;
@@ -1057,6 +1081,115 @@ final class RaidSimulation {
       }
     }
     _wander(enemy, dt);
+  }
+
+  /// A boss keeps to its area and takes on only bodies inside it. It
+  /// charges and sprays on its own timers and bites what it reaches in
+  /// between; with no one inside it goes back to its spot.
+  void _updateBoss(RaidEnemy enemy, EnemyData spec, BossData boss, double dt) {
+    enemy
+      ..attackCooldown -= dt
+      ..sinceHit += dt
+      ..chargeCooldown -= dt
+      ..sprayCooldown -= dt;
+    final damage = zone.enemies.damageMultiplier;
+
+    if (enemy.isCharging) {
+      final want = math.min(boss.chargeSpeed * dt, enemy.chargeLeft);
+      final next = map.move(
+        enemy.position,
+        enemy.chargeDirection * want,
+        enemy.radius,
+      );
+      final moved = next.distanceTo(enemy.position);
+      if (!inBossArea(next) || moved < want * 0.5) {
+        enemy.chargeLeft = 0;
+      } else {
+        enemy
+          ..position = next
+          ..chargeLeft -= want;
+      }
+      for (final body in _wildTargets) {
+        if (enemy.chargeHits.contains(body.id)) continue;
+        if (body.position.distanceTo(enemy.position) >
+            body.radius + enemy.radius) {
+          continue;
+        }
+        enemy.chargeHits.add(body.id);
+        _hurt(body, boss.chargeDamage * damage, enemy);
+      }
+      return;
+    }
+    if (enemy.isTelegraphing) {
+      enemy.telegraphLeft -= dt;
+      if (!enemy.isTelegraphing) {
+        enemy
+          ..chargeLeft = boss.chargeDistance
+          ..chargeHits.clear();
+      }
+      return;
+    }
+
+    var target = enemy.target == null ? null : _body(enemy.target!);
+    if (target == null || target.isDown || !inBossArea(target.position)) {
+      target = null;
+      var best = double.infinity;
+      for (final body in _wildTargets) {
+        if (!inBossArea(body.position)) continue;
+        final d = body.position.distanceTo(enemy.position);
+        if (d < best) {
+          target = body;
+          best = d;
+        }
+      }
+      enemy.target = target?.id;
+    }
+    if (target == null) {
+      _moveToward(enemy, enemy.home, enemySpeed, dt);
+      return;
+    }
+    if (enemy.chargeCooldown <= 0) {
+      final toward = target.position - enemy.position;
+      enemy
+        ..chargeDirection = toward.isZero
+            ? const Vec2(1, 0)
+            : toward.normalized()
+        ..telegraphLeft = boss.chargeTelegraphSeconds
+        ..chargeCooldown = boss.chargeEverySeconds;
+      return;
+    }
+    if (enemy.sprayCooldown <= 0 && boss.sprayBullets > 0) {
+      for (var i = 0; i < boss.sprayBullets; i++) {
+        final direction = const Vec2(
+          1,
+          0,
+        ).rotated(2 * math.pi * i / boss.sprayBullets);
+        bullets.add(
+          RaidBullet(
+            id: _newId(),
+            position: enemy.position + direction * enemy.radius,
+            velocity: direction * boss.spraySpeed,
+            damage: boss.sprayDamage * damage,
+            owner: enemy.id,
+            side: RaidSide.wild,
+            team: wildTeam,
+            remaining: boss.sprayRange,
+          ),
+        );
+      }
+      enemy.sprayCooldown = boss.sprayEverySeconds;
+    }
+    final d = target.position.distanceTo(enemy.position);
+    if (d <= enemy.radius + target.radius + spec.reach) {
+      if (enemy.attackCooldown <= 0) {
+        _hurt(target, spec.damage * damage, enemy);
+        enemy.attackCooldown = spec.attackInterval;
+      }
+      return;
+    }
+    final before = enemy.position;
+    _moveToward(enemy, target.position, enemySpeed, dt);
+    if (!inBossArea(enemy.position)) enemy.position = before;
   }
 
   RaidBody? _nearestInSight(RaidEnemy enemy, double sight) {
@@ -1241,6 +1374,23 @@ final class RaidSimulation {
     enemies.removeWhere((enemy) {
       if (!enemy.isDown) return false;
       _events.add(EnemyDefeated(enemy.id, enemy.kind));
+      if (zone.boss case final boss? when boss.enemy == enemy.kind) {
+        piles.add(
+          RaidPile(
+            id: _newId(),
+            position: enemy.position,
+            kind: PileKind.bossBundle,
+            loot: LootPile.roll(
+              catalog.lootTables[boss.loot]!,
+              catalog.stackOf,
+              _random,
+              makeSeed: _seedMaker(catalog, zone, _random),
+              weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
+            ),
+          ),
+        );
+        return true;
+      }
       final roll = _random.nextDouble();
       if (roll < drops.bundleChance) {
         piles.add(
@@ -1641,7 +1791,9 @@ final class RaidSimulation {
   ) {
     final spec = zone.enemies;
     final placed = <RaidEnemy>[];
+    final area = {...?map.markers[bossAreaMarker]};
     bool free(Vec2 at, double spacing) =>
+        !area.contains(TilePos(at.x.floor(), at.y.floor())) &&
         at.distanceTo(entry) >= spec.keepAway &&
         !map.overlapsCircle(at, 0.35) &&
         !placed.any((e) => e.position.distanceTo(at) < spacing);
@@ -1690,6 +1842,33 @@ final class RaidSimulation {
       });
       add(kind.enemy, at);
       loners++;
+    }
+    // The boss stands at the tile of its area nearest the area's middle.
+    final boss = zone.boss;
+    if (boss != null && area.isNotEmpty) {
+      final mx = area.fold(0, (sum, t) => sum + t.x) / area.length;
+      final my = area.fold(0, (sum, t) => sum + t.y) / area.length;
+      final middle = area.reduce(
+        (a, b) =>
+            (a.x - mx) * (a.x - mx) + (a.y - my) * (a.y - my) <=
+                (b.x - mx) * (b.x - mx) + (b.y - my) * (b.y - my)
+            ? a
+            : b,
+      );
+      final data = catalog.enemies[boss.enemy]!;
+      final at = Vec2(middle.x + 0.5, middle.y + 0.5);
+      placed.add(
+        RaidEnemy(
+          id: newId(),
+          position: at,
+          radius: data.radius,
+          maxHp: data.maxHp * spec.hpMultiplier,
+          kind: boss.enemy,
+          home: at,
+          chargeCooldown: data.boss!.chargeEverySeconds / 2,
+          sprayCooldown: data.boss!.sprayEverySeconds / 2,
+        ),
+      );
     }
     return placed;
   }

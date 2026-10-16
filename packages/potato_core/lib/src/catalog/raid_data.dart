@@ -274,10 +274,52 @@ abstract class EnemyData with _$EnemyData {
     /// Ranged: shooting distance.
     @Default(0.0) double range,
     @Default(0.0) double bulletSpeed,
+
+    /// Set for a boss: it guards the boss area and has extra attacks.
+    BossData? boss,
   }) = _EnemyData;
 
   factory EnemyData.fromJson(Map<String, dynamic> json) =>
       _$EnemyDataFromJson(json);
+}
+
+/// A boss's extra attacks. A charge is shown on the floor for
+/// [chargeTelegraphSeconds], then runs straight at [chargeSpeed] for up to
+/// [chargeDistance], hurting each body it runs into once; obstacles and the
+/// edge of the boss area stop it, and a dash dodges it. A spray fires
+/// [sprayBullets] shots evenly all around.
+@freezed
+abstract class BossData with _$BossData {
+  const factory BossData({
+    required double chargeEverySeconds,
+    required double chargeTelegraphSeconds,
+    required double chargeSpeed,
+    required double chargeDistance,
+    required double chargeDamage,
+    required double sprayEverySeconds,
+    required int sprayBullets,
+    required double sprayDamage,
+    required double spraySpeed,
+    required double sprayRange,
+  }) = _BossData;
+
+  factory BossData.fromJson(Map<String, dynamic> json) =>
+      _$BossDataFromJson(json);
+}
+
+/// The boss guarding a zone's boss area (the map's clearing).
+@freezed
+abstract class ZoneBossData with _$ZoneBossData {
+  const factory ZoneBossData({
+    /// An enemy with [EnemyData.boss] set.
+    required String enemy,
+
+    /// Loot table of the bundle it leaves.
+    required String loot,
+  }) = _ZoneBossData;
+
+  factory ZoneBossData.fromJson(Map<String, dynamic> json) =>
+      _$ZoneBossDataFromJson(json);
 }
 
 /// One zone to explore (`zones.json`): its map and what fills it.
@@ -296,6 +338,9 @@ abstract class ZoneData with _$ZoneData {
     /// Set for a danger zone: leaving takes an open exit and a signal, and
     /// failing loses what was brought. Null for a safe zone.
     ZoneDangerData? danger,
+
+    /// Who guards the map's clearing, if anyone.
+    ZoneBossData? boss,
   }) = _ZoneData;
 
   factory ZoneData.fromJson(Map<String, dynamic> json) =>

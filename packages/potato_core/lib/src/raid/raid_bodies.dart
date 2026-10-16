@@ -166,7 +166,14 @@ final class RaidEnemy extends RaidBody {
     this.sinceHit = double.infinity,
     Vec2? wanderGoal,
     this.wanderTimer = 0,
-  }) : wanderGoal = wanderGoal ?? home;
+    this.chargeCooldown = 0,
+    this.sprayCooldown = 0,
+    this.telegraphLeft = 0,
+    this.chargeLeft = 0,
+    this.chargeDirection = Vec2.zero,
+    Set<int>? chargeHits,
+  }) : wanderGoal = wanderGoal ?? home,
+       chargeHits = chargeHits ?? {};
 
   factory RaidEnemy.fromJson(Map<String, dynamic> json) => RaidEnemy(
     id: json['id'] as int,
@@ -181,6 +188,12 @@ final class RaidEnemy extends RaidBody {
     sinceHit: _seconds(json['since_hit']),
     wanderGoal: Vec2.fromJson(json['wander_goal'] as List<Object?>),
     wanderTimer: (json['wander_timer'] as num).toDouble(),
+    chargeCooldown: (json['charge_cooldown'] as num).toDouble(),
+    sprayCooldown: (json['spray_cooldown'] as num).toDouble(),
+    telegraphLeft: (json['telegraph_left'] as num).toDouble(),
+    chargeLeft: (json['charge_left'] as num).toDouble(),
+    chargeDirection: Vec2.fromJson(json['charge_direction'] as List<Object?>),
+    chargeHits: {...(json['charge_hits'] as List<Object?>).cast<int>()},
   );
 
   /// The enemy's catalog id.
@@ -195,6 +208,21 @@ final class RaidEnemy extends RaidBody {
   double sinceHit;
   Vec2 wanderGoal;
   double wanderTimer;
+
+  /// Bosses: time to the next charge and spray.
+  double chargeCooldown;
+  double sprayCooldown;
+
+  /// A charge shown on the floor, about to run this way.
+  double telegraphLeft;
+
+  /// A charge running: distance left, and who it already hit.
+  double chargeLeft;
+  Vec2 chargeDirection;
+  final Set<int> chargeHits;
+
+  bool get isTelegraphing => telegraphLeft > 0;
+  bool get isCharging => chargeLeft > 0;
 
   @override
   RaidSide get side => RaidSide.wild;
@@ -215,6 +243,12 @@ final class RaidEnemy extends RaidBody {
     'since_hit': _secondsJson(sinceHit),
     'wander_goal': wanderGoal.toJson(),
     'wander_timer': wanderTimer,
+    'charge_cooldown': chargeCooldown,
+    'spray_cooldown': sprayCooldown,
+    'telegraph_left': telegraphLeft,
+    'charge_left': chargeLeft,
+    'charge_direction': chargeDirection.toJson(),
+    'charge_hits': [...chargeHits],
   };
 }
 
@@ -569,6 +603,9 @@ enum PileKind {
 
   /// What a fallen clone gathered.
   cloneBundle,
+
+  /// Left by a defeated boss.
+  bossBundle,
 }
 
 /// Loot opened by standing next to it.

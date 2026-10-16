@@ -49,6 +49,9 @@ abstract class MapRecipe with _$MapRecipe {
       _$MapRecipeFromJson(json);
 }
 
+/// The map marker holding a ring's clearing: the boss area.
+const String bossAreaMarker = 'clearing';
+
 /// The map marker holding the clone entry sites.
 const String cloneEntryMarker = 'clone_entry';
 

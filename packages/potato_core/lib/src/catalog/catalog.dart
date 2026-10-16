@@ -747,6 +747,23 @@ final class Catalog {
       check.positiveNumber('$path.range', enemy.range);
       check.positiveNumber('$path.bullet_speed', enemy.bulletSpeed);
     }
+    if (enemy.boss case final boss?) {
+      final at = '$path.boss';
+      check.positiveNumber('$at.charge_every_seconds', boss.chargeEverySeconds);
+      check.atLeastNumber(
+        '$at.charge_telegraph_seconds',
+        boss.chargeTelegraphSeconds,
+        0,
+      );
+      check.positiveNumber('$at.charge_speed', boss.chargeSpeed);
+      check.positiveNumber('$at.charge_distance', boss.chargeDistance);
+      check.atLeastNumber('$at.charge_damage', boss.chargeDamage, 0);
+      check.positiveNumber('$at.spray_every_seconds', boss.sprayEverySeconds);
+      check.atLeast('$at.spray_bullets', boss.sprayBullets, 0);
+      check.atLeastNumber('$at.spray_damage', boss.sprayDamage, 0);
+      check.positiveNumber('$at.spray_speed', boss.spraySpeed);
+      check.positiveNumber('$at.spray_range', boss.sprayRange);
+    }
   }
 
   static void _checkZone(_FileCheck check, String path, ZoneData zone) {
@@ -951,6 +968,25 @@ final class Catalog {
         if (!lootTables.containsKey(table)) {
           missing('zones', '$at.$path', 'loot table', table);
         }
+      }
+    }
+    for (final zone in zones.values) {
+      final boss = zone.boss;
+      if (boss == null) continue;
+      final enemy = enemies[boss.enemy];
+      if (enemy == null) {
+        missing('zones', '${zone.id}.boss.enemy', 'enemy', boss.enemy);
+      } else if (enemy.boss == null) {
+        issues.add(
+          CatalogIssue(
+            'zones',
+            '${zone.id}.boss.enemy',
+            '"${boss.enemy}" is not a boss',
+          ),
+        );
+      }
+      if (!lootTables.containsKey(boss.loot)) {
+        missing('zones', '${zone.id}.boss.loot', 'loot table', boss.loot);
       }
     }
     for (final clone in defaultClones.values) {

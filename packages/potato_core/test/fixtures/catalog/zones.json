@@ -79,6 +79,10 @@
         "bundle": "bundle",
         "item_chance": 0.35,
         "item": "drop"
+      },
+      "boss": {
+        "enemy": "sample_boss",
+        "loot": "boss_drop"
       }
     },
     {
@@ -174,6 +178,10 @@
         "clones_at_start": 2,
         "clone_every_seconds": 30,
         "clones_max": 4
+      },
+      "boss": {
+        "enemy": "sample_boss",
+        "loot": "boss_drop"
       }
     }
   ]

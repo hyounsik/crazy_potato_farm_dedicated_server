@@ -76,6 +76,25 @@
           "max": 10
         }
       ]
+    },
+    {
+      "id": "boss_drop",
+      "rolls_min": 2,
+      "rolls_max": 3,
+      "entries": [
+        {
+          "item": "food",
+          "weight": 2,
+          "min": 20,
+          "max": 40
+        },
+        {
+          "item": "material",
+          "weight": 1,
+          "min": 3,
+          "max": 6
+        }
+      ]
     }
   ]
 }

@@ -43,6 +43,10 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 - `potato_core`는 웹에서도 같은 결과를 내야 한다. 정수 연산은 32비트 안에서 하고(웹 정수는 53비트까지만 정확), 무작위는 `dart:math` `Random` 대신 `GameRandom`을 쓴다. 확인: `dart test -p node test/common`.
 - 서버 실행: `dart run bin/server.dart` (포트는 `PORT` 환경 변수, 기본 8080). 상태 확인: `GET /health`.
 
+## 규칙 문서는 두 벌
+
+- `CLAUDE.md`와 `GEMINI.md`는 같은 규칙을 담는다. 한쪽을 고치면 다른 쪽도 같은 커밋에서 함께 고친다.
+
 ## Git
 
 - 커밋·push는 사용자가 요청할 때만 한다.

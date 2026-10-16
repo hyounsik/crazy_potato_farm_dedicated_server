@@ -551,6 +551,10 @@ _EnemyData _$EnemyDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'bullet_speed',
         (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
+      boss: $checkedConvert(
+        'boss',
+        (v) => v == null ? null : BossData.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
@@ -573,6 +577,7 @@ Map<String, dynamic> _$EnemyDataToJson(_EnemyData instance) =>
       'reach': instance.reach,
       'range': instance.range,
       'bullet_speed': instance.bulletSpeed,
+      'boss': instance.boss?.toJson(),
     };
 
 const _$EnemyTemperEnumMap = {
@@ -585,36 +590,119 @@ const _$EnemyAttackEnumMap = {
   EnemyAttack.ranged: 'ranged',
 };
 
-_ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_ZoneData', json, ($checkedConvert) {
-      final val = _ZoneData(
-        id: $checkedConvert('id', (v) => v as String),
-        score: $checkedConvert('score', (v) => (v as num).toInt()),
-        map: $checkedConvert(
-          'map',
-          (v) => MapRecipe.fromJson(v as Map<String, dynamic>),
-        ),
-        enemies: $checkedConvert(
-          'enemies',
-          (v) => ZoneEnemiesData.fromJson(v as Map<String, dynamic>),
-        ),
-        gathering: $checkedConvert(
-          'gathering',
-          (v) => ZoneGatheringData.fromJson(v as Map<String, dynamic>),
-        ),
-        drops: $checkedConvert(
-          'drops',
-          (v) => ZoneDropsData.fromJson(v as Map<String, dynamic>),
-        ),
-        danger: $checkedConvert(
-          'danger',
-          (v) => v == null
-              ? null
-              : ZoneDangerData.fromJson(v as Map<String, dynamic>),
-        ),
+_BossData _$BossDataFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_BossData',
+  json,
+  ($checkedConvert) {
+    final val = _BossData(
+      chargeEverySeconds: $checkedConvert(
+        'charge_every_seconds',
+        (v) => (v as num).toDouble(),
+      ),
+      chargeTelegraphSeconds: $checkedConvert(
+        'charge_telegraph_seconds',
+        (v) => (v as num).toDouble(),
+      ),
+      chargeSpeed: $checkedConvert(
+        'charge_speed',
+        (v) => (v as num).toDouble(),
+      ),
+      chargeDistance: $checkedConvert(
+        'charge_distance',
+        (v) => (v as num).toDouble(),
+      ),
+      chargeDamage: $checkedConvert(
+        'charge_damage',
+        (v) => (v as num).toDouble(),
+      ),
+      sprayEverySeconds: $checkedConvert(
+        'spray_every_seconds',
+        (v) => (v as num).toDouble(),
+      ),
+      sprayBullets: $checkedConvert('spray_bullets', (v) => (v as num).toInt()),
+      sprayDamage: $checkedConvert(
+        'spray_damage',
+        (v) => (v as num).toDouble(),
+      ),
+      spraySpeed: $checkedConvert('spray_speed', (v) => (v as num).toDouble()),
+      sprayRange: $checkedConvert('spray_range', (v) => (v as num).toDouble()),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'chargeEverySeconds': 'charge_every_seconds',
+    'chargeTelegraphSeconds': 'charge_telegraph_seconds',
+    'chargeSpeed': 'charge_speed',
+    'chargeDistance': 'charge_distance',
+    'chargeDamage': 'charge_damage',
+    'sprayEverySeconds': 'spray_every_seconds',
+    'sprayBullets': 'spray_bullets',
+    'sprayDamage': 'spray_damage',
+    'spraySpeed': 'spray_speed',
+    'sprayRange': 'spray_range',
+  },
+);
+
+Map<String, dynamic> _$BossDataToJson(_BossData instance) => <String, dynamic>{
+  'charge_every_seconds': instance.chargeEverySeconds,
+  'charge_telegraph_seconds': instance.chargeTelegraphSeconds,
+  'charge_speed': instance.chargeSpeed,
+  'charge_distance': instance.chargeDistance,
+  'charge_damage': instance.chargeDamage,
+  'spray_every_seconds': instance.sprayEverySeconds,
+  'spray_bullets': instance.sprayBullets,
+  'spray_damage': instance.sprayDamage,
+  'spray_speed': instance.spraySpeed,
+  'spray_range': instance.sprayRange,
+};
+
+_ZoneBossData _$ZoneBossDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_ZoneBossData', json, ($checkedConvert) {
+      final val = _ZoneBossData(
+        enemy: $checkedConvert('enemy', (v) => v as String),
+        loot: $checkedConvert('loot', (v) => v as String),
       );
       return val;
     });
+
+Map<String, dynamic> _$ZoneBossDataToJson(_ZoneBossData instance) =>
+    <String, dynamic>{'enemy': instance.enemy, 'loot': instance.loot};
+
+_ZoneData _$ZoneDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('_ZoneData', json, ($checkedConvert) {
+  final val = _ZoneData(
+    id: $checkedConvert('id', (v) => v as String),
+    score: $checkedConvert('score', (v) => (v as num).toInt()),
+    map: $checkedConvert(
+      'map',
+      (v) => MapRecipe.fromJson(v as Map<String, dynamic>),
+    ),
+    enemies: $checkedConvert(
+      'enemies',
+      (v) => ZoneEnemiesData.fromJson(v as Map<String, dynamic>),
+    ),
+    gathering: $checkedConvert(
+      'gathering',
+      (v) => ZoneGatheringData.fromJson(v as Map<String, dynamic>),
+    ),
+    drops: $checkedConvert(
+      'drops',
+      (v) => ZoneDropsData.fromJson(v as Map<String, dynamic>),
+    ),
+    danger: $checkedConvert(
+      'danger',
+      (v) =>
+          v == null ? null : ZoneDangerData.fromJson(v as Map<String, dynamic>),
+    ),
+    boss: $checkedConvert(
+      'boss',
+      (v) =>
+          v == null ? null : ZoneBossData.fromJson(v as Map<String, dynamic>),
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'id': instance.id,
@@ -624,6 +712,7 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'gathering': instance.gathering.toJson(),
   'drops': instance.drops.toJson(),
   'danger': instance.danger?.toJson(),
+  'boss': instance.boss?.toJson(),
 };
 
 _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>

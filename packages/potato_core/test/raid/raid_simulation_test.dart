@@ -65,6 +65,27 @@ void main() {
           'damage': 1,
           'bullet_speed': 1,
         });
+    // A small map with one ring clearing (the boss area), no other enemies.
+    final bossZone = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
+    bossZone['id'] = 'boss_open';
+    bossZone['map'] = {
+      'size': 24,
+      'entry': {'x': 2, 'y': 12},
+      'clear_radius': 1,
+      'rotate': false,
+      'terrain': [
+        {
+          'type': 'ring',
+          'center': {'x': 14, 'y': 12},
+          'radius': 5,
+          'thickness': 1,
+          'facing': {'x': -1, 'y': 0},
+          'gap': 3,
+        },
+      ],
+      'scatter': {'count': 0},
+    };
+    zones.add(bossZone);
     // Run-only abilities for the companion tests.
     final abilities =
         (files['potato_abilities']! as Map<String, dynamic>)['abilities']
@@ -943,6 +964,149 @@ void main() {
       );
       steps(restored, 750);
       expect(jsonEncode(restored.toJson()), jsonEncode(straight.toJson()));
+    });
+  });
+
+  group('the boss', () {
+    RaidSimulation bossRun({List<CompanionStart> team = const []}) {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'boss_open',
+        seed: 1,
+        food: 100,
+        companions: team,
+      );
+      run.player.weapon = 'blank';
+      return run;
+    }
+
+    /// Inside the clearing, two tiles from the boss.
+    const inside = Vec2(12.5, 12.5);
+
+    test('stands in the clearing; other enemies keep out of it', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_zone',
+        seed: 3,
+      );
+      final boss = run.boss!;
+      expect(run.inBossArea(boss.position), isTrue);
+      for (final enemy in run.enemies) {
+        if (enemy == boss) continue;
+        expect(run.inBossArea(enemy.position), isFalse);
+      }
+    });
+
+    test('takes on only those in its area, and goes back when they leave', () {
+      final run = bossRun();
+      final boss = run.boss!;
+      final home = boss.position;
+      runFor(run, 2);
+      expect(boss.target, isNull, reason: 'the player is outside');
+
+      run.player.position = inside;
+      run.step();
+      expect(boss.target, run.player.id);
+
+      run.player.position = const Vec2(2.5, 12.5);
+      runFor(run, 6);
+      expect(boss.target, isNull);
+      expect(boss.position.distanceTo(home), lessThan(0.2));
+    });
+
+    test('shows a charge, then runs into the player', () {
+      final run = bossRun();
+      final boss = run.boss!..chargeCooldown = 0;
+      run.player.position = inside;
+      run.step();
+      expect(boss.isTelegraphing, isTrue);
+      final toward = boss.chargeDirection;
+      expect(toward.x, lessThan(-0.9), reason: 'aimed at the player');
+      final hp = run.player.hp;
+      runFor(run, 1.5);
+      final charge = catalog.enemies['sample_boss']!.boss!.chargeDamage;
+      expect(run.player.hp, lessThanOrEqualTo(hp - charge + 1e-9));
+    });
+
+    test('a dash through the charge takes no harm from it', () {
+      final run = bossRun();
+      final boss = run.boss!..chargeCooldown = 0;
+      run.player.position = inside;
+      run.step();
+      while (boss.isTelegraphing) {
+        run.step();
+      }
+      final hp = run.player.hp;
+      run
+        ..player.dashLeft = 10
+        ..step()
+        ..step()
+        ..step();
+      expect(run.player.hp, hp);
+    });
+
+    test('sprays shots all around', () {
+      final run = bossRun();
+      final boss = run.boss!
+        ..sprayCooldown = 0
+        ..chargeCooldown = 100;
+      run.player.position = inside;
+      run.step();
+      final spray = catalog.enemies['sample_boss']!.boss!.sprayBullets;
+      expect(run.bullets.where((b) => b.owner == boss.id), hasLength(spray));
+    });
+
+    test('does not heal, and leaves a boss bundle when it falls', () {
+      final run = bossRun();
+      final boss = run.boss!..hp = 5;
+      runFor(run, 10);
+      expect(boss.hp, 5);
+      boss.hp = 0;
+      run.step();
+      expect(run.boss, isNull);
+      expect(
+        run.piles.where((p) => p.kind == PileKind.bossBundle),
+        hasLength(1),
+      );
+    });
+
+    test('attack-mode potatoes stay out unless the player is inside', () {
+      final run = bossRun(
+        team: [
+          const CompanionStart(
+            potatoId: 1,
+            type: PotatoType.combat,
+            grade: Grade.normal,
+            abilities: ['combat.plain'],
+            style: CombatStyle.ranged,
+            mode: CompanionMode.attack,
+          ),
+        ],
+      );
+      final boss = run.boss!..chargeCooldown = 100;
+      // Just outside the opening, in attack range of the boss.
+      run.player.position = const Vec2(7.5, 12.5);
+      run.companions.single.position = run.player.position;
+      runFor(run, 1);
+      expect(run.companions.single.target, isNull);
+      run.player.position = inside;
+      // It catches up first (it was over three tiles away), then joins in.
+      runFor(run, 2);
+      expect(run.companions.single.target, boss.id);
+    });
+
+    test('clones go in and fight it', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'sample_danger',
+        seed: 7,
+      )..step();
+      final boss = run.boss!..chargeCooldown = 100;
+      final clone = run.clones.first;
+      clone.position = boss.position + const Vec2(1, 0);
+      runFor(run, 1);
+      expect(boss.target, clone.id);
+      expect(boss.hp, lessThan(boss.maxHp));
     });
   });
 }

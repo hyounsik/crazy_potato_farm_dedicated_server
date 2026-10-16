@@ -32,6 +32,28 @@
       "attack_interval": 1.6,
       "range": 2.4,
       "bullet_speed": 5
+    },
+    {
+      "id": "sample_boss",
+      "temper": "aggressive",
+      "attack": "melee",
+      "max_hp": 400,
+      "radius": 0.45,
+      "damage": 12,
+      "attack_interval": 1.0,
+      "reach": 0.2,
+      "boss": {
+        "charge_every_seconds": 6,
+        "charge_telegraph_seconds": 0.8,
+        "charge_speed": 7,
+        "charge_distance": 4,
+        "charge_damage": 25,
+        "spray_every_seconds": 4,
+        "spray_bullets": 8,
+        "spray_damage": 6,
+        "spray_speed": 5,
+        "spray_range": 3.5
+      }
     }
   ]
 }

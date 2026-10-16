@@ -2821,7 +2821,8 @@ mixin _$EnemyData {
 
  String get id; EnemyTemper get temper; EnemyAttack get attack; double get maxHp; double get radius; double get damage; double get attackInterval;/// Melee: gap between bodies within which it hits.
  double get reach;/// Ranged: shooting distance.
- double get range; double get bulletSpeed;
+ double get range; double get bulletSpeed;/// Set for a boss: it guards the boss area and has extra attacks.
+ BossData? get boss;
 /// Create a copy of EnemyData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2835,20 +2836,20 @@ $EnemyDataCopyWith<EnemyData> get copyWith => _$EnemyDataCopyWithImpl<EnemyData>
 @override
 bool operator ==(Object other) {
   final _this = this as EnemyData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is EnemyData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.temper, _this.temper) || other.temper == _this.temper)&&(identical(other.attack, _this.attack) || other.attack == _this.attack)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.damage, _this.damage) || other.damage == _this.damage)&&(identical(other.attackInterval, _this.attackInterval) || other.attackInterval == _this.attackInterval)&&(identical(other.reach, _this.reach) || other.reach == _this.reach)&&(identical(other.range, _this.range) || other.range == _this.range)&&(identical(other.bulletSpeed, _this.bulletSpeed) || other.bulletSpeed == _this.bulletSpeed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is EnemyData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.temper, _this.temper) || other.temper == _this.temper)&&(identical(other.attack, _this.attack) || other.attack == _this.attack)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.damage, _this.damage) || other.damage == _this.damage)&&(identical(other.attackInterval, _this.attackInterval) || other.attackInterval == _this.attackInterval)&&(identical(other.reach, _this.reach) || other.reach == _this.reach)&&(identical(other.range, _this.range) || other.range == _this.range)&&(identical(other.bulletSpeed, _this.bulletSpeed) || other.bulletSpeed == _this.bulletSpeed)&&(identical(other.boss, _this.boss) || other.boss == _this.boss));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as EnemyData;
-  return Object.hash(runtimeType,_this.id,_this.temper,_this.attack,_this.maxHp,_this.radius,_this.damage,_this.attackInterval,_this.reach,_this.range,_this.bulletSpeed);
+  return Object.hash(runtimeType,_this.id,_this.temper,_this.attack,_this.maxHp,_this.radius,_this.damage,_this.attackInterval,_this.reach,_this.range,_this.bulletSpeed,_this.boss);
 }
 
 @override
 String toString() {
   final _this = this as EnemyData;
-  return 'EnemyData(id: ${_this.id}, temper: ${_this.temper}, attack: ${_this.attack}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, damage: ${_this.damage}, attackInterval: ${_this.attackInterval}, reach: ${_this.reach}, range: ${_this.range}, bulletSpeed: ${_this.bulletSpeed})';
+  return 'EnemyData(id: ${_this.id}, temper: ${_this.temper}, attack: ${_this.attack}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, damage: ${_this.damage}, attackInterval: ${_this.attackInterval}, reach: ${_this.reach}, range: ${_this.range}, bulletSpeed: ${_this.bulletSpeed}, boss: ${_this.boss})';
 }
 
 
@@ -2859,11 +2860,11 @@ abstract mixin class $EnemyDataCopyWith<$Res>  {
   factory $EnemyDataCopyWith(EnemyData value, $Res Function(EnemyData) _then) = _$EnemyDataCopyWithImpl;
 @useResult
 $Res call({
- String id, EnemyTemper temper, EnemyAttack attack, double maxHp, double radius, double damage, double attackInterval, double reach, double range, double bulletSpeed
+ String id, EnemyTemper temper, EnemyAttack attack, double maxHp, double radius, double damage, double attackInterval, double reach, double range, double bulletSpeed, BossData? boss
 });
 
 
-
+$BossDataCopyWith<$Res>? get boss;
 
 }
 /// @nodoc
@@ -2876,7 +2877,7 @@ class _$EnemyDataCopyWithImpl<$Res>
 
 /// Create a copy of EnemyData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? temper = null,Object? attack = null,Object? maxHp = null,Object? radius = null,Object? damage = null,Object? attackInterval = null,Object? reach = null,Object? range = null,Object? bulletSpeed = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? temper = null,Object? attack = null,Object? maxHp = null,Object? radius = null,Object? damage = null,Object? attackInterval = null,Object? reach = null,Object? range = null,Object? bulletSpeed = null,Object? boss = freezed,}) {
   return _then(EnemyData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,temper: null == temper ? _self.temper : temper // ignore: cast_nullable_to_non_nullable
@@ -2888,10 +2889,23 @@ as double,attackInterval: null == attackInterval ? _self.attackInterval : attack
 as double,reach: null == reach ? _self.reach : reach // ignore: cast_nullable_to_non_nullable
 as double,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
 as double,bulletSpeed: null == bulletSpeed ? _self.bulletSpeed : bulletSpeed // ignore: cast_nullable_to_non_nullable
-as double,
+as double,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
+as BossData?,
   ));
 }
+/// Create a copy of EnemyData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossDataCopyWith<$Res>? get boss {
+    if (_self.boss == null) {
+    return null;
+  }
 
+  return $BossDataCopyWith<$Res>(_self.boss!, (value) {
+    return _then(_self.copyWith(boss: value));
+  });
+}
 }
 
 
@@ -2973,10 +2987,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed,  BossData? boss)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _EnemyData() when $default != null:
-return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed);case _:
+return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed,_that.boss);case _:
   return orElse();
 
 }
@@ -2994,10 +3008,10 @@ return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed,  BossData? boss)  $default,) {final _that = this;
 switch (_that) {
 case _EnemyData():
-return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed);case _:
+return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed,_that.boss);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3014,10 +3028,10 @@ return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  EnemyTemper temper,  EnemyAttack attack,  double maxHp,  double radius,  double damage,  double attackInterval,  double reach,  double range,  double bulletSpeed,  BossData? boss)?  $default,) {final _that = this;
 switch (_that) {
 case _EnemyData() when $default != null:
-return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed);case _:
+return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_that.damage,_that.attackInterval,_that.reach,_that.range,_that.bulletSpeed,_that.boss);case _:
   return null;
 
 }
@@ -3029,7 +3043,7 @@ return $default(_that.id,_that.temper,_that.attack,_that.maxHp,_that.radius,_tha
 @JsonSerializable()
 
 class _EnemyData implements EnemyData {
-  const _EnemyData({required this.id, required this.temper, required this.attack, required this.maxHp, required this.radius, required this.damage, required this.attackInterval, this.reach = 0.0, this.range = 0.0, this.bulletSpeed = 0.0});
+  const _EnemyData({required this.id, required this.temper, required this.attack, required this.maxHp, required this.radius, required this.damage, required this.attackInterval, this.reach = 0.0, this.range = 0.0, this.bulletSpeed = 0.0, this.boss});
   factory _EnemyData.fromJson(Map<String, dynamic> json) => _$EnemyDataFromJson(json);
 
 @override final  String id;
@@ -3044,6 +3058,8 @@ class _EnemyData implements EnemyData {
 /// Ranged: shooting distance.
 @override@JsonKey() final  double range;
 @override@JsonKey() final  double bulletSpeed;
+/// Set for a boss: it guards the boss area and has extra attacks.
+@override final  BossData? boss;
 
 /// Create a copy of EnemyData
 /// with the given fields replaced by the non-null parameter values.
@@ -3058,18 +3074,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EnemyData&&(identical(other.id, id) || other.id == id)&&(identical(other.temper, temper) || other.temper == temper)&&(identical(other.attack, attack) || other.attack == attack)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.damage, damage) || other.damage == damage)&&(identical(other.attackInterval, attackInterval) || other.attackInterval == attackInterval)&&(identical(other.reach, reach) || other.reach == reach)&&(identical(other.range, range) || other.range == range)&&(identical(other.bulletSpeed, bulletSpeed) || other.bulletSpeed == bulletSpeed));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _EnemyData&&(identical(other.id, id) || other.id == id)&&(identical(other.temper, temper) || other.temper == temper)&&(identical(other.attack, attack) || other.attack == attack)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.damage, damage) || other.damage == damage)&&(identical(other.attackInterval, attackInterval) || other.attackInterval == attackInterval)&&(identical(other.reach, reach) || other.reach == reach)&&(identical(other.range, range) || other.range == range)&&(identical(other.bulletSpeed, bulletSpeed) || other.bulletSpeed == bulletSpeed)&&(identical(other.boss, boss) || other.boss == boss));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,temper,attack,maxHp,radius,damage,attackInterval,reach,range,bulletSpeed);
+    return Object.hash(runtimeType,id,temper,attack,maxHp,radius,damage,attackInterval,reach,range,bulletSpeed,boss);
 }
 
 @override
 String toString() {
-    return 'EnemyData(id: $id, temper: $temper, attack: $attack, maxHp: $maxHp, radius: $radius, damage: $damage, attackInterval: $attackInterval, reach: $reach, range: $range, bulletSpeed: $bulletSpeed)';
+    return 'EnemyData(id: $id, temper: $temper, attack: $attack, maxHp: $maxHp, radius: $radius, damage: $damage, attackInterval: $attackInterval, reach: $reach, range: $range, bulletSpeed: $bulletSpeed, boss: $boss)';
 }
 
 
@@ -3080,11 +3096,11 @@ abstract mixin class _$EnemyDataCopyWith<$Res> implements $EnemyDataCopyWith<$Re
   factory _$EnemyDataCopyWith(_EnemyData value, $Res Function(_EnemyData) _then) = __$EnemyDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, EnemyTemper temper, EnemyAttack attack, double maxHp, double radius, double damage, double attackInterval, double reach, double range, double bulletSpeed
+ String id, EnemyTemper temper, EnemyAttack attack, double maxHp, double radius, double damage, double attackInterval, double reach, double range, double bulletSpeed, BossData? boss
 });
 
 
-
+@override $BossDataCopyWith<$Res>? get boss;
 
 }
 /// @nodoc
@@ -3097,7 +3113,7 @@ class __$EnemyDataCopyWithImpl<$Res>
 
 /// Create a copy of EnemyData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? temper = null,Object? attack = null,Object? maxHp = null,Object? radius = null,Object? damage = null,Object? attackInterval = null,Object? reach = null,Object? range = null,Object? bulletSpeed = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? temper = null,Object? attack = null,Object? maxHp = null,Object? radius = null,Object? damage = null,Object? attackInterval = null,Object? reach = null,Object? range = null,Object? bulletSpeed = null,Object? boss = freezed,}) {
   return _then(_EnemyData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,temper: null == temper ? _self.temper : temper // ignore: cast_nullable_to_non_nullable
@@ -3109,7 +3125,594 @@ as double,attackInterval: null == attackInterval ? _self.attackInterval : attack
 as double,reach: null == reach ? _self.reach : reach // ignore: cast_nullable_to_non_nullable
 as double,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
 as double,bulletSpeed: null == bulletSpeed ? _self.bulletSpeed : bulletSpeed // ignore: cast_nullable_to_non_nullable
+as double,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
+as BossData?,
+  ));
+}
+
+/// Create a copy of EnemyData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossDataCopyWith<$Res>? get boss {
+    if (_self.boss == null) {
+    return null;
+  }
+
+  return $BossDataCopyWith<$Res>(_self.boss!, (value) {
+    return _then(_self.copyWith(boss: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$BossData {
+
+ double get chargeEverySeconds; double get chargeTelegraphSeconds; double get chargeSpeed; double get chargeDistance; double get chargeDamage; double get sprayEverySeconds; int get sprayBullets; double get sprayDamage; double get spraySpeed; double get sprayRange;
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BossDataCopyWith<BossData> get copyWith => _$BossDataCopyWithImpl<BossData>(this as BossData, _$identity);
+
+  /// Serializes this BossData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BossData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossData&&(identical(other.chargeEverySeconds, _this.chargeEverySeconds) || other.chargeEverySeconds == _this.chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, _this.chargeTelegraphSeconds) || other.chargeTelegraphSeconds == _this.chargeTelegraphSeconds)&&(identical(other.chargeSpeed, _this.chargeSpeed) || other.chargeSpeed == _this.chargeSpeed)&&(identical(other.chargeDistance, _this.chargeDistance) || other.chargeDistance == _this.chargeDistance)&&(identical(other.chargeDamage, _this.chargeDamage) || other.chargeDamage == _this.chargeDamage)&&(identical(other.sprayEverySeconds, _this.sprayEverySeconds) || other.sprayEverySeconds == _this.sprayEverySeconds)&&(identical(other.sprayBullets, _this.sprayBullets) || other.sprayBullets == _this.sprayBullets)&&(identical(other.sprayDamage, _this.sprayDamage) || other.sprayDamage == _this.sprayDamage)&&(identical(other.spraySpeed, _this.spraySpeed) || other.spraySpeed == _this.spraySpeed)&&(identical(other.sprayRange, _this.sprayRange) || other.sprayRange == _this.sprayRange));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BossData;
+  return Object.hash(runtimeType,_this.chargeEverySeconds,_this.chargeTelegraphSeconds,_this.chargeSpeed,_this.chargeDistance,_this.chargeDamage,_this.sprayEverySeconds,_this.sprayBullets,_this.sprayDamage,_this.spraySpeed,_this.sprayRange);
+}
+
+@override
+String toString() {
+  final _this = this as BossData;
+  return 'BossData(chargeEverySeconds: ${_this.chargeEverySeconds}, chargeTelegraphSeconds: ${_this.chargeTelegraphSeconds}, chargeSpeed: ${_this.chargeSpeed}, chargeDistance: ${_this.chargeDistance}, chargeDamage: ${_this.chargeDamage}, sprayEverySeconds: ${_this.sprayEverySeconds}, sprayBullets: ${_this.sprayBullets}, sprayDamage: ${_this.sprayDamage}, spraySpeed: ${_this.spraySpeed}, sprayRange: ${_this.sprayRange})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BossDataCopyWith<$Res>  {
+  factory $BossDataCopyWith(BossData value, $Res Function(BossData) _then) = _$BossDataCopyWithImpl;
+@useResult
+$Res call({
+ double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange
+});
+
+
+
+
+}
+/// @nodoc
+class _$BossDataCopyWithImpl<$Res>
+    implements $BossDataCopyWith<$Res> {
+  _$BossDataCopyWithImpl(this._self, this._then);
+
+  final BossData _self;
+  final $Res Function(BossData) _then;
+
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,}) {
+  return _then(BossData(
+chargeEverySeconds: null == chargeEverySeconds ? _self.chargeEverySeconds : chargeEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,chargeTelegraphSeconds: null == chargeTelegraphSeconds ? _self.chargeTelegraphSeconds : chargeTelegraphSeconds // ignore: cast_nullable_to_non_nullable
+as double,chargeSpeed: null == chargeSpeed ? _self.chargeSpeed : chargeSpeed // ignore: cast_nullable_to_non_nullable
+as double,chargeDistance: null == chargeDistance ? _self.chargeDistance : chargeDistance // ignore: cast_nullable_to_non_nullable
+as double,chargeDamage: null == chargeDamage ? _self.chargeDamage : chargeDamage // ignore: cast_nullable_to_non_nullable
+as double,sprayEverySeconds: null == sprayEverySeconds ? _self.sprayEverySeconds : sprayEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,sprayBullets: null == sprayBullets ? _self.sprayBullets : sprayBullets // ignore: cast_nullable_to_non_nullable
+as int,sprayDamage: null == sprayDamage ? _self.sprayDamage : sprayDamage // ignore: cast_nullable_to_non_nullable
+as double,spraySpeed: null == spraySpeed ? _self.spraySpeed : spraySpeed // ignore: cast_nullable_to_non_nullable
+as double,sprayRange: null == sprayRange ? _self.sprayRange : sprayRange // ignore: cast_nullable_to_non_nullable
 as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BossData].
+extension BossDataPatterns on BossData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BossData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BossData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BossData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BossData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BossData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BossData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BossData() when $default != null:
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)  $default,) {final _that = this;
+switch (_that) {
+case _BossData():
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)?  $default,) {final _that = this;
+switch (_that) {
+case _BossData() when $default != null:
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BossData implements BossData {
+  const _BossData({required this.chargeEverySeconds, required this.chargeTelegraphSeconds, required this.chargeSpeed, required this.chargeDistance, required this.chargeDamage, required this.sprayEverySeconds, required this.sprayBullets, required this.sprayDamage, required this.spraySpeed, required this.sprayRange});
+  factory _BossData.fromJson(Map<String, dynamic> json) => _$BossDataFromJson(json);
+
+@override final  double chargeEverySeconds;
+@override final  double chargeTelegraphSeconds;
+@override final  double chargeSpeed;
+@override final  double chargeDistance;
+@override final  double chargeDamage;
+@override final  double sprayEverySeconds;
+@override final  int sprayBullets;
+@override final  double sprayDamage;
+@override final  double spraySpeed;
+@override final  double sprayRange;
+
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BossDataCopyWith<_BossData> get copyWith => __$BossDataCopyWithImpl<_BossData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BossDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossData&&(identical(other.chargeEverySeconds, chargeEverySeconds) || other.chargeEverySeconds == chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, chargeTelegraphSeconds) || other.chargeTelegraphSeconds == chargeTelegraphSeconds)&&(identical(other.chargeSpeed, chargeSpeed) || other.chargeSpeed == chargeSpeed)&&(identical(other.chargeDistance, chargeDistance) || other.chargeDistance == chargeDistance)&&(identical(other.chargeDamage, chargeDamage) || other.chargeDamage == chargeDamage)&&(identical(other.sprayEverySeconds, sprayEverySeconds) || other.sprayEverySeconds == sprayEverySeconds)&&(identical(other.sprayBullets, sprayBullets) || other.sprayBullets == sprayBullets)&&(identical(other.sprayDamage, sprayDamage) || other.sprayDamage == sprayDamage)&&(identical(other.spraySpeed, spraySpeed) || other.spraySpeed == spraySpeed)&&(identical(other.sprayRange, sprayRange) || other.sprayRange == sprayRange));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,chargeEverySeconds,chargeTelegraphSeconds,chargeSpeed,chargeDistance,chargeDamage,sprayEverySeconds,sprayBullets,sprayDamage,spraySpeed,sprayRange);
+}
+
+@override
+String toString() {
+    return 'BossData(chargeEverySeconds: $chargeEverySeconds, chargeTelegraphSeconds: $chargeTelegraphSeconds, chargeSpeed: $chargeSpeed, chargeDistance: $chargeDistance, chargeDamage: $chargeDamage, sprayEverySeconds: $sprayEverySeconds, sprayBullets: $sprayBullets, sprayDamage: $sprayDamage, spraySpeed: $spraySpeed, sprayRange: $sprayRange)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BossDataCopyWith<$Res> implements $BossDataCopyWith<$Res> {
+  factory _$BossDataCopyWith(_BossData value, $Res Function(_BossData) _then) = __$BossDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange
+});
+
+
+
+
+}
+/// @nodoc
+class __$BossDataCopyWithImpl<$Res>
+    implements _$BossDataCopyWith<$Res> {
+  __$BossDataCopyWithImpl(this._self, this._then);
+
+  final _BossData _self;
+  final $Res Function(_BossData) _then;
+
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,}) {
+  return _then(_BossData(
+chargeEverySeconds: null == chargeEverySeconds ? _self.chargeEverySeconds : chargeEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,chargeTelegraphSeconds: null == chargeTelegraphSeconds ? _self.chargeTelegraphSeconds : chargeTelegraphSeconds // ignore: cast_nullable_to_non_nullable
+as double,chargeSpeed: null == chargeSpeed ? _self.chargeSpeed : chargeSpeed // ignore: cast_nullable_to_non_nullable
+as double,chargeDistance: null == chargeDistance ? _self.chargeDistance : chargeDistance // ignore: cast_nullable_to_non_nullable
+as double,chargeDamage: null == chargeDamage ? _self.chargeDamage : chargeDamage // ignore: cast_nullable_to_non_nullable
+as double,sprayEverySeconds: null == sprayEverySeconds ? _self.sprayEverySeconds : sprayEverySeconds // ignore: cast_nullable_to_non_nullable
+as double,sprayBullets: null == sprayBullets ? _self.sprayBullets : sprayBullets // ignore: cast_nullable_to_non_nullable
+as int,sprayDamage: null == sprayDamage ? _self.sprayDamage : sprayDamage // ignore: cast_nullable_to_non_nullable
+as double,spraySpeed: null == spraySpeed ? _self.spraySpeed : spraySpeed // ignore: cast_nullable_to_non_nullable
+as double,sprayRange: null == sprayRange ? _self.sprayRange : sprayRange // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ZoneBossData {
+
+/// An enemy with [EnemyData.boss] set.
+ String get enemy;/// Loot table of the bundle it leaves.
+ String get loot;
+/// Create a copy of ZoneBossData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ZoneBossDataCopyWith<ZoneBossData> get copyWith => _$ZoneBossDataCopyWithImpl<ZoneBossData>(this as ZoneBossData, _$identity);
+
+  /// Serializes this ZoneBossData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ZoneBossData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneBossData&&(identical(other.enemy, _this.enemy) || other.enemy == _this.enemy)&&(identical(other.loot, _this.loot) || other.loot == _this.loot));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ZoneBossData;
+  return Object.hash(runtimeType,_this.enemy,_this.loot);
+}
+
+@override
+String toString() {
+  final _this = this as ZoneBossData;
+  return 'ZoneBossData(enemy: ${_this.enemy}, loot: ${_this.loot})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ZoneBossDataCopyWith<$Res>  {
+  factory $ZoneBossDataCopyWith(ZoneBossData value, $Res Function(ZoneBossData) _then) = _$ZoneBossDataCopyWithImpl;
+@useResult
+$Res call({
+ String enemy, String loot
+});
+
+
+
+
+}
+/// @nodoc
+class _$ZoneBossDataCopyWithImpl<$Res>
+    implements $ZoneBossDataCopyWith<$Res> {
+  _$ZoneBossDataCopyWithImpl(this._self, this._then);
+
+  final ZoneBossData _self;
+  final $Res Function(ZoneBossData) _then;
+
+/// Create a copy of ZoneBossData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enemy = null,Object? loot = null,}) {
+  return _then(ZoneBossData(
+enemy: null == enemy ? _self.enemy : enemy // ignore: cast_nullable_to_non_nullable
+as String,loot: null == loot ? _self.loot : loot // ignore: cast_nullable_to_non_nullable
+as String,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ZoneBossData].
+extension ZoneBossDataPatterns on ZoneBossData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ZoneBossData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ZoneBossData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ZoneBossData value)  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneBossData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ZoneBossData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneBossData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String enemy,  String loot)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ZoneBossData() when $default != null:
+return $default(_that.enemy,_that.loot);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String enemy,  String loot)  $default,) {final _that = this;
+switch (_that) {
+case _ZoneBossData():
+return $default(_that.enemy,_that.loot);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String enemy,  String loot)?  $default,) {final _that = this;
+switch (_that) {
+case _ZoneBossData() when $default != null:
+return $default(_that.enemy,_that.loot);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ZoneBossData implements ZoneBossData {
+  const _ZoneBossData({required this.enemy, required this.loot});
+  factory _ZoneBossData.fromJson(Map<String, dynamic> json) => _$ZoneBossDataFromJson(json);
+
+/// An enemy with [EnemyData.boss] set.
+@override final  String enemy;
+/// Loot table of the bundle it leaves.
+@override final  String loot;
+
+/// Create a copy of ZoneBossData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ZoneBossDataCopyWith<_ZoneBossData> get copyWith => __$ZoneBossDataCopyWithImpl<_ZoneBossData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ZoneBossDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneBossData&&(identical(other.enemy, enemy) || other.enemy == enemy)&&(identical(other.loot, loot) || other.loot == loot));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enemy,loot);
+}
+
+@override
+String toString() {
+    return 'ZoneBossData(enemy: $enemy, loot: $loot)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ZoneBossDataCopyWith<$Res> implements $ZoneBossDataCopyWith<$Res> {
+  factory _$ZoneBossDataCopyWith(_ZoneBossData value, $Res Function(_ZoneBossData) _then) = __$ZoneBossDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String enemy, String loot
+});
+
+
+
+
+}
+/// @nodoc
+class __$ZoneBossDataCopyWithImpl<$Res>
+    implements _$ZoneBossDataCopyWith<$Res> {
+  __$ZoneBossDataCopyWithImpl(this._self, this._then);
+
+  final _ZoneBossData _self;
+  final $Res Function(_ZoneBossData) _then;
+
+/// Create a copy of ZoneBossData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enemy = null,Object? loot = null,}) {
+  return _then(_ZoneBossData(
+enemy: null == enemy ? _self.enemy : enemy // ignore: cast_nullable_to_non_nullable
+as String,loot: null == loot ? _self.loot : loot // ignore: cast_nullable_to_non_nullable
+as String,
   ));
 }
 
@@ -3123,7 +3726,8 @@ mixin _$ZoneData {
  String get id;/// The region score: the level of the seeds found here.
  int get score; MapRecipe get map; ZoneEnemiesData get enemies; ZoneGatheringData get gathering; ZoneDropsData get drops;/// Set for a danger zone: leaving takes an open exit and a signal, and
 /// failing loses what was brought. Null for a safe zone.
- ZoneDangerData? get danger;
+ ZoneDangerData? get danger;/// Who guards the map's clearing, if anyone.
+ ZoneBossData? get boss;
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3137,20 +3741,20 @@ $ZoneDataCopyWith<ZoneData> get copyWith => _$ZoneDataCopyWithImpl<ZoneData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops)&&(identical(other.danger, _this.danger) || other.danger == _this.danger));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops)&&(identical(other.danger, _this.danger) || other.danger == _this.danger)&&(identical(other.boss, _this.boss) || other.boss == _this.boss));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneData;
-  return Object.hash(runtimeType,_this.id,_this.score,_this.map,_this.enemies,_this.gathering,_this.drops,_this.danger);
+  return Object.hash(runtimeType,_this.id,_this.score,_this.map,_this.enemies,_this.gathering,_this.drops,_this.danger,_this.boss);
 }
 
 @override
 String toString() {
   final _this = this as ZoneData;
-  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops}, danger: ${_this.danger})';
+  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, map: ${_this.map}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops}, danger: ${_this.danger}, boss: ${_this.boss})';
 }
 
 
@@ -3161,11 +3765,11 @@ abstract mixin class $ZoneDataCopyWith<$Res>  {
   factory $ZoneDataCopyWith(ZoneData value, $Res Function(ZoneData) _then) = _$ZoneDataCopyWithImpl;
 @useResult
 $Res call({
- String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss
 });
 
 
-$MapRecipeCopyWith<$Res> get map;$ZoneEnemiesDataCopyWith<$Res> get enemies;$ZoneGatheringDataCopyWith<$Res> get gathering;$ZoneDropsDataCopyWith<$Res> get drops;$ZoneDangerDataCopyWith<$Res>? get danger;
+$MapRecipeCopyWith<$Res> get map;$ZoneEnemiesDataCopyWith<$Res> get enemies;$ZoneGatheringDataCopyWith<$Res> get gathering;$ZoneDropsDataCopyWith<$Res> get drops;$ZoneDangerDataCopyWith<$Res>? get danger;$ZoneBossDataCopyWith<$Res>? get boss;
 
 }
 /// @nodoc
@@ -3178,7 +3782,7 @@ class _$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,}) {
   return _then(ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -3187,7 +3791,8 @@ as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable
 as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
-as ZoneDangerData?,
+as ZoneDangerData?,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
+as ZoneBossData?,
   ));
 }
 /// Create a copy of ZoneData
@@ -3237,6 +3842,18 @@ $ZoneDangerDataCopyWith<$Res>? get danger {
 
   return $ZoneDangerDataCopyWith<$Res>(_self.danger!, (value) {
     return _then(_self.copyWith(danger: value));
+  });
+}/// Create a copy of ZoneData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneBossDataCopyWith<$Res>? get boss {
+    if (_self.boss == null) {
+    return null;
+  }
+
+  return $ZoneBossDataCopyWith<$Res>(_self.boss!, (value) {
+    return _then(_self.copyWith(boss: value));
   });
 }
 }
@@ -3320,10 +3937,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss);case _:
   return orElse();
 
 }
@@ -3341,10 +3958,10 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData():
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3361,10 +3978,10 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  MapRecipe map,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger);case _:
+return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss);case _:
   return null;
 
 }
@@ -3376,7 +3993,7 @@ return $default(_that.id,_that.score,_that.map,_that.enemies,_that.gathering,_th
 @JsonSerializable()
 
 class _ZoneData implements ZoneData {
-  const _ZoneData({required this.id, required this.score, required this.map, required this.enemies, required this.gathering, required this.drops, this.danger});
+  const _ZoneData({required this.id, required this.score, required this.map, required this.enemies, required this.gathering, required this.drops, this.danger, this.boss});
   factory _ZoneData.fromJson(Map<String, dynamic> json) => _$ZoneDataFromJson(json);
 
 @override final  String id;
@@ -3389,6 +4006,8 @@ class _ZoneData implements ZoneData {
 /// Set for a danger zone: leaving takes an open exit and a signal, and
 /// failing loses what was brought. Null for a safe zone.
 @override final  ZoneDangerData? danger;
+/// Who guards the map's clearing, if anyone.
+@override final  ZoneBossData? boss;
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
@@ -3403,18 +4022,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops)&&(identical(other.danger, danger) || other.danger == danger));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.map, map) || other.map == map)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops)&&(identical(other.danger, danger) || other.danger == danger)&&(identical(other.boss, boss) || other.boss == boss));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,score,map,enemies,gathering,drops,danger);
+    return Object.hash(runtimeType,id,score,map,enemies,gathering,drops,danger,boss);
 }
 
 @override
 String toString() {
-    return 'ZoneData(id: $id, score: $score, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops, danger: $danger)';
+    return 'ZoneData(id: $id, score: $score, map: $map, enemies: $enemies, gathering: $gathering, drops: $drops, danger: $danger, boss: $boss)';
 }
 
 
@@ -3425,11 +4044,11 @@ abstract mixin class _$ZoneDataCopyWith<$Res> implements $ZoneDataCopyWith<$Res>
   factory _$ZoneDataCopyWith(_ZoneData value, $Res Function(_ZoneData) _then) = __$ZoneDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger
+ String id, int score, MapRecipe map, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss
 });
 
 
-@override $MapRecipeCopyWith<$Res> get map;@override $ZoneEnemiesDataCopyWith<$Res> get enemies;@override $ZoneGatheringDataCopyWith<$Res> get gathering;@override $ZoneDropsDataCopyWith<$Res> get drops;@override $ZoneDangerDataCopyWith<$Res>? get danger;
+@override $MapRecipeCopyWith<$Res> get map;@override $ZoneEnemiesDataCopyWith<$Res> get enemies;@override $ZoneGatheringDataCopyWith<$Res> get gathering;@override $ZoneDropsDataCopyWith<$Res> get drops;@override $ZoneDangerDataCopyWith<$Res>? get danger;@override $ZoneBossDataCopyWith<$Res>? get boss;
 
 }
 /// @nodoc
@@ -3442,7 +4061,7 @@ class __$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? map = null,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,}) {
   return _then(_ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -3451,7 +4070,8 @@ as MapRecipe,enemies: null == enemies ? _self.enemies : enemies // ignore: cast_
 as ZoneEnemiesData,gathering: null == gathering ? _self.gathering : gathering // ignore: cast_nullable_to_non_nullable
 as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_nullable_to_non_nullable
 as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
-as ZoneDangerData?,
+as ZoneDangerData?,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
+as ZoneBossData?,
   ));
 }
 
@@ -3502,6 +4122,18 @@ $ZoneDangerDataCopyWith<$Res>? get danger {
 
   return $ZoneDangerDataCopyWith<$Res>(_self.danger!, (value) {
     return _then(_self.copyWith(danger: value));
+  });
+}/// Create a copy of ZoneData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneBossDataCopyWith<$Res>? get boss {
+    if (_self.boss == null) {
+    return null;
+  }
+
+  return $ZoneBossDataCopyWith<$Res>(_self.boss!, (value) {
+    return _then(_self.copyWith(boss: value));
   });
 }
 }

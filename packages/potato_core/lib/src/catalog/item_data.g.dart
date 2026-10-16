@@ -19,6 +19,11 @@ _ItemData _$ItemDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         (v) =>
             v == null ? null : SeedKindData.fromJson(v as Map<String, dynamic>),
       ),
+      gear: $checkedConvert(
+        'gear',
+        (v) =>
+            v == null ? null : GearKindData.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
@@ -29,12 +34,14 @@ Map<String, dynamic> _$ItemDataToJson(_ItemData instance) => <String, dynamic>{
   'kind': _$ItemKindEnumMap[instance.kind]!,
   'stack': instance.stack,
   'seed': instance.seed?.toJson(),
+  'gear': instance.gear?.toJson(),
 };
 
 const _$ItemKindEnumMap = {
   ItemKind.food: 'food',
   ItemKind.seed: 'seed',
   ItemKind.material: 'material',
+  ItemKind.gear: 'gear',
 };
 
 _SeedKindData _$SeedKindDataFromJson(Map<String, dynamic> json) =>
@@ -66,6 +73,29 @@ const _$GradeEnumMap = {
   Grade.normal: 'normal',
   Grade.rare: 'rare',
   Grade.legendary: 'legendary',
+};
+
+_GearKindData _$GearKindDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_GearKindData', json, ($checkedConvert) {
+      final val = _GearKindData(
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$GearKindEnumMap, v)),
+        family: $checkedConvert('family', (v) => v as String? ?? ''),
+        grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$GearKindDataToJson(_GearKindData instance) =>
+    <String, dynamic>{
+      'kind': _$GearKindEnumMap[instance.kind]!,
+      'family': instance.family,
+      'grade': _$GradeEnumMap[instance.grade]!,
+    };
+
+const _$GearKindEnumMap = {
+  GearKind.weapon: 'weapon',
+  GearKind.bag: 'bag',
+  GearKind.belt: 'belt',
 };
 
 _LootTableData _$LootTableDataFromJson(Map<String, dynamic> json) =>

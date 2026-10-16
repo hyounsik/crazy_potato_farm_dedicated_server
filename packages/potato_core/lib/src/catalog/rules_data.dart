@@ -3,6 +3,7 @@ import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 part 'rules_data.freezed.dart';
@@ -22,6 +23,8 @@ abstract class RulesData with _$RulesData {
     required WorkbenchRulesData workbench,
     required TotemRulesData totems,
     required BreedingRulesData breeding,
+    required GearRulesData gear,
+    required CombatPowerRulesData combatPower,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -332,6 +335,82 @@ abstract class WorkbenchRulesData with _$WorkbenchRulesData {
         ? minChance
         : chance - level * chanceStep,
   );
+}
+
+/// Equipment. Values are placeholders until the balance phase.
+@freezed
+abstract class GearRulesData with _$GearRulesData {
+  const factory GearRulesData({
+    /// Bare hands: the weapon used with none, the bag slots, and belt slots
+    /// that take any potato.
+    required String bareWeapon,
+    required int bareBagSlots,
+    required int bareBeltSlots,
+
+    /// Weapons: damage share by grade, and what each level adds in
+    /// thousandths. The workbench adds `workbench.damage_percent` a level.
+    required Map<Grade, double> gradeDamage,
+    required int levelDamagePermille,
+
+    /// Bags: slots by grade, and slots each workbench level adds.
+    required Map<Grade, int> bagSlots,
+    required int bagEnhanceSlots,
+
+    /// Belts: slots by grade, and how much stronger a potato in a slot
+    /// gets at its job, in percent by grade, per ten levels, and per
+    /// workbench level.
+    required Map<Grade, int> beltSlots,
+    required Map<Grade, double> beltPercent,
+    required double beltPercentPerTenLevels,
+    required double beltEnhancePercent,
+
+    /// Materials a piece breaks down into by grade, plus this share of what
+    /// its workbench levels took.
+    required Map<Grade, int> disassemble,
+    required int enhanceRefundPercent,
+
+    /// Chance each worn piece is lost when a danger run fails.
+    required double lossChance,
+
+    /// Gear can be worn up to the farm's progress plus this.
+    required int useMargin,
+
+    /// What a new farm wears.
+    required Equipped start,
+  }) = _GearRulesData;
+
+  factory GearRulesData.fromJson(Map<String, dynamic> json) =>
+      _$GearRulesDataFromJson(json);
+}
+
+/// One number for how strong a party is, against what a zone's score
+/// calls for. Weights are placeholders until the balance phase.
+@freezed
+abstract class CombatPowerRulesData with _$CombatPowerRulesData {
+  const factory CombatPowerRulesData({
+    /// Points per point of weapon damage per second.
+    required double weaponDps,
+
+    /// Points per point of a combat potato's health, and of its damage
+    /// per second.
+    required double potatoHp,
+    required double potatoDps,
+
+    /// Flat points for each food or buff potato along.
+    required double helper,
+
+    /// What a zone calls for: this plus so much a score point.
+    required double recommendedBase,
+    required double recommendedPerScore,
+
+    /// Power over recommended at or above [easyRatio] is easy; at or above
+    /// [fairRatio], fair; under it, risky.
+    required double easyRatio,
+    required double fairRatio,
+  }) = _CombatPowerRulesData;
+
+  factory CombatPowerRulesData.fromJson(Map<String, dynamic> json) =>
+      _$CombatPowerRulesDataFromJson(json);
 }
 
 /// Breeding potatoes making seeds in compost yards. Values are

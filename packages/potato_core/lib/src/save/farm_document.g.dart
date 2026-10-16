@@ -126,6 +126,18 @@ _FarmDocument _$FarmDocumentFromJson(
         'weapon_level',
         (v) => (v as num?)?.toInt() ?? 0,
       ),
+      gear: $checkedConvert(
+        'gear',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => Gear.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <Gear>[],
+      ),
+      equipped: $checkedConvert(
+        'equipped',
+        (v) => v == null ? null : Equipped.fromJson(v as Map<String, dynamic>),
+      ),
       progress: $checkedConvert('progress', (v) => (v as num?)?.toInt() ?? 0),
       totemLimit: $checkedConvert('totem_limit', (v) => (v as num?)?.toInt()),
       totals: $checkedConvert(
@@ -169,6 +181,8 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'materials': instance.materials,
       'mail': instance.mail.map((e) => e.toJson()).toList(),
       'weapon_level': instance.weaponLevel,
+      'gear': instance.gear.map((e) => e.toJson()).toList(),
+      'equipped': instance.equipped?.toJson(),
       'progress': instance.progress,
       'totem_limit': instance.totemLimit,
       'totals': instance.totals,

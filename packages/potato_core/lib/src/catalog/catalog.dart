@@ -6,6 +6,7 @@ import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -43,7 +44,7 @@ final class Catalog {
   /// Data ships with the app, so files are not migrated: a file with another
   /// version is an error.
   static const Map<String, int> fileVersions = {
-    'rules': 4,
+    'rules': 5,
     'potato_types': 2,
     'buildings': 1,
     'potato_abilities': 1,
@@ -86,6 +87,20 @@ final class Catalog {
 
   /// How many of [item] fit in one bag slot.
   int stackOf(String item) => items[item]!.stack;
+
+  /// The item id that carries [gear], if there is one.
+  String? gearItemOf(Gear gear) {
+    for (final item in items.values) {
+      final kind = item.gear;
+      if (kind != null &&
+          kind.kind == gear.kind &&
+          kind.grade == gear.grade &&
+          (gear.kind != GearKind.weapon || kind.family == gear.family)) {
+        return item.id;
+      }
+    }
+    return null;
+  }
 
   /// The item id of seeds of [type] at [grade], if there is one.
   String? seedItemOf(PotatoType type, Grade grade) {
@@ -475,7 +490,6 @@ final class Catalog {
 
     final raid = rules.raid;
     check.positive('raid.step_millis', raid.stepMillis);
-    check.positive('raid.bag_slots', raid.bagSlots);
     check.positiveNumber('raid.pickup_radius', raid.pickupRadius);
     check.atLeastNumber('raid.enemy_alert_seconds', raid.enemyAlertSeconds, 0);
     final player = raid.player;
@@ -706,6 +720,15 @@ final class Catalog {
     } else if (!isSeed && item.seed != null) {
       check.issue('$path.seed', 'only seed items have a seed');
     }
+    final isGear = item.kind == ItemKind.gear;
+    if (isGear && item.gear == null) {
+      check.issue('$path.gear', 'gear items need a gear kind');
+    } else if (!isGear && item.gear != null) {
+      check.issue('$path.gear', 'only gear items have a gear kind');
+    }
+    if (item.gear case final gear? when gear.kind == GearKind.weapon) {
+      if (gear.family.isEmpty) check.issue('$path.gear.family', 'is empty');
+    }
   }
 
   static void _checkLootTable(
@@ -927,9 +950,21 @@ final class Catalog {
         CatalogIssue('rules', 'raid.food.item', '"$food" is not a food item'),
       );
     }
-    final weapon = rules.raid.startWeapon;
-    if (!weapons.containsKey(weapon)) {
-      missing('rules', 'raid.start_weapon', 'weapon', weapon);
+    final gear = rules.gear;
+    if (!weapons.containsKey(gear.bareWeapon)) {
+      missing('rules', 'gear.bare_weapon', 'weapon', gear.bareWeapon);
+    }
+    for (final piece in gear.start.all) {
+      if (piece.kind == GearKind.weapon && !weapons.containsKey(piece.family)) {
+        missing('rules', 'gear.start.weapon.family', 'weapon', piece.family);
+      }
+    }
+    for (final item in items.values) {
+      final kind = item.gear;
+      if (kind == null || kind.kind != GearKind.weapon) continue;
+      if (!weapons.containsKey(kind.family)) {
+        missing('items', '${item.id}.gear.family', 'weapon', kind.family);
+      }
     }
     for (final table in lootTables.values) {
       for (final (index, entry) in table.entries.indexed) {

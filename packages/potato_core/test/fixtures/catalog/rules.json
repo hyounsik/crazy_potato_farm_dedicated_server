@@ -1,5 +1,5 @@
 {
-  "version": 4,
+  "version": 5,
   "note": "Sample data for tests only. Values are not the game's real numbers.",
   "farm": {
     "step_millis": 1000,
@@ -129,7 +129,6 @@
       "dash_seconds": 0.18,
       "dash_cooldown_seconds": 2.5
     },
-    "bag_slots": 12,
     "pickup_radius": 0.45,
     "food": {
       "item": "food",
@@ -138,7 +137,6 @@
       "hungry_speed_multiplier": 0.6,
       "hungry_return_seconds": 30
     },
-    "start_weapon": "rapid",
     "enemy_alert_seconds": 3,
     "companion": {
       "max_hp": 40,
@@ -240,5 +238,74 @@
       "buff": 1,
       "breeding": 1
     }
+  },
+  "gear": {
+    "bare_weapon": "bare",
+    "bare_bag_slots": 6,
+    "bare_belt_slots": 1,
+    "grade_damage": {
+      "normal": 1.0,
+      "rare": 1.25,
+      "legendary": 1.6
+    },
+    "level_damage_permille": 20,
+    "bag_slots": {
+      "normal": 12,
+      "rare": 16,
+      "legendary": 20
+    },
+    "bag_enhance_slots": 1,
+    "belt_slots": {
+      "normal": 1,
+      "rare": 2,
+      "legendary": 3
+    },
+    "belt_percent": {
+      "normal": 5,
+      "rare": 10,
+      "legendary": 15
+    },
+    "belt_percent_per_ten_levels": 2,
+    "belt_enhance_percent": 2,
+    "disassemble": {
+      "normal": 3,
+      "rare": 8,
+      "legendary": 20
+    },
+    "enhance_refund_percent": 50,
+    "loss_chance": 0.3,
+    "use_margin": 10,
+    "start": {
+      "weapon": {
+        "kind": "weapon",
+        "family": "rapid",
+        "grade": "normal",
+        "level": 0
+      },
+      "bag": {
+        "kind": "bag",
+        "grade": "normal",
+        "level": 0
+      },
+      "belt": {
+        "kind": "belt",
+        "grade": "normal",
+        "level": 0,
+        "slots": [
+          "food",
+          "combat"
+        ]
+      }
+    }
+  },
+  "combat_power": {
+    "weapon_dps": 1,
+    "potato_hp": 0.2,
+    "potato_dps": 1,
+    "helper": 5,
+    "recommended_base": 40,
+    "recommended_per_score": 6,
+    "easy_ratio": 1.2,
+    "fair_ratio": 0.8
   }
 }

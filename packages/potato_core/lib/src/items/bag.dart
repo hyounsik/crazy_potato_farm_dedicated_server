@@ -2,11 +2,12 @@ import 'dart:math' as math;
 
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Some amount of one item, in a bag slot or a loot pile.
 final class ItemStack {
-  ItemStack(this.item, this.count, {this.seed});
+  ItemStack(this.item, this.count, {this.seed, this.gear});
 
   factory ItemStack.fromJson(Map<String, dynamic> json) => ItemStack(
     json['item'] as String,
@@ -15,7 +16,15 @@ final class ItemStack {
       final Map<String, dynamic> seed => Seed.fromJson(seed),
       _ => null,
     },
+    gear: switch (json['gear']) {
+      final Map<String, dynamic> gear => Gear.fromJson(gear),
+      _ => null,
+    },
   );
+
+  /// One piece of [gear] as an item.
+  factory ItemStack.ofGear(String item, Gear gear) =>
+      ItemStack(item, 1, gear: gear);
 
   /// The item's catalog id.
   final String item;
@@ -25,18 +34,29 @@ final class ItemStack {
   /// ability and style, so only equal seeds share a stack.
   final Seed? seed;
 
+  /// The piece itself, for gear items (each is its own).
+  final Gear? gear;
+
   /// Whether [other] may top up this stack.
-  bool sameAs(ItemStack other) => other.item == item && other.seed == seed;
+  bool sameAs(ItemStack other) =>
+      other.item == item && other.seed == seed && other.gear == gear;
+
+  /// The same items, [n] of them.
+  ItemStack copyWithCount(int n) => ItemStack(item, n, seed: seed, gear: gear);
 
   Map<String, dynamic> toJson() => {
     'item': item,
     'count': count,
     if (seed != null) 'seed': seed!.toJson(),
+    if (gear != null) 'gear': gear!.toJson(),
   };
 }
 
 /// Makes the seed for one seed item found, or null for other items.
 typedef SeedMaker = Seed? Function(String item);
+
+/// Makes the piece for one gear item found, or null for other items.
+typedef GearMaker = Gear? Function(String item);
 
 /// Looks up how many of an item fit in one slot.
 typedef StackSize = int Function(String item);
@@ -75,7 +95,7 @@ final class Bag {
     for (var i = 0; i < slots.length && from.count > 0; i++) {
       if (slots[i] != null) continue;
       final n = math.min(max, from.count);
-      slots[i] = ItemStack(from.item, n, seed: from.seed);
+      slots[i] = from.copyWithCount(n);
       from.count -= n;
       moved += n;
     }
@@ -126,6 +146,7 @@ final class LootPile {
     StackSize stackSize,
     GameRandom random, {
     SeedMaker? makeSeed,
+    GearMaker? makeGear,
     int Function(String item, int weight)? weigh,
   }) {
     final pile = LootPile();
@@ -140,6 +161,16 @@ final class LootPile {
         return roll < 0;
       });
       final count = entry.min + random.nextInt(entry.max - entry.min + 1);
+      if (makeGear?.call(entry.item) case final gear?) {
+        pile._merge(ItemStack.ofGear(entry.item, gear), stackSize);
+        for (var n = 1; n < count; n++) {
+          pile._merge(
+            ItemStack.ofGear(entry.item, makeGear!(entry.item)!),
+            stackSize,
+          );
+        }
+        continue;
+      }
       final first = makeSeed?.call(entry.item);
       if (first == null) {
         pile._merge(ItemStack(entry.item, count), stackSize);
@@ -170,10 +201,13 @@ final class LootPile {
     }
     while (stack.count > 0) {
       final n = math.min(max, stack.count);
-      items.add(ItemStack(stack.item, n, seed: stack.seed));
+      items.add(stack.copyWithCount(n));
       stack.count -= n;
     }
   }
+
+  /// Adds [stack] to the pile, topping up stacks of the same item.
+  void put(ItemStack stack, StackSize stackSize) => _merge(stack, stackSize);
 
   /// Moves item [index] into [bag] as far as it fits. False when nothing fit,
   /// which is when the window offers a swap.

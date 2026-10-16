@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 
 part 'item_data.freezed.dart';
@@ -13,6 +14,9 @@ enum ItemKind {
   seed,
 
   material,
+
+  /// A piece of equipment; goes to the equipment box at home.
+  gear,
 }
 
 /// One kind of item a bag can hold (`items.json`).
@@ -28,6 +32,10 @@ abstract class ItemData with _$ItemData {
     /// What kind of seed a seed item is; required for [ItemKind.seed] only.
     /// Each seed found gets its own level, ability and style.
     SeedKindData? seed,
+
+    /// What kind of equipment a gear item is; required for [ItemKind.gear]
+    /// only. Each piece found gets its own level (and belt slots).
+    GearKindData? gear,
   }) = _ItemData;
 
   factory ItemData.fromJson(Map<String, dynamic> json) =>
@@ -42,6 +50,19 @@ abstract class SeedKindData with _$SeedKindData {
 
   factory SeedKindData.fromJson(Map<String, dynamic> json) =>
       _$SeedKindDataFromJson(json);
+}
+
+/// A gear item's slot, weapon family and grade, before the rest is rolled.
+@freezed
+abstract class GearKindData with _$GearKindData {
+  const factory GearKindData({
+    required GearKind kind,
+    @Default('') String family,
+    required Grade grade,
+  }) = _GearKindData;
+
+  factory GearKindData.fromJson(Map<String, dynamic> json) =>
+      _$GearKindDataFromJson(json);
 }
 
 /// What a gathering spot or a defeated enemy can give (`loot_tables.json`).

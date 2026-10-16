@@ -14,6 +14,8 @@ import 'package:potato_core/src/farm/farm_event.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
 import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/items/gear.dart';
+import 'package:potato_core/src/items/gear_stats.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
@@ -52,11 +54,13 @@ final class FarmSimulation {
     Iterable<OverflowSeed> overflow = const [],
     Map<String, int> materials = const {},
     Iterable<Mail> mail = const [],
-    this.weaponLevel = 0,
+    Iterable<Gear> gear = const [],
+    this.equipped = const Equipped(),
     this.progress = 0,
     int? totemLimit,
     FarmTotals? totals,
-  }) : _graves = List.of(graves),
+  }) : _gear = List.of(gear),
+       _graves = List.of(graves),
        totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
        pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
        gearSlots = gearSlots ?? catalog.rules.storage.gearSlots,
@@ -136,6 +140,7 @@ final class FarmSimulation {
       fields: fields,
       buildings: buildings,
       mail: letters,
+      equipped: catalog.rules.gear.start,
     );
   }
 
@@ -170,8 +175,15 @@ final class FarmSimulation {
   /// Letters, oldest first.
   final List<Mail> _mail;
 
-  /// How far the weapon was strengthened at the workbench.
-  int weaponLevel;
+  /// Equipment in the house box, beyond what is worn. May go past
+  /// [gearSlots] when a run brings more home; nothing more fits then.
+  final List<Gear> _gear;
+  List<Gear> get gear => List.unmodifiable(_gear);
+
+  /// What the player wears (and takes on runs).
+  Equipped equipped;
+
+  late final GearStats _gearStats = GearStats(catalog);
 
   /// The highest zone score of a successful run: equipment and seeds up to
   /// this plus a margin may be used. Never goes down.
@@ -385,7 +397,10 @@ final class FarmSimulation {
     ),
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
-    EnhanceWeapon() => _enhanceWeapon(),
+    EnhanceGear(:final worn, :final index) => _enhanceGear(worn, index),
+    EquipGear(:final index) => _equipGear(index),
+    UnequipGear(:final kind) => _unequipGear(kind),
+    DisassembleGear(:final index) => _disassembleGear(index),
     CollectSeeds(:final buildingId) => _collectSeeds(buildingId),
     LightTotem(:final buildingId) => _lightTotem(buildingId),
     RaiseTotemLimit() => _raiseTotemLimit(),
@@ -428,8 +443,19 @@ final class FarmSimulation {
       :final potatoIds,
       :final lostPotatoIds,
       :final score,
+      :final gear,
+      :final equipped,
     ) =>
-      _returnHome(food, seeds, materials, potatoIds, lostPotatoIds, score),
+      _returnHome(
+        food,
+        seeds,
+        materials,
+        potatoIds,
+        lostPotatoIds,
+        score,
+        gear,
+        equipped,
+      ),
   };
 
   /// Advances the farm by one fixed step (`rules.farm.step_millis`).
@@ -1047,10 +1073,21 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _enhanceWeapon() {
+  /// The worn piece of [worn], or box piece [index].
+  Gear? _gearAt(GearKind? worn, int? index) {
+    if (worn != null) return equipped.of(worn);
+    if (index != null && index >= 0 && index < _gear.length) {
+      return _gear[index];
+    }
+    return null;
+  }
+
+  FarmRejection? _enhanceGear(GearKind? worn, int? index) {
+    final piece = _gearAt(worn, index);
+    if (piece == null) return FarmRejection.noSuchGear;
     final bench = _rules.workbench;
-    if (weaponLevel >= bench.maxLevel) return FarmRejection.atMost;
-    final next = bench.nextFrom(weaponLevel);
+    if (piece.enhance >= bench.maxLevel) return FarmRejection.atMost;
+    final next = bench.nextFrom(piece.enhance);
     if (food < next.food) return FarmRejection.notEnoughFood;
     final have = _materials[bench.material] ?? 0;
     if (have < next.materials) return FarmRejection.notEnoughMaterials;
@@ -1061,13 +1098,57 @@ final class FarmSimulation {
       _materials[bench.material] = have - next.materials;
     }
     final worked = _random.chance(next.chance);
-    if (worked) weaponLevel++;
+    if (worked) {
+      final better = piece.copyWith(enhance: piece.enhance + 1);
+      if (worn != null) {
+        equipped = equipped.wearing(worn, better);
+      } else {
+        _gear[index!] = better;
+      }
+    }
     _events.add(
-      FarmEvent.weaponEnhanced(
-        level: weaponLevel + (worked ? 0 : 1),
+      FarmEvent.gearEnhanced(
+        kind: piece.kind,
+        level: piece.enhance + 1,
         worked: worked,
       ),
     );
+    return null;
+  }
+
+  /// Wears box piece [index]; what was worn there goes to its place.
+  FarmRejection? _equipGear(int index) {
+    if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
+    final piece = _gear[index];
+    if (!_gearStats.canWear(piece, progress)) return FarmRejection.cannotWear;
+    final old = equipped.of(piece.kind);
+    equipped = equipped.wearing(piece.kind, piece);
+    if (old == null) {
+      _gear.removeAt(index);
+    } else {
+      _gear[index] = old;
+    }
+    return null;
+  }
+
+  /// Takes off the worn piece of [kind] into the box (bare hands then).
+  FarmRejection? _unequipGear(GearKind kind) {
+    final piece = equipped.of(kind);
+    if (piece == null) return FarmRejection.noSuchGear;
+    if (_gear.length >= gearSlots) return FarmRejection.boxFull;
+    _gear.add(piece);
+    equipped = equipped.wearing(kind, null);
+    return null;
+  }
+
+  /// Breaks box piece [index] into materials.
+  FarmRejection? _disassembleGear(int index) {
+    if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
+    final piece = _gear.removeAt(index);
+    final materials = _gearStats.disassembly(piece);
+    final item = _rules.workbench.material;
+    if (materials > 0) _materials[item] = (_materials[item] ?? 0) + materials;
+    _events.add(FarmEvent.gearDisassembled(materials: materials));
     return null;
   }
 
@@ -1437,6 +1518,10 @@ final class FarmSimulation {
         ),
       );
     }
+    final fit = _gearStats.fitBelt(equipped.belt, [
+      for (final a in going) a.potato.type,
+    ]);
+    if (fit == null) return FarmRejection.beltTooSmall;
     this.food -= food;
     for (final away in going) {
       final id = away.potato.id;
@@ -1463,8 +1548,12 @@ final class FarmSimulation {
     List<int> potatoIds,
     List<int> lostPotatoIds,
     int? score,
+    List<Gear> gear,
+    Equipped? equipped,
   ) {
     this.food += food;
+    _gear.addAll(gear);
+    if (equipped != null) this.equipped = equipped;
     if (score != null && score > progress) progress = score;
     final lost = [
       for (final id in lostPotatoIds)

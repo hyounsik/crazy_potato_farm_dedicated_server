@@ -6,52 +6,64 @@ part of 'rules_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_RulesData _$RulesDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_RulesData', json, ($checkedConvert) {
-      final val = _RulesData(
-        farm: $checkedConvert(
-          'farm',
-          (v) => FarmRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        potatoes: $checkedConvert(
-          'potatoes',
-          (v) => PotatoRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        pests: $checkedConvert(
-          'pests',
-          (v) => PestRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        newFarm: $checkedConvert(
-          'new_farm',
-          (v) => NewFarmData.fromJson(v as Map<String, dynamic>),
-        ),
-        raid: $checkedConvert(
-          'raid',
-          (v) => RaidRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        storage: $checkedConvert(
-          'storage',
-          (v) => StorageRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        mail: $checkedConvert(
-          'mail',
-          (v) => MailRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        workbench: $checkedConvert(
-          'workbench',
-          (v) => WorkbenchRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        totems: $checkedConvert(
-          'totems',
-          (v) => TotemRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        breeding: $checkedConvert(
-          'breeding',
-          (v) => BreedingRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-      );
-      return val;
-    }, fieldKeyMap: const {'newFarm': 'new_farm'});
+_RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_RulesData',
+  json,
+  ($checkedConvert) {
+    final val = _RulesData(
+      farm: $checkedConvert(
+        'farm',
+        (v) => FarmRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      potatoes: $checkedConvert(
+        'potatoes',
+        (v) => PotatoRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      pests: $checkedConvert(
+        'pests',
+        (v) => PestRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      newFarm: $checkedConvert(
+        'new_farm',
+        (v) => NewFarmData.fromJson(v as Map<String, dynamic>),
+      ),
+      raid: $checkedConvert(
+        'raid',
+        (v) => RaidRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      storage: $checkedConvert(
+        'storage',
+        (v) => StorageRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      mail: $checkedConvert(
+        'mail',
+        (v) => MailRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      workbench: $checkedConvert(
+        'workbench',
+        (v) => WorkbenchRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      totems: $checkedConvert(
+        'totems',
+        (v) => TotemRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      breeding: $checkedConvert(
+        'breeding',
+        (v) => BreedingRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      gear: $checkedConvert(
+        'gear',
+        (v) => GearRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      combatPower: $checkedConvert(
+        'combat_power',
+        (v) => CombatPowerRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {'newFarm': 'new_farm', 'combatPower': 'combat_power'},
+);
 
 Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
     <String, dynamic>{
@@ -65,6 +77,8 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'workbench': instance.workbench.toJson(),
       'totems': instance.totems.toJson(),
       'breeding': instance.breeding.toJson(),
+      'gear': instance.gear.toJson(),
+      'combat_power': instance.combatPower.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -554,6 +568,181 @@ Map<String, dynamic> _$WorkbenchRulesDataToJson(_WorkbenchRulesData instance) =>
       'min_chance': instance.minChance,
       'damage_percent': instance.damagePercent,
     };
+
+_GearRulesData _$GearRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_GearRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _GearRulesData(
+      bareWeapon: $checkedConvert('bare_weapon', (v) => v as String),
+      bareBagSlots: $checkedConvert(
+        'bare_bag_slots',
+        (v) => (v as num).toInt(),
+      ),
+      bareBeltSlots: $checkedConvert(
+        'bare_belt_slots',
+        (v) => (v as num).toInt(),
+      ),
+      gradeDamage: $checkedConvert(
+        'grade_damage',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toDouble()),
+        ),
+      ),
+      levelDamagePermille: $checkedConvert(
+        'level_damage_permille',
+        (v) => (v as num).toInt(),
+      ),
+      bagSlots: $checkedConvert(
+        'bag_slots',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+        ),
+      ),
+      bagEnhanceSlots: $checkedConvert(
+        'bag_enhance_slots',
+        (v) => (v as num).toInt(),
+      ),
+      beltSlots: $checkedConvert(
+        'belt_slots',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+        ),
+      ),
+      beltPercent: $checkedConvert(
+        'belt_percent',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toDouble()),
+        ),
+      ),
+      beltPercentPerTenLevels: $checkedConvert(
+        'belt_percent_per_ten_levels',
+        (v) => (v as num).toDouble(),
+      ),
+      beltEnhancePercent: $checkedConvert(
+        'belt_enhance_percent',
+        (v) => (v as num).toDouble(),
+      ),
+      disassemble: $checkedConvert(
+        'disassemble',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+        ),
+      ),
+      enhanceRefundPercent: $checkedConvert(
+        'enhance_refund_percent',
+        (v) => (v as num).toInt(),
+      ),
+      lossChance: $checkedConvert('loss_chance', (v) => (v as num).toDouble()),
+      useMargin: $checkedConvert('use_margin', (v) => (v as num).toInt()),
+      start: $checkedConvert(
+        'start',
+        (v) => Equipped.fromJson(v as Map<String, dynamic>),
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'bareWeapon': 'bare_weapon',
+    'bareBagSlots': 'bare_bag_slots',
+    'bareBeltSlots': 'bare_belt_slots',
+    'gradeDamage': 'grade_damage',
+    'levelDamagePermille': 'level_damage_permille',
+    'bagSlots': 'bag_slots',
+    'bagEnhanceSlots': 'bag_enhance_slots',
+    'beltSlots': 'belt_slots',
+    'beltPercent': 'belt_percent',
+    'beltPercentPerTenLevels': 'belt_percent_per_ten_levels',
+    'beltEnhancePercent': 'belt_enhance_percent',
+    'enhanceRefundPercent': 'enhance_refund_percent',
+    'lossChance': 'loss_chance',
+    'useMargin': 'use_margin',
+  },
+);
+
+Map<String, dynamic> _$GearRulesDataToJson(
+  _GearRulesData instance,
+) => <String, dynamic>{
+  'bare_weapon': instance.bareWeapon,
+  'bare_bag_slots': instance.bareBagSlots,
+  'bare_belt_slots': instance.bareBeltSlots,
+  'grade_damage': instance.gradeDamage.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'level_damage_permille': instance.levelDamagePermille,
+  'bag_slots': instance.bagSlots.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
+  'bag_enhance_slots': instance.bagEnhanceSlots,
+  'belt_slots': instance.beltSlots.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'belt_percent': instance.beltPercent.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'belt_percent_per_ten_levels': instance.beltPercentPerTenLevels,
+  'belt_enhance_percent': instance.beltEnhancePercent,
+  'disassemble': instance.disassemble.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'enhance_refund_percent': instance.enhanceRefundPercent,
+  'loss_chance': instance.lossChance,
+  'use_margin': instance.useMargin,
+  'start': instance.start.toJson(),
+};
+
+_CombatPowerRulesData _$CombatPowerRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_CombatPowerRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _CombatPowerRulesData(
+      weaponDps: $checkedConvert('weapon_dps', (v) => (v as num).toDouble()),
+      potatoHp: $checkedConvert('potato_hp', (v) => (v as num).toDouble()),
+      potatoDps: $checkedConvert('potato_dps', (v) => (v as num).toDouble()),
+      helper: $checkedConvert('helper', (v) => (v as num).toDouble()),
+      recommendedBase: $checkedConvert(
+        'recommended_base',
+        (v) => (v as num).toDouble(),
+      ),
+      recommendedPerScore: $checkedConvert(
+        'recommended_per_score',
+        (v) => (v as num).toDouble(),
+      ),
+      easyRatio: $checkedConvert('easy_ratio', (v) => (v as num).toDouble()),
+      fairRatio: $checkedConvert('fair_ratio', (v) => (v as num).toDouble()),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'weaponDps': 'weapon_dps',
+    'potatoHp': 'potato_hp',
+    'potatoDps': 'potato_dps',
+    'recommendedBase': 'recommended_base',
+    'recommendedPerScore': 'recommended_per_score',
+    'easyRatio': 'easy_ratio',
+    'fairRatio': 'fair_ratio',
+  },
+);
+
+Map<String, dynamic> _$CombatPowerRulesDataToJson(
+  _CombatPowerRulesData instance,
+) => <String, dynamic>{
+  'weapon_dps': instance.weaponDps,
+  'potato_hp': instance.potatoHp,
+  'potato_dps': instance.potatoDps,
+  'helper': instance.helper,
+  'recommended_base': instance.recommendedBase,
+  'recommended_per_score': instance.recommendedPerScore,
+  'easy_ratio': instance.easyRatio,
+  'fair_ratio': instance.fairRatio,
+};
 
 _BreedingRulesData _$BreedingRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate(

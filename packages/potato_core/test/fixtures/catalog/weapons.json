@@ -27,6 +27,15 @@
       "damage": 60,
       "bullet_speed": 20,
       "aim_seconds": 0.7
+    },
+    {
+      "id": "bare",
+      "range": 2.0,
+      "interval": 0.5,
+      "damage": 3,
+      "bullet_speed": 8,
+      "spread_degrees": 10,
+      "preferred_distance": 1.5
     }
   ]
 }

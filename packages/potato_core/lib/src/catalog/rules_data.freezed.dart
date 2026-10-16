@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RulesData {
 
- FarmRulesData get farm; PotatoRulesData get potatoes; PestRulesData get pests; NewFarmData get newFarm; RaidRulesData get raid; StorageRulesData get storage; MailRulesData get mail; WorkbenchRulesData get workbench; TotemRulesData get totems; BreedingRulesData get breeding;
+ FarmRulesData get farm; PotatoRulesData get potatoes; PestRulesData get pests; NewFarmData get newFarm; RaidRulesData get raid; StorageRulesData get storage; MailRulesData get mail; WorkbenchRulesData get workbench; TotemRulesData get totems; BreedingRulesData get breeding; GearRulesData get gear; CombatPowerRulesData get combatPower;
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $RulesDataCopyWith<RulesData> get copyWith => _$RulesDataCopyWithImpl<RulesData>
 @override
 bool operator ==(Object other) {
   final _this = this as RulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.pests, _this.pests) || other.pests == _this.pests)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid)&&(identical(other.storage, _this.storage) || other.storage == _this.storage)&&(identical(other.mail, _this.mail) || other.mail == _this.mail)&&(identical(other.workbench, _this.workbench) || other.workbench == _this.workbench)&&(identical(other.totems, _this.totems) || other.totems == _this.totems)&&(identical(other.breeding, _this.breeding) || other.breeding == _this.breeding));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.pests, _this.pests) || other.pests == _this.pests)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid)&&(identical(other.storage, _this.storage) || other.storage == _this.storage)&&(identical(other.mail, _this.mail) || other.mail == _this.mail)&&(identical(other.workbench, _this.workbench) || other.workbench == _this.workbench)&&(identical(other.totems, _this.totems) || other.totems == _this.totems)&&(identical(other.breeding, _this.breeding) || other.breeding == _this.breeding)&&(identical(other.gear, _this.gear) || other.gear == _this.gear)&&(identical(other.combatPower, _this.combatPower) || other.combatPower == _this.combatPower));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RulesData;
-  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.pests,_this.newFarm,_this.raid,_this.storage,_this.mail,_this.workbench,_this.totems,_this.breeding);
+  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.pests,_this.newFarm,_this.raid,_this.storage,_this.mail,_this.workbench,_this.totems,_this.breeding,_this.gear,_this.combatPower);
 }
 
 @override
 String toString() {
   final _this = this as RulesData;
-  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, pests: ${_this.pests}, newFarm: ${_this.newFarm}, raid: ${_this.raid}, storage: ${_this.storage}, mail: ${_this.mail}, workbench: ${_this.workbench}, totems: ${_this.totems}, breeding: ${_this.breeding})';
+  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, pests: ${_this.pests}, newFarm: ${_this.newFarm}, raid: ${_this.raid}, storage: ${_this.storage}, mail: ${_this.mail}, workbench: ${_this.workbench}, totems: ${_this.totems}, breeding: ${_this.breeding}, gear: ${_this.gear}, combatPower: ${_this.combatPower})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $RulesDataCopyWith<$Res>  {
   factory $RulesDataCopyWith(RulesData value, $Res Function(RulesData) _then) = _$RulesDataCopyWithImpl;
 @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower
 });
 
 
-$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$PestRulesDataCopyWith<$Res> get pests;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;$StorageRulesDataCopyWith<$Res> get storage;$MailRulesDataCopyWith<$Res> get mail;$WorkbenchRulesDataCopyWith<$Res> get workbench;$TotemRulesDataCopyWith<$Res> get totems;$BreedingRulesDataCopyWith<$Res> get breeding;
+$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$PestRulesDataCopyWith<$Res> get pests;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;$StorageRulesDataCopyWith<$Res> get storage;$MailRulesDataCopyWith<$Res> get mail;$WorkbenchRulesDataCopyWith<$Res> get workbench;$TotemRulesDataCopyWith<$Res> get totems;$BreedingRulesDataCopyWith<$Res> get breeding;$GearRulesDataCopyWith<$Res> get gear;$CombatPowerRulesDataCopyWith<$Res> get combatPower;
 
 }
 /// @nodoc
@@ -71,7 +71,7 @@ class _$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,}) {
   return _then(RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
@@ -83,7 +83,9 @@ as StorageRulesData,mail: null == mail ? _self.mail : mail // ignore: cast_nulla
 as MailRulesData,workbench: null == workbench ? _self.workbench : workbench // ignore: cast_nullable_to_non_nullable
 as WorkbenchRulesData,totems: null == totems ? _self.totems : totems // ignore: cast_nullable_to_non_nullable
 as TotemRulesData,breeding: null == breeding ? _self.breeding : breeding // ignore: cast_nullable_to_non_nullable
-as BreedingRulesData,
+as BreedingRulesData,gear: null == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
+as GearRulesData,combatPower: null == combatPower ? _self.combatPower : combatPower // ignore: cast_nullable_to_non_nullable
+as CombatPowerRulesData,
   ));
 }
 /// Create a copy of RulesData
@@ -175,6 +177,24 @@ $BreedingRulesDataCopyWith<$Res> get breeding {
   
   return $BreedingRulesDataCopyWith<$Res>(_self.breeding, (value) {
     return _then(_self.copyWith(breeding: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GearRulesDataCopyWith<$Res> get gear {
+  
+  return $GearRulesDataCopyWith<$Res>(_self.gear, (value) {
+    return _then(_self.copyWith(gear: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CombatPowerRulesDataCopyWith<$Res> get combatPower {
+  
+  return $CombatPowerRulesDataCopyWith<$Res>(_self.combatPower, (value) {
+    return _then(_self.copyWith(combatPower: value));
   });
 }
 }
@@ -258,10 +278,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
   return orElse();
 
 }
@@ -279,10 +299,10 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)  $default,) {final _that = this;
 switch (_that) {
 case _RulesData():
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -299,10 +319,10 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)?  $default,) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
   return null;
 
 }
@@ -314,7 +334,7 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 @JsonSerializable()
 
 class _RulesData implements RulesData {
-  const _RulesData({required this.farm, required this.potatoes, required this.pests, required this.newFarm, required this.raid, required this.storage, required this.mail, required this.workbench, required this.totems, required this.breeding});
+  const _RulesData({required this.farm, required this.potatoes, required this.pests, required this.newFarm, required this.raid, required this.storage, required this.mail, required this.workbench, required this.totems, required this.breeding, required this.gear, required this.combatPower});
   factory _RulesData.fromJson(Map<String, dynamic> json) => _$RulesDataFromJson(json);
 
 @override final  FarmRulesData farm;
@@ -327,6 +347,8 @@ class _RulesData implements RulesData {
 @override final  WorkbenchRulesData workbench;
 @override final  TotemRulesData totems;
 @override final  BreedingRulesData breeding;
+@override final  GearRulesData gear;
+@override final  CombatPowerRulesData combatPower;
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -341,18 +363,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.pests, pests) || other.pests == pests)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid)&&(identical(other.storage, storage) || other.storage == storage)&&(identical(other.mail, mail) || other.mail == mail)&&(identical(other.workbench, workbench) || other.workbench == workbench)&&(identical(other.totems, totems) || other.totems == totems)&&(identical(other.breeding, breeding) || other.breeding == breeding));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.pests, pests) || other.pests == pests)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid)&&(identical(other.storage, storage) || other.storage == storage)&&(identical(other.mail, mail) || other.mail == mail)&&(identical(other.workbench, workbench) || other.workbench == workbench)&&(identical(other.totems, totems) || other.totems == totems)&&(identical(other.breeding, breeding) || other.breeding == breeding)&&(identical(other.gear, gear) || other.gear == gear)&&(identical(other.combatPower, combatPower) || other.combatPower == combatPower));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,farm,potatoes,pests,newFarm,raid,storage,mail,workbench,totems,breeding);
+    return Object.hash(runtimeType,farm,potatoes,pests,newFarm,raid,storage,mail,workbench,totems,breeding,gear,combatPower);
 }
 
 @override
 String toString() {
-    return 'RulesData(farm: $farm, potatoes: $potatoes, pests: $pests, newFarm: $newFarm, raid: $raid, storage: $storage, mail: $mail, workbench: $workbench, totems: $totems, breeding: $breeding)';
+    return 'RulesData(farm: $farm, potatoes: $potatoes, pests: $pests, newFarm: $newFarm, raid: $raid, storage: $storage, mail: $mail, workbench: $workbench, totems: $totems, breeding: $breeding, gear: $gear, combatPower: $combatPower)';
 }
 
 
@@ -363,11 +385,11 @@ abstract mixin class _$RulesDataCopyWith<$Res> implements $RulesDataCopyWith<$Re
   factory _$RulesDataCopyWith(_RulesData value, $Res Function(_RulesData) _then) = __$RulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower
 });
 
 
-@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $PestRulesDataCopyWith<$Res> get pests;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;@override $StorageRulesDataCopyWith<$Res> get storage;@override $MailRulesDataCopyWith<$Res> get mail;@override $WorkbenchRulesDataCopyWith<$Res> get workbench;@override $TotemRulesDataCopyWith<$Res> get totems;@override $BreedingRulesDataCopyWith<$Res> get breeding;
+@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $PestRulesDataCopyWith<$Res> get pests;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;@override $StorageRulesDataCopyWith<$Res> get storage;@override $MailRulesDataCopyWith<$Res> get mail;@override $WorkbenchRulesDataCopyWith<$Res> get workbench;@override $TotemRulesDataCopyWith<$Res> get totems;@override $BreedingRulesDataCopyWith<$Res> get breeding;@override $GearRulesDataCopyWith<$Res> get gear;@override $CombatPowerRulesDataCopyWith<$Res> get combatPower;
 
 }
 /// @nodoc
@@ -380,7 +402,7 @@ class __$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,}) {
   return _then(_RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
@@ -392,7 +414,9 @@ as StorageRulesData,mail: null == mail ? _self.mail : mail // ignore: cast_nulla
 as MailRulesData,workbench: null == workbench ? _self.workbench : workbench // ignore: cast_nullable_to_non_nullable
 as WorkbenchRulesData,totems: null == totems ? _self.totems : totems // ignore: cast_nullable_to_non_nullable
 as TotemRulesData,breeding: null == breeding ? _self.breeding : breeding // ignore: cast_nullable_to_non_nullable
-as BreedingRulesData,
+as BreedingRulesData,gear: null == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
+as GearRulesData,combatPower: null == combatPower ? _self.combatPower : combatPower // ignore: cast_nullable_to_non_nullable
+as CombatPowerRulesData,
   ));
 }
 
@@ -485,6 +509,24 @@ $BreedingRulesDataCopyWith<$Res> get breeding {
   
   return $BreedingRulesDataCopyWith<$Res>(_self.breeding, (value) {
     return _then(_self.copyWith(breeding: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GearRulesDataCopyWith<$Res> get gear {
+  
+  return $GearRulesDataCopyWith<$Res>(_self.gear, (value) {
+    return _then(_self.copyWith(gear: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$CombatPowerRulesDataCopyWith<$Res> get combatPower {
+  
+  return $CombatPowerRulesDataCopyWith<$Res>(_self.combatPower, (value) {
+    return _then(_self.copyWith(combatPower: value));
   });
 }
 }
@@ -4136,6 +4178,708 @@ as int,chance: null == chance ? _self.chance : chance // ignore: cast_nullable_t
 as double,chanceStep: null == chanceStep ? _self.chanceStep : chanceStep // ignore: cast_nullable_to_non_nullable
 as double,minChance: null == minChance ? _self.minChance : minChance // ignore: cast_nullable_to_non_nullable
 as double,damagePercent: null == damagePercent ? _self.damagePercent : damagePercent // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$GearRulesData {
+
+/// Bare hands: the weapon used with none, the bag slots, and belt slots
+/// that take any potato.
+ String get bareWeapon; int get bareBagSlots; int get bareBeltSlots;/// Weapons: damage share by grade, and what each level adds in
+/// thousandths. The workbench adds `workbench.damage_percent` a level.
+ Map<Grade, double> get gradeDamage; int get levelDamagePermille;/// Bags: slots by grade, and slots each workbench level adds.
+ Map<Grade, int> get bagSlots; int get bagEnhanceSlots;/// Belts: slots by grade, and how much stronger a potato in a slot
+/// gets at its job, in percent by grade, per ten levels, and per
+/// workbench level.
+ Map<Grade, int> get beltSlots; Map<Grade, double> get beltPercent; double get beltPercentPerTenLevels; double get beltEnhancePercent;/// Materials a piece breaks down into by grade, plus this share of what
+/// its workbench levels took.
+ Map<Grade, int> get disassemble; int get enhanceRefundPercent;/// Chance each worn piece is lost when a danger run fails.
+ double get lossChance;/// Gear can be worn up to the farm's progress plus this.
+ int get useMargin;/// What a new farm wears.
+ Equipped get start;
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GearRulesDataCopyWith<GearRulesData> get copyWith => _$GearRulesDataCopyWithImpl<GearRulesData>(this as GearRulesData, _$identity);
+
+  /// Serializes this GearRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as GearRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GearRulesData&&(identical(other.bareWeapon, _this.bareWeapon) || other.bareWeapon == _this.bareWeapon)&&(identical(other.bareBagSlots, _this.bareBagSlots) || other.bareBagSlots == _this.bareBagSlots)&&(identical(other.bareBeltSlots, _this.bareBeltSlots) || other.bareBeltSlots == _this.bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _this.gradeDamage)&&(identical(other.levelDamagePermille, _this.levelDamagePermille) || other.levelDamagePermille == _this.levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _this.bagSlots)&&(identical(other.bagEnhanceSlots, _this.bagEnhanceSlots) || other.bagEnhanceSlots == _this.bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _this.beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _this.beltPercent)&&(identical(other.beltPercentPerTenLevels, _this.beltPercentPerTenLevels) || other.beltPercentPerTenLevels == _this.beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, _this.beltEnhancePercent) || other.beltEnhancePercent == _this.beltEnhancePercent)&&const DeepCollectionEquality().equals(other.disassemble, _this.disassemble)&&(identical(other.enhanceRefundPercent, _this.enhanceRefundPercent) || other.enhanceRefundPercent == _this.enhanceRefundPercent)&&(identical(other.lossChance, _this.lossChance) || other.lossChance == _this.lossChance)&&(identical(other.useMargin, _this.useMargin) || other.useMargin == _this.useMargin)&&(identical(other.start, _this.start) || other.start == _this.start));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as GearRulesData;
+  return Object.hash(runtimeType,_this.bareWeapon,_this.bareBagSlots,_this.bareBeltSlots,const DeepCollectionEquality().hash(_this.gradeDamage),_this.levelDamagePermille,const DeepCollectionEquality().hash(_this.bagSlots),_this.bagEnhanceSlots,const DeepCollectionEquality().hash(_this.beltSlots),const DeepCollectionEquality().hash(_this.beltPercent),_this.beltPercentPerTenLevels,_this.beltEnhancePercent,const DeepCollectionEquality().hash(_this.disassemble),_this.enhanceRefundPercent,_this.lossChance,_this.useMargin,_this.start);
+}
+
+@override
+String toString() {
+  final _this = this as GearRulesData;
+  return 'GearRulesData(bareWeapon: ${_this.bareWeapon}, bareBagSlots: ${_this.bareBagSlots}, bareBeltSlots: ${_this.bareBeltSlots}, gradeDamage: ${_this.gradeDamage}, levelDamagePermille: ${_this.levelDamagePermille}, bagSlots: ${_this.bagSlots}, bagEnhanceSlots: ${_this.bagEnhanceSlots}, beltSlots: ${_this.beltSlots}, beltPercent: ${_this.beltPercent}, beltPercentPerTenLevels: ${_this.beltPercentPerTenLevels}, beltEnhancePercent: ${_this.beltEnhancePercent}, disassemble: ${_this.disassemble}, enhanceRefundPercent: ${_this.enhanceRefundPercent}, lossChance: ${_this.lossChance}, useMargin: ${_this.useMargin}, start: ${_this.start})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GearRulesDataCopyWith<$Res>  {
+  factory $GearRulesDataCopyWith(GearRulesData value, $Res Function(GearRulesData) _then) = _$GearRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, Map<Grade, int> disassemble, int enhanceRefundPercent, double lossChance, int useMargin, Equipped start
+});
+
+
+$EquippedCopyWith<$Res> get start;
+
+}
+/// @nodoc
+class _$GearRulesDataCopyWithImpl<$Res>
+    implements $GearRulesDataCopyWith<$Res> {
+  _$GearRulesDataCopyWithImpl(this._self, this._then);
+
+  final GearRulesData _self;
+  final $Res Function(GearRulesData) _then;
+
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? lossChance = null,Object? useMargin = null,Object? start = null,}) {
+  return _then(GearRulesData(
+bareWeapon: null == bareWeapon ? _self.bareWeapon : bareWeapon // ignore: cast_nullable_to_non_nullable
+as String,bareBagSlots: null == bareBagSlots ? _self.bareBagSlots : bareBagSlots // ignore: cast_nullable_to_non_nullable
+as int,bareBeltSlots: null == bareBeltSlots ? _self.bareBeltSlots : bareBeltSlots // ignore: cast_nullable_to_non_nullable
+as int,gradeDamage: null == gradeDamage ? _self.gradeDamage : gradeDamage // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,levelDamagePermille: null == levelDamagePermille ? _self.levelDamagePermille : levelDamagePermille // ignore: cast_nullable_to_non_nullable
+as int,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,bagEnhanceSlots: null == bagEnhanceSlots ? _self.bagEnhanceSlots : bagEnhanceSlots // ignore: cast_nullable_to_non_nullable
+as int,beltSlots: null == beltSlots ? _self.beltSlots : beltSlots // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,beltPercent: null == beltPercent ? _self.beltPercent : beltPercent // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,beltPercentPerTenLevels: null == beltPercentPerTenLevels ? _self.beltPercentPerTenLevels : beltPercentPerTenLevels // ignore: cast_nullable_to_non_nullable
+as double,beltEnhancePercent: null == beltEnhancePercent ? _self.beltEnhancePercent : beltEnhancePercent // ignore: cast_nullable_to_non_nullable
+as double,disassemble: null == disassemble ? _self.disassemble : disassemble // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,enhanceRefundPercent: null == enhanceRefundPercent ? _self.enhanceRefundPercent : enhanceRefundPercent // ignore: cast_nullable_to_non_nullable
+as int,lossChance: null == lossChance ? _self.lossChance : lossChance // ignore: cast_nullable_to_non_nullable
+as double,useMargin: null == useMargin ? _self.useMargin : useMargin // ignore: cast_nullable_to_non_nullable
+as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as Equipped,
+  ));
+}
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EquippedCopyWith<$Res> get start {
+  
+  return $EquippedCopyWith<$Res>(_self.start, (value) {
+    return _then(_self.copyWith(start: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [GearRulesData].
+extension GearRulesDataPatterns on GearRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GearRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GearRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GearRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _GearRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GearRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GearRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  double lossChance,  int useMargin,  Equipped start)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GearRulesData() when $default != null:
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.disassemble,_that.enhanceRefundPercent,_that.lossChance,_that.useMargin,_that.start);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  double lossChance,  int useMargin,  Equipped start)  $default,) {final _that = this;
+switch (_that) {
+case _GearRulesData():
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.disassemble,_that.enhanceRefundPercent,_that.lossChance,_that.useMargin,_that.start);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  double lossChance,  int useMargin,  Equipped start)?  $default,) {final _that = this;
+switch (_that) {
+case _GearRulesData() when $default != null:
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.disassemble,_that.enhanceRefundPercent,_that.lossChance,_that.useMargin,_that.start);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _GearRulesData implements GearRulesData {
+  const _GearRulesData({required this.bareWeapon, required this.bareBagSlots, required this.bareBeltSlots, required  Map<Grade, double> gradeDamage, required this.levelDamagePermille, required  Map<Grade, int> bagSlots, required this.bagEnhanceSlots, required  Map<Grade, int> beltSlots, required  Map<Grade, double> beltPercent, required this.beltPercentPerTenLevels, required this.beltEnhancePercent, required  Map<Grade, int> disassemble, required this.enhanceRefundPercent, required this.lossChance, required this.useMargin, required this.start}): _gradeDamage = gradeDamage,_bagSlots = bagSlots,_beltSlots = beltSlots,_beltPercent = beltPercent,_disassemble = disassemble;
+  factory _GearRulesData.fromJson(Map<String, dynamic> json) => _$GearRulesDataFromJson(json);
+
+/// Bare hands: the weapon used with none, the bag slots, and belt slots
+/// that take any potato.
+@override final  String bareWeapon;
+@override final  int bareBagSlots;
+@override final  int bareBeltSlots;
+/// Weapons: damage share by grade, and what each level adds in
+/// thousandths. The workbench adds `workbench.damage_percent` a level.
+ final  Map<Grade, double> _gradeDamage;
+/// Weapons: damage share by grade, and what each level adds in
+/// thousandths. The workbench adds `workbench.damage_percent` a level.
+@override Map<Grade, double> get gradeDamage {
+  if (_gradeDamage is EqualUnmodifiableMapView) return _gradeDamage;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_gradeDamage);
+}
+
+@override final  int levelDamagePermille;
+/// Bags: slots by grade, and slots each workbench level adds.
+ final  Map<Grade, int> _bagSlots;
+/// Bags: slots by grade, and slots each workbench level adds.
+@override Map<Grade, int> get bagSlots {
+  if (_bagSlots is EqualUnmodifiableMapView) return _bagSlots;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_bagSlots);
+}
+
+@override final  int bagEnhanceSlots;
+/// Belts: slots by grade, and how much stronger a potato in a slot
+/// gets at its job, in percent by grade, per ten levels, and per
+/// workbench level.
+ final  Map<Grade, int> _beltSlots;
+/// Belts: slots by grade, and how much stronger a potato in a slot
+/// gets at its job, in percent by grade, per ten levels, and per
+/// workbench level.
+@override Map<Grade, int> get beltSlots {
+  if (_beltSlots is EqualUnmodifiableMapView) return _beltSlots;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_beltSlots);
+}
+
+ final  Map<Grade, double> _beltPercent;
+@override Map<Grade, double> get beltPercent {
+  if (_beltPercent is EqualUnmodifiableMapView) return _beltPercent;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_beltPercent);
+}
+
+@override final  double beltPercentPerTenLevels;
+@override final  double beltEnhancePercent;
+/// Materials a piece breaks down into by grade, plus this share of what
+/// its workbench levels took.
+ final  Map<Grade, int> _disassemble;
+/// Materials a piece breaks down into by grade, plus this share of what
+/// its workbench levels took.
+@override Map<Grade, int> get disassemble {
+  if (_disassemble is EqualUnmodifiableMapView) return _disassemble;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_disassemble);
+}
+
+@override final  int enhanceRefundPercent;
+/// Chance each worn piece is lost when a danger run fails.
+@override final  double lossChance;
+/// Gear can be worn up to the farm's progress plus this.
+@override final  int useMargin;
+/// What a new farm wears.
+@override final  Equipped start;
+
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GearRulesDataCopyWith<_GearRulesData> get copyWith => __$GearRulesDataCopyWithImpl<_GearRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GearRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GearRulesData&&(identical(other.bareWeapon, bareWeapon) || other.bareWeapon == bareWeapon)&&(identical(other.bareBagSlots, bareBagSlots) || other.bareBagSlots == bareBagSlots)&&(identical(other.bareBeltSlots, bareBeltSlots) || other.bareBeltSlots == bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _gradeDamage)&&(identical(other.levelDamagePermille, levelDamagePermille) || other.levelDamagePermille == levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _bagSlots)&&(identical(other.bagEnhanceSlots, bagEnhanceSlots) || other.bagEnhanceSlots == bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _beltPercent)&&(identical(other.beltPercentPerTenLevels, beltPercentPerTenLevels) || other.beltPercentPerTenLevels == beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, beltEnhancePercent) || other.beltEnhancePercent == beltEnhancePercent)&&const DeepCollectionEquality().equals(other.disassemble, _disassemble)&&(identical(other.enhanceRefundPercent, enhanceRefundPercent) || other.enhanceRefundPercent == enhanceRefundPercent)&&(identical(other.lossChance, lossChance) || other.lossChance == lossChance)&&(identical(other.useMargin, useMargin) || other.useMargin == useMargin)&&(identical(other.start, start) || other.start == start));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,bareWeapon,bareBagSlots,bareBeltSlots,const DeepCollectionEquality().hash(_gradeDamage),levelDamagePermille,const DeepCollectionEquality().hash(_bagSlots),bagEnhanceSlots,const DeepCollectionEquality().hash(_beltSlots),const DeepCollectionEquality().hash(_beltPercent),beltPercentPerTenLevels,beltEnhancePercent,const DeepCollectionEquality().hash(_disassemble),enhanceRefundPercent,lossChance,useMargin,start);
+}
+
+@override
+String toString() {
+    return 'GearRulesData(bareWeapon: $bareWeapon, bareBagSlots: $bareBagSlots, bareBeltSlots: $bareBeltSlots, gradeDamage: $gradeDamage, levelDamagePermille: $levelDamagePermille, bagSlots: $bagSlots, bagEnhanceSlots: $bagEnhanceSlots, beltSlots: $beltSlots, beltPercent: $beltPercent, beltPercentPerTenLevels: $beltPercentPerTenLevels, beltEnhancePercent: $beltEnhancePercent, disassemble: $disassemble, enhanceRefundPercent: $enhanceRefundPercent, lossChance: $lossChance, useMargin: $useMargin, start: $start)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GearRulesDataCopyWith<$Res> implements $GearRulesDataCopyWith<$Res> {
+  factory _$GearRulesDataCopyWith(_GearRulesData value, $Res Function(_GearRulesData) _then) = __$GearRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, Map<Grade, int> disassemble, int enhanceRefundPercent, double lossChance, int useMargin, Equipped start
+});
+
+
+@override $EquippedCopyWith<$Res> get start;
+
+}
+/// @nodoc
+class __$GearRulesDataCopyWithImpl<$Res>
+    implements _$GearRulesDataCopyWith<$Res> {
+  __$GearRulesDataCopyWithImpl(this._self, this._then);
+
+  final _GearRulesData _self;
+  final $Res Function(_GearRulesData) _then;
+
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? lossChance = null,Object? useMargin = null,Object? start = null,}) {
+  return _then(_GearRulesData(
+bareWeapon: null == bareWeapon ? _self.bareWeapon : bareWeapon // ignore: cast_nullable_to_non_nullable
+as String,bareBagSlots: null == bareBagSlots ? _self.bareBagSlots : bareBagSlots // ignore: cast_nullable_to_non_nullable
+as int,bareBeltSlots: null == bareBeltSlots ? _self.bareBeltSlots : bareBeltSlots // ignore: cast_nullable_to_non_nullable
+as int,gradeDamage: null == gradeDamage ? _self._gradeDamage : gradeDamage // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,levelDamagePermille: null == levelDamagePermille ? _self.levelDamagePermille : levelDamagePermille // ignore: cast_nullable_to_non_nullable
+as int,bagSlots: null == bagSlots ? _self._bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,bagEnhanceSlots: null == bagEnhanceSlots ? _self.bagEnhanceSlots : bagEnhanceSlots // ignore: cast_nullable_to_non_nullable
+as int,beltSlots: null == beltSlots ? _self._beltSlots : beltSlots // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,beltPercent: null == beltPercent ? _self._beltPercent : beltPercent // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,beltPercentPerTenLevels: null == beltPercentPerTenLevels ? _self.beltPercentPerTenLevels : beltPercentPerTenLevels // ignore: cast_nullable_to_non_nullable
+as double,beltEnhancePercent: null == beltEnhancePercent ? _self.beltEnhancePercent : beltEnhancePercent // ignore: cast_nullable_to_non_nullable
+as double,disassemble: null == disassemble ? _self._disassemble : disassemble // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,enhanceRefundPercent: null == enhanceRefundPercent ? _self.enhanceRefundPercent : enhanceRefundPercent // ignore: cast_nullable_to_non_nullable
+as int,lossChance: null == lossChance ? _self.lossChance : lossChance // ignore: cast_nullable_to_non_nullable
+as double,useMargin: null == useMargin ? _self.useMargin : useMargin // ignore: cast_nullable_to_non_nullable
+as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as Equipped,
+  ));
+}
+
+/// Create a copy of GearRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$EquippedCopyWith<$Res> get start {
+  
+  return $EquippedCopyWith<$Res>(_self.start, (value) {
+    return _then(_self.copyWith(start: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$CombatPowerRulesData {
+
+/// Points per point of weapon damage per second.
+ double get weaponDps;/// Points per point of a combat potato's health, and of its damage
+/// per second.
+ double get potatoHp; double get potatoDps;/// Flat points for each food or buff potato along.
+ double get helper;/// What a zone calls for: this plus so much a score point.
+ double get recommendedBase; double get recommendedPerScore;/// Power over recommended at or above [easyRatio] is easy; at or above
+/// [fairRatio], fair; under it, risky.
+ double get easyRatio; double get fairRatio;
+/// Create a copy of CombatPowerRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$CombatPowerRulesDataCopyWith<CombatPowerRulesData> get copyWith => _$CombatPowerRulesDataCopyWithImpl<CombatPowerRulesData>(this as CombatPowerRulesData, _$identity);
+
+  /// Serializes this CombatPowerRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as CombatPowerRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CombatPowerRulesData&&(identical(other.weaponDps, _this.weaponDps) || other.weaponDps == _this.weaponDps)&&(identical(other.potatoHp, _this.potatoHp) || other.potatoHp == _this.potatoHp)&&(identical(other.potatoDps, _this.potatoDps) || other.potatoDps == _this.potatoDps)&&(identical(other.helper, _this.helper) || other.helper == _this.helper)&&(identical(other.recommendedBase, _this.recommendedBase) || other.recommendedBase == _this.recommendedBase)&&(identical(other.recommendedPerScore, _this.recommendedPerScore) || other.recommendedPerScore == _this.recommendedPerScore)&&(identical(other.easyRatio, _this.easyRatio) || other.easyRatio == _this.easyRatio)&&(identical(other.fairRatio, _this.fairRatio) || other.fairRatio == _this.fairRatio));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as CombatPowerRulesData;
+  return Object.hash(runtimeType,_this.weaponDps,_this.potatoHp,_this.potatoDps,_this.helper,_this.recommendedBase,_this.recommendedPerScore,_this.easyRatio,_this.fairRatio);
+}
+
+@override
+String toString() {
+  final _this = this as CombatPowerRulesData;
+  return 'CombatPowerRulesData(weaponDps: ${_this.weaponDps}, potatoHp: ${_this.potatoHp}, potatoDps: ${_this.potatoDps}, helper: ${_this.helper}, recommendedBase: ${_this.recommendedBase}, recommendedPerScore: ${_this.recommendedPerScore}, easyRatio: ${_this.easyRatio}, fairRatio: ${_this.fairRatio})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $CombatPowerRulesDataCopyWith<$Res>  {
+  factory $CombatPowerRulesDataCopyWith(CombatPowerRulesData value, $Res Function(CombatPowerRulesData) _then) = _$CombatPowerRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, double easyRatio, double fairRatio
+});
+
+
+
+
+}
+/// @nodoc
+class _$CombatPowerRulesDataCopyWithImpl<$Res>
+    implements $CombatPowerRulesDataCopyWith<$Res> {
+  _$CombatPowerRulesDataCopyWithImpl(this._self, this._then);
+
+  final CombatPowerRulesData _self;
+  final $Res Function(CombatPowerRulesData) _then;
+
+/// Create a copy of CombatPowerRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? easyRatio = null,Object? fairRatio = null,}) {
+  return _then(CombatPowerRulesData(
+weaponDps: null == weaponDps ? _self.weaponDps : weaponDps // ignore: cast_nullable_to_non_nullable
+as double,potatoHp: null == potatoHp ? _self.potatoHp : potatoHp // ignore: cast_nullable_to_non_nullable
+as double,potatoDps: null == potatoDps ? _self.potatoDps : potatoDps // ignore: cast_nullable_to_non_nullable
+as double,helper: null == helper ? _self.helper : helper // ignore: cast_nullable_to_non_nullable
+as double,recommendedBase: null == recommendedBase ? _self.recommendedBase : recommendedBase // ignore: cast_nullable_to_non_nullable
+as double,recommendedPerScore: null == recommendedPerScore ? _self.recommendedPerScore : recommendedPerScore // ignore: cast_nullable_to_non_nullable
+as double,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
+as double,fairRatio: null == fairRatio ? _self.fairRatio : fairRatio // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [CombatPowerRulesData].
+extension CombatPowerRulesDataPatterns on CombatPowerRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _CombatPowerRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _CombatPowerRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _CombatPowerRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _CombatPowerRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _CombatPowerRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _CombatPowerRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _CombatPowerRulesData() when $default != null:
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)  $default,) {final _that = this;
+switch (_that) {
+case _CombatPowerRulesData():
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)?  $default,) {final _that = this;
+switch (_that) {
+case _CombatPowerRulesData() when $default != null:
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _CombatPowerRulesData implements CombatPowerRulesData {
+  const _CombatPowerRulesData({required this.weaponDps, required this.potatoHp, required this.potatoDps, required this.helper, required this.recommendedBase, required this.recommendedPerScore, required this.easyRatio, required this.fairRatio});
+  factory _CombatPowerRulesData.fromJson(Map<String, dynamic> json) => _$CombatPowerRulesDataFromJson(json);
+
+/// Points per point of weapon damage per second.
+@override final  double weaponDps;
+/// Points per point of a combat potato's health, and of its damage
+/// per second.
+@override final  double potatoHp;
+@override final  double potatoDps;
+/// Flat points for each food or buff potato along.
+@override final  double helper;
+/// What a zone calls for: this plus so much a score point.
+@override final  double recommendedBase;
+@override final  double recommendedPerScore;
+/// Power over recommended at or above [easyRatio] is easy; at or above
+/// [fairRatio], fair; under it, risky.
+@override final  double easyRatio;
+@override final  double fairRatio;
+
+/// Create a copy of CombatPowerRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$CombatPowerRulesDataCopyWith<_CombatPowerRulesData> get copyWith => __$CombatPowerRulesDataCopyWithImpl<_CombatPowerRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$CombatPowerRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CombatPowerRulesData&&(identical(other.weaponDps, weaponDps) || other.weaponDps == weaponDps)&&(identical(other.potatoHp, potatoHp) || other.potatoHp == potatoHp)&&(identical(other.potatoDps, potatoDps) || other.potatoDps == potatoDps)&&(identical(other.helper, helper) || other.helper == helper)&&(identical(other.recommendedBase, recommendedBase) || other.recommendedBase == recommendedBase)&&(identical(other.recommendedPerScore, recommendedPerScore) || other.recommendedPerScore == recommendedPerScore)&&(identical(other.easyRatio, easyRatio) || other.easyRatio == easyRatio)&&(identical(other.fairRatio, fairRatio) || other.fairRatio == fairRatio));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,weaponDps,potatoHp,potatoDps,helper,recommendedBase,recommendedPerScore,easyRatio,fairRatio);
+}
+
+@override
+String toString() {
+    return 'CombatPowerRulesData(weaponDps: $weaponDps, potatoHp: $potatoHp, potatoDps: $potatoDps, helper: $helper, recommendedBase: $recommendedBase, recommendedPerScore: $recommendedPerScore, easyRatio: $easyRatio, fairRatio: $fairRatio)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$CombatPowerRulesDataCopyWith<$Res> implements $CombatPowerRulesDataCopyWith<$Res> {
+  factory _$CombatPowerRulesDataCopyWith(_CombatPowerRulesData value, $Res Function(_CombatPowerRulesData) _then) = __$CombatPowerRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, double easyRatio, double fairRatio
+});
+
+
+
+
+}
+/// @nodoc
+class __$CombatPowerRulesDataCopyWithImpl<$Res>
+    implements _$CombatPowerRulesDataCopyWith<$Res> {
+  __$CombatPowerRulesDataCopyWithImpl(this._self, this._then);
+
+  final _CombatPowerRulesData _self;
+  final $Res Function(_CombatPowerRulesData) _then;
+
+/// Create a copy of CombatPowerRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? easyRatio = null,Object? fairRatio = null,}) {
+  return _then(_CombatPowerRulesData(
+weaponDps: null == weaponDps ? _self.weaponDps : weaponDps // ignore: cast_nullable_to_non_nullable
+as double,potatoHp: null == potatoHp ? _self.potatoHp : potatoHp // ignore: cast_nullable_to_non_nullable
+as double,potatoDps: null == potatoDps ? _self.potatoDps : potatoDps // ignore: cast_nullable_to_non_nullable
+as double,helper: null == helper ? _self.helper : helper // ignore: cast_nullable_to_non_nullable
+as double,recommendedBase: null == recommendedBase ? _self.recommendedBase : recommendedBase // ignore: cast_nullable_to_non_nullable
+as double,recommendedPerScore: null == recommendedPerScore ? _self.recommendedPerScore : recommendedPerScore // ignore: cast_nullable_to_non_nullable
+as double,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
+as double,fairRatio: null == fairRatio ? _self.fairRatio : fairRatio // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

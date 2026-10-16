@@ -26,7 +26,7 @@ void main() {
       (files['rules']! as Map<String, dynamic>)['version'] = 1;
       expect(
         Catalog.load(files).issues.single.toString(),
-        'rules: version: expected 4, found 1',
+        'rules: version: expected 5, found 1',
       );
     });
 
@@ -178,7 +178,9 @@ void main() {
       final files = sampleCatalogFiles();
       final raid = (files['rules']! as Map<String, dynamic>)['raid'] as Map;
       (raid['food'] as Map)['item'] = 'material';
-      raid['start_weapon'] = 'nothing';
+      ((files['rules']! as Map<String, dynamic>)['gear']
+              as Map)['bare_weapon'] =
+          'nothing';
       final tables = _list(files, 'loot_tables');
       (((tables[0] as Map)['entries'] as List)[0] as Map)['item'] = 'ghost';
       final zone = _list(files, 'zones')[0] as Map;
@@ -187,7 +189,7 @@ void main() {
 
       expect(Catalog.load(files).issues.map((issue) => issue.toString()), [
         'rules: raid.food.item: "material" is not a food item',
-        'rules: raid.start_weapon: no weapon "nothing"',
+        'rules: gear.bare_weapon: no weapon "nothing"',
         'loot_tables: spot.entries[0].item: no item "ghost"',
         'zones: sample_zone.enemies.pack_kinds[0]: no enemy "yeti"',
         'zones: sample_zone.drops.bundle: no loot table "missing_table"',

@@ -12,6 +12,7 @@ import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/save/migration.dart';
 
 part 'farm_document.freezed.dart';
@@ -54,7 +55,13 @@ abstract class FarmDocument with _$FarmDocument {
     @Default(<OverflowDocument>[]) List<OverflowDocument> overflow,
     @Default(<String, int>{}) Map<String, int> materials,
     @Default(<MailDocument>[]) List<MailDocument> mail,
+
+    /// The workbench level of the one weapon, in documents from before
+    /// gear (then [equipped] is null and the farm gets the starting gear,
+    /// this level on its weapon).
     @Default(0) int weaponLevel,
+    @Default(<Gear>[]) List<Gear> gear,
+    Equipped? equipped,
     @Default(0) int progress,
     int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
@@ -160,7 +167,8 @@ abstract class FarmDocument with _$FarmDocument {
     ],
     materials: Map.of(farm.materials),
     mail: [for (final mail in farm.mail) MailDocument.of(mail)],
-    weaponLevel: farm.weaponLevel,
+    gear: farm.gear,
+    equipped: farm.equipped,
     progress: farm.progress,
     totemLimit: farm.totemLimit,
     totals: farm.totals.toJson(),
@@ -169,6 +177,16 @@ abstract class FarmDocument with _$FarmDocument {
   /// Builds the running farm, using [catalog] for its rules.
   ///
   /// Throws [FormatException] for a building kind the catalog lacks.
+  /// A farm from before gear: the starting gear, with the old weapon
+  /// level moved onto the starting weapon.
+  Equipped _startGear(Catalog catalog) {
+    final start = catalog.rules.gear.start;
+    final weapon = start.weapon;
+    return weapon == null
+        ? start
+        : start.copyWith(weapon: weapon.copyWith(enhance: weaponLevel));
+  }
+
   FarmSimulation toSimulation(Catalog catalog) {
     final pouch = SeedPouch();
     for (final stack in seeds) {
@@ -254,7 +272,8 @@ abstract class FarmDocument with _$FarmDocument {
       ],
       materials: materials,
       mail: [for (final mail in this.mail) mail.toMail()],
-      weaponLevel: weaponLevel,
+      gear: gear,
+      equipped: equipped ?? _startGear(catalog),
       progress: progress,
       totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),

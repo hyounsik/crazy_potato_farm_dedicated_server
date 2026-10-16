@@ -1,4 +1,5 @@
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
 
 /// Something the player asks a run to do. Stick movement is not a command:
@@ -30,6 +31,38 @@ final class SetCompanionMode extends RaidCommand {
   /// The companion's body id in the run.
   final int companion;
   final CompanionMode mode;
+}
+
+/// Wears the gear in bag slot [slot]; what was worn goes into that slot.
+/// A smaller bag drops what no longer fits in a bundle at the player's
+/// feet.
+final class EquipFromBag extends RaidCommand {
+  const EquipFromBag(this.slot);
+
+  final int slot;
+}
+
+/// Takes off the worn piece of [kind] into the bag (bare hands then).
+final class Unequip extends RaidCommand {
+  const Unequip(this.kind);
+
+  final GearKind kind;
+}
+
+/// Drops bag slot [slot] on the floor in a bundle (into a bundle within
+/// reach, if there is one).
+final class DropItem extends RaidCommand {
+  const DropItem(this.slot);
+
+  final int slot;
+}
+
+/// Puts bag slot [slot] into pile [pile].
+final class PutInPile extends RaidCommand {
+  const PutInPile(this.pile, this.slot);
+
+  final int pile;
+  final int slot;
 }
 
 /// Moves item [index] of pile [pile] into the bag as far as it fits.
@@ -84,6 +117,18 @@ enum RaidRejection {
 
   /// No standing combat companion with that id.
   noSuchCompanion,
+
+  /// Not gear, or nothing worn there.
+  noGear,
+
+  /// Its level is past the farm's progress plus the margin.
+  cannotWear,
+
+  /// The companions would not fit that belt.
+  beltTooSmall,
+
+  /// Nothing in that bag slot.
+  emptySlot,
 }
 
 /// What happened in a run, collected with `RaidSimulation.takeEvents`.

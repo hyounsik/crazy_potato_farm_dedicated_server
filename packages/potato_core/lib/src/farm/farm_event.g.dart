@@ -216,9 +216,10 @@ Map<String, dynamic> _$MailArrivedToJson(MailArrived instance) =>
       'runtimeType': instance.$type,
     };
 
-WeaponEnhanced _$WeaponEnhancedFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('WeaponEnhanced', json, ($checkedConvert) {
-      final val = WeaponEnhanced(
+GearEnhanced _$GearEnhancedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('GearEnhanced', json, ($checkedConvert) {
+      final val = GearEnhanced(
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$GearKindEnumMap, v)),
         level: $checkedConvert('level', (v) => (v as num).toInt()),
         worked: $checkedConvert('worked', (v) => v as bool),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
@@ -226,10 +227,32 @@ WeaponEnhanced _$WeaponEnhancedFromJson(Map<String, dynamic> json) =>
       return val;
     }, fieldKeyMap: const {r'$type': 'runtimeType'});
 
-Map<String, dynamic> _$WeaponEnhancedToJson(WeaponEnhanced instance) =>
+Map<String, dynamic> _$GearEnhancedToJson(GearEnhanced instance) =>
     <String, dynamic>{
+      'kind': _$GearKindEnumMap[instance.kind]!,
       'level': instance.level,
       'worked': instance.worked,
+      'runtimeType': instance.$type,
+    };
+
+const _$GearKindEnumMap = {
+  GearKind.weapon: 'weapon',
+  GearKind.bag: 'bag',
+  GearKind.belt: 'belt',
+};
+
+GearDisassembled _$GearDisassembledFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('GearDisassembled', json, ($checkedConvert) {
+      final val = GearDisassembled(
+        materials: $checkedConvert('materials', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$GearDisassembledToJson(GearDisassembled instance) =>
+    <String, dynamic>{
+      'materials': instance.materials,
       'runtimeType': instance.$type,
     };
 

@@ -17,7 +17,6 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
             'player',
             (v) => PlayerRulesData.fromJson(v as Map<String, dynamic>),
           ),
-          bagSlots: $checkedConvert('bag_slots', (v) => (v as num).toInt()),
           pickupRadius: $checkedConvert(
             'pickup_radius',
             (v) => (v as num).toDouble(),
@@ -26,7 +25,6 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
             'food',
             (v) => FoodRulesData.fromJson(v as Map<String, dynamic>),
           ),
-          startWeapon: $checkedConvert('start_weapon', (v) => v as String),
           enemyAlertSeconds: $checkedConvert(
             'enemy_alert_seconds',
             (v) => (v as num).toDouble(),
@@ -44,9 +42,7 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
       },
       fieldKeyMap: const {
         'stepMillis': 'step_millis',
-        'bagSlots': 'bag_slots',
         'pickupRadius': 'pickup_radius',
-        'startWeapon': 'start_weapon',
         'enemyAlertSeconds': 'enemy_alert_seconds',
       },
     );
@@ -55,10 +51,8 @@ Map<String, dynamic> _$RaidRulesDataToJson(_RaidRulesData instance) =>
     <String, dynamic>{
       'step_millis': instance.stepMillis,
       'player': instance.player.toJson(),
-      'bag_slots': instance.bagSlots,
       'pickup_radius': instance.pickupRadius,
       'food': instance.food.toJson(),
-      'start_weapon': instance.startWeapon,
       'enemy_alert_seconds': instance.enemyAlertSeconds,
       'companion': instance.companion.toJson(),
       'clones': instance.clones.toJson(),

@@ -9,6 +9,8 @@ import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/items/gear.dart';
+import 'package:potato_core/src/items/gear_stats.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/potatoes/potato_effects.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -32,6 +34,7 @@ final class CompanionStart {
     this.style,
     this.mode = CompanionMode.defense,
     this.lifeLeft = 1,
+    this.beltBoost = 0,
   });
 
   final int potatoId;
@@ -47,12 +50,28 @@ final class CompanionStart {
   /// The farm potato's life left, 0 to 1.
   final double lifeLeft;
 
+  /// Its belt slot's boost (0.1 is +10% at its job).
+  final double beltBoost;
+
+  CompanionStart withBoost(double boost) => CompanionStart(
+    potatoId: potatoId,
+    type: type,
+    grade: grade,
+    level: level,
+    abilities: abilities,
+    style: style,
+    mode: mode,
+    lifeLeft: lifeLeft,
+    beltBoost: boost,
+  );
+
   CompanionTraits get traits => (
     type: type,
     level: level,
     abilities: abilities,
     hpRatio: 1,
     lifeLeft: lifeLeft,
+    boost: beltBoost,
   );
 }
 
@@ -64,9 +83,13 @@ final class RaidResult {
     required this.companions,
     required this.score,
     required this.lost,
+    this.equipped = const Equipped(),
   });
 
   final RaidOutcome outcome;
+
+  /// What is worn at the end; after a lost run, only what was not lost.
+  final Equipped equipped;
 
   /// The zone's score; a successful run raises the farm's progress to it.
   final int score;
@@ -110,6 +133,8 @@ final class RaidSimulation {
     this._revealed = false,
     this._clonesIn = 0,
     this._nextCloneAt = 0,
+    this.progress = 0,
+    this._kept,
     this._outcome,
   });
 
@@ -122,7 +147,8 @@ final class RaidSimulation {
     required int seed,
     Map<String, MapChunk> chunks = const {},
     int food = 0,
-    int weaponLevel = 0,
+    Equipped equipped = const Equipped(),
+    int progress = 0,
     List<CompanionStart> companions = const [],
   }) {
     final zoneData = catalog.zones[zone];
@@ -133,6 +159,13 @@ final class RaidSimulation {
     final entry = Vec2(map.entry.x + 0.5, map.entry.y + 0.5);
     var nextId = 1;
 
+    final gear = GearStats(catalog);
+    // Companions in belt slots get the belt's boost.
+    final fit = gear.fitBelt(equipped.belt, [
+      for (final c in companions) c.type,
+    ]);
+    final boost = fit == null ? 0.0 : gear.beltBoost(equipped.belt);
+    companions = [for (final c in companions) c.withBoost(boost)];
     final effects = RaidEffects(catalog);
     final party = effects.party([for (final c in companions) c.traits]);
     final player = RaidPlayer(
@@ -140,10 +173,10 @@ final class RaidSimulation {
       position: entry,
       radius: rules.player.radius,
       maxHp: party.apply(RaidStat.hp, rules.player.maxHp),
-      weapon: rules.startWeapon,
-      weaponLevel: weaponLevel,
+      weapon: gear.weaponOf(equipped.weapon),
+      equipped: equipped,
     );
-    final bag = Bag(rules.bagSlots, catalog.stackOf);
+    final bag = Bag(gear.bagSlots(equipped.bag), catalog.stackOf);
     if (food > 0) bag.addFrom(ItemStack(rules.food.item, food));
 
     final team = [
@@ -165,6 +198,7 @@ final class RaidSimulation {
           style: start.type == PotatoType.combat ? start.style : null,
           mode: start.mode,
           lifeLeft: start.lifeLeft,
+          beltBoost: start.beltBoost,
           slot: slot,
         ),
     ];
@@ -204,18 +238,21 @@ final class RaidSimulation {
       clones: [],
       nextId: nextId,
       tick: 0,
+      progress: progress,
     );
     run._nextCloneAt = zoneData.danger?.cloneEverySeconds ?? 0;
     return run;
   }
 
   /// What one of the player's bullets does: the weapon's damage, raised
-  /// by its workbench level and buff potatoes.
+  /// by its grade, level, workbench levels and buff potatoes.
   double get playerShotDamage => _party.apply(
     RaidStat.attack,
     catalog.weapons[player.weapon]!.damage *
-        (1 + player.weaponLevel * catalog.rules.workbench.damagePercent / 100),
+        _gear.damageScale(player.equipped.weapon),
   );
+
+  late final GearStats _gear = GearStats(catalog);
 
   /// A companion's max health at the start: its style's (or the plain
   /// companion's), raised by level for combat potatoes, then abilities.
@@ -230,7 +267,11 @@ final class RaidSimulation {
         ? rules.styles[start.style]
         : null;
     var hp = style?.maxHp ?? rules.maxHp;
-    if (style != null) hp *= 1 + start.level * rules.levelHpPermille / 1000;
+    if (style != null) {
+      hp *=
+          (1 + start.level * rules.levelHpPermille / 1000) *
+          (1 + start.beltBoost);
+    }
     final sums = <String, StatSum>{}
       ..addAll(own)
       ..addAll(party);
@@ -272,6 +313,11 @@ final class RaidSimulation {
       clones: list('clones', (j) => RaidClone.fromJson(j, catalog.stackOf)),
       clonesIn: json['clones_in'] as int,
       nextCloneAt: (json['next_clone_at'] as num).toDouble(),
+      progress: json['progress'] as int,
+      kept: switch (json['kept']) {
+        final Map<String, dynamic> kept => Equipped.fromJson(kept),
+        _ => null,
+      },
       signal: switch (json['signal']) {
         final Map<String, dynamic> signal => RaidSignal.fromJson(signal),
         _ => null,
@@ -285,14 +331,22 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 6;
+  static const int formatVersion = 7;
 
   final Catalog catalog;
   final ZoneData zone;
   final MapData map;
   final GameRandom _random;
   final RaidPlayer player;
-  final Bag bag;
+
+  /// The player's bag; changing bags replaces it.
+  Bag bag;
+
+  /// The farm's progress: gear above it plus the margin cannot be worn.
+  final int progress;
+
+  /// After a lost danger run, the worn gear that was not lost.
+  Equipped? _kept;
   final List<RaidEnemy> enemies;
   final List<RaidCompanion> companions;
   final List<RaidBullet> bullets;
@@ -334,6 +388,7 @@ final class RaidSimulation {
     abilities: c.abilities,
     hpRatio: c.hp / c.maxHp,
     lifeLeft: c.lifeLeft,
+    boost: c.beltBoost,
   );
 
   /// [companion]'s own effects plus its party's.
@@ -356,7 +411,8 @@ final class RaidSimulation {
     if (style == null) return 0;
     final base =
         style.damage *
-        (1 + companion.level * rules.companion.levelAttackPermille / 1000);
+        (1 + companion.level * rules.companion.levelAttackPermille / 1000) *
+        (1 + companion.beltBoost);
     return statsOf(companion).apply(RaidStat.attack, base);
   }
 
@@ -459,6 +515,7 @@ final class RaidSimulation {
       ],
       score: zone.score,
       lost: isDanger && outcome != RaidOutcome.extracted,
+      equipped: _kept ?? player.equipped,
     );
   }
 
@@ -497,6 +554,24 @@ final class RaidSimulation {
       case GoHome():
         if (isDanger) return RaidRejection.wrongZone;
         _end(RaidOutcome.wentHome);
+        return null;
+      case EquipFromBag(:final slot):
+        return _equipFromBag(slot);
+      case Unequip(:final kind):
+        return _unequip(kind);
+      case DropItem(:final slot):
+        if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
+        final stack = bag.replace(slot, null);
+        if (stack == null) return RaidRejection.emptySlot;
+        _drop([stack]);
+        return null;
+      case PutInPile(:final pile, :final slot):
+        final found = _reachablePile(pile);
+        if (found case final RaidRejection rejection) return rejection;
+        if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
+        final stack = bag.replace(slot, null);
+        if (stack == null) return RaidRejection.emptySlot;
+        (found as RaidPile).loot.put(stack, catalog.stackOf);
         return null;
       case SetCompanionMode(:final companion, :final mode):
         for (final c in companions) {
@@ -544,6 +619,105 @@ final class RaidSimulation {
         if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
         target.loot.swapWith(bag, index, slot);
         return null;
+    }
+  }
+
+  /// Wears the gear in bag slot [slot]; what was worn there takes the slot.
+  RaidRejection? _equipFromBag(int slot) {
+    if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
+    final piece = bag.slots[slot]?.gear;
+    if (piece == null) return RaidRejection.noGear;
+    if (!_gear.canWear(piece, progress)) return RaidRejection.cannotWear;
+    if (piece.kind == GearKind.belt && !_beltFits(piece)) {
+      return RaidRejection.beltTooSmall;
+    }
+    final old = player.equipped.of(piece.kind);
+    bag.replace(slot, old == null ? null : _stackOf(old));
+    _wear(piece.kind, piece);
+    return null;
+  }
+
+  /// Takes off the worn piece of [kind] into the bag.
+  RaidRejection? _unequip(GearKind kind) {
+    final piece = player.equipped.of(kind);
+    if (piece == null) return RaidRejection.noGear;
+    if (kind == GearKind.belt && !_beltFits(null)) {
+      return RaidRejection.beltTooSmall;
+    }
+    final stack = _stackOf(piece);
+    if (kind == GearKind.bag) {
+      // The bag itself goes in first; whatever no longer fits drops.
+      final items = [stack, for (final s in bag.slots) ?s];
+      _wear(kind, null);
+      _refill(items);
+      return null;
+    }
+    final free = bag.slots.indexOf(null);
+    if (free < 0) return RaidRejection.bagFull;
+    bag.replace(free, stack);
+    _wear(kind, null);
+    return null;
+  }
+
+  bool _beltFits(Gear? belt) =>
+      _gear.fitBelt(belt, [for (final c in companions) c.type]) != null;
+
+  ItemStack _stackOf(Gear piece) =>
+      ItemStack.ofGear(catalog.gearItemOf(piece) ?? '', piece);
+
+  /// Puts on [piece] (null for bare hands). A new bag keeps what fits and
+  /// drops the rest.
+  void _wear(GearKind kind, Gear? piece) {
+    player.equipped = player.equipped.wearing(kind, piece);
+    switch (kind) {
+      case GearKind.weapon:
+        player
+          ..weapon = _gear.weaponOf(piece)
+          ..aimProgress = 0;
+      case GearKind.bag:
+        if (bag.capacity != _gear.bagSlots(piece)) {
+          _refill([for (final s in bag.slots) ?s]);
+        }
+      case GearKind.belt:
+        break;
+    }
+  }
+
+  /// A bag for what is worn now, filled with [items] in order; the rest
+  /// drops at the player's feet.
+  void _refill(List<ItemStack> items) {
+    bag = Bag(_gear.bagSlots(player.equipped.bag), catalog.stackOf);
+    final left = <ItemStack>[];
+    for (final stack in items) {
+      bag.addFrom(stack);
+      if (stack.count > 0) left.add(stack);
+    }
+    if (left.isNotEmpty) _drop(left);
+  }
+
+  /// Leaves [stacks] in a bundle within reach of the player, or a new one at
+  /// its feet.
+  void _drop(List<ItemStack> stacks) {
+    RaidPile? pile;
+    for (final p in piles) {
+      if (p.kind == PileKind.bundle &&
+          p.position.distanceTo(player.position) <= rules.pickupRadius) {
+        pile = p;
+      }
+    }
+    pile ??= () {
+      final made = RaidPile(
+        id: _newId(),
+        position: player.position,
+        kind: PileKind.bundle,
+        loot: LootPile(),
+        seen: true,
+      );
+      piles.add(made);
+      return made;
+    }();
+    for (final stack in stacks) {
+      pile.loot.put(stack, catalog.stackOf);
     }
   }
 
@@ -647,6 +821,17 @@ final class RaidSimulation {
   }
 
   void _end(RaidOutcome outcome) {
+    if (isDanger && outcome != RaidOutcome.extracted) {
+      // Each worn piece is lost by its own roll.
+      var kept = player.equipped;
+      for (final kind in GearKind.values) {
+        if (kept.of(kind) == null) continue;
+        if (_random.chance(_gear.rules.lossChance)) {
+          kept = kept.wearing(kind, null);
+        }
+      }
+      _kept = kept;
+    }
     _outcome = outcome;
     _events.add(RaidEnded(outcome));
   }
@@ -812,7 +997,9 @@ final class RaidSimulation {
       final level = catalog.rules.potatoes.level.foodYieldPermille;
       final rate = stats.apply(
         FarmStat.foodYield,
-        spec.producePerSecond * (1 + companion.level * level / 1000),
+        spec.producePerSecond *
+            (1 + companion.level * level / 1000) *
+            (1 + companion.beltBoost),
       );
       companion.produced += rate * dt;
       final whole = companion.produced.floor();
@@ -1385,6 +1572,7 @@ final class RaidSimulation {
               catalog.stackOf,
               _random,
               makeSeed: _seedMaker(catalog, zone, _random),
+              makeGear: _gearMaker(catalog, zone, _random),
               weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
             ),
           ),
@@ -1403,6 +1591,7 @@ final class RaidSimulation {
               catalog.stackOf,
               _random,
               makeSeed: _seedMaker(catalog, zone, _random),
+              makeGear: _gearMaker(catalog, zone, _random),
               weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
             ),
           ),
@@ -1413,6 +1602,7 @@ final class RaidSimulation {
           catalog.stackOf,
           _random,
           makeSeed: _seedMaker(catalog, zone, _random),
+          makeGear: _gearMaker(catalog, zone, _random),
           weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
         );
         for (final stack in loot.items) {
@@ -1913,6 +2103,37 @@ final class RaidSimulation {
     };
   }
 
+  /// Gear found in [zone] gets its score as its level; belts roll the type
+  /// of each slot (as many as the grade gives).
+  static GearMaker _gearMaker(
+    Catalog catalog,
+    ZoneData zone,
+    GameRandom random,
+  ) {
+    const types = [PotatoType.food, PotatoType.combat, PotatoType.buff];
+    return (item) {
+      final kind = catalog.items[item]?.gear;
+      if (kind == null) return null;
+      final slots = kind.kind == GearKind.belt
+          ? [
+              for (
+                var i = 0;
+                i < (catalog.rules.gear.beltSlots[kind.grade] ?? 1);
+                i++
+              )
+                types[random.nextInt(types.length)],
+            ]
+          : const <PotatoType>[];
+      return Gear(
+        kind: kind.kind,
+        family: kind.family,
+        grade: kind.grade,
+        level: zone.score,
+        slots: slots,
+      );
+    };
+  }
+
   /// Luck: rare and legendary seeds weigh [factor] times as much.
   static int Function(String, int)? _luck(Catalog catalog, double factor) {
     if (factor == 1) return null;
@@ -1949,6 +2170,7 @@ final class RaidSimulation {
             catalog.stackOf,
             random,
             makeSeed: _seedMaker(catalog, zone, random),
+            makeGear: _gearMaker(catalog, zone, random),
             weigh: _luck(catalog, luck),
           ),
         ),
@@ -1975,6 +2197,8 @@ final class RaidSimulation {
     'clones': [for (final c in clones) c.toJson()],
     'clones_in': _clonesIn,
     'next_clone_at': _nextCloneAt,
+    'progress': progress,
+    'kept': _kept?.toJson(),
     'signal': signal?.toJson(),
     'revealed': _revealed,
     'outcome': _outcome?.name,

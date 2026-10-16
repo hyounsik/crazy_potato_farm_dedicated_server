@@ -1,0 +1,253 @@
+import 'dart:convert';
+
+import 'package:potato_core/potato_core.dart';
+import 'package:test/test.dart';
+
+import '../fixtures/sample_catalog.dart';
+
+/// Gear in runs: what it does, finding and swapping it, dropping items,
+/// and losing it.
+void main() {
+  late Catalog catalog;
+
+  const smallBag = Gear(kind: GearKind.bag, grade: Grade.normal, level: 1);
+  const bigBag = Gear(kind: GearKind.bag, grade: Grade.legendary, level: 1);
+  const rareRapid = Gear(
+    kind: GearKind.weapon,
+    family: 'rapid',
+    grade: Grade.rare,
+    level: 10,
+  );
+
+  setUpAll(() => catalog = sampleCatalog());
+
+  RaidSimulation run({
+    Equipped equipped = const Equipped(),
+    String zone = 'sample_zone',
+    int progress = 0,
+    List<CompanionStart> team = const [],
+    Catalog? using,
+  }) => RaidSimulation.start(
+    catalog: using ?? catalog,
+    zone: zone,
+    seed: 3,
+    food: 30,
+    equipped: equipped,
+    progress: progress,
+    companions: team,
+  );
+
+  ItemStack stackOf(Gear gear) =>
+      ItemStack.ofGear(catalog.gearItemOf(gear)!, gear);
+
+  test('bare hands: the bare weapon and bag', () {
+    final bare = run();
+    expect(bare.player.weapon, catalog.rules.gear.bareWeapon);
+    expect(bare.bag.capacity, catalog.rules.gear.bareBagSlots);
+  });
+
+  test('the worn bag sets the slots; the weapon its grade and level', () {
+    final stats = GearStats(catalog);
+    final r = run(
+      equipped: const Equipped(weapon: rareRapid, bag: bigBag),
+    );
+    expect(r.bag.capacity, catalog.rules.gear.bagSlots[Grade.legendary]);
+    expect(r.player.weapon, 'rapid');
+    final base = catalog.weapons['rapid']!.damage;
+    expect(
+      r.playerShotDamage,
+      closeTo(base * stats.damageScale(rareRapid), 1e-9),
+    );
+    expect(
+      stats.damageScale(rareRapid),
+      closeTo(
+        1.25 * (1 + 10 * catalog.rules.gear.levelDamagePermille / 1000),
+        1e-9,
+      ),
+    );
+  });
+
+  test('a belt slot makes its potato stronger', () {
+    const belt = Gear(
+      kind: GearKind.belt,
+      grade: Grade.legendary,
+      level: 0,
+      slots: [PotatoType.combat],
+    );
+    const fighter = CompanionStart(
+      potatoId: 1,
+      type: PotatoType.combat,
+      grade: Grade.normal,
+      abilities: ['combat.plain'],
+      style: CombatStyle.melee,
+    );
+    final plain = run(team: [fighter]).companions.single;
+    final boosted = run(
+      equipped: const Equipped(belt: belt),
+      team: [fighter],
+    ).companions.single;
+    final boost = GearStats(catalog).beltBoost(belt);
+    expect(boost, greaterThan(0));
+    expect(boosted.maxHp, closeTo(plain.maxHp * (1 + boost), 1e-9));
+  });
+
+  test('gear found takes the zone score as its level; belts roll slots', () {
+    final withGear = sampleCatalogWith((files) {
+      final tables = (files['loot_tables'] as Map)['loot_tables'] as List;
+      final spot = tables.firstWhere((t) => (t as Map)['id'] == 'spot') as Map;
+      spot['entries'] = [
+        {'item': 'gear_belt_rare', 'weight': 1, 'min': 1, 'max': 1},
+      ];
+    });
+    final r = run(using: withGear);
+    final found = r.piles
+        .where((p) => p.kind == PileKind.spot)
+        .expand((p) => p.loot.items)
+        .map((s) => s.gear!)
+        .toList();
+    expect(found, isNotEmpty);
+    for (final belt in found) {
+      expect(belt.level, withGear.zones['sample_zone']!.score);
+      expect(belt.slots, hasLength(withGear.rules.gear.beltSlots[Grade.rare]));
+    }
+  });
+
+  test(
+    'wearing from the bag swaps; a smaller bag drops what no longer fits',
+    () {
+      final r = run(equipped: const Equipped(bag: bigBag));
+      // Pieces of gear never stack, so each keeps its slot.
+      for (var i = 0; i < r.bag.capacity; i++) {
+        r.bag.slots[i] ??= stackOf(rareRapid.copyWith(level: i));
+      }
+      r.bag.replace(0, stackOf(smallBag));
+      expect(r.apply(const EquipFromBag(0)), isNull);
+      expect(r.player.equipped.bag, smallBag);
+      expect(r.bag.capacity, catalog.rules.gear.bagSlots[Grade.normal]);
+      expect(
+        r.bag.slots.first!.gear,
+        bigBag,
+        reason: 'the old bag takes the slot',
+      );
+      final dropped = r.piles.where((p) => p.kind == PileKind.bundle).single;
+      final left =
+          catalog.rules.gear.bagSlots[Grade.legendary]! -
+          catalog.rules.gear.bagSlots[Grade.normal]!;
+      expect(dropped.loot.items.fold(0, (n, s) => n + s.count), left);
+      expect(dropped.position, r.player.position);
+    },
+  );
+
+  test('gear past progress plus the margin cannot be worn', () {
+    final r = run();
+    final margin = catalog.rules.gear.useMargin;
+    r.bag.replace(0, stackOf(rareRapid.copyWith(level: margin + 1)));
+    expect(r.apply(const EquipFromBag(0)), RaidRejection.cannotWear);
+    expect(r.apply(const EquipFromBag(1)), RaidRejection.noGear);
+  });
+
+  test('a belt with too few slots for the potatoes is refused', () {
+    const one = Gear(
+      kind: GearKind.belt,
+      grade: Grade.normal,
+      level: 0,
+      slots: [PotatoType.buff],
+    );
+    final r = run(
+      team: const [
+        CompanionStart(potatoId: 1, type: PotatoType.food, grade: Grade.normal),
+      ],
+    );
+    r.bag.replace(0, stackOf(one));
+    expect(r.apply(const EquipFromBag(0)), RaidRejection.beltTooSmall);
+  });
+
+  test('taking off the bag keeps it and drops what no longer fits', () {
+    final r = run(equipped: const Equipped(bag: bigBag));
+    for (var i = 0; i < r.bag.capacity; i++) {
+      r.bag.slots[i] = stackOf(rareRapid.copyWith(level: i));
+    }
+    expect(r.apply(const Unequip(GearKind.bag)), isNull);
+    expect(r.player.equipped.bag, isNull);
+    expect(r.bag.slots.first!.gear, bigBag);
+    expect(r.piles.where((p) => p.kind == PileKind.bundle), hasLength(1));
+  });
+
+  test('items can be dropped in a bundle and put into a pile', () {
+    final r = run();
+    r.bag.replace(1, ItemStack('material', 5));
+    expect(r.apply(const DropItem(1)), isNull);
+    expect(r.bag.slots[1], isNull);
+    final bundle = r.piles.singleWhere((p) => p.kind == PileKind.bundle);
+    expect(bundle.loot.items.single.count, 5);
+
+    r.bag.replace(2, ItemStack('material', 3));
+    expect(r.apply(PutInPile(bundle.id, 2)), isNull);
+    expect(bundle.loot.items.single.count, 8, reason: 'merged with the rest');
+    expect(r.apply(const DropItem(2)), RaidRejection.emptySlot);
+  });
+
+  test('a lost danger run keeps each worn piece by its own roll', () {
+    Catalog losing(double chance) => sampleCatalogWith((files) {
+      (rulesOf(files)['gear'] as Map)['loss_chance'] = chance;
+    });
+    const worn = Equipped(weapon: rareRapid, bag: bigBag);
+    RaidResult fail(Catalog using) {
+      final r = run(using: using, zone: 'sample_danger', equipped: worn)
+        ..player.hp = 0
+        ..player.sinceHit = 0;
+      r.step();
+      return r.result!;
+    }
+
+    expect(fail(losing(1)).equipped, const Equipped());
+    expect(fail(losing(0)).equipped, worn);
+    final home = fail(losing(0)).homecoming(catalog) as ReturnHome;
+    expect(home.equipped, worn);
+  });
+
+  test('gear in the bag comes home to the box; the worn set too', () {
+    final r = run(equipped: const Equipped(weapon: rareRapid));
+    r.bag.replace(3, stackOf(bigBag));
+    r.apply(const GoHome());
+    final home = r.result!.homecoming(catalog) as ReturnHome;
+    expect(home.gear, [bigBag]);
+    expect(home.equipped, const Equipped(weapon: rareRapid));
+  });
+
+  test('saving with gear and going on equals never stopping', () {
+    final a = run(
+      equipped: const Equipped(weapon: rareRapid, bag: bigBag),
+    );
+    final b = RaidSimulation.fromJson(
+      jsonDecode(jsonEncode(a.toJson())) as Map<String, dynamic>,
+      catalog,
+    );
+    for (var i = 0; i < 300; i++) {
+      a.step();
+      b.step();
+    }
+    expect(jsonEncode(b.toJson()), jsonEncode(a.toJson()));
+  });
+
+  group('combat power', () {
+    test('better gear and fighters raise it; the verdict follows', () {
+      final stats = GearStats(catalog);
+      final bare = stats.combatPower(const Equipped(), const []);
+      final armed = stats.combatPower(
+        const Equipped(weapon: rareRapid),
+        const [],
+      );
+      final party = stats.combatPower(const Equipped(weapon: rareRapid), const [
+        (type: PotatoType.combat, level: 5, style: CombatStyle.melee),
+      ]);
+      expect(armed, greaterThan(bare));
+      expect(party, greaterThan(armed));
+      final need = stats.recommendedPower(10);
+      expect(stats.recommendedPower(20), greaterThan(need));
+      expect(stats.verdict(need * 2, need), PowerVerdict.easy);
+      expect(stats.verdict(need, need), PowerVerdict.fair);
+      expect(stats.verdict(need ~/ 2, need), PowerVerdict.risky);
+    });
+  });
+}

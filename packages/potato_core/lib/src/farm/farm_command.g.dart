@@ -65,16 +65,72 @@ Map<String, dynamic> _$HarvestFieldToJson(HarvestField instance) =>
       'runtimeType': instance.$type,
     };
 
-EnhanceWeapon _$EnhanceWeaponFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('EnhanceWeapon', json, ($checkedConvert) {
-      final val = EnhanceWeapon(
+EnhanceGear _$EnhanceGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('EnhanceGear', json, ($checkedConvert) {
+      final val = EnhanceGear(
+        worn: $checkedConvert(
+          'worn',
+          (v) => $enumDecodeNullable(_$GearKindEnumMap, v),
+        ),
+        index: $checkedConvert('index', (v) => (v as num?)?.toInt()),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
     }, fieldKeyMap: const {r'$type': 'runtimeType'});
 
-Map<String, dynamic> _$EnhanceWeaponToJson(EnhanceWeapon instance) =>
-    <String, dynamic>{'runtimeType': instance.$type};
+Map<String, dynamic> _$EnhanceGearToJson(EnhanceGear instance) =>
+    <String, dynamic>{
+      'worn': _$GearKindEnumMap[instance.worn],
+      'index': instance.index,
+      'runtimeType': instance.$type,
+    };
+
+const _$GearKindEnumMap = {
+  GearKind.weapon: 'weapon',
+  GearKind.bag: 'bag',
+  GearKind.belt: 'belt',
+};
+
+EquipGear _$EquipGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('EquipGear', json, ($checkedConvert) {
+      final val = EquipGear(
+        index: $checkedConvert('index', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$EquipGearToJson(EquipGear instance) => <String, dynamic>{
+  'index': instance.index,
+  'runtimeType': instance.$type,
+};
+
+UnequipGear _$UnequipGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('UnequipGear', json, ($checkedConvert) {
+      final val = UnequipGear(
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$GearKindEnumMap, v)),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$UnequipGearToJson(UnequipGear instance) =>
+    <String, dynamic>{
+      'kind': _$GearKindEnumMap[instance.kind]!,
+      'runtimeType': instance.$type,
+    };
+
+DisassembleGear _$DisassembleGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('DisassembleGear', json, ($checkedConvert) {
+      final val = DisassembleGear(
+        index: $checkedConvert('index', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$DisassembleGearToJson(DisassembleGear instance) =>
+    <String, dynamic>{'index': instance.index, 'runtimeType': instance.$type};
 
 CollectSeeds _$CollectSeedsFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
@@ -558,6 +614,18 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
             const <int>[],
       ),
       score: $checkedConvert('score', (v) => (v as num?)?.toInt()),
+      gear: $checkedConvert(
+        'gear',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => Gear.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <Gear>[],
+      ),
+      equipped: $checkedConvert(
+        'equipped',
+        (v) => v == null ? null : Equipped.fromJson(v as Map<String, dynamic>),
+      ),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -577,5 +645,7 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
       'potato_ids': instance.potatoIds,
       'lost_potato_ids': instance.lostPotatoIds,
       'score': instance.score,
+      'gear': instance.gear.map((e) => e.toJson()).toList(),
+      'equipped': instance.equipped?.toJson(),
       'runtimeType': instance.$type,
     };

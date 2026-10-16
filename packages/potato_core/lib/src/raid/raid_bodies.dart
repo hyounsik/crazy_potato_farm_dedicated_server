@@ -2,6 +2,7 @@ import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
+import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Which side a body or shot is on, for drawing. Who hurts whom goes by
@@ -90,6 +91,7 @@ final class RaidPlayer extends RaidShooter {
     super.fireCooldown,
     super.aimTarget,
     super.aimProgress,
+    this.equipped = const Equipped(),
   });
 
   factory RaidPlayer.fromJson(Map<String, dynamic> json) => RaidPlayer(
@@ -110,8 +112,11 @@ final class RaidPlayer extends RaidShooter {
     fireCooldown: (json['fire_cooldown'] as num).toDouble(),
     aimTarget: json['aim_target'] as int?,
     aimProgress: (json['aim_progress'] as num).toDouble(),
+    equipped: Equipped.fromJson(json['equipped'] as Map<String, dynamic>),
   );
 
+  /// What is worn; null slots are bare hands.
+  Equipped equipped;
   double dashLeft;
   double dashCooldown;
   Vec2 dashDirection;
@@ -149,6 +154,7 @@ final class RaidPlayer extends RaidShooter {
     'fire_cooldown': fireCooldown,
     'aim_target': aimTarget,
     'aim_progress': aimProgress,
+    'equipped': equipped.toJson(),
   };
 }
 
@@ -282,6 +288,7 @@ final class RaidCompanion extends RaidBody {
     this.target,
     this.attackCooldown = 0,
     this.team = playerTeam,
+    this.beltBoost = 0,
   });
 
   factory RaidCompanion.fromJson(Map<String, dynamic> json) => RaidCompanion(
@@ -308,6 +315,7 @@ final class RaidCompanion extends RaidBody {
     target: json['target'] as int?,
     attackCooldown: (json['attack_cooldown'] as num).toDouble(),
     team: json['team'] as int,
+    beltBoost: (json['belt_boost'] as num).toDouble(),
   );
 
   /// The farm potato's id, to send it back home (0 for a clone's).
@@ -348,6 +356,9 @@ final class RaidCompanion extends RaidBody {
     style: style,
   );
 
+  /// How much stronger its belt slot makes it at its job (0.1 is +10%).
+  final double beltBoost;
+
   /// [playerTeam], or the id of the clone it follows.
   @override
   final int team;
@@ -362,6 +373,7 @@ final class RaidCompanion extends RaidBody {
     'max_hp': maxHp,
     'hp': hp,
     'team': team,
+    'belt_boost': beltBoost,
     'potato_id': potatoId,
     'type': type.name,
     'grade': grade.name,

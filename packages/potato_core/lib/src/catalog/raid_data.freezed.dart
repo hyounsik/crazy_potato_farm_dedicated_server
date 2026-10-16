@@ -17,9 +17,8 @@ T _$identity<T>(T value) => value;
 mixin _$RaidRulesData {
 
 /// Game time one run `step` covers.
- int get stepMillis; PlayerRulesData get player; int get bagSlots;/// How close the player must stand to open a pile or a gathering spot.
- double get pickupRadius; FoodRulesData get food;/// The weapon every run starts with, until equipment exists.
- String get startWeapon;/// How long an enemy keeps chasing whoever hit it, even out of sight.
+ int get stepMillis; PlayerRulesData get player;/// How close the player must stand to open a pile or a gathering spot.
+ double get pickupRadius; FoodRulesData get food;/// How long an enemy keeps chasing whoever hit it, even out of sight.
  double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones;
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -34,20 +33,20 @@ $RaidRulesDataCopyWith<RaidRulesData> get copyWith => _$RaidRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as RaidRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.bagSlots, _this.bagSlots) || other.bagSlots == _this.bagSlots)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.startWeapon, _this.startWeapon) || other.startWeapon == _this.startWeapon)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RaidRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.bagSlots,_this.pickupRadius,_this.food,_this.startWeapon,_this.enemyAlertSeconds,_this.companion,_this.clones);
+  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.pickupRadius,_this.food,_this.enemyAlertSeconds,_this.companion,_this.clones);
 }
 
 @override
 String toString() {
   final _this = this as RaidRulesData;
-  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, bagSlots: ${_this.bagSlots}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, startWeapon: ${_this.startWeapon}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones})';
+  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones})';
 }
 
 
@@ -58,7 +57,7 @@ abstract mixin class $RaidRulesDataCopyWith<$Res>  {
   factory $RaidRulesDataCopyWith(RaidRulesData value, $Res Function(RaidRulesData) _then) = _$RaidRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
 });
 
 
@@ -75,15 +74,13 @@ class _$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
   return _then(RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
-as PlayerRulesData,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
-as int,pickupRadius: null == pickupRadius ? _self.pickupRadius : pickupRadius // ignore: cast_nullable_to_non_nullable
+as PlayerRulesData,pickupRadius: null == pickupRadius ? _self.pickupRadius : pickupRadius // ignore: cast_nullable_to_non_nullable
 as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
-as FoodRulesData,startWeapon: null == startWeapon ? _self.startWeapon : startWeapon // ignore: cast_nullable_to_non_nullable
-as String,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
+as FoodRulesData,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
 as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
 as CloneRulesData,
@@ -207,10 +204,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   return orElse();
 
 }
@@ -228,10 +225,10 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData():
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -248,10 +245,10 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  int bagSlots,  double pickupRadius,  FoodRulesData food,  String startWeapon,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,_that.food,_that.startWeapon,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
   return null;
 
 }
@@ -263,18 +260,15 @@ return $default(_that.stepMillis,_that.player,_that.bagSlots,_that.pickupRadius,
 @JsonSerializable()
 
 class _RaidRulesData implements RaidRulesData {
-  const _RaidRulesData({required this.stepMillis, required this.player, required this.bagSlots, required this.pickupRadius, required this.food, required this.startWeapon, required this.enemyAlertSeconds, required this.companion, required this.clones});
+  const _RaidRulesData({required this.stepMillis, required this.player, required this.pickupRadius, required this.food, required this.enemyAlertSeconds, required this.companion, required this.clones});
   factory _RaidRulesData.fromJson(Map<String, dynamic> json) => _$RaidRulesDataFromJson(json);
 
 /// Game time one run `step` covers.
 @override final  int stepMillis;
 @override final  PlayerRulesData player;
-@override final  int bagSlots;
 /// How close the player must stand to open a pile or a gathering spot.
 @override final  double pickupRadius;
 @override final  FoodRulesData food;
-/// The weapon every run starts with, until equipment exists.
-@override final  String startWeapon;
 /// How long an enemy keeps chasing whoever hit it, even out of sight.
 @override final  double enemyAlertSeconds;
 @override final  CompanionRulesData companion;
@@ -293,18 +287,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.bagSlots, bagSlots) || other.bagSlots == bagSlots)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.startWeapon, startWeapon) || other.startWeapon == startWeapon)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,player,bagSlots,pickupRadius,food,startWeapon,enemyAlertSeconds,companion,clones);
+    return Object.hash(runtimeType,stepMillis,player,pickupRadius,food,enemyAlertSeconds,companion,clones);
 }
 
 @override
 String toString() {
-    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, bagSlots: $bagSlots, pickupRadius: $pickupRadius, food: $food, startWeapon: $startWeapon, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones)';
+    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, pickupRadius: $pickupRadius, food: $food, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones)';
 }
 
 
@@ -315,7 +309,7 @@ abstract mixin class _$RaidRulesDataCopyWith<$Res> implements $RaidRulesDataCopy
   factory _$RaidRulesDataCopyWith(_RaidRulesData value, $Res Function(_RaidRulesData) _then) = __$RaidRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, int bagSlots, double pickupRadius, FoodRulesData food, String startWeapon, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
 });
 
 
@@ -332,15 +326,13 @@ class __$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? bagSlots = null,Object? pickupRadius = null,Object? food = null,Object? startWeapon = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
   return _then(_RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
-as PlayerRulesData,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
-as int,pickupRadius: null == pickupRadius ? _self.pickupRadius : pickupRadius // ignore: cast_nullable_to_non_nullable
+as PlayerRulesData,pickupRadius: null == pickupRadius ? _self.pickupRadius : pickupRadius // ignore: cast_nullable_to_non_nullable
 as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
-as FoodRulesData,startWeapon: null == startWeapon ? _self.startWeapon : startWeapon // ignore: cast_nullable_to_non_nullable
-as String,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
+as FoodRulesData,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
 as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
 as CloneRulesData,

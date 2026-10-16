@@ -15,6 +15,9 @@ typedef CompanionTraits = ({
 
   /// Life left on the farm, 0 to 1.
   double lifeLeft,
+
+  /// Its belt slot's boost: a buff potato's effects grow by it.
+  double boost,
 });
 
 /// Works out what companions' abilities do in a run: on themselves, and from
@@ -28,7 +31,11 @@ final class RaidEffects {
   final Catalog catalog;
 
   double _power(CompanionTraits potato) => potato.type == PotatoType.buff
-      ? 1 + potato.level * catalog.rules.potatoes.level.buffPowerPermille / 1000
+      ? (1 +
+                potato.level *
+                    catalog.rules.potatoes.level.buffPowerPermille /
+                    1000) *
+            (1 + potato.boost)
       : 1;
 
   Iterable<AbilityEffectData> _effects(

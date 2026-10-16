@@ -15,14 +15,10 @@ abstract class RaidRulesData with _$RaidRulesData {
     /// Game time one run `step` covers.
     required int stepMillis,
     required PlayerRulesData player,
-    required int bagSlots,
 
     /// How close the player must stand to open a pile or a gathering spot.
     required double pickupRadius,
     required FoodRulesData food,
-
-    /// The weapon every run starts with, until equipment exists.
-    required String startWeapon,
 
     /// How long an enemy keeps chasing whoever hit it, even out of sight.
     required double enemyAlertSeconds,

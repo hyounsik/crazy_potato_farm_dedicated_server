@@ -5,6 +5,8 @@ import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
+import 'package:potato_core/src/items/gear.dart';
+
 part 'farm_event.freezed.dart';
 part 'farm_event.g.dart';
 
@@ -66,12 +68,17 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.mailArrived({required int mailId}) = MailArrived;
 
-  /// The workbench tried to raise the weapon to [level]; [worked] says
-  /// whether it took.
-  const factory FarmEvent.weaponEnhanced({
+  /// The workbench tried to raise a piece of [kind] to [level]; [worked]
+  /// says whether it took.
+  const factory FarmEvent.gearEnhanced({
+    required GearKind kind,
     required int level,
     required bool worked,
-  }) = WeaponEnhanced;
+  }) = GearEnhanced;
+
+  /// A piece broke down into [materials].
+  const factory FarmEvent.gearDisassembled({required int materials}) =
+      GearDisassembled;
 
   const factory FarmEvent.totemLit({required int buildingId}) = TotemLit;
 

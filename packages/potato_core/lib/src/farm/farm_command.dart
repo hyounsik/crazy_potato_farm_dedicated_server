@@ -2,6 +2,8 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
+import 'package:potato_core/src/items/gear.dart';
+
 part 'farm_command.freezed.dart';
 part 'farm_command.g.dart';
 
@@ -24,9 +26,21 @@ sealed class FarmCommand with _$FarmCommand {
   /// Takes the baby potatoes stored on every potato in a field.
   const factory FarmCommand.harvestField({required int fieldId}) = HarvestField;
 
-  /// Strengthens the weapon one level at the workbench, for baby potatoes
-  /// and materials. It may not take; what was spent is gone either way.
-  const factory FarmCommand.enhanceWeapon() = EnhanceWeapon;
+  /// Strengthens one piece of gear a level at the workbench, for baby
+  /// potatoes and materials: the worn piece of [worn], or box piece
+  /// [index]. It may not take; what was spent is gone either way.
+  const factory FarmCommand.enhanceGear({GearKind? worn, int? index}) =
+      EnhanceGear;
+
+  /// Wears box piece [index], putting what was worn there in its place.
+  const factory FarmCommand.equipGear({required int index}) = EquipGear;
+
+  /// Takes off the worn piece of [kind] into the box.
+  const factory FarmCommand.unequipGear({required GearKind kind}) = UnequipGear;
+
+  /// Breaks box piece [index] into materials at the workbench.
+  const factory FarmCommand.disassembleGear({required int index}) =
+      DisassembleGear;
 
   /// Takes the seeds compost yard [buildingId] has made into the pouch.
   const factory FarmCommand.collectSeeds({required int buildingId}) =
@@ -154,6 +168,12 @@ sealed class FarmCommand with _$FarmCommand {
     @Default(<int>[]) List<int> potatoIds,
     @Default(<int>[]) List<int> lostPotatoIds,
     int? score,
+
+    /// Gear brought back in the bag, for the box.
+    @Default(<Gear>[]) List<Gear> gear,
+
+    /// What is worn at the end of the run; null keeps what the farm has.
+    Equipped? equipped,
   }) = ReturnHome;
 
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>
@@ -238,4 +258,14 @@ enum FarmRejection {
   /// A companion that is missing, still growing, already out, in the
   /// fridge, or of a type that never leaves the farm.
   cannotGo,
+
+  /// The companions do not fit the worn belt's slots.
+  beltTooSmall,
+  noSuchGear,
+
+  /// The equipment box has no free slot.
+  boxFull,
+
+  /// The gear's level is past the farm's progress plus the margin.
+  cannotWear,
 }

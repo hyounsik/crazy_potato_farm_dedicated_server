@@ -29,6 +29,150 @@
       "id": "material",
       "kind": "material",
       "stack": 100
+    },
+    {
+      "id": "gear_rapid_normal",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "rapid",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "gear_spread_normal",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "spread",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "gear_charge_normal",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "charge",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "gear_bag_normal",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "bag",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "gear_belt_normal",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "belt",
+        "grade": "normal"
+      }
+    },
+    {
+      "id": "gear_rapid_rare",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "rapid",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "gear_spread_rare",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "spread",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "gear_charge_rare",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "charge",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "gear_bag_rare",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "bag",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "gear_belt_rare",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "belt",
+        "grade": "rare"
+      }
+    },
+    {
+      "id": "gear_rapid_legendary",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "rapid",
+        "grade": "legendary"
+      }
+    },
+    {
+      "id": "gear_spread_legendary",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "spread",
+        "grade": "legendary"
+      }
+    },
+    {
+      "id": "gear_charge_legendary",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "weapon",
+        "family": "charge",
+        "grade": "legendary"
+      }
+    },
+    {
+      "id": "gear_bag_legendary",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "bag",
+        "grade": "legendary"
+      }
+    },
+    {
+      "id": "gear_belt_legendary",
+      "kind": "gear",
+      "stack": 1,
+      "gear": {
+        "kind": "belt",
+        "grade": "legendary"
+      }
     }
   ]
 }

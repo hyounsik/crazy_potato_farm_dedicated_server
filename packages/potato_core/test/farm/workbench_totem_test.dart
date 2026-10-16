@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 import '../fixtures/sample_catalog.dart';
 import '../fixtures/seeds.dart';
 
-/// Strengthening the weapon at the workbench, and totems.
+/// Strengthening gear at the workbench, and totems.
 void main() {
   late Catalog catalog;
   late FarmSimulation farm;
@@ -29,57 +29,75 @@ void main() {
   );
 
   group('workbench', () {
+    const weapon = FarmCommand.enhanceGear(worn: GearKind.weapon);
+    int weaponLevel(FarmSimulation farm) => farm.equipped.weapon!.enhance;
+
     test('spends food and materials; the first level always takes', () {
       giveMaterials(10);
       // The sample's first level is certain (chance 1.0).
-      expect(farm.apply(const FarmCommand.enhanceWeapon()), isNull);
-      expect(farm.weaponLevel, 1);
+      expect(farm.apply(weapon), isNull);
+      expect(weaponLevel(farm), 1);
       expect(farm.food, 10000 - 20);
       expect(farm.materials['material'], 8);
       expect(
         farm.takeEvents(),
-        contains(const FarmEvent.weaponEnhanced(level: 1, worked: true)),
+        contains(
+          const FarmEvent.gearEnhanced(
+            kind: GearKind.weapon,
+            level: 1,
+            worked: true,
+          ),
+        ),
       );
     });
 
     test('needs the materials, and stops at the top level', () {
-      expect(
-        farm.apply(const FarmCommand.enhanceWeapon()),
-        FarmRejection.notEnoughMaterials,
-      );
+      expect(farm.apply(weapon), FarmRejection.notEnoughMaterials);
       giveMaterials(1000);
       var tries = 0;
-      while (farm.weaponLevel < catalog.rules.workbench.maxLevel &&
+      while (weaponLevel(farm) < catalog.rules.workbench.maxLevel &&
           tries < 500) {
-        farm.apply(const FarmCommand.enhanceWeapon());
+        farm.apply(weapon);
         tries++;
       }
-      expect(farm.weaponLevel, catalog.rules.workbench.maxLevel);
+      expect(weaponLevel(farm), catalog.rules.workbench.maxLevel);
       expect(
         tries,
         greaterThan(catalog.rules.workbench.maxLevel),
         reason: 'later levels sometimes fail',
       );
-      expect(
-        farm.apply(const FarmCommand.enhanceWeapon()),
-        FarmRejection.atMost,
-      );
-      expect(reload(farm).weaponLevel, farm.weaponLevel);
+      expect(farm.apply(weapon), FarmRejection.atMost);
+      expect(weaponLevel(reload(farm)), weaponLevel(farm));
     });
 
     test('a strengthened weapon hits harder in a run', () {
       final zone = catalog.zones.values.first.id;
+      final start = catalog.rules.gear.start.weapon!;
       double damage(int level) => RaidSimulation.start(
         catalog: catalog,
         zone: zone,
         seed: 7,
-        weaponLevel: level,
+        equipped: Equipped(weapon: start.copyWith(enhance: level)),
       ).playerShotDamage;
 
-      final base = catalog.weapons[catalog.rules.raid.startWeapon]!.damage;
+      final base = catalog.weapons[start.family]!.damage;
       expect(damage(0), base);
       expect(damage(3), closeTo(base * 1.3, 1e-9));
     });
+
+    test(
+      'a farm from before gear gets the starting gear, keeping its level',
+      () {
+        final json =
+            jsonDecode(jsonEncode(FarmDocument.of(farm).toJson()))
+                  as Map<String, dynamic>
+              ..remove('equipped')
+              ..['weapon_level'] = 4;
+        final old = FarmDocument.decode(json).toSimulation(catalog);
+        expect(old.equipped.weapon!.enhance, 4);
+        expect(old.equipped.bag, catalog.rules.gear.start.bag);
+      },
+    );
   });
 
   group('totems', () {

@@ -19,7 +19,9 @@ mixin _$ItemData {
  String get id; ItemKind get kind;/// How many fit in one bag slot.
  int get stack;/// What kind of seed a seed item is; required for [ItemKind.seed] only.
 /// Each seed found gets its own level, ability and style.
- SeedKindData? get seed;
+ SeedKindData? get seed;/// What kind of equipment a gear item is; required for [ItemKind.gear]
+/// only. Each piece found gets its own level (and belt slots).
+ GearKindData? get gear;
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +35,20 @@ $ItemDataCopyWith<ItemData> get copyWith => _$ItemDataCopyWithImpl<ItemData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as ItemData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ItemData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.seed, _this.seed) || other.seed == _this.seed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ItemData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.stack, _this.stack) || other.stack == _this.stack)&&(identical(other.seed, _this.seed) || other.seed == _this.seed)&&(identical(other.gear, _this.gear) || other.gear == _this.gear));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ItemData;
-  return Object.hash(runtimeType,_this.id,_this.kind,_this.stack,_this.seed);
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.stack,_this.seed,_this.gear);
 }
 
 @override
 String toString() {
   final _this = this as ItemData;
-  return 'ItemData(id: ${_this.id}, kind: ${_this.kind}, stack: ${_this.stack}, seed: ${_this.seed})';
+  return 'ItemData(id: ${_this.id}, kind: ${_this.kind}, stack: ${_this.stack}, seed: ${_this.seed}, gear: ${_this.gear})';
 }
 
 
@@ -57,11 +59,11 @@ abstract mixin class $ItemDataCopyWith<$Res>  {
   factory $ItemDataCopyWith(ItemData value, $Res Function(ItemData) _then) = _$ItemDataCopyWithImpl;
 @useResult
 $Res call({
- String id, ItemKind kind, int stack, SeedKindData? seed
+ String id, ItemKind kind, int stack, SeedKindData? seed, GearKindData? gear
 });
 
 
-$SeedKindDataCopyWith<$Res>? get seed;
+$SeedKindDataCopyWith<$Res>? get seed;$GearKindDataCopyWith<$Res>? get gear;
 
 }
 /// @nodoc
@@ -74,13 +76,14 @@ class _$ItemDataCopyWithImpl<$Res>
 
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? stack = null,Object? seed = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? stack = null,Object? seed = freezed,Object? gear = freezed,}) {
   return _then(ItemData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as ItemKind,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as int,seed: freezed == seed ? _self.seed : seed // ignore: cast_nullable_to_non_nullable
-as SeedKindData?,
+as SeedKindData?,gear: freezed == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
+as GearKindData?,
   ));
 }
 /// Create a copy of ItemData
@@ -94,6 +97,18 @@ $SeedKindDataCopyWith<$Res>? get seed {
 
   return $SeedKindDataCopyWith<$Res>(_self.seed!, (value) {
     return _then(_self.copyWith(seed: value));
+  });
+}/// Create a copy of ItemData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GearKindDataCopyWith<$Res>? get gear {
+    if (_self.gear == null) {
+    return null;
+  }
+
+  return $GearKindDataCopyWith<$Res>(_self.gear!, (value) {
+    return _then(_self.copyWith(gear: value));
   });
 }
 }
@@ -177,10 +192,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed,  GearKindData? gear)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ItemData() when $default != null:
-return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
+return $default(_that.id,_that.kind,_that.stack,_that.seed,_that.gear);case _:
   return orElse();
 
 }
@@ -198,10 +213,10 @@ return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed,  GearKindData? gear)  $default,) {final _that = this;
 switch (_that) {
 case _ItemData():
-return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
+return $default(_that.id,_that.kind,_that.stack,_that.seed,_that.gear);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -218,10 +233,10 @@ return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  ItemKind kind,  int stack,  SeedKindData? seed,  GearKindData? gear)?  $default,) {final _that = this;
 switch (_that) {
 case _ItemData() when $default != null:
-return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
+return $default(_that.id,_that.kind,_that.stack,_that.seed,_that.gear);case _:
   return null;
 
 }
@@ -233,7 +248,7 @@ return $default(_that.id,_that.kind,_that.stack,_that.seed);case _:
 @JsonSerializable()
 
 class _ItemData implements ItemData {
-  const _ItemData({required this.id, required this.kind, required this.stack, this.seed});
+  const _ItemData({required this.id, required this.kind, required this.stack, this.seed, this.gear});
   factory _ItemData.fromJson(Map<String, dynamic> json) => _$ItemDataFromJson(json);
 
 @override final  String id;
@@ -243,6 +258,9 @@ class _ItemData implements ItemData {
 /// What kind of seed a seed item is; required for [ItemKind.seed] only.
 /// Each seed found gets its own level, ability and style.
 @override final  SeedKindData? seed;
+/// What kind of equipment a gear item is; required for [ItemKind.gear]
+/// only. Each piece found gets its own level (and belt slots).
+@override final  GearKindData? gear;
 
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
@@ -257,18 +275,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ItemData&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.seed, seed) || other.seed == seed));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ItemData&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.stack, stack) || other.stack == stack)&&(identical(other.seed, seed) || other.seed == seed)&&(identical(other.gear, gear) || other.gear == gear));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,kind,stack,seed);
+    return Object.hash(runtimeType,id,kind,stack,seed,gear);
 }
 
 @override
 String toString() {
-    return 'ItemData(id: $id, kind: $kind, stack: $stack, seed: $seed)';
+    return 'ItemData(id: $id, kind: $kind, stack: $stack, seed: $seed, gear: $gear)';
 }
 
 
@@ -279,11 +297,11 @@ abstract mixin class _$ItemDataCopyWith<$Res> implements $ItemDataCopyWith<$Res>
   factory _$ItemDataCopyWith(_ItemData value, $Res Function(_ItemData) _then) = __$ItemDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, ItemKind kind, int stack, SeedKindData? seed
+ String id, ItemKind kind, int stack, SeedKindData? seed, GearKindData? gear
 });
 
 
-@override $SeedKindDataCopyWith<$Res>? get seed;
+@override $SeedKindDataCopyWith<$Res>? get seed;@override $GearKindDataCopyWith<$Res>? get gear;
 
 }
 /// @nodoc
@@ -296,13 +314,14 @@ class __$ItemDataCopyWithImpl<$Res>
 
 /// Create a copy of ItemData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? stack = null,Object? seed = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? stack = null,Object? seed = freezed,Object? gear = freezed,}) {
   return _then(_ItemData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as ItemKind,stack: null == stack ? _self.stack : stack // ignore: cast_nullable_to_non_nullable
 as int,seed: freezed == seed ? _self.seed : seed // ignore: cast_nullable_to_non_nullable
-as SeedKindData?,
+as SeedKindData?,gear: freezed == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
+as GearKindData?,
   ));
 }
 
@@ -317,6 +336,18 @@ $SeedKindDataCopyWith<$Res>? get seed {
 
   return $SeedKindDataCopyWith<$Res>(_self.seed!, (value) {
     return _then(_self.copyWith(seed: value));
+  });
+}/// Create a copy of ItemData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$GearKindDataCopyWith<$Res>? get gear {
+    if (_self.gear == null) {
+    return null;
+  }
+
+  return $GearKindDataCopyWith<$Res>(_self.gear!, (value) {
+    return _then(_self.copyWith(gear: value));
   });
 }
 }
@@ -587,6 +618,282 @@ class __$SeedKindDataCopyWithImpl<$Res>
   return _then(_SeedKindData(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$GearKindData {
+
+ GearKind get kind; String get family; Grade get grade;
+/// Create a copy of GearKindData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GearKindDataCopyWith<GearKindData> get copyWith => _$GearKindDataCopyWithImpl<GearKindData>(this as GearKindData, _$identity);
+
+  /// Serializes this GearKindData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as GearKindData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GearKindData&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.family, _this.family) || other.family == _this.family)&&(identical(other.grade, _this.grade) || other.grade == _this.grade));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as GearKindData;
+  return Object.hash(runtimeType,_this.kind,_this.family,_this.grade);
+}
+
+@override
+String toString() {
+  final _this = this as GearKindData;
+  return 'GearKindData(kind: ${_this.kind}, family: ${_this.family}, grade: ${_this.grade})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GearKindDataCopyWith<$Res>  {
+  factory $GearKindDataCopyWith(GearKindData value, $Res Function(GearKindData) _then) = _$GearKindDataCopyWithImpl;
+@useResult
+$Res call({
+ GearKind kind, String family, Grade grade
+});
+
+
+
+
+}
+/// @nodoc
+class _$GearKindDataCopyWithImpl<$Res>
+    implements $GearKindDataCopyWith<$Res> {
+  _$GearKindDataCopyWithImpl(this._self, this._then);
+
+  final GearKindData _self;
+  final $Res Function(GearKindData) _then;
+
+/// Create a copy of GearKindData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? family = null,Object? grade = null,}) {
+  return _then(GearKindData(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as GearKind,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
+as String,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
+as Grade,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [GearKindData].
+extension GearKindDataPatterns on GearKindData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GearKindData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GearKindData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GearKindData value)  $default,){
+final _that = this;
+switch (_that) {
+case _GearKindData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GearKindData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GearKindData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GearKindData() when $default != null:
+return $default(_that.kind,_that.family,_that.grade);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade)  $default,) {final _that = this;
+switch (_that) {
+case _GearKindData():
+return $default(_that.kind,_that.family,_that.grade);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( GearKind kind,  String family,  Grade grade)?  $default,) {final _that = this;
+switch (_that) {
+case _GearKindData() when $default != null:
+return $default(_that.kind,_that.family,_that.grade);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _GearKindData implements GearKindData {
+  const _GearKindData({required this.kind, this.family = '', required this.grade});
+  factory _GearKindData.fromJson(Map<String, dynamic> json) => _$GearKindDataFromJson(json);
+
+@override final  GearKind kind;
+@override@JsonKey() final  String family;
+@override final  Grade grade;
+
+/// Create a copy of GearKindData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GearKindDataCopyWith<_GearKindData> get copyWith => __$GearKindDataCopyWithImpl<_GearKindData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GearKindDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GearKindData&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.family, family) || other.family == family)&&(identical(other.grade, grade) || other.grade == grade));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,kind,family,grade);
+}
+
+@override
+String toString() {
+    return 'GearKindData(kind: $kind, family: $family, grade: $grade)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GearKindDataCopyWith<$Res> implements $GearKindDataCopyWith<$Res> {
+  factory _$GearKindDataCopyWith(_GearKindData value, $Res Function(_GearKindData) _then) = __$GearKindDataCopyWithImpl;
+@override @useResult
+$Res call({
+ GearKind kind, String family, Grade grade
+});
+
+
+
+
+}
+/// @nodoc
+class __$GearKindDataCopyWithImpl<$Res>
+    implements _$GearKindDataCopyWith<$Res> {
+  __$GearKindDataCopyWithImpl(this._self, this._then);
+
+  final _GearKindData _self;
+  final $Res Function(_GearKindData) _then;
+
+/// Create a copy of GearKindData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? family = null,Object? grade = null,}) {
+  return _then(_GearKindData(
+kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
+as GearKind,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
+as String,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
 as Grade,
   ));
 }

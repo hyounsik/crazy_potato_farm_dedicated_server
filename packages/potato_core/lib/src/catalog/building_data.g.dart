@@ -18,6 +18,7 @@ _BuildingData _$BuildingDataFromJson(Map<String, dynamic> json) =>
         ),
         buildable: $checkedConvert('buildable', (v) => v as bool? ?? true),
         removable: $checkedConvert('removable', (v) => v as bool? ?? true),
+        single: $checkedConvert('single', (v) => v as bool? ?? false),
         totem: $checkedConvert(
           'totem',
           (v) =>
@@ -41,6 +42,7 @@ Map<String, dynamic> _$BuildingDataToJson(_BuildingData instance) =>
       'houses': _$PotatoTypeEnumMap[instance.houses],
       'buildable': instance.buildable,
       'removable': instance.removable,
+      'single': instance.single,
       'totem': instance.totem?.toJson(),
       'levels': instance.levels.map((e) => e.toJson()).toList(),
     };
@@ -58,6 +60,7 @@ _BuildingLevelData _$BuildingLevelDataFromJson(Map<String, dynamic> json) =>
         cost: $checkedConvert('cost', (v) => (v as num).toInt()),
         capacity: $checkedConvert('capacity', (v) => (v as num?)?.toInt() ?? 0),
         graves: $checkedConvert('graves', (v) => (v as num?)?.toInt() ?? 0),
+        stores: $checkedConvert('stores', (v) => (v as num?)?.toInt() ?? 0),
       );
       return val;
     });
@@ -67,6 +70,7 @@ Map<String, dynamic> _$BuildingLevelDataToJson(_BuildingLevelData instance) =>
       'cost': instance.cost,
       'capacity': instance.capacity,
       'graves': instance.graves,
+      'stores': instance.stores,
     };
 
 _TotemData _$TotemDataFromJson(Map<String, dynamic> json) =>

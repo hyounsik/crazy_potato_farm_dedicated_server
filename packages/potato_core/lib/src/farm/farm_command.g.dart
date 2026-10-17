@@ -239,6 +239,17 @@ Map<String, dynamic> _$TakeOverflowToJson(TakeOverflow instance) =>
       'runtimeType': instance.$type,
     };
 
+SellOverflow _$SellOverflowFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('SellOverflow', json, ($checkedConvert) {
+      final val = SellOverflow(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$SellOverflowToJson(SellOverflow instance) =>
+    <String, dynamic>{'runtimeType': instance.$type};
+
 ReadMail _$ReadMailFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ReadMail', json, ($checkedConvert) {
       final val = ReadMail(

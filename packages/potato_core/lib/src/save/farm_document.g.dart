@@ -144,6 +144,12 @@ _FarmDocument _$FarmDocumentFromJson(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
       ),
+      missingBuildings: $checkedConvert(
+        'missing_buildings',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+            const <String>[],
+      ),
     );
     return val;
   },
@@ -156,6 +162,7 @@ _FarmDocument _$FarmDocumentFromJson(
     'gearSlots': 'gear_slots',
     'weaponLevel': 'weapon_level',
     'totemLimit': 'totem_limit',
+    'missingBuildings': 'missing_buildings',
   },
 );
 
@@ -186,6 +193,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'progress': instance.progress,
       'totem_limit': instance.totemLimit,
       'totals': instance.totals,
+      'missing_buildings': instance.missingBuildings,
     };
 
 _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>

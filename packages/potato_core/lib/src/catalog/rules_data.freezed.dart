@@ -2089,8 +2089,7 @@ as int,
 /// @nodoc
 mixin _$FridgeRulesData {
 
-/// Potatoes it holds. Companions coming home may go past it.
- int get size;/// How fast life runs out inside, in percent of normal.
+/// How fast life runs out inside, in percent of normal.
  int get agingPercent;
 /// Create a copy of FridgeRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -2105,20 +2104,20 @@ $FridgeRulesDataCopyWith<FridgeRulesData> get copyWith => _$FridgeRulesDataCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as FridgeRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FridgeRulesData&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.agingPercent, _this.agingPercent) || other.agingPercent == _this.agingPercent));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FridgeRulesData&&(identical(other.agingPercent, _this.agingPercent) || other.agingPercent == _this.agingPercent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FridgeRulesData;
-  return Object.hash(runtimeType,_this.size,_this.agingPercent);
+  return Object.hash(runtimeType,_this.agingPercent);
 }
 
 @override
 String toString() {
   final _this = this as FridgeRulesData;
-  return 'FridgeRulesData(size: ${_this.size}, agingPercent: ${_this.agingPercent})';
+  return 'FridgeRulesData(agingPercent: ${_this.agingPercent})';
 }
 
 
@@ -2129,7 +2128,7 @@ abstract mixin class $FridgeRulesDataCopyWith<$Res>  {
   factory $FridgeRulesDataCopyWith(FridgeRulesData value, $Res Function(FridgeRulesData) _then) = _$FridgeRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int size, int agingPercent
+ int agingPercent
 });
 
 
@@ -2146,10 +2145,9 @@ class _$FridgeRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FridgeRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? agingPercent = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? agingPercent = null,}) {
   return _then(FridgeRulesData(
-size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as int,agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
+agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -2235,10 +2233,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  int agingPercent)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int agingPercent)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FridgeRulesData() when $default != null:
-return $default(_that.size,_that.agingPercent);case _:
+return $default(_that.agingPercent);case _:
   return orElse();
 
 }
@@ -2256,10 +2254,10 @@ return $default(_that.size,_that.agingPercent);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  int agingPercent)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int agingPercent)  $default,) {final _that = this;
 switch (_that) {
 case _FridgeRulesData():
-return $default(_that.size,_that.agingPercent);case _:
+return $default(_that.agingPercent);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2276,10 +2274,10 @@ return $default(_that.size,_that.agingPercent);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  int agingPercent)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int agingPercent)?  $default,) {final _that = this;
 switch (_that) {
 case _FridgeRulesData() when $default != null:
-return $default(_that.size,_that.agingPercent);case _:
+return $default(_that.agingPercent);case _:
   return null;
 
 }
@@ -2291,11 +2289,9 @@ return $default(_that.size,_that.agingPercent);case _:
 @JsonSerializable()
 
 class _FridgeRulesData implements FridgeRulesData {
-  const _FridgeRulesData({required this.size, required this.agingPercent});
+  const _FridgeRulesData({required this.agingPercent});
   factory _FridgeRulesData.fromJson(Map<String, dynamic> json) => _$FridgeRulesDataFromJson(json);
 
-/// Potatoes it holds. Companions coming home may go past it.
-@override final  int size;
 /// How fast life runs out inside, in percent of normal.
 @override final  int agingPercent;
 
@@ -2312,18 +2308,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FridgeRulesData&&(identical(other.size, size) || other.size == size)&&(identical(other.agingPercent, agingPercent) || other.agingPercent == agingPercent));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FridgeRulesData&&(identical(other.agingPercent, agingPercent) || other.agingPercent == agingPercent));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,size,agingPercent);
+    return Object.hash(runtimeType,agingPercent);
 }
 
 @override
 String toString() {
-    return 'FridgeRulesData(size: $size, agingPercent: $agingPercent)';
+    return 'FridgeRulesData(agingPercent: $agingPercent)';
 }
 
 
@@ -2334,7 +2330,7 @@ abstract mixin class _$FridgeRulesDataCopyWith<$Res> implements $FridgeRulesData
   factory _$FridgeRulesDataCopyWith(_FridgeRulesData value, $Res Function(_FridgeRulesData) _then) = __$FridgeRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int size, int agingPercent
+ int agingPercent
 });
 
 
@@ -2351,10 +2347,9 @@ class __$FridgeRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FridgeRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? agingPercent = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? agingPercent = null,}) {
   return _then(_FridgeRulesData(
-size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
-as int,agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
+agingPercent: null == agingPercent ? _self.agingPercent : agingPercent // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

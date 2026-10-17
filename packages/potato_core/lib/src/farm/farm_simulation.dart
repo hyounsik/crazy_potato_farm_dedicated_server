@@ -248,6 +248,10 @@ final class FarmSimulation {
   /// Potatoes in the fridge, in id order.
   Iterable<Potato> get fridge => _fridge.values;
 
+  /// How many potatoes the fridge (the potato cellar) holds. Companions
+  /// coming home may go past it.
+  int get fridgeSize => _buildings.values.fold(0, (n, b) => n + b.stores);
+
   /// Dead potatoes waiting in the graveyards, oldest first.
   Iterable<Potato> get graves => _graves;
 
@@ -408,6 +412,7 @@ final class FarmSimulation {
     WidenGearBox() => _widen(pouch: false),
     SellSeed(:final seed) => _sellSeed(seed),
     TakeOverflow(:final seed) => _takeOverflow(seed),
+    SellOverflow() => _sellOverflow(),
     ReadMail(:final mailId) => _readMail(mailId),
     ClaimMail(:final mailId) => _claimMail(mailId),
     OpenBlock(:final block) => _openBlock(block),
@@ -962,6 +967,9 @@ final class FarmSimulation {
   FarmRejection? _build(String kind, TilePos origin) {
     final data = catalog.buildings[kind];
     if (data == null || !data.buildable) return FarmRejection.noSuchBuilding;
+    if (data.single && _buildings.values.any((b) => b.kind == kind)) {
+      return FarmRejection.onlyOne;
+    }
     if (data.totem != null && totemCount >= totemLimit) {
       return FarmRejection.totemLimit;
     }
@@ -1028,11 +1036,23 @@ final class FarmSimulation {
   /// Waiting seeds whose time is up turn into baby potatoes.
   void _expireOverflow() {
     while (_overflow.isNotEmpty && _overflow.first.expiresTick <= _tick) {
-      final seed = _overflow.removeAt(0).seed;
-      final value = _rules.storage.seedFood[seed.grade]!;
-      food += value;
-      _events.add(FarmEvent.overflowExpired(seed: seed, food: value));
+      _turnOverflow(_overflow.removeAt(0).seed);
     }
+  }
+
+  void _turnOverflow(Seed seed) {
+    final value = _rules.storage.seedFood[seed.grade]!;
+    food += value;
+    _events.add(FarmEvent.overflowExpired(seed: seed, food: value));
+  }
+
+  FarmRejection? _sellOverflow() {
+    if (_overflow.isEmpty) return FarmRejection.notWaiting;
+    for (final waiting in _overflow) {
+      _turnOverflow(waiting.seed);
+    }
+    _overflow.clear();
+    return null;
   }
 
   FarmRejection? _widen({required bool pouch}) {
@@ -1245,13 +1265,14 @@ final class FarmSimulation {
     return null;
   }
 
-  /// Puts back starting buildings that cannot be removed (the house) when a
-  /// farm saved before they existed lacks them: at their starting spot, or
-  /// the first open spot that fits.
-  void addMissingStartBuildings() {
+  /// Puts back starting buildings that cannot be removed (the house), and
+  /// the starting buildings of kinds in [also], when a farm saved before
+  /// they existed lacks them: at their starting spot, or the first open spot
+  /// that fits.
+  void addMissingStartBuildings({Iterable<String> also = const []}) {
     for (final start in _rules.newFarm.buildings) {
       final data = catalog.buildings[start.kind]!;
-      if (data.removable) continue;
+      if (data.removable && !also.contains(start.kind)) continue;
       if (_buildings.values.any((b) => b.kind == start.kind)) continue;
       TilePos? spot;
       bool fits(TilePos origin) => canPlace(
@@ -1276,6 +1297,10 @@ final class FarmSimulation {
   FarmRejection? _demolish(int buildingId) {
     if (_buildings[buildingId]?.data.removable == false) {
       return FarmRejection.cannotRemove;
+    }
+    final stores = _buildings[buildingId]?.stores ?? 0;
+    if (stores > 0 && _fridge.length > fridgeSize - stores) {
+      return FarmRejection.cellarNotEmpty;
     }
     final building = _buildings.remove(buildingId);
     if (building == null) return FarmRejection.noSuchBuilding;
@@ -1447,7 +1472,7 @@ final class FarmSimulation {
     if (!potato.isGrown(catalog.potatoType(potato.type))) {
       return FarmRejection.stillGrowing;
     }
-    if (_fridge.length >= _rules.potatoes.fridge.size) {
+    if (_fridge.length >= fridgeSize) {
       return FarmRejection.fridgeFull;
     }
     if (spot != null) {

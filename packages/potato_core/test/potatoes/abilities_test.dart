@@ -166,7 +166,7 @@ void main() {
       );
       farm.food = 10000;
       build('compost_yard', const TilePos(8, 8));
-      final yard = farm.buildings.single;
+      final yard = farm.buildings.singleWhere((b) => b.kind == 'compost_yard');
       // breeding.eye ×2 on a 0.5 chance: always.
       final seed = _seed(PotatoType.breeding, 'breeding.eye');
       farm.seeds.add(seed);
@@ -200,7 +200,7 @@ void main() {
     build('training_ground', const TilePos(8, 8));
     final seed = _seed(PotatoType.combat, 'combat.gatherer');
     farm.seeds.add(seed);
-    final ground = farm.buildings.single.id;
+    final ground = farm.buildings.last.id;
     farm.apply(FarmCommand.train(buildingId: ground, seed: seed));
     final food = plant(plainSeed(PotatoType.food));
     final before = farm.food;
@@ -221,7 +221,7 @@ void main() {
     final seed = _seed(PotatoType.combat, 'combat.gatherer');
     farm.seeds.add(seed);
     farm.apply(
-      FarmCommand.train(buildingId: farm.buildings.single.id, seed: seed),
+      FarmCommand.train(buildingId: farm.buildings.last.id, seed: seed),
     );
     final field = farm.field(1)!;
     final potatoes = [

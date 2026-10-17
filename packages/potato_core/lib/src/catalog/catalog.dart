@@ -354,7 +354,6 @@ final class Catalog {
       'potatoes.guards.walk_millis_per_tile',
       potatoes.guards.walkMillisPerTile,
     );
-    check.atLeast('potatoes.fridge.size', potatoes.fridge.size, 0);
     check.probability(
       'potatoes.harvest_rare_chance',
       potatoes.harvestRareChance,

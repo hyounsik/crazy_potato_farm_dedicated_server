@@ -15,6 +15,26 @@
       ]
     },
     {
+      "id": "potato_cellar",
+      "width": 1,
+      "height": 1,
+      "single": true,
+      "levels": [
+        {
+          "cost": 0,
+          "stores": 4
+        },
+        {
+          "cost": 100,
+          "stores": 6
+        },
+        {
+          "cost": 200,
+          "stores": 8
+        }
+      ]
+    },
+    {
       "id": "training_ground",
       "width": 2,
       "height": 2,

@@ -55,6 +55,30 @@ void main() {
       );
     });
 
+    test('every waiting seed turns into baby potatoes at once', () {
+      fill();
+      expect(
+        farm.apply(const FarmCommand.sellOverflow()),
+        FarmRejection.notWaiting,
+      );
+      farm.apply(
+        FarmCommand.returnHome(
+          food: 0,
+          seeds: [
+            SeedCount(seed: rare, count: 2),
+            SeedCount(seed: normal, count: 1),
+          ],
+        ),
+      );
+      expect(farm.overflow, hasLength(3));
+      farm.takeEvents();
+      final before = farm.food;
+      expect(farm.apply(const FarmCommand.sellOverflow()), isNull);
+      expect(farm.overflow, isEmpty);
+      expect(farm.food, before + 15 + 15 + 5);
+      expect(farm.takeEvents().whereType<OverflowExpired>(), hasLength(3));
+    });
+
     test('a waiting seed comes in once there is room', () {
       fill();
       final had = farm.seeds.count(rare);

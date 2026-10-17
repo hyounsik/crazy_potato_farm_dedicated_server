@@ -309,7 +309,6 @@ Map<String, dynamic> _$GuardRulesDataToJson(_GuardRulesData instance) =>
 _FridgeRulesData _$FridgeRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_FridgeRulesData', json, ($checkedConvert) {
       final val = _FridgeRulesData(
-        size: $checkedConvert('size', (v) => (v as num).toInt()),
         agingPercent: $checkedConvert(
           'aging_percent',
           (v) => (v as num).toInt(),
@@ -319,10 +318,7 @@ _FridgeRulesData _$FridgeRulesDataFromJson(Map<String, dynamic> json) =>
     }, fieldKeyMap: const {'agingPercent': 'aging_percent'});
 
 Map<String, dynamic> _$FridgeRulesDataToJson(_FridgeRulesData instance) =>
-    <String, dynamic>{
-      'size': instance.size,
-      'aging_percent': instance.agingPercent,
-    };
+    <String, dynamic>{'aging_percent': instance.agingPercent};
 
 _PestRulesData _$PestRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_PestRulesData', json, ($checkedConvert) {

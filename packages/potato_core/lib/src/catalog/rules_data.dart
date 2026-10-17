@@ -170,13 +170,12 @@ abstract class GuardRulesData with _$GuardRulesData {
       _$GuardRulesDataFromJson(json);
 }
 
-/// The potato fridge: potatoes taken out of fields and training grounds.
+/// The potato fridge (the potato cellar on screen): potatoes taken out of
+/// fields and training grounds. How many it holds comes from the cellar
+/// building's level.
 @freezed
 abstract class FridgeRulesData with _$FridgeRulesData {
   const factory FridgeRulesData({
-    /// Potatoes it holds. Companions coming home may go past it.
-    required int size,
-
     /// How fast life runs out inside, in percent of normal.
     required int agingPercent,
   }) = _FridgeRulesData;

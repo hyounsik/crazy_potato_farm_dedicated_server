@@ -65,6 +65,10 @@ sealed class FarmCommand with _$FarmCommand {
   /// room now.
   const factory FarmCommand.takeOverflow({required Seed seed}) = TakeOverflow;
 
+  /// Turns every waiting seed that did not fit into the pouch into baby
+  /// potatoes at once, as if their time were up.
+  const factory FarmCommand.sellOverflow() = SellOverflow;
+
   /// Marks letter [mailId] read.
   const factory FarmCommand.readMail({required int mailId}) = ReadMail;
 
@@ -212,6 +216,12 @@ enum FarmRejection {
 
   /// The building comes with the farm and stays (the house).
   cannotRemove,
+
+  /// The potato cellar still keeps potatoes.
+  cellarNotEmpty,
+
+  /// The farm already has one, and may have only one (the potato cellar).
+  onlyOne,
 
   /// The pouch or box is as large as it can get.
   atMost,

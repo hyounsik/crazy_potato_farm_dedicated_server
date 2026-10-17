@@ -21,8 +21,12 @@ abstract class BuildingData with _$BuildingData {
     /// Whether it shows in the build menu. The house comes with the farm.
     @Default(true) bool buildable,
 
-    /// Whether it can be demolished. The house cannot.
+    /// Whether it can be demolished. The house cannot; the potato cellar
+    /// only while empty.
     @Default(true) bool removable,
+
+    /// Whether a farm has at most one (the potato cellar).
+    @Default(false) bool single,
 
     /// What it does when lit, for totems.
     TotemData? totem,
@@ -47,6 +51,10 @@ abstract class BuildingLevelData with _$BuildingLevelData {
 
     /// Dead potatoes this building keeps for reviving (graveyards).
     @Default(0) int graves,
+
+    /// Potatoes this building keeps out of the fields (the potato cellar,
+    /// called the fridge in code).
+    @Default(0) int stores,
   }) = _BuildingLevelData;
 
   factory BuildingLevelData.fromJson(Map<String, dynamic> json) =>

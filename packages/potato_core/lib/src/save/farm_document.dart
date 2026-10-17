@@ -65,6 +65,10 @@ abstract class FarmDocument with _$FarmDocument {
     @Default(0) int progress,
     int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
+
+    /// Starting building kinds a farm saved before they existed should get
+    /// when it is read (set by migrations, never written).
+    @Default(<String>[]) List<String> missingBuildings,
   }) = _FarmDocument;
 
   const FarmDocument._();
@@ -278,7 +282,7 @@ abstract class FarmDocument with _$FarmDocument {
       totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),
     );
-    return farm..addMissingStartBuildings();
+    return farm..addMissingStartBuildings(also: missingBuildings);
   }
 }
 

@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 4;
+const int farmFormatVersion = 5;
 
 /// The oldest format this code reads. Older documents (before abilities and
 /// levels) are not upgraded while the game is in development: the client
@@ -21,7 +21,15 @@ final class FarmTooOldException extends FormatException {
 /// rewrites the old JSON map, and keep every old step. Steps work on plain
 /// maps because the old shape no longer has a model class.
 final List<Map<String, dynamic> Function(Map<String, dynamic> json)>
-_farmMigrations = [];
+_farmMigrations = [
+  // 4 → 5: the potato cellar became a building that comes with the farm.
+  // Older farms get one when they are read.
+  (json) => json
+    ..['missing_buildings'] = [
+      ...?(json['missing_buildings'] as List?),
+      'potato_cellar',
+    ],
+];
 
 /// Brings a decoded farm document up to [farmFormatVersion].
 ///

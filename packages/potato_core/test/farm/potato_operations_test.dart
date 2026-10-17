@@ -142,7 +142,7 @@ void main() {
         ),
         FarmRejection.notEnoughFood,
       );
-      expect(farm.buildings, isEmpty);
+      expect(farm.buildings.map((b) => b.kind), ['potato_cellar']);
       expect(farm.nextId, FarmSimulation.newFarm(catalog, seed: 3).nextId);
 
       farm.food = 1000;
@@ -587,19 +587,66 @@ void main() {
       expect(potato.livedMillis, 0);
     });
 
-    test('the fridge has a size', () {
-      final size = catalog.rules.potatoes.fridge.size;
-      final tiles = farm.field(1)!.rect.tiles.toList();
+    /// Plants a food potato on the field's first tile, grows it, and puts
+    /// it into the fridge; returns what uprooting said.
+    FarmRejection? uprootOne() {
+      final tile = farm.field(1)!.rect.origin;
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: _food));
+      farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
+      final id = farm.field(1)!.potatoAt(tile)!.id;
+      final rejection = farm.apply(FarmCommand.uproot(potatoId: id));
+      if (rejection != null) farm.apply(FarmCommand.harvestField(fieldId: 1));
+      return rejection;
+    }
+
+    FarmBuilding cellar() =>
+        farm.buildings.singleWhere((b) => b.kind == 'potato_cellar');
+
+    test('the potato cellar comes with the farm and sets the fridge size', () {
+      final size = cellar().stores;
+      expect(size, greaterThan(0));
+      expect(farm.fridgeSize, size);
       for (var i = 0; i <= size; i++) {
-        final tile = tiles[i % tiles.length];
-        farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: _food));
-        farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
-        final id = farm.field(1)!.potatoAt(tile)!.id;
-        expect(
-          farm.apply(FarmCommand.uproot(potatoId: id)),
-          i < size ? isNull : FarmRejection.fridgeFull,
-        );
+        expect(uprootOne(), i < size ? isNull : FarmRejection.fridgeFull);
       }
+      expect(farm.apply(FarmCommand.upgrade(buildingId: cellar().id)), isNull);
+      expect(farm.fridgeSize, greaterThan(size));
+      expect(uprootOne(), isNull);
+    });
+
+    test('the potato cellar comes down only when empty, and once a farm', () {
+      final id = cellar().id;
+      expect(
+        farm.apply(
+          FarmCommand.build(kind: 'potato_cellar', origin: TilePos(8, 8)),
+        ),
+        FarmRejection.onlyOne,
+      );
+      expect(uprootOne(), isNull);
+      expect(
+        farm.apply(FarmCommand.demolish(buildingId: id)),
+        FarmRejection.cellarNotEmpty,
+      );
+      final potato = farm.fridge.single;
+      expect(
+        farm.apply(
+          FarmCommand.replant(
+            potatoId: potato.id,
+            fieldId: 1,
+            tile: farm.field(1)!.rect.origin,
+          ),
+        ),
+        isNull,
+      );
+      expect(farm.apply(FarmCommand.demolish(buildingId: id)), isNull);
+      expect(farm.fridgeSize, 0);
+      expect(
+        farm.apply(
+          FarmCommand.build(kind: 'potato_cellar', origin: TilePos(8, 8)),
+        ),
+        isNull,
+      );
+      expect(farm.fridgeSize, greaterThan(0));
     });
 
     test('guards go into the fridge and back to a training ground', () {

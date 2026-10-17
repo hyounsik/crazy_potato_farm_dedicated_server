@@ -84,6 +84,27 @@ void main() {
       }
     });
 
+    test('gives a farm from before the potato cellar its cellar', () {
+      final farm = busyFarm();
+      final cellar = farm.buildings.single;
+      final json = FarmDocument.of(farm).toJson()
+        ..['format_version'] = 4
+        ..['buildings'] = <Object>[]
+        ..remove('missing_buildings');
+      final loaded = FarmDocument.decode(
+        jsonDecode(jsonEncode(json)) as Map<String, dynamic>,
+      ).toSimulation(catalog);
+      expect(loaded.buildings.single.kind, 'potato_cellar');
+      expect(loaded.buildings.single.origin, cellar.origin);
+
+      // Taken down later, it stays down.
+      final again = reload(
+        loaded
+          ..apply(FarmCommand.demolish(buildingId: loaded.buildings.single.id)),
+      );
+      expect(again.buildings, isEmpty);
+    });
+
     test('rejects a document from a newer app', () {
       final json = FarmDocument.of(busyFarm()).toJson()
         ..['format_version'] = farmFormatVersion + 1;

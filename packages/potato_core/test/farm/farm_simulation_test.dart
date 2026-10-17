@@ -228,7 +228,7 @@ void main() {
         ..apply(
           FarmCommand.build(kind: 'graveyard', origin: const TilePos(14, 8)),
         );
-      final building = farm.buildings.single;
+      final building = farm.buildings.singleWhere((b) => b.kind == 'graveyard');
       expect(
         farm.apply(
           FarmCommand.moveBuilding(
@@ -253,7 +253,7 @@ void main() {
       ) as Map<String, dynamic>;
       final loaded = FarmDocument.decode(json).toSimulation(catalog);
       expect(loaded.field(1)!.rect.origin, const TilePos(9, 12));
-      expect(loaded.buildings.single.origin, const TilePos(9, 8));
+      expect(loaded.building(building.id)!.origin, const TilePos(9, 8));
     });
   });
 
@@ -263,8 +263,8 @@ void main() {
       expect(farm.seeds.count(_normal), start - 1);
       expect(farm.field(1)!.potatoAt(_tile)!.grade, Grade.normal);
       expect(farm.takeEvents(), [
-        // Id 1 is the starting field and 2 the start letter.
-        FarmEvent.planted(fieldId: 1, tile: _tile, potatoId: 3, seed: _normal),
+        // Id 1 is the starting field, 2 the cellar and 3 the start letter.
+        FarmEvent.planted(fieldId: 1, tile: _tile, potatoId: 4, seed: _normal),
       ]);
       expect(farm.takeEvents(), isEmpty);
     });
@@ -305,7 +305,7 @@ void main() {
       farm.takeEvents();
       farm.runSteps(120);
       expect(farm.takeEvents(), [
-        FarmEvent.grown(fieldId: 1, tile: _tile, potatoId: 3),
+        FarmEvent.grown(fieldId: 1, tile: _tile, potatoId: 4),
       ]);
       expect(
         farm.apply(FarmCommand.harvestField(fieldId: 1)),

@@ -34,7 +34,6 @@
       "walk_millis_per_tile": 500
     },
     "fridge": {
-      "size": 4,
       "aging_percent": 10
     },
     "harvest_rare_chance": 0.0,
@@ -87,6 +86,15 @@
         },
         "width": 2,
         "height": 2
+      }
+    ],
+    "buildings": [
+      {
+        "kind": "potato_cellar",
+        "origin": {
+          "x": 13,
+          "y": 15
+        }
       }
     ],
     "seeds": [

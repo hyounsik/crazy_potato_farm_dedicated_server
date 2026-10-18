@@ -163,6 +163,30 @@ void main() {
     );
   });
 
+  test('a story letter with its gift untaken outlasts the mail limit', () {
+    farm.apply(FarmCommand.makeField(rect: secondField()));
+    final story = farm.mail.last;
+    expect(story.kind, MailKind.story);
+    expect(story.hasGift, isTrue);
+
+    // Each statue built sends a letter; the oldest others make way.
+    farm.food = 100000;
+    final keep = catalog.rules.mail.keep;
+    for (var i = 0; i < keep + 2; i++) {
+      final rect = secondField();
+      expect(
+        farm.apply(FarmCommand.build(kind: 'statue', origin: rect.origin)),
+        isNull,
+      );
+    }
+    expect(farm.mail, hasLength(keep));
+    expect(farm.mail.first.id, story.id, reason: 'kept, though oldest');
+
+    farm.apply(FarmCommand.claimMail(mailId: story.id));
+    farm.apply(FarmCommand.build(kind: 'statue', origin: secondField().origin));
+    expect(farm.mail.any((m) => m.id == story.id), isFalse);
+  });
+
   test('later events wait for earlier ones; a wait counts from then', () {
     farm.apply(FarmCommand.makeField(rect: secondField()));
     escape('sample_zone');

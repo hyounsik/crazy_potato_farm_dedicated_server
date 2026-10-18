@@ -151,14 +151,15 @@ sealed class FarmCommand with _$FarmCommand {
   /// Turns dead potato [potatoId] in a graveyard into its seed.
   const factory FarmCommand.revive({required int potatoId}) = Revive;
 
-  /// Sets out exploring with [food] baby potatoes and the potatoes
-  /// [potatoIds] as companions. They leave the farm until [returnHome].
-  /// [zone] is refused while the story keeps it closed; null skips that
-  /// check.
+  /// Sets out exploring zone [zone] with [food] baby potatoes and the
+  /// potatoes [potatoIds] as companions. They leave the farm until
+  /// [returnHome]. A zone the story keeps closed is refused, and so is one
+  /// the catalog does not have (2026-10-18: required, so a command from
+  /// another player cannot skip the lock).
   const factory FarmCommand.depart({
+    required String zone,
     required int food,
     @Default(<int>[]) List<int> potatoIds,
-    String? zone,
   }) = Depart;
 
   /// Opens every feature and stops story events. A developer tool: only
@@ -281,6 +282,9 @@ enum FarmRejection {
   /// A companion that is missing, still growing, already out, in the
   /// fridge, or of a type that never leaves the farm.
   cannotGo,
+
+  /// A run to a zone the catalog does not have.
+  unknownZone,
 
   /// The companions do not fit the worn belt's slots.
   beltTooSmall,

@@ -673,7 +673,12 @@ void main() {
   test('guards can go exploring and come back to guard', () {
     final ground = build('training_ground', const TilePos(8, 8));
     final id = growGuard(ground);
-    expect(farm.apply(FarmCommand.depart(food: 0, potatoIds: [id])), isNull);
+    expect(
+      farm.apply(
+        FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: [id]),
+      ),
+      isNull,
+    );
     expect(farm.guards, isEmpty);
     expect(farm.countOf(PotatoType.combat), 0);
 

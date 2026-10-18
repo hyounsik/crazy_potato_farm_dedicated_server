@@ -100,11 +100,19 @@ void main() {
     final ids = [for (final p in farm.field(1)!.potatoes.values) p.id];
     // The starting belt takes one food and one combat potato.
     expect(
-      farm.apply(FarmCommand.depart(food: 0, potatoIds: ids)),
+      farm.apply(
+        FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: ids),
+      ),
       FarmRejection.beltTooSmall,
     );
     expect(
-      farm.apply(FarmCommand.depart(food: 0, potatoIds: [ids.first])),
+      farm.apply(
+        FarmCommand.depart(
+          zone: 'sample_zone',
+          food: 0,
+          potatoIds: [ids.first],
+        ),
+      ),
       isNull,
     );
   });

@@ -572,6 +572,7 @@ Map<String, dynamic> _$ReviveToJson(Revive instance) => <String, dynamic>{
 Depart _$DepartFromJson(Map<String, dynamic> json) =>
     $checkedCreate('Depart', json, ($checkedConvert) {
       final val = Depart(
+        zone: $checkedConvert('zone', (v) => v as String),
         food: $checkedConvert('food', (v) => (v as num).toInt()),
         potatoIds: $checkedConvert(
           'potato_ids',
@@ -579,16 +580,15 @@ Depart _$DepartFromJson(Map<String, dynamic> json) =>
               (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
               const <int>[],
         ),
-        zone: $checkedConvert('zone', (v) => v as String?),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
     }, fieldKeyMap: const {'potatoIds': 'potato_ids', r'$type': 'runtimeType'});
 
 Map<String, dynamic> _$DepartToJson(Depart instance) => <String, dynamic>{
+  'zone': instance.zone,
   'food': instance.food,
   'potato_ids': instance.potatoIds,
-  'zone': instance.zone,
   'runtimeType': instance.$type,
 };
 

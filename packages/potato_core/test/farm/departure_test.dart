@@ -27,7 +27,12 @@ void main() {
     final id = growOne();
     farm.takeEvents();
 
-    expect(farm.apply(FarmCommand.depart(food: 50, potatoIds: [id])), isNull);
+    expect(
+      farm.apply(
+        FarmCommand.depart(zone: 'sample_zone', food: 50, potatoIds: [id]),
+      ),
+      isNull,
+    );
     expect(farm.food, 150);
     expect(farm.awayPotatoes.single.id, id);
     expect(farm.takeEvents(), [
@@ -37,7 +42,9 @@ void main() {
 
   test('an away potato stands still and frees its tile', () {
     final id = growOne();
-    farm.apply(FarmCommand.depart(food: 0, potatoIds: [id]));
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: [id]),
+    );
     final potato = farm.potatoById(id)!;
     final lived = potato.livedMillis;
 
@@ -56,7 +63,9 @@ void main() {
 
   test('a companion whose tile was taken comes home to the fridge', () {
     final id = growOne();
-    farm.apply(FarmCommand.depart(food: 0, potatoIds: [id]));
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: [id]),
+    );
     farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
     farm.takeEvents();
 
@@ -69,18 +78,26 @@ void main() {
 
   test('who and how much can go', () {
     expect(
-      farm.apply(FarmCommand.depart(food: 201)),
+      farm.apply(FarmCommand.depart(zone: 'nowhere', food: 0)),
+      FarmRejection.unknownZone,
+    );
+    expect(
+      farm.apply(FarmCommand.depart(zone: 'sample_zone', food: 201)),
       FarmRejection.notEnoughFood,
     );
     farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
     final sprout = farm.field(1)!.potatoAt(_tile)!.id;
     expect(
-      farm.apply(FarmCommand.depart(food: 0, potatoIds: [sprout])),
+      farm.apply(
+        FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: [sprout]),
+      ),
       FarmRejection.cannotGo,
       reason: 'still growing',
     );
     expect(
-      farm.apply(FarmCommand.depart(food: 0, potatoIds: [999])),
+      farm.apply(
+        FarmCommand.depart(zone: 'sample_zone', food: 0, potatoIds: [999]),
+      ),
       FarmRejection.cannotGo,
     );
     expect(farm.food, 200, reason: 'a refused departure changes nothing');
@@ -88,7 +105,9 @@ void main() {
 
   test('a run result comes home into the farm', () {
     final id = growOne();
-    farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 40, potatoIds: [id]),
+    );
 
     final rare = plainSeed(PotatoType.food, Grade.rare);
     final before = farm.seeds.count(rare);
@@ -117,7 +136,9 @@ void main() {
 
   test('a lost danger run brings nothing and the companions are gone', () {
     final id = growOne();
-    farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 40, potatoIds: [id]),
+    );
     farm.takeEvents();
     final result = RaidResult(
       outcome: RaidOutcome.fainted,
@@ -141,7 +162,9 @@ void main() {
 
   test('a companion that fell in a danger zone stays gone after leaving', () {
     final id = growOne();
-    farm.apply(FarmCommand.depart(food: 40, potatoIds: [id]));
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 40, potatoIds: [id]),
+    );
     farm.takeEvents();
     final result = RaidResult(
       outcome: RaidOutcome.extracted,

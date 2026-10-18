@@ -1071,7 +1071,9 @@ final class FarmSimulation {
     return null;
   }
 
-  /// Puts a letter in the mailbox, letting the oldest go past the limit.
+  /// Puts a letter in the mailbox, letting the oldest go past the limit. A
+  /// story letter whose gift is not taken yet never goes (2026-10-18): the
+  /// mailbox may then hold more than the limit.
   void _send(
     MailKind kind, {
     String? building,
@@ -1090,7 +1092,11 @@ final class FarmSimulation {
     );
     _mail.add(mail);
     while (_mail.length > _rules.mail.keep) {
-      _mail.removeAt(0);
+      final oldest = _mail.indexWhere(
+        (m) => m.kind != MailKind.story || !m.hasGift,
+      );
+      if (oldest < 0) break;
+      _mail.removeAt(oldest);
     }
     _events.add(FarmEvent.mailArrived(mailId: mail.id));
   }
@@ -1599,8 +1605,9 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _depart(int food, List<int> potatoIds, String? zone) {
-    if (zone != null && !zoneOpen(zone)) return FarmRejection.locked;
+  FarmRejection? _depart(int food, List<int> potatoIds, String zone) {
+    if (!catalog.zones.containsKey(zone)) return FarmRejection.unknownZone;
+    if (!zoneOpen(zone)) return FarmRejection.locked;
     if (food < 0 || food > this.food) return FarmRejection.notEnoughFood;
     final going = <AwayPotato>[];
     for (final id in potatoIds.toSet()) {

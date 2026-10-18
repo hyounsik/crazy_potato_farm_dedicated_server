@@ -39,6 +39,20 @@ FarmTotals _$FarmTotalsFromJson(Map<String, dynamic> json) => $checkedCreate(
         'food_harvested_by_guards',
         (v) => (v as num?)?.toInt() ?? 0,
       ),
+      potatoesDied: $checkedConvert(
+        'potatoes_died',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      potatoesTrained: $checkedConvert(
+        'potatoes_trained',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      escapes: $checkedConvert(
+        'escapes',
+        (v) => (v as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, (e as num).toInt()),
+        ),
+      ),
     );
     return val;
   },
@@ -50,6 +64,8 @@ FarmTotals _$FarmTotalsFromJson(Map<String, dynamic> json) => $checkedCreate(
     'pestsClearedByGuards': 'pests_cleared_by_guards',
     'pestsClearedByTap': 'pests_cleared_by_tap',
     'foodHarvestedByGuards': 'food_harvested_by_guards',
+    'potatoesDied': 'potatoes_died',
+    'potatoesTrained': 'potatoes_trained',
   },
 );
 
@@ -62,4 +78,7 @@ Map<String, dynamic> _$FarmTotalsToJson(FarmTotals instance) =>
       'pests_cleared_by_guards': instance.pestsClearedByGuards,
       'pests_cleared_by_tap': instance.pestsClearedByTap,
       'food_harvested_by_guards': instance.foodHarvestedByGuards,
+      'potatoes_died': instance.potatoesDied,
+      'potatoes_trained': instance.potatoesTrained,
+      'escapes': instance.escapes,
     };

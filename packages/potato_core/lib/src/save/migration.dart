@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 5;
+const int farmFormatVersion = 6;
 
 /// The oldest format this code reads. Older documents (before abilities and
 /// levels) are not upgraded while the game is in development: the client
@@ -29,6 +29,9 @@ _farmMigrations = [
       ...?(json['missing_buildings'] as List?),
       'potato_cellar',
     ],
+  // 5 → 6: the story locks features on new farms. Farms made before it
+  // keep everything open and skip the story.
+  (json) => json..['story_skipped'] = true,
 ];
 
 /// Brings a decoded farm document up to [farmFormatVersion].

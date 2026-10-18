@@ -84,9 +84,13 @@ final class RaidResult {
     required this.score,
     required this.lost,
     this.equipped = const Equipped(),
+    this.zone,
   });
 
   final RaidOutcome outcome;
+
+  /// The zone id of the run.
+  final String? zone;
 
   /// What is worn at the end; after a lost run, only what was not lost.
   final Equipped equipped;
@@ -514,6 +518,7 @@ final class RaidSimulation {
           (potatoId: c.potatoId, down: c.isDown, gone: isDanger && c.isDown),
       ],
       score: zone.score,
+      zone: zone.id,
       lost: isDanger && outcome != RaidOutcome.extracted,
       equipped: _kept ?? player.equipped,
     );

@@ -26,7 +26,10 @@ mixin _$FarmDocument {
  int? get pouchSlots; int? get gearSlots; List<OverflowDocument> get overflow; Map<String, int> get materials; List<MailDocument> get mail;/// The workbench level of the one weapon, in documents from before
 /// gear (then [equipped] is null and the farm gets the starting gear,
 /// this level on its weapon).
- int get weaponLevel; List<Gear> get gear; Equipped? get equipped; int get progress; int? get totemLimit; Map<String, dynamic> get totals;/// Starting building kinds a farm saved before they existed should get
+ int get weaponLevel; List<Gear> get gear; Equipped? get equipped; int get progress; int? get totemLimit; Map<String, dynamic> get totals;/// Story events done, by id, with the step each was done on.
+ Map<String, int> get storyDone;/// Every feature open, no story events (see
+/// [FarmSimulation.storySkipped]).
+ bool get storySkipped;/// Starting building kinds a farm saved before they existed should get
 /// when it is read (set by migrations, never written).
  List<String> get missingBuildings;
 /// Create a copy of FarmDocument
@@ -42,20 +45,20 @@ $FarmDocumentCopyWith<FarmDocument> get copyWith => _$FarmDocumentCopyWithImpl<F
 @override
 bool operator ==(Object other) {
   final _this = this as FarmDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmDocument&&(identical(other.formatVersion, _this.formatVersion) || other.formatVersion == _this.formatVersion)&&(identical(other.tick, _this.tick) || other.tick == _this.tick)&&(identical(other.nextId, _this.nextId) || other.nextId == _this.nextId)&&const DeepCollectionEquality().equals(other.randomState, _this.randomState)&&(identical(other.food, _this.food) || other.food == _this.food)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds)&&const DeepCollectionEquality().equals(other.fields, _this.fields)&&const DeepCollectionEquality().equals(other.buildings, _this.buildings)&&const DeepCollectionEquality().equals(other.guards, _this.guards)&&const DeepCollectionEquality().equals(other.breeders, _this.breeders)&&const DeepCollectionEquality().equals(other.fridge, _this.fridge)&&const DeepCollectionEquality().equals(other.away, _this.away)&&const DeepCollectionEquality().equals(other.graves, _this.graves)&&const DeepCollectionEquality().equals(other.openBlocks, _this.openBlocks)&&(identical(other.pouchSlots, _this.pouchSlots) || other.pouchSlots == _this.pouchSlots)&&(identical(other.gearSlots, _this.gearSlots) || other.gearSlots == _this.gearSlots)&&const DeepCollectionEquality().equals(other.overflow, _this.overflow)&&const DeepCollectionEquality().equals(other.materials, _this.materials)&&const DeepCollectionEquality().equals(other.mail, _this.mail)&&(identical(other.weaponLevel, _this.weaponLevel) || other.weaponLevel == _this.weaponLevel)&&const DeepCollectionEquality().equals(other.gear, _this.gear)&&(identical(other.equipped, _this.equipped) || other.equipped == _this.equipped)&&(identical(other.progress, _this.progress) || other.progress == _this.progress)&&(identical(other.totemLimit, _this.totemLimit) || other.totemLimit == _this.totemLimit)&&const DeepCollectionEquality().equals(other.totals, _this.totals)&&const DeepCollectionEquality().equals(other.missingBuildings, _this.missingBuildings));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmDocument&&(identical(other.formatVersion, _this.formatVersion) || other.formatVersion == _this.formatVersion)&&(identical(other.tick, _this.tick) || other.tick == _this.tick)&&(identical(other.nextId, _this.nextId) || other.nextId == _this.nextId)&&const DeepCollectionEquality().equals(other.randomState, _this.randomState)&&(identical(other.food, _this.food) || other.food == _this.food)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds)&&const DeepCollectionEquality().equals(other.fields, _this.fields)&&const DeepCollectionEquality().equals(other.buildings, _this.buildings)&&const DeepCollectionEquality().equals(other.guards, _this.guards)&&const DeepCollectionEquality().equals(other.breeders, _this.breeders)&&const DeepCollectionEquality().equals(other.fridge, _this.fridge)&&const DeepCollectionEquality().equals(other.away, _this.away)&&const DeepCollectionEquality().equals(other.graves, _this.graves)&&const DeepCollectionEquality().equals(other.openBlocks, _this.openBlocks)&&(identical(other.pouchSlots, _this.pouchSlots) || other.pouchSlots == _this.pouchSlots)&&(identical(other.gearSlots, _this.gearSlots) || other.gearSlots == _this.gearSlots)&&const DeepCollectionEquality().equals(other.overflow, _this.overflow)&&const DeepCollectionEquality().equals(other.materials, _this.materials)&&const DeepCollectionEquality().equals(other.mail, _this.mail)&&(identical(other.weaponLevel, _this.weaponLevel) || other.weaponLevel == _this.weaponLevel)&&const DeepCollectionEquality().equals(other.gear, _this.gear)&&(identical(other.equipped, _this.equipped) || other.equipped == _this.equipped)&&(identical(other.progress, _this.progress) || other.progress == _this.progress)&&(identical(other.totemLimit, _this.totemLimit) || other.totemLimit == _this.totemLimit)&&const DeepCollectionEquality().equals(other.totals, _this.totals)&&const DeepCollectionEquality().equals(other.storyDone, _this.storyDone)&&(identical(other.storySkipped, _this.storySkipped) || other.storySkipped == _this.storySkipped)&&const DeepCollectionEquality().equals(other.missingBuildings, _this.missingBuildings));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FarmDocument;
-  return Object.hashAll([runtimeType,_this.formatVersion,_this.tick,_this.nextId,const DeepCollectionEquality().hash(_this.randomState),_this.food,const DeepCollectionEquality().hash(_this.seeds),const DeepCollectionEquality().hash(_this.fields),const DeepCollectionEquality().hash(_this.buildings),const DeepCollectionEquality().hash(_this.guards),const DeepCollectionEquality().hash(_this.breeders),const DeepCollectionEquality().hash(_this.fridge),const DeepCollectionEquality().hash(_this.away),const DeepCollectionEquality().hash(_this.graves),const DeepCollectionEquality().hash(_this.openBlocks),_this.pouchSlots,_this.gearSlots,const DeepCollectionEquality().hash(_this.overflow),const DeepCollectionEquality().hash(_this.materials),const DeepCollectionEquality().hash(_this.mail),_this.weaponLevel,const DeepCollectionEquality().hash(_this.gear),_this.equipped,_this.progress,_this.totemLimit,const DeepCollectionEquality().hash(_this.totals),const DeepCollectionEquality().hash(_this.missingBuildings)]);
+  return Object.hashAll([runtimeType,_this.formatVersion,_this.tick,_this.nextId,const DeepCollectionEquality().hash(_this.randomState),_this.food,const DeepCollectionEquality().hash(_this.seeds),const DeepCollectionEquality().hash(_this.fields),const DeepCollectionEquality().hash(_this.buildings),const DeepCollectionEquality().hash(_this.guards),const DeepCollectionEquality().hash(_this.breeders),const DeepCollectionEquality().hash(_this.fridge),const DeepCollectionEquality().hash(_this.away),const DeepCollectionEquality().hash(_this.graves),const DeepCollectionEquality().hash(_this.openBlocks),_this.pouchSlots,_this.gearSlots,const DeepCollectionEquality().hash(_this.overflow),const DeepCollectionEquality().hash(_this.materials),const DeepCollectionEquality().hash(_this.mail),_this.weaponLevel,const DeepCollectionEquality().hash(_this.gear),_this.equipped,_this.progress,_this.totemLimit,const DeepCollectionEquality().hash(_this.totals),const DeepCollectionEquality().hash(_this.storyDone),_this.storySkipped,const DeepCollectionEquality().hash(_this.missingBuildings)]);
 }
 
 @override
 String toString() {
   final _this = this as FarmDocument;
-  return 'FarmDocument(formatVersion: ${_this.formatVersion}, tick: ${_this.tick}, nextId: ${_this.nextId}, randomState: ${_this.randomState}, food: ${_this.food}, seeds: ${_this.seeds}, fields: ${_this.fields}, buildings: ${_this.buildings}, guards: ${_this.guards}, breeders: ${_this.breeders}, fridge: ${_this.fridge}, away: ${_this.away}, graves: ${_this.graves}, openBlocks: ${_this.openBlocks}, pouchSlots: ${_this.pouchSlots}, gearSlots: ${_this.gearSlots}, overflow: ${_this.overflow}, materials: ${_this.materials}, mail: ${_this.mail}, weaponLevel: ${_this.weaponLevel}, gear: ${_this.gear}, equipped: ${_this.equipped}, progress: ${_this.progress}, totemLimit: ${_this.totemLimit}, totals: ${_this.totals}, missingBuildings: ${_this.missingBuildings})';
+  return 'FarmDocument(formatVersion: ${_this.formatVersion}, tick: ${_this.tick}, nextId: ${_this.nextId}, randomState: ${_this.randomState}, food: ${_this.food}, seeds: ${_this.seeds}, fields: ${_this.fields}, buildings: ${_this.buildings}, guards: ${_this.guards}, breeders: ${_this.breeders}, fridge: ${_this.fridge}, away: ${_this.away}, graves: ${_this.graves}, openBlocks: ${_this.openBlocks}, pouchSlots: ${_this.pouchSlots}, gearSlots: ${_this.gearSlots}, overflow: ${_this.overflow}, materials: ${_this.materials}, mail: ${_this.mail}, weaponLevel: ${_this.weaponLevel}, gear: ${_this.gear}, equipped: ${_this.equipped}, progress: ${_this.progress}, totemLimit: ${_this.totemLimit}, totals: ${_this.totals}, storyDone: ${_this.storyDone}, storySkipped: ${_this.storySkipped}, missingBuildings: ${_this.missingBuildings})';
 }
 
 
@@ -66,7 +69,7 @@ abstract mixin class $FarmDocumentCopyWith<$Res>  {
   factory $FarmDocumentCopyWith(FarmDocument value, $Res Function(FarmDocument) _then) = _$FarmDocumentCopyWithImpl;
 @useResult
 $Res call({
- int formatVersion, int tick, int nextId, List<int> randomState, int food, List<SeedCount> seeds, List<FieldDocument> fields, List<BuildingDocument> buildings, List<GuardDocument> guards, List<BreederDocument> breeders, List<PotatoDocument> fridge, List<AwayDocument> away, List<PotatoDocument> graves, List<TilePos>? openBlocks, int? pouchSlots, int? gearSlots, List<OverflowDocument> overflow, Map<String, int> materials, List<MailDocument> mail, int weaponLevel, List<Gear> gear, Equipped? equipped, int progress, int? totemLimit, Map<String, dynamic> totals, List<String> missingBuildings
+ int formatVersion, int tick, int nextId, List<int> randomState, int food, List<SeedCount> seeds, List<FieldDocument> fields, List<BuildingDocument> buildings, List<GuardDocument> guards, List<BreederDocument> breeders, List<PotatoDocument> fridge, List<AwayDocument> away, List<PotatoDocument> graves, List<TilePos>? openBlocks, int? pouchSlots, int? gearSlots, List<OverflowDocument> overflow, Map<String, int> materials, List<MailDocument> mail, int weaponLevel, List<Gear> gear, Equipped? equipped, int progress, int? totemLimit, Map<String, dynamic> totals, Map<String, int> storyDone, bool storySkipped, List<String> missingBuildings
 });
 
 
@@ -83,7 +86,7 @@ class _$FarmDocumentCopyWithImpl<$Res>
 
 /// Create a copy of FarmDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? formatVersion = null,Object? tick = null,Object? nextId = null,Object? randomState = null,Object? food = null,Object? seeds = null,Object? fields = null,Object? buildings = null,Object? guards = null,Object? breeders = null,Object? fridge = null,Object? away = null,Object? graves = null,Object? openBlocks = freezed,Object? pouchSlots = freezed,Object? gearSlots = freezed,Object? overflow = null,Object? materials = null,Object? mail = null,Object? weaponLevel = null,Object? gear = null,Object? equipped = freezed,Object? progress = null,Object? totemLimit = freezed,Object? totals = null,Object? missingBuildings = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? formatVersion = null,Object? tick = null,Object? nextId = null,Object? randomState = null,Object? food = null,Object? seeds = null,Object? fields = null,Object? buildings = null,Object? guards = null,Object? breeders = null,Object? fridge = null,Object? away = null,Object? graves = null,Object? openBlocks = freezed,Object? pouchSlots = freezed,Object? gearSlots = freezed,Object? overflow = null,Object? materials = null,Object? mail = null,Object? weaponLevel = null,Object? gear = null,Object? equipped = freezed,Object? progress = null,Object? totemLimit = freezed,Object? totals = null,Object? storyDone = null,Object? storySkipped = null,Object? missingBuildings = null,}) {
   return _then(FarmDocument(
 formatVersion: null == formatVersion ? _self.formatVersion : formatVersion // ignore: cast_nullable_to_non_nullable
 as int,tick: null == tick ? _self.tick : tick // ignore: cast_nullable_to_non_nullable
@@ -110,7 +113,9 @@ as List<Gear>,equipped: freezed == equipped ? _self.equipped : equipped // ignor
 as Equipped?,progress: null == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
 as int,totemLimit: freezed == totemLimit ? _self.totemLimit : totemLimit // ignore: cast_nullable_to_non_nullable
 as int?,totals: null == totals ? _self.totals : totals // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,missingBuildings: null == missingBuildings ? _self.missingBuildings : missingBuildings // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,storyDone: null == storyDone ? _self.storyDone : storyDone // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,storySkipped: null == storySkipped ? _self.storySkipped : storySkipped // ignore: cast_nullable_to_non_nullable
+as bool,missingBuildings: null == missingBuildings ? _self.missingBuildings : missingBuildings // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }
@@ -208,10 +213,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  List<String> missingBuildings)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  Map<String, int> storyDone,  bool storySkipped,  List<String> missingBuildings)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FarmDocument() when $default != null:
-return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.missingBuildings);case _:
+return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.storyDone,_that.storySkipped,_that.missingBuildings);case _:
   return orElse();
 
 }
@@ -229,10 +234,10 @@ return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  List<String> missingBuildings)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  Map<String, int> storyDone,  bool storySkipped,  List<String> missingBuildings)  $default,) {final _that = this;
 switch (_that) {
 case _FarmDocument():
-return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.missingBuildings);case _:
+return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.storyDone,_that.storySkipped,_that.missingBuildings);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -249,10 +254,10 @@ return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  List<String> missingBuildings)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int formatVersion,  int tick,  int nextId,  List<int> randomState,  int food,  List<SeedCount> seeds,  List<FieldDocument> fields,  List<BuildingDocument> buildings,  List<GuardDocument> guards,  List<BreederDocument> breeders,  List<PotatoDocument> fridge,  List<AwayDocument> away,  List<PotatoDocument> graves,  List<TilePos>? openBlocks,  int? pouchSlots,  int? gearSlots,  List<OverflowDocument> overflow,  Map<String, int> materials,  List<MailDocument> mail,  int weaponLevel,  List<Gear> gear,  Equipped? equipped,  int progress,  int? totemLimit,  Map<String, dynamic> totals,  Map<String, int> storyDone,  bool storySkipped,  List<String> missingBuildings)?  $default,) {final _that = this;
 switch (_that) {
 case _FarmDocument() when $default != null:
-return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.missingBuildings);case _:
+return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_that.food,_that.seeds,_that.fields,_that.buildings,_that.guards,_that.breeders,_that.fridge,_that.away,_that.graves,_that.openBlocks,_that.pouchSlots,_that.gearSlots,_that.overflow,_that.materials,_that.mail,_that.weaponLevel,_that.gear,_that.equipped,_that.progress,_that.totemLimit,_that.totals,_that.storyDone,_that.storySkipped,_that.missingBuildings);case _:
   return null;
 
 }
@@ -264,7 +269,7 @@ return $default(_that.formatVersion,_that.tick,_that.nextId,_that.randomState,_t
 @JsonSerializable()
 
 class _FarmDocument extends FarmDocument {
-  const _FarmDocument({required this.formatVersion, required this.tick, required this.nextId, required  List<int> randomState, required this.food, required  List<SeedCount> seeds, required  List<FieldDocument> fields,  List<BuildingDocument> buildings = const <BuildingDocument>[],  List<GuardDocument> guards = const <GuardDocument>[],  List<BreederDocument> breeders = const <BreederDocument>[],  List<PotatoDocument> fridge = const <PotatoDocument>[],  List<AwayDocument> away = const <AwayDocument>[],  List<PotatoDocument> graves = const <PotatoDocument>[],  List<TilePos>? openBlocks, this.pouchSlots, this.gearSlots,  List<OverflowDocument> overflow = const <OverflowDocument>[],  Map<String, int> materials = const <String, int>{},  List<MailDocument> mail = const <MailDocument>[], this.weaponLevel = 0,  List<Gear> gear = const <Gear>[], this.equipped, this.progress = 0, this.totemLimit,  Map<String, dynamic> totals = const <String, dynamic>{},  List<String> missingBuildings = const <String>[]}): _randomState = randomState,_seeds = seeds,_fields = fields,_buildings = buildings,_guards = guards,_breeders = breeders,_fridge = fridge,_away = away,_graves = graves,_openBlocks = openBlocks,_overflow = overflow,_materials = materials,_mail = mail,_gear = gear,_totals = totals,_missingBuildings = missingBuildings,super._();
+  const _FarmDocument({required this.formatVersion, required this.tick, required this.nextId, required  List<int> randomState, required this.food, required  List<SeedCount> seeds, required  List<FieldDocument> fields,  List<BuildingDocument> buildings = const <BuildingDocument>[],  List<GuardDocument> guards = const <GuardDocument>[],  List<BreederDocument> breeders = const <BreederDocument>[],  List<PotatoDocument> fridge = const <PotatoDocument>[],  List<AwayDocument> away = const <AwayDocument>[],  List<PotatoDocument> graves = const <PotatoDocument>[],  List<TilePos>? openBlocks, this.pouchSlots, this.gearSlots,  List<OverflowDocument> overflow = const <OverflowDocument>[],  Map<String, int> materials = const <String, int>{},  List<MailDocument> mail = const <MailDocument>[], this.weaponLevel = 0,  List<Gear> gear = const <Gear>[], this.equipped, this.progress = 0, this.totemLimit,  Map<String, dynamic> totals = const <String, dynamic>{},  Map<String, int> storyDone = const <String, int>{}, this.storySkipped = false,  List<String> missingBuildings = const <String>[]}): _randomState = randomState,_seeds = seeds,_fields = fields,_buildings = buildings,_guards = guards,_breeders = breeders,_fridge = fridge,_away = away,_graves = graves,_openBlocks = openBlocks,_overflow = overflow,_materials = materials,_mail = mail,_gear = gear,_totals = totals,_storyDone = storyDone,_missingBuildings = missingBuildings,super._();
   factory _FarmDocument.fromJson(Map<String, dynamic> json) => _$FarmDocumentFromJson(json);
 
 /// Bumped whenever the format changes; see [farmFormatVersion].
@@ -398,6 +403,18 @@ class _FarmDocument extends FarmDocument {
   return EqualUnmodifiableMapView(_totals);
 }
 
+/// Story events done, by id, with the step each was done on.
+ final  Map<String, int> _storyDone;
+/// Story events done, by id, with the step each was done on.
+@override@JsonKey() Map<String, int> get storyDone {
+  if (_storyDone is EqualUnmodifiableMapView) return _storyDone;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_storyDone);
+}
+
+/// Every feature open, no story events (see
+/// [FarmSimulation.storySkipped]).
+@override@JsonKey() final  bool storySkipped;
 /// Starting building kinds a farm saved before they existed should get
 /// when it is read (set by migrations, never written).
  final  List<String> _missingBuildings;
@@ -423,18 +440,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmDocument&&(identical(other.formatVersion, formatVersion) || other.formatVersion == formatVersion)&&(identical(other.tick, tick) || other.tick == tick)&&(identical(other.nextId, nextId) || other.nextId == nextId)&&const DeepCollectionEquality().equals(other.randomState, _randomState)&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&const DeepCollectionEquality().equals(other.fields, _fields)&&const DeepCollectionEquality().equals(other.buildings, _buildings)&&const DeepCollectionEquality().equals(other.guards, _guards)&&const DeepCollectionEquality().equals(other.breeders, _breeders)&&const DeepCollectionEquality().equals(other.fridge, _fridge)&&const DeepCollectionEquality().equals(other.away, _away)&&const DeepCollectionEquality().equals(other.graves, _graves)&&const DeepCollectionEquality().equals(other.openBlocks, _openBlocks)&&(identical(other.pouchSlots, pouchSlots) || other.pouchSlots == pouchSlots)&&(identical(other.gearSlots, gearSlots) || other.gearSlots == gearSlots)&&const DeepCollectionEquality().equals(other.overflow, _overflow)&&const DeepCollectionEquality().equals(other.materials, _materials)&&const DeepCollectionEquality().equals(other.mail, _mail)&&(identical(other.weaponLevel, weaponLevel) || other.weaponLevel == weaponLevel)&&const DeepCollectionEquality().equals(other.gear, _gear)&&(identical(other.equipped, equipped) || other.equipped == equipped)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.totemLimit, totemLimit) || other.totemLimit == totemLimit)&&const DeepCollectionEquality().equals(other.totals, _totals)&&const DeepCollectionEquality().equals(other.missingBuildings, _missingBuildings));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmDocument&&(identical(other.formatVersion, formatVersion) || other.formatVersion == formatVersion)&&(identical(other.tick, tick) || other.tick == tick)&&(identical(other.nextId, nextId) || other.nextId == nextId)&&const DeepCollectionEquality().equals(other.randomState, _randomState)&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&const DeepCollectionEquality().equals(other.fields, _fields)&&const DeepCollectionEquality().equals(other.buildings, _buildings)&&const DeepCollectionEquality().equals(other.guards, _guards)&&const DeepCollectionEquality().equals(other.breeders, _breeders)&&const DeepCollectionEquality().equals(other.fridge, _fridge)&&const DeepCollectionEquality().equals(other.away, _away)&&const DeepCollectionEquality().equals(other.graves, _graves)&&const DeepCollectionEquality().equals(other.openBlocks, _openBlocks)&&(identical(other.pouchSlots, pouchSlots) || other.pouchSlots == pouchSlots)&&(identical(other.gearSlots, gearSlots) || other.gearSlots == gearSlots)&&const DeepCollectionEquality().equals(other.overflow, _overflow)&&const DeepCollectionEquality().equals(other.materials, _materials)&&const DeepCollectionEquality().equals(other.mail, _mail)&&(identical(other.weaponLevel, weaponLevel) || other.weaponLevel == weaponLevel)&&const DeepCollectionEquality().equals(other.gear, _gear)&&(identical(other.equipped, equipped) || other.equipped == equipped)&&(identical(other.progress, progress) || other.progress == progress)&&(identical(other.totemLimit, totemLimit) || other.totemLimit == totemLimit)&&const DeepCollectionEquality().equals(other.totals, _totals)&&const DeepCollectionEquality().equals(other.storyDone, _storyDone)&&(identical(other.storySkipped, storySkipped) || other.storySkipped == storySkipped)&&const DeepCollectionEquality().equals(other.missingBuildings, _missingBuildings));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,formatVersion,tick,nextId,const DeepCollectionEquality().hash(_randomState),food,const DeepCollectionEquality().hash(_seeds),const DeepCollectionEquality().hash(_fields),const DeepCollectionEquality().hash(_buildings),const DeepCollectionEquality().hash(_guards),const DeepCollectionEquality().hash(_breeders),const DeepCollectionEquality().hash(_fridge),const DeepCollectionEquality().hash(_away),const DeepCollectionEquality().hash(_graves),const DeepCollectionEquality().hash(_openBlocks),pouchSlots,gearSlots,const DeepCollectionEquality().hash(_overflow),const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_mail),weaponLevel,const DeepCollectionEquality().hash(_gear),equipped,progress,totemLimit,const DeepCollectionEquality().hash(_totals),const DeepCollectionEquality().hash(_missingBuildings)]);
+    return Object.hashAll([runtimeType,formatVersion,tick,nextId,const DeepCollectionEquality().hash(_randomState),food,const DeepCollectionEquality().hash(_seeds),const DeepCollectionEquality().hash(_fields),const DeepCollectionEquality().hash(_buildings),const DeepCollectionEquality().hash(_guards),const DeepCollectionEquality().hash(_breeders),const DeepCollectionEquality().hash(_fridge),const DeepCollectionEquality().hash(_away),const DeepCollectionEquality().hash(_graves),const DeepCollectionEquality().hash(_openBlocks),pouchSlots,gearSlots,const DeepCollectionEquality().hash(_overflow),const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_mail),weaponLevel,const DeepCollectionEquality().hash(_gear),equipped,progress,totemLimit,const DeepCollectionEquality().hash(_totals),const DeepCollectionEquality().hash(_storyDone),storySkipped,const DeepCollectionEquality().hash(_missingBuildings)]);
 }
 
 @override
 String toString() {
-    return 'FarmDocument(formatVersion: $formatVersion, tick: $tick, nextId: $nextId, randomState: $randomState, food: $food, seeds: $seeds, fields: $fields, buildings: $buildings, guards: $guards, breeders: $breeders, fridge: $fridge, away: $away, graves: $graves, openBlocks: $openBlocks, pouchSlots: $pouchSlots, gearSlots: $gearSlots, overflow: $overflow, materials: $materials, mail: $mail, weaponLevel: $weaponLevel, gear: $gear, equipped: $equipped, progress: $progress, totemLimit: $totemLimit, totals: $totals, missingBuildings: $missingBuildings)';
+    return 'FarmDocument(formatVersion: $formatVersion, tick: $tick, nextId: $nextId, randomState: $randomState, food: $food, seeds: $seeds, fields: $fields, buildings: $buildings, guards: $guards, breeders: $breeders, fridge: $fridge, away: $away, graves: $graves, openBlocks: $openBlocks, pouchSlots: $pouchSlots, gearSlots: $gearSlots, overflow: $overflow, materials: $materials, mail: $mail, weaponLevel: $weaponLevel, gear: $gear, equipped: $equipped, progress: $progress, totemLimit: $totemLimit, totals: $totals, storyDone: $storyDone, storySkipped: $storySkipped, missingBuildings: $missingBuildings)';
 }
 
 
@@ -445,7 +462,7 @@ abstract mixin class _$FarmDocumentCopyWith<$Res> implements $FarmDocumentCopyWi
   factory _$FarmDocumentCopyWith(_FarmDocument value, $Res Function(_FarmDocument) _then) = __$FarmDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- int formatVersion, int tick, int nextId, List<int> randomState, int food, List<SeedCount> seeds, List<FieldDocument> fields, List<BuildingDocument> buildings, List<GuardDocument> guards, List<BreederDocument> breeders, List<PotatoDocument> fridge, List<AwayDocument> away, List<PotatoDocument> graves, List<TilePos>? openBlocks, int? pouchSlots, int? gearSlots, List<OverflowDocument> overflow, Map<String, int> materials, List<MailDocument> mail, int weaponLevel, List<Gear> gear, Equipped? equipped, int progress, int? totemLimit, Map<String, dynamic> totals, List<String> missingBuildings
+ int formatVersion, int tick, int nextId, List<int> randomState, int food, List<SeedCount> seeds, List<FieldDocument> fields, List<BuildingDocument> buildings, List<GuardDocument> guards, List<BreederDocument> breeders, List<PotatoDocument> fridge, List<AwayDocument> away, List<PotatoDocument> graves, List<TilePos>? openBlocks, int? pouchSlots, int? gearSlots, List<OverflowDocument> overflow, Map<String, int> materials, List<MailDocument> mail, int weaponLevel, List<Gear> gear, Equipped? equipped, int progress, int? totemLimit, Map<String, dynamic> totals, Map<String, int> storyDone, bool storySkipped, List<String> missingBuildings
 });
 
 
@@ -462,7 +479,7 @@ class __$FarmDocumentCopyWithImpl<$Res>
 
 /// Create a copy of FarmDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? formatVersion = null,Object? tick = null,Object? nextId = null,Object? randomState = null,Object? food = null,Object? seeds = null,Object? fields = null,Object? buildings = null,Object? guards = null,Object? breeders = null,Object? fridge = null,Object? away = null,Object? graves = null,Object? openBlocks = freezed,Object? pouchSlots = freezed,Object? gearSlots = freezed,Object? overflow = null,Object? materials = null,Object? mail = null,Object? weaponLevel = null,Object? gear = null,Object? equipped = freezed,Object? progress = null,Object? totemLimit = freezed,Object? totals = null,Object? missingBuildings = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? formatVersion = null,Object? tick = null,Object? nextId = null,Object? randomState = null,Object? food = null,Object? seeds = null,Object? fields = null,Object? buildings = null,Object? guards = null,Object? breeders = null,Object? fridge = null,Object? away = null,Object? graves = null,Object? openBlocks = freezed,Object? pouchSlots = freezed,Object? gearSlots = freezed,Object? overflow = null,Object? materials = null,Object? mail = null,Object? weaponLevel = null,Object? gear = null,Object? equipped = freezed,Object? progress = null,Object? totemLimit = freezed,Object? totals = null,Object? storyDone = null,Object? storySkipped = null,Object? missingBuildings = null,}) {
   return _then(_FarmDocument(
 formatVersion: null == formatVersion ? _self.formatVersion : formatVersion // ignore: cast_nullable_to_non_nullable
 as int,tick: null == tick ? _self.tick : tick // ignore: cast_nullable_to_non_nullable
@@ -489,7 +506,9 @@ as List<Gear>,equipped: freezed == equipped ? _self.equipped : equipped // ignor
 as Equipped?,progress: null == progress ? _self.progress : progress // ignore: cast_nullable_to_non_nullable
 as int,totemLimit: freezed == totemLimit ? _self.totemLimit : totemLimit // ignore: cast_nullable_to_non_nullable
 as int?,totals: null == totals ? _self._totals : totals // ignore: cast_nullable_to_non_nullable
-as Map<String, dynamic>,missingBuildings: null == missingBuildings ? _self._missingBuildings : missingBuildings // ignore: cast_nullable_to_non_nullable
+as Map<String, dynamic>,storyDone: null == storyDone ? _self._storyDone : storyDone // ignore: cast_nullable_to_non_nullable
+as Map<String, int>,storySkipped: null == storySkipped ? _self.storySkipped : storySkipped // ignore: cast_nullable_to_non_nullable
+as bool,missingBuildings: null == missingBuildings ? _self._missingBuildings : missingBuildings // ignore: cast_nullable_to_non_nullable
 as List<String>,
   ));
 }
@@ -2704,7 +2723,7 @@ $SeedCopyWith<$Res> get seed {
 /// @nodoc
 mixin _$MailDocument {
 
- int get id; MailKind get kind; int get tick; String? get building; List<Seed> get seeds; int get food; bool get read; bool get claimed;
+ int get id; MailKind get kind; int get tick; String? get building; String? get story; List<Seed> get seeds; int get food; bool get read; bool get claimed;
 /// Create a copy of MailDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2718,20 +2737,20 @@ $MailDocumentCopyWith<MailDocument> get copyWith => _$MailDocumentCopyWithImpl<M
 @override
 bool operator ==(Object other) {
   final _this = this as MailDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MailDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.tick, _this.tick) || other.tick == _this.tick)&&(identical(other.building, _this.building) || other.building == _this.building)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.read, _this.read) || other.read == _this.read)&&(identical(other.claimed, _this.claimed) || other.claimed == _this.claimed));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MailDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.tick, _this.tick) || other.tick == _this.tick)&&(identical(other.building, _this.building) || other.building == _this.building)&&(identical(other.story, _this.story) || other.story == _this.story)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.read, _this.read) || other.read == _this.read)&&(identical(other.claimed, _this.claimed) || other.claimed == _this.claimed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MailDocument;
-  return Object.hash(runtimeType,_this.id,_this.kind,_this.tick,_this.building,const DeepCollectionEquality().hash(_this.seeds),_this.food,_this.read,_this.claimed);
+  return Object.hash(runtimeType,_this.id,_this.kind,_this.tick,_this.building,_this.story,const DeepCollectionEquality().hash(_this.seeds),_this.food,_this.read,_this.claimed);
 }
 
 @override
 String toString() {
   final _this = this as MailDocument;
-  return 'MailDocument(id: ${_this.id}, kind: ${_this.kind}, tick: ${_this.tick}, building: ${_this.building}, seeds: ${_this.seeds}, food: ${_this.food}, read: ${_this.read}, claimed: ${_this.claimed})';
+  return 'MailDocument(id: ${_this.id}, kind: ${_this.kind}, tick: ${_this.tick}, building: ${_this.building}, story: ${_this.story}, seeds: ${_this.seeds}, food: ${_this.food}, read: ${_this.read}, claimed: ${_this.claimed})';
 }
 
 
@@ -2742,7 +2761,7 @@ abstract mixin class $MailDocumentCopyWith<$Res>  {
   factory $MailDocumentCopyWith(MailDocument value, $Res Function(MailDocument) _then) = _$MailDocumentCopyWithImpl;
 @useResult
 $Res call({
- int id, MailKind kind, int tick, String? building, List<Seed> seeds, int food, bool read, bool claimed
+ int id, MailKind kind, int tick, String? building, String? story, List<Seed> seeds, int food, bool read, bool claimed
 });
 
 
@@ -2759,12 +2778,13 @@ class _$MailDocumentCopyWithImpl<$Res>
 
 /// Create a copy of MailDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? tick = null,Object? building = freezed,Object? seeds = null,Object? food = null,Object? read = null,Object? claimed = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? kind = null,Object? tick = null,Object? building = freezed,Object? story = freezed,Object? seeds = null,Object? food = null,Object? read = null,Object? claimed = null,}) {
   return _then(MailDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as MailKind,tick: null == tick ? _self.tick : tick // ignore: cast_nullable_to_non_nullable
 as int,building: freezed == building ? _self.building : building // ignore: cast_nullable_to_non_nullable
+as String?,story: freezed == story ? _self.story : story // ignore: cast_nullable_to_non_nullable
 as String?,seeds: null == seeds ? _self.seeds : seeds // ignore: cast_nullable_to_non_nullable
 as List<Seed>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable
@@ -2854,10 +2874,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  MailKind kind,  int tick,  String? building,  List<Seed> seeds,  int food,  bool read,  bool claimed)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  MailKind kind,  int tick,  String? building,  String? story,  List<Seed> seeds,  int food,  bool read,  bool claimed)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MailDocument() when $default != null:
-return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.food,_that.read,_that.claimed);case _:
+return $default(_that.id,_that.kind,_that.tick,_that.building,_that.story,_that.seeds,_that.food,_that.read,_that.claimed);case _:
   return orElse();
 
 }
@@ -2875,10 +2895,10 @@ return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  MailKind kind,  int tick,  String? building,  List<Seed> seeds,  int food,  bool read,  bool claimed)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  MailKind kind,  int tick,  String? building,  String? story,  List<Seed> seeds,  int food,  bool read,  bool claimed)  $default,) {final _that = this;
 switch (_that) {
 case _MailDocument():
-return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.food,_that.read,_that.claimed);case _:
+return $default(_that.id,_that.kind,_that.tick,_that.building,_that.story,_that.seeds,_that.food,_that.read,_that.claimed);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2895,10 +2915,10 @@ return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  MailKind kind,  int tick,  String? building,  List<Seed> seeds,  int food,  bool read,  bool claimed)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  MailKind kind,  int tick,  String? building,  String? story,  List<Seed> seeds,  int food,  bool read,  bool claimed)?  $default,) {final _that = this;
 switch (_that) {
 case _MailDocument() when $default != null:
-return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.food,_that.read,_that.claimed);case _:
+return $default(_that.id,_that.kind,_that.tick,_that.building,_that.story,_that.seeds,_that.food,_that.read,_that.claimed);case _:
   return null;
 
 }
@@ -2910,13 +2930,14 @@ return $default(_that.id,_that.kind,_that.tick,_that.building,_that.seeds,_that.
 @JsonSerializable()
 
 class _MailDocument extends MailDocument {
-  const _MailDocument({required this.id, required this.kind, required this.tick, this.building,  List<Seed> seeds = const <Seed>[], this.food = 0, this.read = false, this.claimed = false}): _seeds = seeds,super._();
+  const _MailDocument({required this.id, required this.kind, required this.tick, this.building, this.story,  List<Seed> seeds = const <Seed>[], this.food = 0, this.read = false, this.claimed = false}): _seeds = seeds,super._();
   factory _MailDocument.fromJson(Map<String, dynamic> json) => _$MailDocumentFromJson(json);
 
 @override final  int id;
 @override final  MailKind kind;
 @override final  int tick;
 @override final  String? building;
+@override final  String? story;
  final  List<Seed> _seeds;
 @override@JsonKey() List<Seed> get seeds {
   if (_seeds is EqualUnmodifiableListView) return _seeds;
@@ -2941,18 +2962,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MailDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.tick, tick) || other.tick == tick)&&(identical(other.building, building) || other.building == building)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&(identical(other.food, food) || other.food == food)&&(identical(other.read, read) || other.read == read)&&(identical(other.claimed, claimed) || other.claimed == claimed));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MailDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.tick, tick) || other.tick == tick)&&(identical(other.building, building) || other.building == building)&&(identical(other.story, story) || other.story == story)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&(identical(other.food, food) || other.food == food)&&(identical(other.read, read) || other.read == read)&&(identical(other.claimed, claimed) || other.claimed == claimed));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,kind,tick,building,const DeepCollectionEquality().hash(_seeds),food,read,claimed);
+    return Object.hash(runtimeType,id,kind,tick,building,story,const DeepCollectionEquality().hash(_seeds),food,read,claimed);
 }
 
 @override
 String toString() {
-    return 'MailDocument(id: $id, kind: $kind, tick: $tick, building: $building, seeds: $seeds, food: $food, read: $read, claimed: $claimed)';
+    return 'MailDocument(id: $id, kind: $kind, tick: $tick, building: $building, story: $story, seeds: $seeds, food: $food, read: $read, claimed: $claimed)';
 }
 
 
@@ -2963,7 +2984,7 @@ abstract mixin class _$MailDocumentCopyWith<$Res> implements $MailDocumentCopyWi
   factory _$MailDocumentCopyWith(_MailDocument value, $Res Function(_MailDocument) _then) = __$MailDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- int id, MailKind kind, int tick, String? building, List<Seed> seeds, int food, bool read, bool claimed
+ int id, MailKind kind, int tick, String? building, String? story, List<Seed> seeds, int food, bool read, bool claimed
 });
 
 
@@ -2980,12 +3001,13 @@ class __$MailDocumentCopyWithImpl<$Res>
 
 /// Create a copy of MailDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? tick = null,Object? building = freezed,Object? seeds = null,Object? food = null,Object? read = null,Object? claimed = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? kind = null,Object? tick = null,Object? building = freezed,Object? story = freezed,Object? seeds = null,Object? food = null,Object? read = null,Object? claimed = null,}) {
   return _then(_MailDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as MailKind,tick: null == tick ? _self.tick : tick // ignore: cast_nullable_to_non_nullable
 as int,building: freezed == building ? _self.building : building // ignore: cast_nullable_to_non_nullable
+as String?,story: freezed == story ? _self.story : story // ignore: cast_nullable_to_non_nullable
 as String?,seeds: null == seeds ? _self._seeds : seeds // ignore: cast_nullable_to_non_nullable
 as List<Seed>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,read: null == read ? _self.read : read // ignore: cast_nullable_to_non_nullable

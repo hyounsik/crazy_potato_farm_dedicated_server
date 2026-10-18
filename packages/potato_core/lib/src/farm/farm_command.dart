@@ -153,10 +153,17 @@ sealed class FarmCommand with _$FarmCommand {
 
   /// Sets out exploring with [food] baby potatoes and the potatoes
   /// [potatoIds] as companions. They leave the farm until [returnHome].
+  /// [zone] is refused while the story keeps it closed; null skips that
+  /// check.
   const factory FarmCommand.depart({
     required int food,
     @Default(<int>[]) List<int> potatoIds,
+    String? zone,
   }) = Depart;
+
+  /// Opens every feature and stops story events. A developer tool: only
+  /// development builds send it.
+  const factory FarmCommand.unlockAll() = UnlockAll;
 
   /// Comes back from exploring: [food] and [seeds] go into the farm, and
   /// the companions [potatoIds] go back to where they were, or to the fridge
@@ -178,6 +185,10 @@ sealed class FarmCommand with _$FarmCommand {
 
     /// What is worn at the end of the run; null keeps what the farm has.
     Equipped? equipped,
+
+    /// The zone the run went to, counted for story goals when [score] is
+    /// set (the run succeeded).
+    String? zone,
   }) = ReturnHome;
 
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>
@@ -186,6 +197,8 @@ sealed class FarmCommand with _$FarmCommand {
 
 /// Why the farm refused a command. The screen turns these into messages.
 enum FarmRejection {
+  /// The story has not opened this yet.
+  locked,
   noSuchField,
   outsideField,
   tileTaken,

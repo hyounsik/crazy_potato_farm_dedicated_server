@@ -17,7 +17,10 @@ final class FarmTotals {
     this.pestsClearedByGuards = 0,
     this.pestsClearedByTap = 0,
     this.foodHarvestedByGuards = 0,
-  });
+    this.potatoesDied = 0,
+    this.potatoesTrained = 0,
+    Map<String, int>? escapes,
+  }) : escapes = escapes ?? {};
 
   factory FarmTotals.fromJson(Map<String, dynamic> json) =>
       _$FarmTotalsFromJson(json);
@@ -35,6 +38,15 @@ final class FarmTotals {
   /// Baby potatoes guards with a harvesting ability brought in.
   int foodHarvestedByGuards;
 
+  /// Potatoes that died (old age, blight) or were lost on a failed run.
+  int potatoesDied;
+
+  /// Combat seeds trained into potatoes.
+  int potatoesTrained;
+
+  /// Successful runs, by zone id.
+  final Map<String, int> escapes;
+
   FarmTotals copy() => FarmTotals.fromJson(toJson());
 
   /// What changed since [before], as totals.
@@ -47,6 +59,13 @@ final class FarmTotals {
     pestsClearedByGuards: pestsClearedByGuards - before.pestsClearedByGuards,
     pestsClearedByTap: pestsClearedByTap - before.pestsClearedByTap,
     foodHarvestedByGuards: foodHarvestedByGuards - before.foodHarvestedByGuards,
+    potatoesDied: potatoesDied - before.potatoesDied,
+    potatoesTrained: potatoesTrained - before.potatoesTrained,
+    escapes: {
+      for (final MapEntry(:key, :value) in escapes.entries)
+        if (value - (before.escapes[key] ?? 0) != 0)
+          key: value - (before.escapes[key] ?? 0),
+    },
   );
 
   Map<String, dynamic> toJson() => _$FarmTotalsToJson(this);

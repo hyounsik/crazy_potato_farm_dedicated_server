@@ -6,6 +6,7 @@ import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
+import 'package:potato_core/src/catalog/story_data.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -29,6 +30,7 @@ final class Catalog {
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
     required Map<String, DefaultCloneData> defaultClones,
+    required this.story,
   }) : defaultClones = Map.unmodifiable(defaultClones),
        _potatoTypes = Map.unmodifiable(potatoTypes),
        buildings = Map.unmodifiable(buildings),
@@ -54,6 +56,7 @@ final class Catalog {
     'enemies': 1,
     'zones': 2,
     'default_clones': 1,
+    'story': 1,
   };
 
   final RulesData rules;
@@ -75,6 +78,9 @@ final class Catalog {
 
   /// Clones shipped with the game, in file order.
   final Map<String, DefaultCloneData> defaultClones;
+
+  /// The main story's events and the features they unlock.
+  final StoryData story;
 
   PotatoTypeData potatoType(PotatoType type) => _potatoTypes[type]!;
 
@@ -246,6 +252,12 @@ final class Catalog {
       (c) => c.id,
       _checkDefaultClone,
     );
+    final story = _readFile(
+      files,
+      'story',
+      issues,
+      (check, json) => check.parse('', json, StoryData.fromJson),
+    );
 
     if (rules == null ||
         potatoTypes == null ||
@@ -256,7 +268,8 @@ final class Catalog {
         weapons == null ||
         enemies == null ||
         zones == null ||
-        defaultClones == null) {
+        defaultClones == null ||
+        story == null) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
     }
     _checkReferences(
@@ -272,6 +285,7 @@ final class Catalog {
       zones: zones,
       defaultClones: defaultClones,
     );
+    _checkStory(_FileCheck('story', issues), story, buildings, zones);
     if (issues.isNotEmpty) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
     }
@@ -288,6 +302,7 @@ final class Catalog {
         enemies: enemies,
         zones: zones,
         defaultClones: defaultClones,
+        story: story,
       ),
       const [],
     );
@@ -882,6 +897,70 @@ final class Catalog {
 
   /// Ids one file uses must exist in another.
   /// (Ability ids are checked where seeds are made.)
+  /// Event ids are unique and only follow earlier events (so there are no
+  /// loops), keys name real buildings and zones, and every locked key is
+  /// opened by some event.
+  static void _checkStory(
+    _FileCheck check,
+    StoryData story,
+    Map<String, BuildingData> buildings,
+    Map<String, ZoneData> zones,
+  ) {
+    void checkKey(String path, String key) {
+      if (key == StoryUnlock.pests || key == StoryUnlock.farmExpansion) return;
+      if (StoryUnlock.buildingOf(key) case final id?) {
+        if (!buildings.containsKey(id)) check.issue(path, 'no building "$id"');
+        return;
+      }
+      if (StoryUnlock.zoneOf(key) case final id?) {
+        if (!zones.containsKey(id)) check.issue(path, 'no zone "$id"');
+        return;
+      }
+      check.issue(path, 'unknown unlock "$key"');
+    }
+
+    for (final (index, key) in story.locked.indexed) {
+      checkKey('locked[$index]', key);
+    }
+    final seen = <String>{};
+    final opened = <String>{};
+    for (final (index, event) in story.events.indexed) {
+      final path = 'events[$index]';
+      if (!seen.add(event.id)) {
+        check.issue('$path.id', 'duplicate "${event.id}"');
+      }
+      for (final (i, id) in (event.after ?? const <String>[]).indexed) {
+        if (!seen.contains(id) || id == event.id) {
+          check.issue('$path.after[$i]', 'no earlier event "$id"');
+        }
+      }
+      for (final (i, key) in event.unlocks.indexed) {
+        checkKey('$path.unlocks[$i]', key);
+        opened.add(key);
+      }
+      check.atLeast('$path.food', event.food, 0);
+      for (final (i, stack) in event.seeds.indexed) {
+        check.positive('$path.seeds[$i].count', stack.count);
+        check.atLeast('$path.seeds[$i].level', stack.level, 1);
+      }
+      for (final (i, goal) in event.goals.indexed) {
+        final at = '$path.goals[$i]';
+        check.atLeast('$at.count', goal.count, 0);
+        if (goal.building case final id? when !buildings.containsKey(id)) {
+          check.issue('$at.building', 'no building "$id"');
+        }
+        if (goal.zone case final id? when !zones.containsKey(id)) {
+          check.issue('$at.zone', 'no zone "$id"');
+        }
+      }
+    }
+    for (final (index, key) in story.locked.indexed) {
+      if (!opened.contains(key)) {
+        check.issue('locked[$index]', 'no event unlocks "$key"');
+      }
+    }
+  }
+
   static void _checkReferences(
     List<CatalogIssue> issues, {
     required RulesData rules,

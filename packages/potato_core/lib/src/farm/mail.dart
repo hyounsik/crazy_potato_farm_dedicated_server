@@ -8,6 +8,10 @@ enum MailKind {
 
   /// Sent when a building goes up, with a seed. [Mail.building] says which.
   building,
+
+  /// Sent when a story event is done, with its reward. [Mail.story] says
+  /// which event.
+  story,
 }
 
 /// A letter in the mailbox and what it brings.
@@ -17,6 +21,7 @@ final class Mail {
     required this.kind,
     required this.tick,
     this.building,
+    this.story,
     this.seeds = const [],
     this.food = 0,
     this.read = false,
@@ -31,6 +36,9 @@ final class Mail {
 
   /// The `buildings.json` id a building letter is about.
   final String? building;
+
+  /// The `story.json` event id a story letter is about.
+  final String? story;
   final List<Seed> seeds;
   final int food;
   bool read;

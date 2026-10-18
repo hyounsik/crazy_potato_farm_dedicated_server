@@ -6,6 +6,7 @@ import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
+import 'package:potato_core/src/catalog/story_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/farm/farm_building.dart';
@@ -59,7 +60,10 @@ final class FarmSimulation {
     this.progress = 0,
     int? totemLimit,
     FarmTotals? totals,
+    Map<String, int> storyDone = const {},
+    this.storySkipped = false,
   }) : _gear = List.of(gear),
+       _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
        totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
        pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
@@ -91,6 +95,7 @@ final class FarmSimulation {
       _adopt(away.potato);
     }
     _graves.forEach(_adopt);
+    _unlockDone();
   }
 
   /// A new farm laid out by the catalog's `new_farm` rules.
@@ -102,20 +107,7 @@ final class FarmSimulation {
     final roller = AbilityRoller(catalog);
     final seeds = SeedPouch();
     for (final stack in start.seeds) {
-      for (var i = 0; i < stack.count; i++) {
-        final rolled = roller.seed(
-          type: stack.type,
-          grade: stack.grade,
-          level: stack.level,
-          random: random,
-        );
-        seeds.add(
-          rolled.copyWith(
-            ability: stack.ability ?? rolled.ability,
-            style: stack.style ?? rolled.style,
-          ),
-        );
-      }
+      _rollStack(roller, stack, random).forEach(seeds.add);
     }
     var nextId = 1;
     final fields = [
@@ -143,6 +135,27 @@ final class FarmSimulation {
       equipped: catalog.rules.gear.start,
     );
   }
+
+  /// The seeds of [stack], each with its own rolled ability (and style)
+  /// unless the stack fixes them.
+  static List<Seed> _rollStack(
+    AbilityRoller roller,
+    SeedStackData stack,
+    GameRandom random,
+  ) => [
+    for (var i = 0; i < stack.count; i++)
+      if (roller.seed(
+            type: stack.type,
+            grade: stack.grade,
+            level: stack.level,
+            random: random,
+          )
+          case final rolled)
+        rolled.copyWith(
+          ability: stack.ability ?? rolled.ability,
+          style: stack.style ?? rolled.style,
+        ),
+  ];
 
   final Catalog catalog;
   final GameRandom _random;
@@ -212,6 +225,44 @@ final class FarmSimulation {
 
   /// Running counts, saved with the farm.
   final FarmTotals totals;
+
+  /// Story events done, by id, with the step each was done on, in the
+  /// order they were done.
+  final Map<String, int> _storyDone;
+
+  /// Unlock keys opened by the events done.
+  final Set<String> _unlocked = {};
+
+  /// Every feature is open and story events no longer happen: farms saved
+  /// before the story existed, and the developer "unlock all".
+  bool storySkipped;
+
+  /// The story events done, by id, with the step each was done on.
+  Map<String, int> get storyDone => UnmodifiableMapView(_storyDone);
+
+  /// Whether the feature [key] (see [StoryUnlock]) is open on this farm.
+  bool isUnlocked(String key) =>
+      storySkipped ||
+      _unlocked.contains(key) ||
+      !catalog.story.locked.contains(key);
+
+  /// Whether the build menu offers buildings of [kind].
+  bool canBuildKind(String kind) => isUnlocked(StoryUnlock.building(kind));
+
+  /// Whether runs may go to zone [zone].
+  bool zoneOpen(String zone) => isUnlocked(StoryUnlock.zone(zone));
+
+  /// The story events that may happen now, in story order: not done, and
+  /// every event before them done.
+  Iterable<StoryEventData> get storyEventsOpen sync* {
+    if (storySkipped) return;
+    for (final event in _storyEvents()) {
+      if (!_storyDone.containsKey(event.data.id) &&
+          event.after.every(_storyDone.containsKey)) {
+        yield event.data;
+      }
+    }
+  }
 
   RulesData get _rules => catalog.rules;
 
@@ -393,7 +444,13 @@ final class FarmSimulation {
   }
 
   /// Runs a player command. Returns null when it worked, or why not.
-  FarmRejection? apply(FarmCommand command) => switch (command) {
+  FarmRejection? apply(FarmCommand command) {
+    final rejection = _dispatch(command);
+    if (rejection == null) _advanceStory();
+    return rejection;
+  }
+
+  FarmRejection? _dispatch(FarmCommand command) => switch (command) {
     PlantSeed(:final fieldId, :final tile, :final seed) => _plant(
       fieldId,
       tile,
@@ -440,7 +497,12 @@ final class FarmSimulation {
       buildingId,
     ),
     Revive(:final potatoId) => _revive(potatoId),
-    Depart(:final food, :final potatoIds) => _depart(food, potatoIds),
+    Depart(:final food, :final potatoIds, :final zone) => _depart(
+      food,
+      potatoIds,
+      zone,
+    ),
+    UnlockAll() => _unlockAll(),
     ReturnHome(
       :final food,
       :final seeds,
@@ -450,6 +512,7 @@ final class FarmSimulation {
       :final score,
       :final gear,
       :final equipped,
+      :final zone,
     ) =>
       _returnHome(
         food,
@@ -460,6 +523,7 @@ final class FarmSimulation {
         score,
         gear,
         equipped,
+        zone,
       ),
   };
 
@@ -477,6 +541,7 @@ final class FarmSimulation {
     _putOutTotems();
     if (_isDue(_rules.pests.checkEverySeconds)) _rollPests();
     if (_isDue(_rules.potatoes.upkeepEverySeconds)) _payUpkeep();
+    _advanceStory();
   }
 
   /// Runs [count] steps, e.g. to catch up on time the app was closed.
@@ -727,6 +792,7 @@ final class FarmSimulation {
   /// Bugs only come where baby potatoes are stored, more likely the more
   /// there are; blight can come to any planted field.
   void _rollPests() {
+    if (!isUnlocked(StoryUnlock.pests)) return;
     final rules = _rules.pests;
     for (final field in _fields.values) {
       if (field.pest != null || field._potatoes.isEmpty) continue;
@@ -856,6 +922,7 @@ final class FarmSimulation {
   }
 
   FarmRejection? _openBlock(TilePos block) {
+    if (!isUnlocked(StoryUnlock.farmExpansion)) return FarmRejection.locked;
     if (!canOpen(block)) return FarmRejection.cannotOpen;
     final cost = blockCost;
     if (food < cost) return FarmRejection.notEnoughFood;
@@ -967,6 +1034,7 @@ final class FarmSimulation {
   FarmRejection? _build(String kind, TilePos origin) {
     final data = catalog.buildings[kind];
     if (data == null || !data.buildable) return FarmRejection.noSuchBuilding;
+    if (!canBuildKind(kind)) return FarmRejection.locked;
     if (data.single && _buildings.values.any((b) => b.kind == kind)) {
       return FarmRejection.onlyOne;
     }
@@ -1002,6 +1070,7 @@ final class FarmSimulation {
   void _send(
     MailKind kind, {
     String? building,
+    String? story,
     List<Seed> seeds = const [],
     int food = 0,
   }) {
@@ -1010,6 +1079,7 @@ final class FarmSimulation {
       kind: kind,
       tick: _tick,
       building: building,
+      story: story,
       seeds: seeds,
       food: food,
     );
@@ -1358,6 +1428,7 @@ final class FarmSimulation {
     if (!_seeds.take(seed)) return FarmRejection.noSeed;
     final potato = _sprout(seed, seed.grade);
     _house(potato, building);
+    if (seed.type == PotatoType.combat) totals.potatoesTrained++;
     _events.add(
       FarmEvent.trained(
         buildingId: buildingId,
@@ -1522,7 +1593,8 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _depart(int food, List<int> potatoIds) {
+  FarmRejection? _depart(int food, List<int> potatoIds, String? zone) {
+    if (zone != null && !zoneOpen(zone)) return FarmRejection.locked;
     if (food < 0 || food > this.food) return FarmRejection.notEnoughFood;
     final going = <AwayPotato>[];
     for (final id in potatoIds.toSet()) {
@@ -1575,8 +1647,12 @@ final class FarmSimulation {
     int? score,
     List<Gear> gear,
     Equipped? equipped,
+    String? zone,
   ) {
     this.food += food;
+    if (score != null && zone != null) {
+      totals.escapes.update(zone, (n) => n + 1, ifAbsent: () => 1);
+    }
     _gear.addAll(gear);
     if (equipped != null) this.equipped = equipped;
     if (score != null && score > progress) progress = score;
@@ -1584,6 +1660,7 @@ final class FarmSimulation {
       for (final id in lostPotatoIds)
         if (_away.remove(id) != null) id,
     ];
+    totals.potatoesDied += lost.length;
     var seedCount = 0;
     for (final stack in seeds) {
       for (var i = 0; i < stack.count; i++) {
@@ -1748,9 +1825,108 @@ final class FarmSimulation {
     return _random.chance(best);
   }
 
+  // Story.
+
+  /// The story's events with their [StoryEventData.after] filled in.
+  List<({StoryEventData data, List<String> after})> _storyEvents() {
+    final events = catalog.story.events;
+    return [
+      for (final (index, event) in events.indexed)
+        (
+          data: event,
+          after: event.after ?? [if (index > 0) events[index - 1].id],
+        ),
+    ];
+  }
+
+  void _unlockDone() {
+    for (final event in catalog.story.events) {
+      if (_storyDone.containsKey(event.id)) _unlocked.addAll(event.unlocks);
+    }
+  }
+
+  /// Finishes every open event whose goals hold, until none is left: one
+  /// event done may open the next with goals that already hold.
+  void _advanceStory() {
+    if (storySkipped) return;
+    var changed = true;
+    while (changed) {
+      changed = false;
+      for (final event in _storyEvents()) {
+        final id = event.data.id;
+        if (_storyDone.containsKey(id)) continue;
+        if (!event.after.every(_storyDone.containsKey)) continue;
+        final since = event.after.fold(
+          0,
+          (latest, before) => math.max(latest, _storyDone[before]!),
+        );
+        if (!event.data.goals.every((g) => _goalHolds(g, since))) continue;
+        _finishStory(event.data);
+        changed = true;
+      }
+    }
+  }
+
+  /// How far [goal] has come; it holds at [StoryGoalData.count]. [since] is
+  /// the step the event could start on.
+  int storyGoalCount(StoryGoalData goal, {int since = 0}) =>
+      switch (goal.kind) {
+        StoryGoalKind.fields => _fields.length,
+        StoryGoalKind.buildings =>
+          _buildings.values
+              .where((b) => goal.building == null || b.kind == goal.building)
+              .length,
+        StoryGoalKind.potatoes => [
+          for (final field in _fields.values) ...field._potatoes.values,
+          for (final guard in _guards.values) guard.potato,
+          for (final breeder in _breeders.values) breeder.potato,
+          ..._fridge.values,
+          ...awayPotatoes,
+        ].where((p) => goal.type == null || p.type == goal.type).length,
+        StoryGoalKind.food => food,
+        StoryGoalKind.escapes =>
+          totals.escapes.entries
+              .where(
+                (e) =>
+                    (goal.zone == null || e.key == goal.zone) &&
+                    (goal.danger == null ||
+                        (catalog.zones[e.key]?.danger != null) == goal.danger),
+              )
+              .fold(0, (n, e) => n + e.value),
+        StoryGoalKind.progress => progress,
+        StoryGoalKind.power => _gearStats.combatPower(equipped, const []),
+        StoryGoalKind.pestsAppeared => totals.pestsAppeared,
+        StoryGoalKind.pestsCleared =>
+          totals.pestsClearedByTap + totals.pestsClearedByGuards,
+        StoryGoalKind.potatoesDied => totals.potatoesDied,
+        StoryGoalKind.potatoesTrained => totals.potatoesTrained,
+        StoryGoalKind.wait => (_tick - since) * _rules.farm.stepMillis ~/ 1000,
+      };
+
+  bool _goalHolds(StoryGoalData goal, int since) =>
+      storyGoalCount(goal, since: since) >= goal.count;
+
+  void _finishStory(StoryEventData event) {
+    _storyDone[event.id] = _tick;
+    _unlocked.addAll(event.unlocks);
+    _events.add(FarmEvent.storyDone(event: event.id, unlocks: event.unlocks));
+    final seeds = [
+      for (final stack in event.seeds) ..._rollStack(_roller, stack, _random),
+    ];
+    _send(MailKind.story, story: event.id, seeds: seeds, food: event.food);
+  }
+
+  /// Opens every feature and stops story events (a developer tool).
+  FarmRejection? _unlockAll() {
+    if (storySkipped) return FarmRejection.nothingToClaim;
+    storySkipped = true;
+    return null;
+  }
+
   /// Puts dead [potato] in a graveyard; false when the farm has none. A
   /// full graveyard loses its oldest grave.
   bool _bury(Potato potato) {
+    totals.potatoesDied++;
     _worked.remove(potato.id);
     potato
       ..weak = false

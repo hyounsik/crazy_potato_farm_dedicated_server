@@ -68,6 +68,12 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.mailArrived({required int mailId}) = MailArrived;
 
+  /// Story event [event] is done and opened [unlocks]; its letter follows.
+  const factory FarmEvent.storyDone({
+    required String event,
+    @Default(<String>[]) List<String> unlocks,
+  }) = StoryDone;
+
   /// The workbench tried to raise a piece of [kind] to [level]; [worked]
   /// says whether it took.
   const factory FarmEvent.gearEnhanced({

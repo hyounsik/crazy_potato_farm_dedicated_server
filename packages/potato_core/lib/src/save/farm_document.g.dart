@@ -144,6 +144,18 @@ _FarmDocument _$FarmDocumentFromJson(
         'totals',
         (v) => v as Map<String, dynamic>? ?? const <String, dynamic>{},
       ),
+      storyDone: $checkedConvert(
+        'story_done',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(k, (e as num).toInt()),
+            ) ??
+            const <String, int>{},
+      ),
+      storySkipped: $checkedConvert(
+        'story_skipped',
+        (v) => v as bool? ?? false,
+      ),
       missingBuildings: $checkedConvert(
         'missing_buildings',
         (v) =>
@@ -162,6 +174,8 @@ _FarmDocument _$FarmDocumentFromJson(
     'gearSlots': 'gear_slots',
     'weaponLevel': 'weapon_level',
     'totemLimit': 'totem_limit',
+    'storyDone': 'story_done',
+    'storySkipped': 'story_skipped',
     'missingBuildings': 'missing_buildings',
   },
 );
@@ -193,6 +207,8 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'progress': instance.progress,
       'totem_limit': instance.totemLimit,
       'totals': instance.totals,
+      'story_done': instance.storyDone,
+      'story_skipped': instance.storySkipped,
       'missing_buildings': instance.missingBuildings,
     };
 
@@ -486,6 +502,7 @@ _MailDocument _$MailDocumentFromJson(Map<String, dynamic> json) =>
         kind: $checkedConvert('kind', (v) => $enumDecode(_$MailKindEnumMap, v)),
         tick: $checkedConvert('tick', (v) => (v as num).toInt()),
         building: $checkedConvert('building', (v) => v as String?),
+        story: $checkedConvert('story', (v) => v as String?),
         seeds: $checkedConvert(
           'seeds',
           (v) =>
@@ -507,6 +524,7 @@ Map<String, dynamic> _$MailDocumentToJson(_MailDocument instance) =>
       'kind': _$MailKindEnumMap[instance.kind]!,
       'tick': instance.tick,
       'building': instance.building,
+      'story': instance.story,
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
       'food': instance.food,
       'read': instance.read,
@@ -516,6 +534,7 @@ Map<String, dynamic> _$MailDocumentToJson(_MailDocument instance) =>
 const _$MailKindEnumMap = {
   MailKind.start: 'start',
   MailKind.building: 'building',
+  MailKind.story: 'story',
 };
 
 _BreederDocument _$BreederDocumentFromJson(Map<String, dynamic> json) =>

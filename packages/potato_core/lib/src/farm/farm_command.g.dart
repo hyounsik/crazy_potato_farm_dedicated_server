@@ -579,6 +579,7 @@ Depart _$DepartFromJson(Map<String, dynamic> json) =>
               (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
               const <int>[],
         ),
+        zone: $checkedConvert('zone', (v) => v as String?),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -587,6 +588,19 @@ Depart _$DepartFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DepartToJson(Depart instance) => <String, dynamic>{
   'food': instance.food,
   'potato_ids': instance.potatoIds,
+  'zone': instance.zone,
+  'runtimeType': instance.$type,
+};
+
+UnlockAll _$UnlockAllFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('UnlockAll', json, ($checkedConvert) {
+      final val = UnlockAll(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$UnlockAllToJson(UnlockAll instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
@@ -637,6 +651,7 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
         'equipped',
         (v) => v == null ? null : Equipped.fromJson(v as Map<String, dynamic>),
       ),
+      zone: $checkedConvert('zone', (v) => v as String?),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -658,5 +673,6 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
       'score': instance.score,
       'gear': instance.gear.map((e) => e.toJson()).toList(),
       'equipped': instance.equipped?.toJson(),
+      'zone': instance.zone,
       'runtimeType': instance.$type,
     };

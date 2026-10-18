@@ -216,6 +216,27 @@ Map<String, dynamic> _$MailArrivedToJson(MailArrived instance) =>
       'runtimeType': instance.$type,
     };
 
+StoryDone _$StoryDoneFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('StoryDone', json, ($checkedConvert) {
+      final val = StoryDone(
+        event: $checkedConvert('event', (v) => v as String),
+        unlocks: $checkedConvert(
+          'unlocks',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$StoryDoneToJson(StoryDone instance) => <String, dynamic>{
+  'event': instance.event,
+  'unlocks': instance.unlocks,
+  'runtimeType': instance.$type,
+};
+
 GearEnhanced _$GearEnhancedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('GearEnhanced', json, ($checkedConvert) {
       final val = GearEnhanced(

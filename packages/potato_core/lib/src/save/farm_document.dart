@@ -66,6 +66,13 @@ abstract class FarmDocument with _$FarmDocument {
     int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
 
+    /// Story events done, by id, with the step each was done on.
+    @Default(<String, int>{}) Map<String, int> storyDone,
+
+    /// Every feature open, no story events (see
+    /// [FarmSimulation.storySkipped]).
+    @Default(false) bool storySkipped,
+
     /// Starting building kinds a farm saved before they existed should get
     /// when it is read (set by migrations, never written).
     @Default(<String>[]) List<String> missingBuildings,
@@ -176,6 +183,8 @@ abstract class FarmDocument with _$FarmDocument {
     progress: farm.progress,
     totemLimit: farm.totemLimit,
     totals: farm.totals.toJson(),
+    storyDone: Map.of(farm.storyDone),
+    storySkipped: farm.storySkipped,
   );
 
   /// Builds the running farm, using [catalog] for its rules.
@@ -281,6 +290,8 @@ abstract class FarmDocument with _$FarmDocument {
       progress: progress,
       totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),
+      storyDone: storyDone,
+      storySkipped: storySkipped,
     );
     return farm..addMissingStartBuildings(also: missingBuildings);
   }
@@ -436,6 +447,7 @@ abstract class MailDocument with _$MailDocument {
     required MailKind kind,
     required int tick,
     String? building,
+    String? story,
     @Default(<Seed>[]) List<Seed> seeds,
     @Default(0) int food,
     @Default(false) bool read,
@@ -449,6 +461,7 @@ abstract class MailDocument with _$MailDocument {
     kind: mail.kind,
     tick: mail.tick,
     building: mail.building,
+    story: mail.story,
     seeds: mail.seeds,
     food: mail.food,
     read: mail.read,
@@ -463,6 +476,7 @@ abstract class MailDocument with _$MailDocument {
     kind: kind,
     tick: tick,
     building: building,
+    story: story,
     seeds: seeds,
     food: food,
     read: read,

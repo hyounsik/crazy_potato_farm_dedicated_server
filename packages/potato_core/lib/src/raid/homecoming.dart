@@ -109,6 +109,7 @@ extension RaidHomecoming on RaidResult {
           if (c.gone) c.potatoId,
       ],
       score: outcome.succeeded ? score : null,
+      zone: zone,
       gear: gear,
       equipped: equipped,
     );

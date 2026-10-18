@@ -108,6 +108,26 @@ void main() {
     }
   });
 
+  test('the totem limit waits until a totem is open', () {
+    expect(farm.totemsOpen, isTrue, reason: 'no totem is listed');
+    final locked = sampleCatalogWith((files) {
+      final story = _story();
+      final totems = ['building:totem_growth', 'building:totem_harvest'];
+      (story['locked'] as List).addAll(totems);
+      (story['events'] as List).last['unlocks'].addAll(totems);
+      files['story'] = story;
+    });
+    final closed = FarmSimulation.newFarm(locked, seed: 1)..food = 10000;
+    expect(closed.totemsOpen, isFalse);
+    expect(
+      closed.apply(const FarmCommand.raiseTotemLimit()),
+      FarmRejection.locked,
+    );
+    closed.apply(const FarmCommand.unlockAll());
+    expect(closed.totemsOpen, isTrue);
+    expect(closed.apply(const FarmCommand.raiseTotemLimit()), isNull);
+  });
+
   test('meeting the goals finishes the event, opens it and sends a letter', () {
     expect(farm.storyEventsOpen.map((e) => e.id), ['two_fields']);
     farm.takeEvents();

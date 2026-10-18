@@ -249,6 +249,11 @@ final class FarmSimulation {
   /// Whether the build menu offers buildings of [kind].
   bool canBuildKind(String kind) => isUnlocked(StoryUnlock.building(kind));
 
+  /// Whether the story opened any totem; the totem limit waits for one.
+  bool get totemsOpen => catalog.buildings.values.any(
+    (b) => b.totem != null && canBuildKind(b.id),
+  );
+
   /// Whether runs may go to zone [zone].
   bool zoneOpen(String zone) => isUnlocked(StoryUnlock.zone(zone));
 
@@ -1269,6 +1274,7 @@ final class FarmSimulation {
 
   FarmRejection? _raiseTotemLimit() {
     final rules = _rules.totems;
+    if (!totemsOpen) return FarmRejection.locked;
     if (totemLimit >= rules.maxLimit) return FarmRejection.atMost;
     if (food < rules.limitStepFood) return FarmRejection.notEnoughFood;
     food -= rules.limitStepFood;

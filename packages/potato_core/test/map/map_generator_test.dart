@@ -78,18 +78,39 @@ void main() {
     }
   });
 
+  test('a big rock blocks only its bottom row', () {
+    for (var seed = 0; seed < 20; seed++) {
+      final map = generate(seed);
+      for (final o in map.obstacles) {
+        if (o.kind != ObstacleKind.rock || o.size < 2) continue;
+        expect(o.blockedRows, 1);
+        for (var x = o.origin.x; x < o.origin.x + o.size; x++) {
+          expect(map.tileAt(x, o.origin.y), MapTile.obstacle);
+          expect(map.tileAt(x, o.origin.y - 1), MapTile.open);
+        }
+      }
+      expect(
+        map.obstacles.where((o) => o.kind == ObstacleKind.tree),
+        everyElement(predicate<MapObstacle>((o) => o.blockedRows == o.size)),
+        reason: 'trees stay square',
+      );
+    }
+  });
+
   test('scattered obstacles keep a free tile around them', () {
     for (var seed = 0; seed < 20; seed++) {
       final map = generate(seed);
       expect(map.obstacles, isNotEmpty);
       for (final o in map.obstacles) {
-        for (var y = o.origin.y - 1; y <= o.origin.y + o.size; y++) {
+        // A big rock's open row behind it counts as its free ring.
+        final top = o.origin.y - 1 - (o.size - o.blockedRows);
+        for (var y = top; y <= o.origin.y + o.blockedRows; y++) {
           for (var x = o.origin.x - 1; x <= o.origin.x + o.size; x++) {
             final own =
                 x >= o.origin.x &&
                 x < o.origin.x + o.size &&
                 y >= o.origin.y &&
-                y < o.origin.y + o.size;
+                y < o.origin.y + o.blockedRows;
             expect(
               map.tileAt(x, y),
               own ? MapTile.obstacle : MapTile.open,
@@ -198,4 +219,5 @@ int _checksum(String text) {
   return hash;
 }
 
-const _seed1Checksum = 1619851324;
+// Changed 2026-10-18: big rocks block only their bottom row.
+const _seed1Checksum = 1091467342;

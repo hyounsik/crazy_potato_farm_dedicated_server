@@ -344,6 +344,31 @@ final class _Builder {
         turnedHeights[at.y * size + at.x] = heights[y * size + x];
       }
     }
+    final turnedObstacles = [
+      for (final o in obstacles)
+        o.copyWith(
+          // The block's new top-left is the turned corner nearest (0, 0).
+          origin: _topLeft([
+            turn(o.origin),
+            turn(TilePos(o.origin.x + o.size - 1, o.origin.y + o.size - 1)),
+          ]),
+        ),
+    ];
+    // A big rock blocks only its bottom row once turned, the row behind it
+    // open again (2026-10-18, user: one can stand behind it). Its ring of
+    // free tiles is kept, so routes stay open.
+    for (final (i, o) in turnedObstacles.indexed) {
+      if (o.kind != ObstacleKind.rock || o.size < 2) continue;
+      for (var dy = 0; dy < o.size - 1; dy++) {
+        for (var dx = 0; dx < o.size; dx++) {
+          turned[(o.origin.y + dy) * size + o.origin.x + dx] = MapTile.open;
+        }
+      }
+      turnedObstacles[i] = o.copyWith(
+        origin: TilePos(o.origin.x, o.origin.y + o.size - 1),
+        rows: 1,
+      );
+    }
     return MapData(
       size: size,
       tiles: turned,
@@ -354,16 +379,7 @@ final class _Builder {
         for (final MapEntry(:key, :value) in markers.entries)
           key: [for (final t in value) turn(t)],
       },
-      obstacles: [
-        for (final o in obstacles)
-          o.copyWith(
-            // The block's new top-left is the turned corner nearest (0, 0).
-            origin: _topLeft([
-              turn(o.origin),
-              turn(TilePos(o.origin.x + o.size - 1, o.origin.y + o.size - 1)),
-            ]),
-          ),
-      ],
+      obstacles: turnedObstacles,
     );
   }
 

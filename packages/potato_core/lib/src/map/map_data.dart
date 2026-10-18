@@ -24,14 +24,25 @@ enum MapTile {
 
 enum ObstacleKind { rock, tree }
 
-/// A scattered obstacle covering [size]×[size] tiles from [origin].
+/// A scattered obstacle [size] tiles wide and [blockedRows] tall from
+/// [origin].
 @freezed
 abstract class MapObstacle with _$MapObstacle {
+  const MapObstacle._();
+
   const factory MapObstacle({
     required TilePos origin,
     required int size,
     required ObstacleKind kind,
+
+    /// Rows it blocks, when fewer than [size]: a big rock blocks only its
+    /// bottom row (2026-10-18, user), so one can stand behind it. Null for a
+    /// square.
+    int? rows,
   }) = _MapObstacle;
+
+  /// Rows it blocks from [origin] down.
+  int get blockedRows => rows ?? size;
 
   factory MapObstacle.fromJson(Map<String, dynamic> json) =>
       _$MapObstacleFromJson(json);

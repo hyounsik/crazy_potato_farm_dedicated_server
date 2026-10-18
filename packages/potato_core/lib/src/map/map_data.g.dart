@@ -18,6 +18,7 @@ _MapObstacle _$MapObstacleFromJson(Map<String, dynamic> json) =>
           'kind',
           (v) => $enumDecode(_$ObstacleKindEnumMap, v),
         ),
+        rows: $checkedConvert('rows', (v) => (v as num?)?.toInt()),
       );
       return val;
     });
@@ -27,6 +28,7 @@ Map<String, dynamic> _$MapObstacleToJson(_MapObstacle instance) =>
       'origin': instance.origin.toJson(),
       'size': instance.size,
       'kind': _$ObstacleKindEnumMap[instance.kind]!,
+      'rows': instance.rows,
     };
 
 const _$ObstacleKindEnumMap = {

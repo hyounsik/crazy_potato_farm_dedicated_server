@@ -16,7 +16,10 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$MapObstacle {
 
- TilePos get origin; int get size; ObstacleKind get kind;
+ TilePos get origin; int get size; ObstacleKind get kind;/// Rows it blocks, when fewer than [size]: a big rock blocks only its
+/// bottom row (2026-10-18, user), so one can stand behind it. Null for a
+/// square.
+ int? get rows;
 /// Create a copy of MapObstacle
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +33,20 @@ $MapObstacleCopyWith<MapObstacle> get copyWith => _$MapObstacleCopyWithImpl<MapO
 @override
 bool operator ==(Object other) {
   final _this = this as MapObstacle;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapObstacle&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.kind, _this.kind) || other.kind == _this.kind));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapObstacle&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.rows, _this.rows) || other.rows == _this.rows));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MapObstacle;
-  return Object.hash(runtimeType,_this.origin,_this.size,_this.kind);
+  return Object.hash(runtimeType,_this.origin,_this.size,_this.kind,_this.rows);
 }
 
 @override
 String toString() {
   final _this = this as MapObstacle;
-  return 'MapObstacle(origin: ${_this.origin}, size: ${_this.size}, kind: ${_this.kind})';
+  return 'MapObstacle(origin: ${_this.origin}, size: ${_this.size}, kind: ${_this.kind}, rows: ${_this.rows})';
 }
 
 
@@ -54,7 +57,7 @@ abstract mixin class $MapObstacleCopyWith<$Res>  {
   factory $MapObstacleCopyWith(MapObstacle value, $Res Function(MapObstacle) _then) = _$MapObstacleCopyWithImpl;
 @useResult
 $Res call({
- TilePos origin, int size, ObstacleKind kind
+ TilePos origin, int size, ObstacleKind kind, int? rows
 });
 
 
@@ -71,12 +74,13 @@ class _$MapObstacleCopyWithImpl<$Res>
 
 /// Create a copy of MapObstacle
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? origin = null,Object? size = null,Object? kind = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? origin = null,Object? size = null,Object? kind = null,Object? rows = freezed,}) {
   return _then(MapObstacle(
 origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
 as TilePos,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as ObstacleKind,
+as ObstacleKind,rows: freezed == rows ? _self.rows : rows // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 /// Create a copy of MapObstacle
@@ -170,10 +174,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TilePos origin,  int size,  ObstacleKind kind)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( TilePos origin,  int size,  ObstacleKind kind,  int? rows)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MapObstacle() when $default != null:
-return $default(_that.origin,_that.size,_that.kind);case _:
+return $default(_that.origin,_that.size,_that.kind,_that.rows);case _:
   return orElse();
 
 }
@@ -191,10 +195,10 @@ return $default(_that.origin,_that.size,_that.kind);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TilePos origin,  int size,  ObstacleKind kind)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( TilePos origin,  int size,  ObstacleKind kind,  int? rows)  $default,) {final _that = this;
 switch (_that) {
 case _MapObstacle():
-return $default(_that.origin,_that.size,_that.kind);case _:
+return $default(_that.origin,_that.size,_that.kind,_that.rows);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -211,10 +215,10 @@ return $default(_that.origin,_that.size,_that.kind);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TilePos origin,  int size,  ObstacleKind kind)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( TilePos origin,  int size,  ObstacleKind kind,  int? rows)?  $default,) {final _that = this;
 switch (_that) {
 case _MapObstacle() when $default != null:
-return $default(_that.origin,_that.size,_that.kind);case _:
+return $default(_that.origin,_that.size,_that.kind,_that.rows);case _:
   return null;
 
 }
@@ -225,13 +229,17 @@ return $default(_that.origin,_that.size,_that.kind);case _:
 /// @nodoc
 @JsonSerializable()
 
-class _MapObstacle implements MapObstacle {
-  const _MapObstacle({required this.origin, required this.size, required this.kind});
+class _MapObstacle extends MapObstacle {
+  const _MapObstacle({required this.origin, required this.size, required this.kind, this.rows}): super._();
   factory _MapObstacle.fromJson(Map<String, dynamic> json) => _$MapObstacleFromJson(json);
 
 @override final  TilePos origin;
 @override final  int size;
 @override final  ObstacleKind kind;
+/// Rows it blocks, when fewer than [size]: a big rock blocks only its
+/// bottom row (2026-10-18, user), so one can stand behind it. Null for a
+/// square.
+@override final  int? rows;
 
 /// Create a copy of MapObstacle
 /// with the given fields replaced by the non-null parameter values.
@@ -246,18 +254,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapObstacle&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.size, size) || other.size == size)&&(identical(other.kind, kind) || other.kind == kind));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapObstacle&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.size, size) || other.size == size)&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.rows, rows) || other.rows == rows));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,origin,size,kind);
+    return Object.hash(runtimeType,origin,size,kind,rows);
 }
 
 @override
 String toString() {
-    return 'MapObstacle(origin: $origin, size: $size, kind: $kind)';
+    return 'MapObstacle(origin: $origin, size: $size, kind: $kind, rows: $rows)';
 }
 
 
@@ -268,7 +276,7 @@ abstract mixin class _$MapObstacleCopyWith<$Res> implements $MapObstacleCopyWith
   factory _$MapObstacleCopyWith(_MapObstacle value, $Res Function(_MapObstacle) _then) = __$MapObstacleCopyWithImpl;
 @override @useResult
 $Res call({
- TilePos origin, int size, ObstacleKind kind
+ TilePos origin, int size, ObstacleKind kind, int? rows
 });
 
 
@@ -285,12 +293,13 @@ class __$MapObstacleCopyWithImpl<$Res>
 
 /// Create a copy of MapObstacle
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? origin = null,Object? size = null,Object? kind = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? origin = null,Object? size = null,Object? kind = null,Object? rows = freezed,}) {
   return _then(_MapObstacle(
 origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
 as TilePos,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
-as ObstacleKind,
+as ObstacleKind,rows: freezed == rows ? _self.rows : rows // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

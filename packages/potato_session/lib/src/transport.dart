@@ -189,4 +189,3 @@ final class _InMemoryClient implements ClientTransport {
     await _connection.close();
   }
 }
-

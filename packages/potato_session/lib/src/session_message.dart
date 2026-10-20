@@ -302,4 +302,3 @@ final class JsonSessionCodec implements SessionCodec {
     jsonDecode(utf8.decode(bytes)) as Map<String, dynamic>,
   );
 }
-

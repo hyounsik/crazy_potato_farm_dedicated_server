@@ -92,10 +92,12 @@ final class RaidPlayer extends RaidShooter {
     super.aimTarget,
     super.aimProgress,
     this.equipped = const Equipped(),
+    this.name = '',
   });
 
   factory RaidPlayer.fromJson(Map<String, dynamic> json) => RaidPlayer(
     id: json['id'] as int,
+    name: json['name'] as String? ?? '',
     position: Vec2.fromJson(json['position'] as List<Object?>),
     radius: (json['radius'] as num).toDouble(),
     maxHp: (json['max_hp'] as num).toDouble(),
@@ -117,6 +119,9 @@ final class RaidPlayer extends RaidShooter {
 
   /// What is worn; null slots are bare hands.
   Equipped equipped;
+
+  /// Display name in a party run; empty in solo.
+  final String name;
   double dashLeft;
   double dashCooldown;
   Vec2 dashDirection;
@@ -138,6 +143,7 @@ final class RaidPlayer extends RaidShooter {
 
   Map<String, dynamic> toJson() => {
     'id': id,
+    if (name.isNotEmpty) 'name': name,
     'position': position.toJson(),
     'radius': radius,
     'max_hp': maxHp,

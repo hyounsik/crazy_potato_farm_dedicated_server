@@ -1605,9 +1605,23 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _depart(int food, List<int> potatoIds, String zone) {
+  /// Sets out as a guest in a friend's co-op party (`multiplayer.md`: if the
+  /// host's farm unlocked [zone], guests can join even if their own farm has
+  /// not unlocked it yet).
+  FarmRejection? departGuest({
+    required int food,
+    List<int> potatoIds = const [],
+    required String zone,
+  }) => _depart(food, potatoIds, zone, checkZoneUnlock: false);
+
+  FarmRejection? _depart(
+    int food,
+    List<int> potatoIds,
+    String zone, {
+    bool checkZoneUnlock = true,
+  }) {
     if (!catalog.zones.containsKey(zone)) return FarmRejection.unknownZone;
-    if (!zoneOpen(zone)) return FarmRejection.locked;
+    if (checkZoneUnlock && !zoneOpen(zone)) return FarmRejection.locked;
     if (food < 0 || food > this.food) return FarmRejection.notEnoughFood;
     final going = <AwayPotato>[];
     for (final id in potatoIds.toSet()) {

@@ -1201,4 +1201,182 @@ void main() {
       expect(run.bullets.where((b) => b.id == 9999), isEmpty);
     });
   });
+
+  group('party', () {
+    RaidSimulation makeParty({
+      String zone = 'danger_open',
+      List<RaidMemberStart>? members,
+    }) => RaidSimulation.party(
+      catalog: catalog,
+      zone: zone,
+      seed: 7,
+      members:
+          members ??
+          const [RaidMemberStart(food: 50), RaidMemberStart(food: 50)],
+    );
+
+    test('members share a team, buff potatoes reach all, and both shoot the '
+        'same enemy without hurting each other', () {
+      final plain = makeParty();
+      final run = makeParty(
+        members: const [
+          RaidMemberStart(
+            food: 50,
+            companions: [
+              CompanionStart(
+                potatoId: 1,
+                type: PotatoType.buff,
+                grade: Grade.normal,
+                abilities: ['buff.rally'],
+              ),
+            ],
+          ),
+          RaidMemberStart(food: 50),
+        ],
+      );
+      plain.step();
+      run.step();
+      expect(run.members, hasLength(2));
+      final [host, guest] = run.members;
+      expect(host.player.team, playerTeam);
+      expect(guest.player.team, playerTeam);
+      // Both got the buff potato's attack boost.
+      expect(
+        run.shotDamageOf(host),
+        closeTo(plain.shotDamageOf(plain.members[0]) * 1.2, 1e-9),
+      );
+      expect(
+        run.shotDamageOf(guest),
+        closeTo(plain.shotDamageOf(plain.members[1]) * 1.2, 1e-9),
+      );
+
+      run.enemies.clear();
+      run.clones.clear();
+      // Standing side by side with no enemy: neither aims at the other.
+      guest.player.position = host.player.position + const Vec2(1, 0);
+      expect(run.aimOf(host), isNull);
+      expect(run.aimOf(guest), isNull);
+
+      final enemy = addEnemy(
+        run,
+        'brute',
+        host.player.position + const Vec2(2, 0),
+      )..attackCooldown = 10;
+      expect(run.aimOf(host), enemy);
+      expect(run.aimOf(guest), enemy);
+      runFor(run, 1);
+      expect(enemy.hp, lessThan(enemy.maxHp));
+      expect(host.player.hp, host.player.maxHp);
+      expect(guest.player.hp, guest.player.maxHp);
+    });
+
+    test('bags are separate and floor items go to whoever walks over them', () {
+      final run = makeParty();
+      run.enemies.clear();
+      run.clones.clear();
+      final [host, guest] = run.members;
+      host.player.position = const Vec2(5.5, 5.5);
+      guest.player.position = const Vec2(10.5, 10.5);
+      run.floorItems.add(
+        RaidFloorItem(
+          id: 900,
+          position: guest.player.position,
+          stack: ItemStack('material', 3),
+        ),
+      );
+      run.step();
+      expect(host.bag.countOf('material'), 0);
+      expect(guest.bag.countOf('material'), 3);
+      final picked = run.takeEvents().whereType<ItemPicked>().single;
+      expect(picked.player, guest.id);
+    });
+
+    test('when one member falls in a danger zone the run goes on and their '
+        'bag stays in a bundle for the survivor to extract with', () {
+      final run = makeParty();
+      run.enemies.clear();
+      run.clones.clear();
+      final [host, guest] = run.members;
+      guest.bag.addFrom(ItemStack('seed_food_rare', 2));
+      guest.player.position = host.player.position;
+
+      // Knock the guest down.
+      guest.player.hp = 0;
+      run.step();
+      expect(guest.outcome, RaidOutcome.fainted);
+      expect(host.outcome, isNull);
+      expect(run.isOver, isFalse);
+      expect(run.resultOf(guest)!.lost, isTrue);
+      expect(
+        run.resultOf(guest)!.items.any((s) => s.item == 'seed_food_rare'),
+        isTrue,
+      );
+
+      // A bundle with what the guest carried is on the floor; host takes it.
+      final bundle = run.pileNearOf(host);
+      expect(bundle, isNotNull);
+      expect(run.applyOf(host, TakeAllLoot(bundle!.id)), isNull);
+      expect(host.bag.countOf('seed_food_rare'), 2);
+
+      // Host signals at an open exit and extracts; now the run is over.
+      final exit = run.exits.first;
+      host.player.position = exit.position;
+      expect(run.applyOf(host, const Signal()), isNull);
+      runFor(run, run.zone.danger!.countdownSeconds + 0.2);
+      expect(host.outcome, RaidOutcome.extracted);
+      expect(run.isOver, isTrue);
+      expect(run.resultOf(host)!.lost, isFalse);
+      expect(
+        run.resultOf(host)!.items.any((s) => s.item == 'seed_food_rare'),
+        isTrue,
+      );
+    });
+
+    test(
+      'round-trips a party run, results, commands and events through JSON',
+      () {
+        final run = makeParty();
+        final [host, guest] = run.members;
+        run.setMoveOf(guest, const Vec2(1, 0));
+        runFor(run, 0.5);
+        final restored = RaidSimulation.fromJson(run.toJson(), catalog);
+        expect(restored.members, hasLength(2));
+        expect(restored.members[1].player.position, guest.player.position);
+
+        for (final cmd in const <RaidCommand>[
+          Dash(),
+          GoHome(),
+          Signal(),
+          SetCompanionMode(3, CompanionMode.attack),
+          EquipFromBag(1),
+          Unequip(GearKind.weapon),
+          DropItem(0),
+          PutInPile(4, 1),
+          TakeLoot(4, 0),
+          TakeAllLoot(4),
+          SwapLoot(4, 0, 2),
+        ]) {
+          expect(RaidCommand.fromJson(cmd.toJson()).toJson(), cmd.toJson());
+        }
+        for (final ev in <RaidEvent>[
+          const BodyHit(1, 12.5),
+          const EnemyDefeated(2, 'biter'),
+          const CompanionDown(3),
+          const CompanionSaid(3, 'hi'),
+          const CloneEntered(4),
+          const CloneSignalled(4, 5),
+          const CloneEscaped(4),
+          const CloneDown(4),
+          ItemPicked(ItemStack('material', 2), player: guest.id),
+          const ExitFound(5),
+          const ExitsRevealed(),
+          SignalSent(5, player: host.id),
+          SignalLost(5, player: host.id),
+          RaidEnded(RaidOutcome.extracted, player: host.id),
+        ]) {
+          expect(RaidEvent.fromJson(ev.toJson()).toJson(), ev.toJson());
+        }
+      },
+    );
+  });
 }

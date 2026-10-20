@@ -1,0 +1,329 @@
+import 'dart:convert';
+import 'dart:io';
+
+import 'package:potato_session/potato_session.dart';
+import 'package:test/test.dart';
+
+Map<String, Object?> _loadCatalogFiles() {
+  final candidates = [
+    Directory('../potato_core/test/fixtures/catalog'),
+    Directory('packages/potato_core/test/fixtures/catalog'),
+    Directory(
+      '../crazy_potato_farm_dedicated_server/packages/potato_core/test/fixtures/catalog',
+    ),
+  ];
+  final dir = candidates.firstWhere(
+    (d) => d.existsSync(),
+    orElse: () =>
+        throw StateError('Cannot find potato_core/test/fixtures/catalog'),
+  );
+  return {
+    for (final file in dir.listSync())
+      if (file is File && file.path.endsWith('.json'))
+        file.uri.pathSegments.last.replaceAll('.json', ''): jsonDecode(
+          file.readAsStringSync(),
+        ),
+  };
+}
+
+Catalog _testCatalog() {
+  final files = _loadCatalogFiles();
+  final zones =
+      (files['zones']! as Map<String, dynamic>)['zones'] as List<Object?>;
+  final open = jsonDecode(jsonEncode(zones.first)) as Map<String, dynamic>;
+  open['id'] = 'open';
+  open['map'] = {
+    'size': 20,
+    'entry': {'x': 10, 'y': 10},
+    'clear_radius': 1,
+    'rotate': false,
+    'scatter': {'count': 0},
+  };
+  (open['enemies'] as Map)['count'] = 0;
+  (open['enemies'] as Map)['packs'] = 0;
+  (open['gathering'] as Map)['count'] = 0;
+  zones.add(open);
+
+  final danger = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
+  danger['id'] = 'danger_open';
+  (danger['map'] as Map)['exits'] = [
+    {'x': 16, 'y': 10},
+    {'x': 3, 'y': 10},
+  ];
+  danger['danger'] = {
+    'open_exits': 2,
+    'reveal_seconds': 60,
+    'exit_radius': 0.9,
+    'countdown_seconds': 5,
+    'wait_sight_multiplier': 2,
+    'hungry_damage_per_second': 10,
+  };
+  zones.add(danger);
+
+  final res = Catalog.load(files);
+  if (!res.isValid) throw StateError('Invalid catalog: ${res.issues}');
+  return res.catalog!;
+}
+
+Future<void> _pumpMicrotasks([int turns = 4]) async {
+  for (var i = 0; i < turns; i++) {
+    await Future<void>.delayed(Duration.zero);
+  }
+}
+
+void main() {
+  late Catalog catalog;
+
+  setUpAll(() {
+    catalog = _testCatalog();
+  });
+
+  group('Handshake & Version Check', () {
+    test('accepts matching build number and catalog hash', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        buildNumber: 42,
+      );
+      final client = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('guest_1'),
+        buildNumber: 42,
+        start: const RaidMemberStart(name: 'Guest One'),
+      );
+
+      await _pumpMicrotasks();
+
+      expect(client.stage, ClientSessionStage.waiting);
+      expect(host.guests, hasLength(1));
+      expect(host.guests.single.peerId, 'guest_1');
+      expect(host.guests.single.name, 'Guest One');
+
+      await client.close();
+      await host.close();
+    });
+
+    test('rejects mismatched build number or catalog hash', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        buildNumber: 10,
+      );
+      final client = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('guest_bad_ver'),
+        buildNumber: 11,
+        start: const RaidMemberStart(name: 'Wrong Build'),
+      );
+
+      await _pumpMicrotasks();
+
+      expect(client.stage, ClientSessionStage.rejected);
+      expect(client.joinRejection, SessionJoinRejection.versionMismatch);
+      expect(host.guests, isEmpty);
+
+      await client.close();
+      await host.close();
+    });
+
+    test('rejects when party is full (maxGuests)', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        maxGuests: 1,
+      );
+      final c1 = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('g1'),
+        start: const RaidMemberStart(name: 'G1'),
+      );
+      final c2 = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('g2'),
+        start: const RaidMemberStart(name: 'G2'),
+      );
+
+      await _pumpMicrotasks();
+
+      expect(c1.stage, ClientSessionStage.waiting);
+      expect(c2.stage, ClientSessionStage.rejected);
+      expect(c2.joinRejection, SessionJoinRejection.sessionFull);
+      expect(host.guests, hasLength(1));
+
+      await c1.close();
+      await c2.close();
+      await host.close();
+    });
+  });
+
+  group('2-Player Co-op Exploration over InMemorySessionNetwork', () {
+    test('host starts run, guest predicts move, host broadcasts snapshots & results', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      final guest = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('guest_2'),
+        start: const RaidMemberStart(
+          name: 'Guest Two',
+          companions: [
+            CompanionStart(
+              potatoId: 2,
+              type: PotatoType.combat,
+              grade: Grade.normal,
+            ),
+          ],
+        ),
+      );
+
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.waiting);
+
+      host.startRun(
+        zone: 'open',
+        seed: 7,
+        hostStart: const RaidMemberStart(
+          name: 'Host One',
+          companions: [
+            CompanionStart(
+              potatoId: 1,
+              type: PotatoType.combat,
+              grade: Grade.normal,
+            ),
+          ],
+        ),
+      );
+
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.playing);
+      expect(guest.memberIndex, 1);
+      expect(guest.run, isNotNull);
+      expect(guest.run!.focusIndex, 1);
+      expect(guest.run!.player.name, 'Guest Two');
+      expect(guest.run!.companions.single.potatoId, 2);
+      expect(guest.run!.members, hasLength(2));
+
+      final initialGuestX = guest.run!.player.position.x;
+      final initialHostY = guest.run!.members[0].player.position.y;
+
+      // Guest moves right (+x), Host moves down (+y).
+      guest.setMove(const Vec2(1, 0));
+      host.run!.setMove(const Vec2(0, 1));
+      await _pumpMicrotasks();
+
+      // Advance 500ms in 50ms steps on both sides.
+      for (var i = 0; i < 10; i++) {
+        host.advance(const Duration(milliseconds: 50));
+        guest.advance(const Duration(milliseconds: 50));
+        await _pumpMicrotasks();
+      }
+
+      // Guest predicted and reconciled its own +x movement; host also moved +y.
+      expect(guest.run!.player.position.x, greaterThan(initialGuestX + 0.5));
+      expect(
+        host.run!.members[1].player.position.x,
+        closeTo(guest.run!.player.position.x, 0.25),
+      );
+      // Guest interpolated the host's +y movement from snapshots.
+      expect(
+        guest.run!.members[0].player.position.y,
+        greaterThan(initialHostY + 0.2),
+      );
+
+      // Guest sends GoHome in safe zone; receives MemberResultMessage.
+      guest.sendCommand(const GoHome());
+      await _pumpMicrotasks();
+
+      expect(guest.stage, ClientSessionStage.ended);
+      expect(guest.result, isNotNull);
+      expect(guest.result!.outcome, RaidOutcome.wentHome);
+
+      // Host is still running until host also goes home.
+      expect(host.run!.outcome, isNull);
+      host.run!.apply(const GoHome());
+      expect(host.run!.isOver, isTrue);
+
+      await guest.close();
+      await host.close();
+    });
+  });
+
+  group('Disconnection Handling', () {
+    test(
+      'guest disconnect stops guest movement and leaves character defenseless',
+      () async {
+        final net = InMemorySessionNetwork();
+        final host = HostSession(catalog: catalog, transport: net.host);
+        final guest = ClientSession(
+          catalog: catalog,
+          transport: net.connectClient('guest_dc'),
+          start: const RaidMemberStart(name: 'Guest DC'),
+        );
+
+        await _pumpMicrotasks();
+        host.startRun(
+          zone: 'danger_open',
+          seed: 11,
+          hostStart: const RaidMemberStart(name: 'Host'),
+        );
+        await _pumpMicrotasks();
+
+        guest.setMove(const Vec2(1, 0));
+        await _pumpMicrotasks();
+        host.advance(const Duration(milliseconds: 100));
+        expect(host.run!.members[1].move.x, greaterThan(0));
+
+        // Guest drops connection.
+        net.disconnectClient('guest_dc');
+        await _pumpMicrotasks();
+
+        expect(host.guests.single.connected, isFalse);
+        expect(host.run!.members[1].move, Vec2.zero);
+
+        await guest.close();
+        await host.close();
+      },
+    );
+
+    test(
+      'host disconnect in danger zone pauses guest and aborts after timeout',
+      () async {
+        final net = InMemorySessionNetwork();
+        final host = HostSession(catalog: catalog, transport: net.host);
+        final guest = ClientSession(
+          catalog: catalog,
+          transport: net.connectClient('guest_abort'),
+          start: const RaidMemberStart(name: 'Guest Abort'),
+          hostReconnectTimeout: const Duration(seconds: 5),
+        );
+
+        await _pumpMicrotasks();
+        host.startRun(
+          zone: 'danger_open',
+          seed: 12,
+          hostStart: const RaidMemberStart(name: 'Host'),
+        );
+        await _pumpMicrotasks();
+        expect(guest.stage, ClientSessionStage.playing);
+
+        // Host connection drops.
+        net.disconnectHost();
+        await _pumpMicrotasks();
+        expect(guest.stage, ClientSessionStage.hostDisconnected);
+
+        // Advancing before timeout keeps stage in hostDisconnected.
+        guest.advance(const Duration(seconds: 3));
+        expect(guest.stage, ClientSessionStage.hostDisconnected);
+
+        // Advancing past timeout voids the run (aborted) so pre-departure state is restored.
+        guest.advance(const Duration(seconds: 3));
+        expect(guest.stage, ClientSessionStage.aborted);
+
+        await guest.close();
+        await host.close();
+      },
+    );
+  });
+}

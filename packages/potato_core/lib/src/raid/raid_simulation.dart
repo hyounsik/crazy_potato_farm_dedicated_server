@@ -22,6 +22,7 @@ import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
 import 'package:potato_core/src/raid/raid_command.dart';
 import 'package:potato_core/src/raid/raid_effects.dart';
+import 'package:potato_core/src/raid/raid_member.dart';
 
 /// A farm potato taken along on a run.
 final class CompanionStart {
@@ -36,6 +37,24 @@ final class CompanionStart {
     this.lifeLeft = 1,
     this.beltBoost = 0,
   });
+
+  factory CompanionStart.fromJson(Map<String, dynamic> json) => CompanionStart(
+    potatoId: json['potato_id'] as int,
+    type: PotatoType.values.byName(json['type'] as String),
+    grade: Grade.values.byName(json['grade'] as String),
+    level: json['level'] as int? ?? 0,
+    abilities: (json['abilities'] as List<Object?>? ?? const []).cast<String>(),
+    style: switch (json['style']) {
+      final String s => CombatStyle.values.byName(s),
+      _ => null,
+    },
+    mode: switch (json['mode']) {
+      final String m => CompanionMode.values.byName(m),
+      _ => CompanionMode.defense,
+    },
+    lifeLeft: (json['life_left'] as num? ?? 1).toDouble(),
+    beltBoost: (json['belt_boost'] as num? ?? 0).toDouble(),
+  );
 
   final int potatoId;
   final PotatoType type;
@@ -73,6 +92,18 @@ final class CompanionStart {
     lifeLeft: lifeLeft,
     boost: beltBoost,
   );
+
+  Map<String, dynamic> toJson() => {
+    'potato_id': potatoId,
+    'type': type.name,
+    'grade': grade.name,
+    'level': level,
+    'abilities': abilities,
+    if (style != null) 'style': style!.name,
+    'mode': mode.name,
+    'life_left': lifeLeft,
+    if (beltBoost != 0) 'belt_boost': beltBoost,
+  };
 }
 
 /// What a finished run brings home.
@@ -86,6 +117,31 @@ final class RaidResult {
     this.equipped = const Equipped(),
     this.zone,
   });
+
+  factory RaidResult.fromJson(Map<String, dynamic> json) => RaidResult(
+    outcome: RaidOutcome.values.byName(json['outcome'] as String),
+    zone: json['zone'] as String?,
+    equipped: switch (json['equipped']) {
+      final Map<String, dynamic> e => Equipped.fromJson(e),
+      _ => const Equipped(),
+    },
+    score: json['score'] as int,
+    lost: json['lost'] as bool,
+    items: [
+      for (final i in json['items'] as List<Object?>)
+        ItemStack.fromJson(i! as Map<String, dynamic>),
+    ],
+    companions: [
+      for (final c in json['companions'] as List<Object?>)
+        switch (c! as Map<String, dynamic>) {
+          final m => (
+            potatoId: m['potato_id'] as int,
+            down: m['down'] as bool,
+            gone: m['gone'] as bool,
+          ),
+        },
+    ],
+  );
 
   final RaidOutcome outcome;
 
@@ -108,6 +164,19 @@ final class RaidResult {
   /// Each companion's farm potato id, whether it was knocked down, and
   /// whether it is gone: fallen in a danger zone, it left its seed instead.
   final List<({int potatoId, bool down, bool gone})> companions;
+
+  Map<String, dynamic> toJson() => {
+    'outcome': outcome.name,
+    'zone': ?zone,
+    'equipped': equipped.toJson(),
+    'score': score,
+    'lost': lost,
+    'items': [for (final i in items) i.toJson()],
+    'companions': [
+      for (final c in companions)
+        {'potato_id': c.potatoId, 'down': c.down, 'gone': c.gone},
+    ],
+  };
 }
 
 /// One exploration run, advanced in fixed steps.
@@ -122,10 +191,8 @@ final class RaidSimulation {
     required this.zone,
     required this.map,
     required this._random,
-    required this.player,
-    required this.bag,
+    required this.members,
     required this.enemies,
-    required this.companions,
     required this.bullets,
     required this.piles,
     required this.floorItems,
@@ -133,13 +200,9 @@ final class RaidSimulation {
     required this.clones,
     required this._nextId,
     required this._tick,
-    this.signal,
     this._revealed = false,
     this._clonesIn = 0,
     this._nextCloneAt = 0,
-    this.progress = 0,
-    this._kept,
-    this._outcome,
   });
 
   /// Builds zone [zone]'s map from [seed] and fills it: enemies, gathering
@@ -154,7 +217,32 @@ final class RaidSimulation {
     Equipped equipped = const Equipped(),
     int progress = 0,
     List<CompanionStart> companions = const [],
+  }) => RaidSimulation.party(
+    catalog: catalog,
+    zone: zone,
+    seed: seed,
+    chunks: chunks,
+    members: [
+      RaidMemberStart(
+        food: food,
+        equipped: equipped,
+        progress: progress,
+        companions: companions,
+      ),
+    ],
+  );
+
+  /// A run for a party of [members] (one to four) going in together. The
+  /// first is the one [player], [bag] and the other single-player members
+  /// read; all share a team and their buff potatoes reach everyone.
+  factory RaidSimulation.party({
+    required Catalog catalog,
+    required String zone,
+    required int seed,
+    required List<RaidMemberStart> members,
+    Map<String, MapChunk> chunks = const {},
   }) {
+    if (members.isEmpty) throw ArgumentError.value(members, 'members');
     final zoneData = catalog.zones[zone];
     if (zoneData == null) throw ArgumentError.value(zone, 'zone', 'unknown');
     final rules = catalog.rules.raid;
@@ -164,48 +252,74 @@ final class RaidSimulation {
     var nextId = 1;
 
     final gear = GearStats(catalog);
-    // Companions in belt slots get the belt's boost.
-    final fit = gear.fitBelt(equipped.belt, [
-      for (final c in companions) c.type,
-    ]);
-    final boost = fit == null ? 0.0 : gear.beltBoost(equipped.belt);
-    companions = [for (final c in companions) c.withBoost(boost)];
-    final effects = RaidEffects(catalog);
-    final party = effects.party([for (final c in companions) c.traits]);
-    final player = RaidPlayer(
-      id: nextId++,
-      position: entry,
-      radius: rules.player.radius,
-      maxHp: party.apply(RaidStat.hp, rules.player.maxHp),
-      weapon: gear.weaponOf(equipped.weapon),
-      equipped: equipped,
-    );
-    final bag = Bag(gear.bagSlots(equipped.bag), catalog.stackOf);
-    if (food > 0) bag.addFrom(ItemStack(rules.food.item, food));
-
-    final team = [
-      for (final (slot, start) in companions.indexed)
-        RaidCompanion(
-          id: nextId++,
-          position: map.move(
-            entry,
-            _followOffset(slot),
-            rules.companion.radius,
-          ),
-          radius: rules.companion.radius,
-          maxHp: _startHp(catalog, start, effects.own(start.traits), party),
-          potatoId: start.potatoId,
-          type: start.type,
-          grade: start.grade,
-          level: start.level,
-          abilities: start.abilities,
-          style: start.type == PotatoType.combat ? start.style : null,
-          mode: start.mode,
-          lifeLeft: start.lifeLeft,
-          beltBoost: start.beltBoost,
-          slot: slot,
-        ),
+    // Companions in belt slots get their own member's belt boost.
+    final starts = [
+      for (final m in members)
+        () {
+          final fit = gear.fitBelt(m.equipped.belt, [
+            for (final c in m.companions) c.type,
+          ]);
+          final boost = fit == null ? 0.0 : gear.beltBoost(m.equipped.belt);
+          return [for (final c in m.companions) c.withBoost(boost)];
+        }(),
     ];
+    final effects = RaidEffects(catalog);
+    final party = effects.party([
+      for (final team in starts)
+        for (final c in team) c.traits,
+    ]);
+    final team = <RaidMember>[];
+    for (final (index, m) in members.indexed) {
+      final at = index == 0
+          ? entry
+          : map.move(entry, _memberOffset(index), rules.player.radius);
+      final player = RaidPlayer(
+        id: nextId++,
+        name: m.name,
+        position: at,
+        radius: rules.player.radius,
+        maxHp: party.apply(RaidStat.hp, rules.player.maxHp),
+        weapon: gear.weaponOf(m.equipped.weapon),
+        equipped: m.equipped,
+      );
+      final bag = Bag(gear.bagSlots(m.equipped.bag), catalog.stackOf);
+      if (m.food > 0) bag.addFrom(ItemStack(rules.food.item, m.food));
+      team.add(
+        RaidMember(
+          player: player,
+          bag: bag,
+          progress: m.progress,
+          companions: [
+            for (final (slot, start) in starts[index].indexed)
+              RaidCompanion(
+                id: nextId++,
+                position: map.move(
+                  at,
+                  _followOffset(slot),
+                  rules.companion.radius,
+                ),
+                radius: rules.companion.radius,
+                maxHp: _startHp(
+                  catalog,
+                  start,
+                  effects.own(start.traits),
+                  party,
+                ),
+                potatoId: start.potatoId,
+                type: start.type,
+                grade: start.grade,
+                level: start.level,
+                abilities: start.abilities,
+                style: start.type == PotatoType.combat ? start.style : null,
+                mode: start.mode,
+                lifeLeft: start.lifeLeft,
+                beltBoost: start.beltBoost,
+                slot: slot,
+              ),
+          ],
+        ),
+      );
+    }
 
     final enemies = _placeEnemies(
       catalog,
@@ -214,6 +328,7 @@ final class RaidSimulation {
       entry,
       random,
       () => nextId++,
+      partySize: members.length,
     );
     final piles = _placeSpots(
       catalog,
@@ -223,6 +338,7 @@ final class RaidSimulation {
       random,
       () => nextId++,
       party.apply(RaidStat.lootRareChance, 1),
+      partySize: members.length,
     );
     final exits = _openExits(zoneData, map, random, () => nextId++);
 
@@ -231,10 +347,8 @@ final class RaidSimulation {
       zone: zoneData,
       map: map,
       random: random,
-      player: player,
-      bag: bag,
+      members: team,
       enemies: enemies,
-      companions: team,
       bullets: [],
       piles: piles,
       floorItems: [],
@@ -242,18 +356,24 @@ final class RaidSimulation {
       clones: [],
       nextId: nextId,
       tick: 0,
-      progress: progress,
     );
     run._nextCloneAt = zoneData.danger?.cloneEverySeconds ?? 0;
     return run;
   }
 
+  /// Where party member [index] (from 1) starts, around the entry.
+  static Vec2 _memberOffset(int index) =>
+      const [Vec2(0.8, 0), Vec2(0, 0.8), Vec2(0.8, 0.8)][(index - 1) % 3];
+
   /// What one of the player's bullets does: the weapon's damage, raised
   /// by its grade, level, workbench levels and buff potatoes.
-  double get playerShotDamage => _party.apply(
+  double get playerShotDamage => shotDamageOf(_first);
+
+  /// What one of [member]'s bullets does.
+  double shotDamageOf(RaidMember member) => _party.apply(
     RaidStat.attack,
-    catalog.weapons[player.weapon]!.damage *
-        _gear.damageScale(player.equipped.weapon),
+    catalog.weapons[member.player.weapon]!.damage *
+        _gear.damageScale(member.player.equipped.weapon),
   );
 
   late final GearStats _gear = GearStats(catalog);
@@ -295,7 +415,6 @@ final class RaidSimulation {
       for (final e in json[key] as List<Object?>)
         read(e! as Map<String, dynamic>),
     ];
-    final outcome = json['outcome'] as String?;
     return RaidSimulation._(
       catalog: catalog,
       zone: zone,
@@ -303,13 +422,8 @@ final class RaidSimulation {
       random: GameRandom.fromState(
         (json['random_state'] as List<Object?>).cast<int>(),
       ),
-      player: RaidPlayer.fromJson(json['player'] as Map<String, dynamic>),
-      bag: Bag.restore([
-        for (final s in json['bag'] as List<Object?>)
-          s == null ? null : ItemStack.fromJson(s as Map<String, dynamic>),
-      ], catalog.stackOf),
+      members: list('members', (j) => RaidMember.fromJson(j, catalog)),
       enemies: list('enemies', RaidEnemy.fromJson),
-      companions: list('companions', RaidCompanion.fromJson),
       bullets: list('bullets', RaidBullet.fromJson),
       piles: list('piles', RaidPile.fromJson),
       floorItems: list('floor_items', RaidFloorItem.fromJson),
@@ -317,42 +431,58 @@ final class RaidSimulation {
       clones: list('clones', (j) => RaidClone.fromJson(j, catalog.stackOf)),
       clonesIn: json['clones_in'] as int,
       nextCloneAt: (json['next_clone_at'] as num).toDouble(),
-      progress: json['progress'] as int,
-      kept: switch (json['kept']) {
-        final Map<String, dynamic> kept => Equipped.fromJson(kept),
-        _ => null,
-      },
-      signal: switch (json['signal']) {
-        final Map<String, dynamic> signal => RaidSignal.fromJson(signal),
-        _ => null,
-      },
       revealed: json['revealed'] as bool,
       nextId: json['next_id'] as int,
       tick: json['tick'] as int,
-      outcome: outcome == null ? null : RaidOutcome.values.byName(outcome),
     );
   }
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 8;
+  static const int formatVersion = 9;
 
   final Catalog catalog;
   final ZoneData zone;
   final MapData map;
   final GameRandom _random;
-  final RaidPlayer player;
+
+  /// Everyone in the run, in the order they went in. Party members stay
+  /// here after they are out, with how it ended.
+  final List<RaidMember> members;
+
+  /// Which member in [members] the single-player getters ([player], [bag],
+  /// [companions], [apply], ...) speak for: 0 on the host and in solo runs,
+  /// a client's own index on a guest.
+  int focusIndex = 0;
+
+  RaidMember get _first => members[focusIndex];
+
+  /// The member whose player has [id], if any.
+  RaidMember? memberOf(int id) {
+    for (final m in members) {
+      if (m.id == id) return m;
+    }
+    return null;
+  }
+
+  /// Members still in the run.
+  Iterable<RaidMember> get _active => members.where((m) => !m.isOut);
+
+  RaidPlayer get player => _first.player;
 
   /// The player's bag; changing bags replaces it.
-  Bag bag;
+  Bag get bag => _first.bag;
+
+  /// The player's companions.
+  List<RaidCompanion> get companions => _first.companions;
 
   /// The farm's progress: gear above it plus the margin cannot be worn.
-  final int progress;
+  int get progress => _first.progress;
 
-  /// After a lost danger run, the worn gear that was not lost.
-  Equipped? _kept;
+  /// The countdown after the player's signal, if one is running.
+  RaidSignal? get signal => _first.signal;
+
   final List<RaidEnemy> enemies;
-  final List<RaidCompanion> companions;
   final List<RaidBullet> bullets;
   final List<RaidPile> piles;
   final List<RaidFloorItem> floorItems;
@@ -363,8 +493,6 @@ final class RaidSimulation {
   /// Clones in the run now (danger zones). Each carries its companions.
   final List<RaidClone> clones;
 
-  /// The countdown after a signal, if one is running.
-  RaidSignal? signal;
   bool _revealed;
 
   /// How many clones have walked in, and the run time (seconds) the next
@@ -373,8 +501,6 @@ final class RaidSimulation {
   double _nextCloneAt;
   int _nextId;
   int _tick;
-  RaidOutcome? _outcome;
-  Vec2 _move = Vec2.zero;
   final List<RaidEvent> _events = [];
 
   RaidRulesData get rules => catalog.rules.raid;
@@ -422,8 +548,9 @@ final class RaidSimulation {
 
   void _updateParty() => _parties = {
     playerTeam: _effects.party([
-      for (final c in companions)
-        if (!c.isDown) _traitsOf(c),
+      for (final m in _active)
+        for (final c in m.companions)
+          if (!c.isDown) _traitsOf(c),
     ]),
     for (final clone in clones)
       clone.id: _effects.party([
@@ -437,25 +564,44 @@ final class RaidSimulation {
 
   int get tick => _tick;
 
+  /// Sets [tick] and [exitsRevealed] from a host snapshot on a guest client.
+  void applySnapshotMeta({required int tick, required bool revealed}) {
+    _tick = tick;
+    _revealed = revealed;
+    _updateParty();
+  }
+
   /// Game time since the run began.
   Duration get elapsed => Duration(milliseconds: rules.stepMillis * _tick);
 
-  /// Set once the run is over; [step] does nothing after that.
-  RaidOutcome? get outcome => _outcome;
+  /// How the player's run ended, once it has. Solo, [step] does nothing
+  /// after that; in a party the run goes on until everyone is out.
+  RaidOutcome? get outcome => _first.outcome;
 
-  WeaponData get weapon => catalog.weapons[player.weapon]!;
+  /// Whether every member is out: [step] does nothing any more.
+  bool get isOver => members.every((m) => m.isOut);
+
+  WeaponData get weapon => weaponOf(_first);
+
+  WeaponData weaponOf(RaidMember member) =>
+      catalog.weapons[member.player.weapon]!;
 
   /// How far wild enemies see in this zone.
   double get enemySight => rules.player.sight * zone.enemies.sightMultiplier;
   double get enemySpeed => rules.player.speed * zone.enemies.speedMultiplier;
 
-  /// How far into the player's signal countdown the run is, 0 to 1; 0
-  /// without one.
+  /// How far into a signal countdown the run is, 0 to 1; 0 without one.
+  /// With several members signalling, the one nearest zero counts.
   double get _waitPassed {
     final danger = zone.danger;
-    final signal = this.signal;
-    if (danger == null || signal == null) return 0;
-    return 1 - signal.left / danger.countdownSeconds;
+    if (danger == null) return 0;
+    var passed = 0.0;
+    for (final m in _active) {
+      final signal = m.signal;
+      if (signal == null) continue;
+      passed = math.max(passed, 1 - signal.left / danger.countdownSeconds);
+    }
+    return passed;
   }
 
   /// How far aggressive enemies see now: wider during a signal's countdown,
@@ -496,46 +642,63 @@ final class RaidSimulation {
   bool get exitsRevealed => _revealed;
 
   /// The open exit the player stands in, if any.
-  RaidExit? exitHere() {
+  RaidExit? exitHere() => exitOf(_first);
+
+  /// The open exit [member] stands in, if any.
+  RaidExit? exitOf(RaidMember member) {
     final radius = zone.danger?.exitRadius ?? 0;
     for (final exit in exits) {
-      if (exit.position.distanceTo(player.position) <= radius) return exit;
+      if (exit.position.distanceTo(member.player.position) <= radius) {
+        return exit;
+      }
     }
     return null;
   }
 
-  bool get isHungry => bag.countOf(rules.food.item) == 0;
+  bool get isHungry => isHungryOf(_first);
+
+  bool isHungryOf(RaidMember member) =>
+      member.bag.countOf(rules.food.item) == 0;
 
   /// What the run brings home, once it is over.
-  RaidResult? get result {
-    final outcome = _outcome;
+  RaidResult? get result => resultOf(_first);
+
+  /// What [member] brings home, once they are out.
+  RaidResult? resultOf(RaidMember member) {
+    final outcome = member.outcome;
     if (outcome == null) return null;
     return RaidResult(
       outcome: outcome,
-      items: [for (final s in bag.slots) ?s],
+      items: [for (final s in member.bag.slots) ?s],
       companions: [
-        for (final c in companions)
+        for (final c in member.companions)
           (potatoId: c.potatoId, down: c.isDown, gone: isDanger && c.isDown),
       ],
       score: zone.score,
       zone: zone.id,
       lost: isDanger && outcome != RaidOutcome.extracted,
-      equipped: _kept ?? player.equipped,
+      equipped: member.kept ?? member.player.equipped,
     );
   }
 
   /// The stick: a direction on the world plane, at most 1 long. A shorter
   /// push walks slower.
-  void setMove(Vec2 direction) =>
-      _move = direction.length > 1 ? direction.normalized() : direction;
+  void setMove(Vec2 direction) => setMoveOf(_first, direction);
+
+  /// [member]'s stick.
+  void setMoveOf(RaidMember member, Vec2 direction) =>
+      member.move = direction.length > 1 ? direction.normalized() : direction;
 
   /// The pile the player stands next to, if any; the nearest one wins.
-  RaidPile? pileNear() {
+  RaidPile? pileNear() => pileNearOf(_first);
+
+  /// The pile [member] stands next to, if any; the nearest one wins.
+  RaidPile? pileNearOf(RaidMember member) {
     RaidPile? best;
     var bestDistance = rules.pickupRadius;
     for (final pile in piles) {
       if (pile.loot.isEmpty) continue;
-      final d = pile.position.distanceTo(player.position);
+      final d = pile.position.distanceTo(member.player.position);
       if (d <= bestDistance) {
         best = pile;
         bestDistance = d;
@@ -544,34 +707,40 @@ final class RaidSimulation {
     return best;
   }
 
-  RaidRejection? apply(RaidCommand command) {
-    if (_outcome != null) return RaidRejection.over;
+  RaidRejection? apply(RaidCommand command) => applyOf(_first, command);
+
+  /// Carries out [command] for [member].
+  RaidRejection? applyOf(RaidMember member, RaidCommand command) {
+    if (member.isOut) return RaidRejection.over;
+    final player = member.player;
+    final bag = member.bag;
     switch (command) {
       case Dash():
         if (player.isDashing || player.dashCooldown > 0) {
           return RaidRejection.dashNotReady;
         }
+        final move = member.move;
         player
-          ..dashDirection = _move.isZero ? player.facing : _move.normalized()
+          ..dashDirection = move.isZero ? player.facing : move.normalized()
           ..dashLeft = rules.player.dashSeconds
           ..dashCooldown = rules.player.dashCooldownSeconds;
         return null;
       case GoHome():
         if (isDanger) return RaidRejection.wrongZone;
-        _end(RaidOutcome.wentHome);
+        _end(member, RaidOutcome.wentHome);
         return null;
       case EquipFromBag(:final slot):
-        return _equipFromBag(slot);
+        return _equipFromBag(member, slot);
       case Unequip(:final kind):
-        return _unequip(kind);
+        return _unequip(member, kind);
       case DropItem(:final slot):
         if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
         final stack = bag.replace(slot, null);
         if (stack == null) return RaidRejection.emptySlot;
-        _drop([stack]);
+        _drop(member, [stack]);
         return null;
       case PutInPile(:final pile, :final slot):
-        final found = _reachablePile(pile);
+        final found = _reachablePile(member, pile);
         if (found case final RaidRejection rejection) return rejection;
         if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
         final stack = bag.replace(slot, null);
@@ -579,7 +748,7 @@ final class RaidSimulation {
         (found as RaidPile).loot.put(stack, catalog.stackOf);
         return null;
       case SetCompanionMode(:final companion, :final mode):
-        for (final c in companions) {
+        for (final c in member.companions) {
           if (c.id != companion) continue;
           if (c.type != PotatoType.combat || c.isDown) break;
           c
@@ -590,15 +759,18 @@ final class RaidSimulation {
         return RaidRejection.noSuchCompanion;
       case Signal():
         if (!isDanger) return RaidRejection.wrongZone;
-        if (signal != null) return RaidRejection.signalling;
-        final exit = exitHere();
+        if (member.signal != null) return RaidRejection.signalling;
+        final exit = exitOf(member);
         if (exit == null) return RaidRejection.notAtExit;
         exit.found = true;
-        signal = RaidSignal(exit: exit.id, left: zone.danger!.countdownSeconds);
-        _events.add(SignalSent(exit.id));
+        member.signal = RaidSignal(
+          exit: exit.id,
+          left: zone.danger!.countdownSeconds,
+        );
+        _events.add(SignalSent(exit.id, player: member.id));
         return null;
       case TakeLoot(:final pile, :final index):
-        final found = _reachablePile(pile);
+        final found = _reachablePile(member, pile);
         if (found case final RaidRejection rejection) return rejection;
         final target = found as RaidPile;
         if (index < 0 || index >= target.loot.items.length) {
@@ -608,14 +780,14 @@ final class RaidSimulation {
         _dropEmptyBundle(target);
         return took ? null : RaidRejection.bagFull;
       case TakeAllLoot(:final pile):
-        final found = _reachablePile(pile);
+        final found = _reachablePile(member, pile);
         if (found case final RaidRejection rejection) return rejection;
         final target = found as RaidPile;
         target.loot.takeAllInto(bag);
         _dropEmptyBundle(target);
         return null;
       case SwapLoot(:final pile, :final index, :final slot):
-        final found = _reachablePile(pile);
+        final found = _reachablePile(member, pile);
         if (found case final RaidRejection rejection) return rejection;
         final target = found as RaidPile;
         if (index < 0 || index >= target.loot.items.length) {
@@ -628,51 +800,54 @@ final class RaidSimulation {
   }
 
   /// Wears the gear in bag slot [slot]; what was worn there takes the slot.
-  RaidRejection? _equipFromBag(int slot) {
+  RaidRejection? _equipFromBag(RaidMember member, int slot) {
+    final bag = member.bag;
     if (slot < 0 || slot >= bag.capacity) return RaidRejection.noSuchSlot;
     final piece = bag.slots[slot]?.gear;
     if (piece == null) return RaidRejection.noGear;
-    if (!_gear.canWear(piece, progress)) return RaidRejection.cannotWear;
-    if (piece.kind == GearKind.belt && !_beltFits(piece)) {
+    if (!_gear.canWear(piece, member.progress)) return RaidRejection.cannotWear;
+    if (piece.kind == GearKind.belt && !_beltFits(member, piece)) {
       return RaidRejection.beltTooSmall;
     }
-    final old = player.equipped.of(piece.kind);
+    final old = member.player.equipped.of(piece.kind);
     bag.replace(slot, old == null ? null : _stackOf(old));
-    _wear(piece.kind, piece);
+    _wear(member, piece.kind, piece);
     return null;
   }
 
   /// Takes off the worn piece of [kind] into the bag.
-  RaidRejection? _unequip(GearKind kind) {
-    final piece = player.equipped.of(kind);
+  RaidRejection? _unequip(RaidMember member, GearKind kind) {
+    final piece = member.player.equipped.of(kind);
     if (piece == null) return RaidRejection.noGear;
-    if (kind == GearKind.belt && !_beltFits(null)) {
+    if (kind == GearKind.belt && !_beltFits(member, null)) {
       return RaidRejection.beltTooSmall;
     }
     final stack = _stackOf(piece);
+    final bag = member.bag;
     if (kind == GearKind.bag) {
       // The bag itself goes in first; whatever no longer fits drops.
       final items = [stack, for (final s in bag.slots) ?s];
-      _wear(kind, null);
-      _refill(items);
+      _wear(member, kind, null);
+      _refill(member, items);
       return null;
     }
     final free = bag.slots.indexOf(null);
     if (free < 0) return RaidRejection.bagFull;
     bag.replace(free, stack);
-    _wear(kind, null);
+    _wear(member, kind, null);
     return null;
   }
 
-  bool _beltFits(Gear? belt) =>
-      _gear.fitBelt(belt, [for (final c in companions) c.type]) != null;
+  bool _beltFits(RaidMember member, Gear? belt) =>
+      _gear.fitBelt(belt, [for (final c in member.companions) c.type]) != null;
 
   ItemStack _stackOf(Gear piece) =>
       ItemStack.ofGear(catalog.gearItemOf(piece) ?? '', piece);
 
   /// Puts on [piece] (null for bare hands). A new bag keeps what fits and
   /// drops the rest.
-  void _wear(GearKind kind, Gear? piece) {
+  void _wear(RaidMember member, GearKind kind, Gear? piece) {
+    final player = member.player;
     player.equipped = player.equipped.wearing(kind, piece);
     switch (kind) {
       case GearKind.weapon:
@@ -680,8 +855,8 @@ final class RaidSimulation {
           ..weapon = _gear.weaponOf(piece)
           ..aimProgress = 0;
       case GearKind.bag:
-        if (bag.capacity != _gear.bagSlots(piece)) {
-          _refill([for (final s in bag.slots) ?s]);
+        if (member.bag.capacity != _gear.bagSlots(piece)) {
+          _refill(member, [for (final s in member.bag.slots) ?s]);
         }
       case GearKind.belt:
         break;
@@ -689,31 +864,35 @@ final class RaidSimulation {
   }
 
   /// A bag for what is worn now, filled with [items] in order; the rest
-  /// drops at the player's feet.
-  void _refill(List<ItemStack> items) {
-    bag = Bag(_gear.bagSlots(player.equipped.bag), catalog.stackOf);
+  /// drops at the member's feet.
+  void _refill(RaidMember member, List<ItemStack> items) {
+    final bag = member.bag = Bag(
+      _gear.bagSlots(member.player.equipped.bag),
+      catalog.stackOf,
+    );
     final left = <ItemStack>[];
     for (final stack in items) {
       bag.addFrom(stack);
       if (stack.count > 0) left.add(stack);
     }
-    if (left.isNotEmpty) _drop(left);
+    if (left.isNotEmpty) _drop(member, left);
   }
 
-  /// Leaves [stacks] in a bundle within reach of the player, or a new one at
-  /// its feet.
-  void _drop(List<ItemStack> stacks) {
+  /// Leaves [stacks] in a bundle within reach of [member], or a new one at
+  /// their feet.
+  void _drop(RaidMember member, List<ItemStack> stacks) {
+    final at = member.player.position;
     RaidPile? pile;
     for (final p in piles) {
       if (p.kind == PileKind.bundle &&
-          p.position.distanceTo(player.position) <= rules.pickupRadius) {
+          p.position.distanceTo(at) <= rules.pickupRadius) {
         pile = p;
       }
     }
     pile ??= () {
       final made = RaidPile(
         id: _newId(),
-        position: player.position,
+        position: at,
         kind: PileKind.bundle,
         loot: LootPile(),
         seen: true,
@@ -726,12 +905,12 @@ final class RaidSimulation {
     }
   }
 
-  /// The pile, or why it cannot be used.
-  Object _reachablePile(int id) {
+  /// The pile, or why [member] cannot use it.
+  Object _reachablePile(RaidMember member, int id) {
     for (final pile in piles) {
       if (pile.id != id) continue;
       final reach = rules.pickupRadius;
-      return pile.position.distanceTo(player.position) <= reach
+      return pile.position.distanceTo(member.player.position) <= reach
           ? pile
           : RaidRejection.tooFar;
     }
@@ -744,14 +923,18 @@ final class RaidSimulation {
 
   /// Advances the run by one fixed step (`rules.raid.step_millis`).
   void step() {
-    if (_outcome != null) return;
+    if (isOver) return;
     _tick++;
     final dt = stepSeconds;
     _updateParty();
-    _updatePlayer(dt);
-    if (_outcome != null) return;
-    for (final companion in companions) {
-      if (!companion.isDown) _updateCompanion(companion, player, dt);
+    for (final m in List.of(_active)) {
+      _updatePlayer(m, dt);
+    }
+    if (isOver) return;
+    for (final m in _active) {
+      for (final companion in m.companions) {
+        if (!companion.isDown) _updateCompanion(companion, m.player, dt, m);
+      }
     }
     for (final clone in List.of(clones)) {
       _updateClone(clone, dt);
@@ -765,40 +948,46 @@ final class RaidSimulation {
     _clearDefeated();
     _clearClones();
     _markSeen();
-    if (player.isDown) {
-      _end(RaidOutcome.fainted);
-      return;
+    for (final m in List.of(_active)) {
+      if (m.player.isDown) _end(m, RaidOutcome.fainted);
     }
+    if (isOver) return;
     if (isDanger) {
       _updateExits(dt);
       _bringClones();
     }
   }
 
-  /// Piles the player has in sight now stay on the minimap.
+  /// Piles a member has in sight now stay on the minimap.
   void _markSeen() {
-    for (final pile in piles) {
-      if (!pile.seen &&
-          pile.position.distanceTo(player.position) <= rules.player.sight &&
-          map.seesLevel(player.position, pile.position)) {
-        pile.seen = true;
+    for (final m in _active) {
+      final at = m.player.position;
+      for (final pile in piles) {
+        if (!pile.seen &&
+            pile.position.distanceTo(at) <= rules.player.sight &&
+            map.seesLevel(at, pile.position)) {
+          pile.seen = true;
+        }
       }
     }
   }
 
   // Exits --------------------------------------------------------------------
 
-  /// Finds exits the player sees, reveals all once time is up, and runs the
-  /// signal's countdown: at zero the player leaves when standing in that
+  /// Finds exits a member sees, reveals all once time is up, and runs each
+  /// member's signal countdown: at zero they leave when standing in that
   /// exit, otherwise the signal goes out.
   void _updateExits(double dt) {
     final danger = zone.danger!;
-    for (final exit in exits) {
-      if (exit.found) continue;
-      if (exit.position.distanceTo(player.position) <= rules.player.sight &&
-          map.seesLevel(player.position, exit.position)) {
-        exit.found = true;
-        _events.add(ExitFound(exit.id));
+    for (final m in _active) {
+      final at = m.player.position;
+      for (final exit in exits) {
+        if (exit.found) continue;
+        if (exit.position.distanceTo(at) <= rules.player.sight &&
+            map.seesLevel(at, exit.position)) {
+          exit.found = true;
+          _events.add(ExitFound(exit.id));
+        }
       }
     }
     if (!_revealed && elapsed.inMilliseconds >= danger.revealSeconds * 1000) {
@@ -808,15 +997,17 @@ final class RaidSimulation {
       }
       _events.add(const ExitsRevealed());
     }
-    final signal = this.signal;
-    if (signal == null) return;
-    signal.left -= dt;
-    if (signal.left > 0) return;
-    this.signal = null;
-    if (exitHere()?.id == signal.exit) {
-      _end(RaidOutcome.extracted);
-    } else {
-      _events.add(SignalLost(signal.exit));
+    for (final m in List.of(_active)) {
+      final signal = m.signal;
+      if (signal == null) continue;
+      signal.left -= dt;
+      if (signal.left > 0) continue;
+      m.signal = null;
+      if (exitOf(m)?.id == signal.exit) {
+        _end(m, RaidOutcome.extracted);
+      } else {
+        _events.add(SignalLost(signal.exit, player: m.id));
+      }
     }
   }
 
@@ -827,31 +1018,51 @@ final class RaidSimulation {
     return events;
   }
 
-  void _end(RaidOutcome outcome) {
+  void _end(RaidMember member, RaidOutcome outcome) {
     if (isDanger && outcome != RaidOutcome.extracted) {
       // Each worn piece is lost by its own roll.
-      var kept = player.equipped;
+      var kept = member.player.equipped;
       for (final kind in GearKind.values) {
         if (kept.of(kind) == null) continue;
         if (_random.chance(_gear.rules.lossChance)) {
           kept = kept.wearing(kind, null);
         }
       }
-      _kept = kept;
+      member.kept = kept;
+      // In a party, what a fallen member carried stays on the ground for
+      // teammates to pick up; their own bag keeps the record of what was lost.
+      if (members.length > 1) {
+        final dropped = [
+          for (final s in member.bag.slots)
+            if (s != null)
+              ItemStack(s.item, s.count, seed: s.seed, gear: s.gear),
+        ];
+        if (dropped.isNotEmpty) _drop(member, dropped);
+      }
     }
-    _outcome = outcome;
-    _events.add(RaidEnded(outcome));
+    member
+      ..outcome = outcome
+      ..signal = null;
+    _events.add(RaidEnded(outcome, player: member.id));
   }
 
   int _newId() => _nextId++;
 
   // Player -------------------------------------------------------------------
 
-  void _updatePlayer(double dt) {
+  /// Moves [member] for [dt] seconds using the same rules as [step]. Guests
+  /// call [predictMove] between host snapshots so the stick feels instant.
+  void predictMove([double? dt]) {
+    _updateParty();
+    _stepMemberMove(_first, dt ?? stepSeconds);
+  }
+
+  void _stepMemberMove(RaidMember member, double dt) {
     final spec = rules.player;
-    player
-      ..dashCooldown = math.max(0, player.dashCooldown - dt)
-      ..sinceHit += dt;
+    final player = member.player;
+    if (player.isDown || member.isOut) return;
+    final move = member.move;
+    player.dashCooldown = math.max(0, player.dashCooldown - dt);
     if (player.isDashing) {
       player.dashLeft -= dt;
       final speed = spec.dashDistance / spec.dashSeconds;
@@ -860,27 +1071,35 @@ final class RaidSimulation {
         player.dashDirection * (speed * dt),
         player.radius,
       );
-    } else if (!_move.isZero) {
-      player.facing = _move.normalized();
+    } else if (!move.isZero) {
+      player.facing = move.normalized();
       final speed =
           _party.apply(RaidStat.moveSpeed, spec.speed) *
-          (isHungry ? rules.food.hungrySpeedMultiplier : 1);
+          (isHungryOf(member) ? rules.food.hungrySpeedMultiplier : 1);
       player.position = map.move(
         player.position,
-        _move * (speed * dt),
+        move * (speed * dt),
         player.radius,
       );
     }
-    _eat(dt);
-    if (_outcome != null) return;
-    _autoFire(dt);
+  }
+
+  void _updatePlayer(RaidMember member, double dt) {
+    final player = member.player;
+    if (player.isDown) return;
+    player.sinceHit += dt;
+    _stepMemberMove(member, dt);
+    _eat(member, dt);
+    if (member.isOut || player.isDown) return;
+    _fire(player, aimOf(member), shotDamageOf(member), dt);
   }
 
   /// Food is eaten all the time, more while healing. With none left the
-  /// player is hungry: slower, not healing, and sent home after a while.
-  void _eat(double dt) {
+  /// member is hungry: slower, not healing, and sent home after a while.
+  void _eat(RaidMember member, double dt) {
     final food = rules.food;
-    if (isHungry) {
+    final player = member.player;
+    if (isHungryOf(member)) {
       player
         ..foodOwed = 0
         ..hungrySeconds += dt;
@@ -888,7 +1107,7 @@ final class RaidSimulation {
         // No walking home from a danger zone: hunger wears health down.
         player.hp = math.max(0, player.hp - danger.hungryDamagePerSecond * dt);
       } else if (player.hungrySeconds >= food.hungryReturnSeconds) {
-        _end(RaidOutcome.starved);
+        _end(member, RaidOutcome.starved);
       }
       return;
     }
@@ -905,13 +1124,9 @@ final class RaidSimulation {
     final whole = player.foodOwed.floor();
     if (whole > 0) {
       player.foodOwed -= whole;
-      bag.remove(food.item, whole);
+      member.bag.remove(food.item, whole);
     }
   }
-
-  /// The player fires at what auto-aim picks.
-  void _autoFire(double dt) =>
-      _fire(player, autoAimTarget(), playerShotDamage, dt);
 
   /// [shooter] fires at [target] (null holds fire). Charging weapons must
   /// stay on one target for a while first.
@@ -954,7 +1169,11 @@ final class RaidSimulation {
   }
 
   /// The body auto-aim would shoot now, for drawing an aim line too.
-  RaidBody? autoAimTarget() => _nearestInRange(player, weapon.range);
+  RaidBody? autoAimTarget() => aimOf(_first);
+
+  /// The body [member]'s auto-aim would shoot now.
+  RaidBody? aimOf(RaidMember member) =>
+      _nearestInRange(member.player, weaponOf(member).range);
 
   /// The standing opponent of [from] nearest to it within [range] that no
   /// obstacle hides.
@@ -971,10 +1190,13 @@ final class RaidSimulation {
     return best;
   }
 
-  /// Every body in the run, standing or not.
+  /// Every body in the run, standing or not. Members already out of the run
+  /// are left out so nothing targets or hits them.
   Iterable<RaidBody> get _bodies sync* {
-    yield player;
-    yield* companions;
+    for (final m in _active) {
+      yield m.player;
+      yield* m.companions;
+    }
     yield* enemies;
     for (final clone in clones) {
       yield clone;
@@ -991,16 +1213,21 @@ final class RaidSimulation {
   static Vec2 _followOffset(int slot) =>
       const [Vec2(-0.7, 0.15), Vec2(0.15, -0.7), Vec2(-0.55, -0.55)][slot % 3];
 
-  /// [owner] is who it follows: the player, or its clone. Only the player's
-  /// potatoes make food and heal (from the player's bag).
-  void _updateCompanion(RaidCompanion companion, RaidShooter owner, double dt) {
+  /// [owner] is who it follows: a party member (`[member] != null`) or a
+  /// clone. Only party potatoes make food and heal, into and from their own
+  /// member's bag.
+  void _updateCompanion(
+    RaidCompanion companion,
+    RaidShooter owner,
+    double dt, [
+    RaidMember? member,
+  ]) {
     final spec = rules.companion;
     final stats = statsOf(companion);
-    final mine = companion.team == playerTeam;
     companion
       ..sinceHit += dt
       ..attackCooldown -= dt;
-    if (mine && companion.type == PotatoType.food) {
+    if (member != null && companion.type == PotatoType.food) {
       final level = catalog.rules.potatoes.level.foodYieldPermille;
       final rate = stats.apply(
         FarmStat.foodYield,
@@ -1012,12 +1239,12 @@ final class RaidSimulation {
       final whole = companion.produced.floor();
       if (whole > 0) {
         companion.produced -= whole;
-        bag.addFrom(ItemStack(rules.food.item, whole));
+        member.bag.addFrom(ItemStack(rules.food.item, whole));
       }
     }
-    // Heals like the player, eating from the bag; not while hungry.
-    if (mine &&
-        !isHungry &&
+    // Heals like the player, eating from the member's bag; not while hungry.
+    if (member != null &&
+        !isHungryOf(member) &&
         companion.sinceHit >= spec.regenDelaySeconds &&
         companion.hp < companion.maxHp) {
       final share = stats.apply(
@@ -1032,7 +1259,7 @@ final class RaidSimulation {
       final whole = companion.foodOwed.floor();
       if (whole > 0) {
         companion.foodOwed -= whole;
-        bag.remove(rules.food.item, whole);
+        member.bag.remove(rules.food.item, whole);
       }
     }
     final target = companion.type == PotatoType.combat
@@ -1202,7 +1429,7 @@ final class RaidSimulation {
     final before = (_tick - 1) * rules.stepMillis;
     final now = _tick * rules.stepMillis;
     for (final companion in [
-      ...companions,
+      for (final m in _active) ...m.companions,
       for (final clone in clones) ...clone.companions,
     ]) {
       if (companion.isDown) continue;
@@ -1554,16 +1781,22 @@ final class RaidSimulation {
 
   void _pickUpFloorItems() {
     floorItems.removeWhere((item) {
-      if (item.position.distanceTo(player.position) > rules.pickupRadius) {
-        return false;
+      for (final m in _active) {
+        if (item.position.distanceTo(m.player.position) > rules.pickupRadius) {
+          continue;
+        }
+        final moved = m.bag.addFrom(item.stack);
+        if (moved > 0) {
+          _events.add(
+            ItemPicked(
+              ItemStack(item.stack.item, moved, seed: item.stack.seed),
+              player: m.id,
+            ),
+          );
+        }
+        if (item.stack.count == 0) return true;
       }
-      final moved = bag.addFrom(item.stack);
-      if (moved > 0) {
-        _events.add(
-          ItemPicked(ItemStack(item.stack.item, moved, seed: item.stack.seed)),
-        );
-      }
-      return item.stack.count == 0;
+      return false;
     });
   }
 
@@ -1657,8 +1890,11 @@ final class RaidSimulation {
     final sites = map.markers[cloneEntryMarker] ?? [map.entry];
     final hidden = [
       for (final site in sites)
-        if (Vec2(site.x + 0.5, site.y + 0.5).distanceTo(player.position) >
-            rules.player.sight)
+        if (_active.every(
+          (m) =>
+              Vec2(site.x + 0.5, site.y + 0.5).distanceTo(m.player.position) >
+              rules.player.sight,
+        ))
           site,
     ];
     final pool = hidden.isEmpty ? sites : hidden;
@@ -1983,6 +2219,10 @@ final class RaidSimulation {
   static Vec2 _randomTile(MapData map, GameRandom random) =>
       Vec2(random.nextInt(map.size) + 0.5, random.nextInt(map.size) + 0.5);
 
+  /// How enemy counts, boss health and gathering spots scale with
+  /// [partySize]. Kept at 1 until the balance phase sets the numbers.
+  static double _partyScale(int partySize) => partySize <= 1 ? 1 : 1;
+
   /// Lone enemies picked by weight, plus packs standing close together, all
   /// away from the entry and off obstacles.
   static List<RaidEnemy> _placeEnemies(
@@ -1991,8 +2231,10 @@ final class RaidSimulation {
     MapData map,
     Vec2 entry,
     GameRandom random,
-    int Function() newId,
-  ) {
+    int Function() newId, {
+    int partySize = 1,
+  }) {
+    final scale = _partyScale(partySize);
     final spec = zone.enemies;
     final placed = <RaidEnemy>[];
     final area = {...?map.markers[bossAreaMarker]};
@@ -2016,7 +2258,8 @@ final class RaidSimulation {
     }
 
     var packs = 0;
-    for (var tries = 0; packs < spec.packs && tries < 2000; tries++) {
+    final packGoal = (spec.packs * scale).round();
+    for (var tries = 0; packs < packGoal && tries < 2000; tries++) {
       final center = _randomTile(map, random);
       if (!free(center, 3)) continue;
       final kind = spec.packKinds[random.nextInt(spec.packKinds.length)];
@@ -2036,7 +2279,8 @@ final class RaidSimulation {
 
     final total = spec.kinds.fold(0, (sum, k) => sum + k.weight);
     var loners = 0;
-    for (var tries = 0; loners < spec.count && tries < 2000; tries++) {
+    final lonerGoal = (spec.count * scale).round();
+    for (var tries = 0; loners < lonerGoal && tries < 2000; tries++) {
       final at = _randomTile(map, random);
       if (!free(at, 1.5)) continue;
       var roll = random.nextInt(total);
@@ -2066,7 +2310,7 @@ final class RaidSimulation {
           id: newId(),
           position: at,
           radius: data.radius,
-          maxHp: data.maxHp * spec.hpMultiplier,
+          maxHp: data.maxHp * spec.hpMultiplier * scale,
           kind: boss.enemy,
           home: at,
           chargeCooldown: data.boss!.chargeEverySeconds / 2,
@@ -2165,12 +2409,14 @@ final class RaidSimulation {
     Vec2 entry,
     GameRandom random,
     int Function() newId,
-    double luck,
-  ) {
+    double luck, {
+    int partySize = 1,
+  }) {
     final spec = zone.gathering;
+    final goal = (spec.count * _partyScale(partySize)).round();
     final table = catalog.lootTables[spec.loot]!;
     final spots = <RaidPile>[];
-    for (var tries = 0; spots.length < spec.count && tries < 3000; tries++) {
+    for (var tries = 0; spots.length < goal && tries < 3000; tries++) {
       final at = _randomTile(map, random);
       if (at.distanceTo(entry) < 1.5 || map.overlapsCircle(at, 0.3)) continue;
       if (spots.any((s) => s.position.distanceTo(at) < spec.spacing)) continue;
@@ -2200,10 +2446,8 @@ final class RaidSimulation {
     'next_id': _nextId,
     'random_state': _random.state,
     'map': map.toJson(),
-    'player': player.toJson(),
-    'bag': bag.toJson(),
+    'members': [for (final m in members) m.toJson()],
     'enemies': [for (final e in enemies) e.toJson()],
-    'companions': [for (final c in companions) c.toJson()],
     'bullets': [for (final b in bullets) b.toJson()],
     'piles': [for (final p in piles) p.toJson()],
     'floor_items': [for (final f in floorItems) f.toJson()],
@@ -2211,10 +2455,6 @@ final class RaidSimulation {
     'clones': [for (final c in clones) c.toJson()],
     'clones_in': _clonesIn,
     'next_clone_at': _nextCloneAt,
-    'progress': progress,
-    'kept': _kept?.toJson(),
-    'signal': signal?.toJson(),
     'revealed': _revealed,
-    'outcome': _outcome?.name,
   };
 }

@@ -10,3 +10,7 @@ dependencies:
   # A relative path keeps working when the client pulls this package via git.
   potato_core:
     path: ../potato_core
+
+dev_dependencies:
+  lints: ^6.1.0
+  test: ^1.33.0

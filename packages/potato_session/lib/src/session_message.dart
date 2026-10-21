@@ -142,6 +142,7 @@ sealed class SessionMessage {
           you: json['you'] as int,
         )),
         'start_run' => StartRunMessage(json['zone'] as String),
+        'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
         'quick_chat' => QuickChatMessage(
           QuickChat.values.byName(json['chat'] as String),
           from: json['from'] as int? ?? -1,
@@ -206,6 +207,7 @@ sealed class SessionMessage {
       'you': lobby.you,
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
+    FarmViewMessage(:final farm) => {'type': 'farm_view', 'farm': farm},
     QuickChatMessage(:final chat, :final from) => {
       'type': 'quick_chat',
       'chat': chat.name,
@@ -300,6 +302,15 @@ final class QuickChatMessage extends SessionMessage {
 
   final QuickChat chat;
   final int from;
+}
+
+/// Host → guest on reliable while the party gathers at the host's farm: the
+/// host's farm document (as saved) to show, sent when a guest joins and
+/// again every few seconds (2026-10-21, 사용자). Guests only look.
+final class FarmViewMessage extends SessionMessage {
+  const FarmViewMessage(this.farm);
+
+  final Map<String, dynamic> farm;
 }
 
 /// Leader guest → dedicated server on reliable: set out to [zone] now.

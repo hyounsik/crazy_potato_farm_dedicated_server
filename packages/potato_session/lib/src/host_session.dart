@@ -50,6 +50,7 @@ final class HostSession {
     this.codec = const JsonSessionCodec(),
     this.snapshotEvery = const Duration(milliseconds: 100),
     this.hostPlays = true,
+    this.hostName = '',
     int? maxGuests,
   }) : catalogHash = computeCatalogHash(catalog),
        maxGuests = maxGuests ?? (hostPlays ? 3 : 4) {
@@ -64,6 +65,9 @@ final class HostSession {
   final SessionCodec codec;
   final Duration snapshotEvery;
   final bool hostPlays;
+
+  /// The host player's name, first in [LobbyMessage] when [hostPlays].
+  final String hostName;
   final int maxGuests;
 
   late final StreamSubscription<SessionPacket> _packetSub;
@@ -75,6 +79,7 @@ final class HostSession {
   final _startRequests = StreamController<String>.broadcast();
   final List<RaidEvent> _hostEvents = [];
   final List<QuickChatLine> _chats = [];
+  Map<String, dynamic>? _sharedFarm;
 
   /// Quick messages kept for the host's screen until [takeChats]; a dedicated
   /// server never takes them, so only the latest few are kept.
@@ -233,6 +238,14 @@ final class HostSession {
     return out;
   }
 
+  /// Shows the host's farm document [farm] to the guests gathering in the
+  /// waiting room; a guest who joins later gets the latest one.
+  void shareFarm(Map<String, dynamic> farm) {
+    if (_run != null || _closed) return;
+    _sharedFarm = farm;
+    _broadcast(SessionChannel.reliable, FarmViewMessage(farm));
+  }
+
   /// The host player (member 0) sends [chat] to the party.
   void sendChat(QuickChat chat) {
     if (!hostPlays || _run == null || _closed) return;
@@ -323,6 +336,9 @@ final class HostSession {
       SessionChannel.reliable,
       const WelcomeMessage(accepted: true),
     );
+    if (_sharedFarm case final farm?) {
+      _send(peerId, SessionChannel.reliable, FarmViewMessage(farm));
+    }
     _notifyGuests();
   }
 
@@ -383,13 +399,18 @@ final class HostSession {
     if (!_guestsChanged.isClosed) {
       _guestsChanged.add(List.unmodifiable(_guestOrder));
     }
-    if (hostPlays || _run != null) return;
-    final names = [for (final g in _guestOrder) g.name];
+    if (_run != null) return;
+    // With the host playing, they come first and guests follow.
+    final first = hostPlays ? 1 : 0;
+    final names = [
+      if (hostPlays) hostName,
+      for (final g in _guestOrder) g.name,
+    ];
     for (final (i, g) in _guestOrder.indexed) {
       _send(
         g.peerId,
         SessionChannel.reliable,
-        LobbyMessage((names: names, you: i)),
+        LobbyMessage((names: names, you: first + i)),
       );
     }
   }

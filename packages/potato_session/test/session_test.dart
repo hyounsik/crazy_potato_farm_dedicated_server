@@ -473,4 +473,53 @@ void main() {
       expect(() => codec.decode(bytes), throwsArgumentError);
     });
   });
+
+  group('Gathering at the host farm', () {
+    test('guests see the host first in the lobby and get the shared farm, '
+        'the latest one when they join late', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        hostName: 'Host',
+      );
+      final a = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'A'),
+      );
+      await _pumpMicrotasks();
+      host.shareFarm({'v': 1});
+      await _pumpMicrotasks();
+      expect(a.sharedFarm, {'v': 1});
+      expect(a.lobby?.names, ['Host', 'A']);
+      expect(a.lobby?.you, 1);
+      expect(a.isLeader, isFalse);
+
+      host.shareFarm({'v': 2});
+      final b = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('b'),
+        start: const RaidMemberStart(name: 'B'),
+      );
+      await _pumpMicrotasks();
+      expect(b.sharedFarm, {'v': 2});
+      expect(a.lobby?.names, ['Host', 'A', 'B']);
+      expect(b.lobby?.you, 2);
+
+      // Not once the run is under way.
+      host.startRun(
+        zone: 'open',
+        seed: 1,
+        hostStart: const RaidMemberStart(name: 'Host'),
+      );
+      host.shareFarm({'v': 3});
+      await _pumpMicrotasks();
+      expect(a.sharedFarm, {'v': 2});
+
+      await a.close();
+      await b.close();
+      await host.close();
+    });
+  });
 }

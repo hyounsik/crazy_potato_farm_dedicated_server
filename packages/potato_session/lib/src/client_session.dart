@@ -87,6 +87,8 @@ final class ClientSession {
   SessionJoinRejection? _joinRejection;
   SessionLobby? _lobby;
   final _lobbyController = StreamController<SessionLobby>.broadcast();
+  Map<String, dynamic>? _sharedFarm;
+  final _farmController = StreamController<Map<String, dynamic>>.broadcast();
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -116,9 +118,14 @@ final class ClientSession {
   bool get isConnected => transport.isConnected;
   Stream<bool> get connectionStream => transport.connection;
 
-  /// Who is in a dedicated server's waiting room; null in host mode.
+  /// Who is in the waiting room, in party colour order (the host first in
+  /// host mode; on a dedicated server the first is the leader).
   SessionLobby? get lobby => _lobby;
   Stream<SessionLobby> get lobbyStream => _lobbyController.stream;
+
+  /// The host's farm document while the party gathers there (host mode).
+  Map<String, dynamic>? get sharedFarm => _sharedFarm;
+  Stream<Map<String, dynamic>> get sharedFarmStream => _farmController.stream;
 
   /// Whether this guest leads a dedicated server's waiting room (first in
   /// [lobby]) and so picks the zone and sets out.
@@ -308,6 +315,9 @@ final class ClientSession {
         } else {
           _send(SessionChannel.reliable, CatalogMessage({...files}));
         }
+      case FarmViewMessage(:final farm):
+        _sharedFarm = farm;
+        if (!_farmController.isClosed) _farmController.add(farm);
       case LobbyMessage(:final lobby):
         _lobby = lobby;
         if (!_lobbyController.isClosed) _lobbyController.add(lobby);
@@ -555,5 +565,6 @@ final class ClientSession {
     await _connSub.cancel();
     await _stageController.close();
     await _lobbyController.close();
+    await _farmController.close();
   }
 }

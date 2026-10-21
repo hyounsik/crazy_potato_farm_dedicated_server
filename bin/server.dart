@@ -11,6 +11,7 @@ Future<void> main() async {
     address: InternetAddress.anyIPv4,
     port: port,
     password: password,
+    log: stdout.writeln,
   );
   // A server process logs to stdout so container and service logs pick it up;
   // dart:developer's log() only reaches an attached debugger.

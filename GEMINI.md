@@ -42,6 +42,7 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 - **생성 파일(`*.freezed.dart`, `*.g.dart`)은 커밋한다.** 클라이언트가 git 의존성으로 받을 때는 코드 생성이 돌지 않기 때문이다.
 - `potato_core`는 웹에서도 같은 결과를 내야 한다. 정수 연산은 32비트 안에서 하고(웹 정수는 53비트까지만 정확), 무작위는 `dart:math` `Random` 대신 `GameRandom`을 쓴다. 확인: `dart test -p node test/common`.
 - 서버 실행: `dart run bin/server.dart` (포트는 `PORT` 환경 변수, 기본 8080. 접속 비밀번호는 `PASSWORD`, 없으면 누구나). 상태 확인: `GET /health`. 플레이어 접속: WebSocket `/session` (`WebSocketFrame`, 참가자 쪽 `package:potato_session/websocket_client.dart`).
+- 서버가 돌리는 것: 탐험 판 하나(`DedicatedRoom`, `HostSession(hostPlays: false)`). 서버는 게임 데이터 없이 뜨고 첫 참가자가 보낸다(`CatalogRequestMessage`·`CatalogMessage`). 게임 데이터 파일을 이 저장소에 넣지 않는다(테스트용 `packages/potato_core/test/fixtures/catalog`만). 먼저 들어온 참가자가 방장(`StartRunMessage`), 대기실 명단은 `LobbyMessage`.
 - `potato_session` 본체(`potato_session.dart`)는 호스트 모드가 쓰므로 `dart:io`를 넣지 않는다. I/O가 필요한 참가자 코드는 별도 라이브러리로 둔다(예: `websocket_client.dart`).
 
 ## 규칙 문서는 두 벌

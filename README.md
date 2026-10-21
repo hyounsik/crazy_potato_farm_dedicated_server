@@ -28,6 +28,26 @@ the first byte is the channel (0 reliable, 1 unreliable), the rest the payload
 (`WebSocketFrame` in `potato_session`). Clients use `WebSocketClientTransport`
 from `package:potato_session/websocket_client.dart`.
 
+### What the server hosts
+
+One exploration party at a time (`DedicatedRoom`):
+
+- The server ships **without game data**. The first player to connect is asked
+  for it and sends the data files their app was built with; the server accepts
+  them when they load and match that player's catalog hash. That player's app
+  build becomes the server's: later players must be on the same build and
+  catalog, or they are turned away. When everyone has left, the server forgets
+  the data, so an updated app can bring its own.
+- Nobody plays on the server. The first player in the waiting room leads and
+  picks where to go; the server picks the seed and runs the game at a fixed
+  step, sending snapshots to everyone. Up to four players.
+- When every player still connected is out of the run, a new waiting room opens.
+- Players are told apart by nickname plus an installation id; there are no
+  accounts.
+
+The server logs what happens to stdout (connections, data received, runs
+starting and ending).
+
 With Docker (first draft, not yet tested):
 
 ```sh

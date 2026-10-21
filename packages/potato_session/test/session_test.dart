@@ -1,5 +1,6 @@
 import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:potato_session/potato_session.dart';
 import 'package:test/test.dart';
@@ -325,5 +326,151 @@ void main() {
         await host.close();
       },
     );
+  });
+
+  group('Without a host player (dedicated server)', () {
+    test('guests are members from 0 and the leader sets out', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        hostPlays: false,
+      );
+      final requests = <String>[];
+      host.startRequests.listen(requests.add);
+      final leader = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'Lead'),
+        playerId: 'install-a',
+      );
+      await _pumpMicrotasks();
+      final other = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('b'),
+        start: const RaidMemberStart(name: 'Other'),
+        playerId: 'install-b',
+      );
+      await _pumpMicrotasks();
+
+      expect(leader.lobby?.names, ['Lead', 'Other']);
+      expect(leader.lobby?.you, 0);
+      expect(other.lobby?.names, ['Lead', 'Other']);
+      expect(other.lobby?.you, 1);
+      expect(leader.isLeader, isTrue);
+      expect(other.isLeader, isFalse);
+
+      other.requestStart('open');
+      leader.requestStart('no_such_zone');
+      await _pumpMicrotasks();
+      expect(requests, isEmpty);
+
+      leader.requestStart('open');
+      await _pumpMicrotasks();
+      expect(requests, ['open']);
+
+      host.startRun(zone: 'open', seed: 3);
+      await _pumpMicrotasks();
+      expect(host.run!.members, hasLength(2));
+      expect(leader.stage, ClientSessionStage.playing);
+      expect(leader.memberIndex, 0);
+      expect(other.memberIndex, 1);
+
+      await leader.close();
+      await other.close();
+      await host.close();
+    });
+
+    test(
+      'the same installation replaces its stale waiting-room entry',
+      () async {
+        final net = InMemorySessionNetwork();
+        final host = HostSession(
+          catalog: catalog,
+          transport: net.host,
+          hostPlays: false,
+        );
+        final first = ClientSession(
+          catalog: catalog,
+          transport: net.connectClient('old'),
+          start: const RaidMemberStart(name: 'Me'),
+          playerId: 'install-me',
+        );
+        await _pumpMicrotasks();
+        final again = ClientSession(
+          catalog: catalog,
+          transport: net.connectClient('new'),
+          start: const RaidMemberStart(name: 'Me'),
+          playerId: 'install-me',
+        );
+        await _pumpMicrotasks();
+
+        expect(host.guests.map((g) => g.peerId), ['new']);
+        expect(again.lobby?.names, ['Me']);
+        expect(again.lobby?.you, 0);
+
+        await first.close();
+        await again.close();
+        await host.close();
+      },
+    );
+
+    test('host mode still needs the host to play', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      expect(() => host.startRun(zone: 'open', seed: 1), throwsArgumentError);
+      await host.close();
+    });
+  });
+
+  group('Quick messages', () {
+    test('the host relays them to everyone with the sender', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      final a = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'A'),
+      );
+      final b = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('b'),
+        start: const RaidMemberStart(name: 'B'),
+      );
+      await _pumpMicrotasks();
+      // Not before the run.
+      a.sendChat(QuickChat.go);
+      host.startRun(
+        zone: 'open',
+        seed: 1,
+        hostStart: const RaidMemberStart(name: 'H'),
+      );
+      await _pumpMicrotasks();
+      expect(host.takeChats(), isEmpty);
+
+      a.sendChat(QuickChat.help);
+      host.sendChat(QuickChat.gather);
+      await _pumpMicrotasks();
+      const sent = [
+        (from: 1, chat: QuickChat.help),
+        (from: 0, chat: QuickChat.gather),
+      ];
+
+      expect(a.takeChats(), unorderedEquals(sent));
+      expect(b.takeChats(), unorderedEquals(sent));
+      expect(host.takeChats(), unorderedEquals(sent));
+
+      await a.close();
+      await b.close();
+      await host.close();
+    });
+
+    test('an unknown quick message id is dropped', () {
+      const codec = JsonSessionCodec();
+      final bytes = Uint8List.fromList(
+        utf8.encode('{"type":"quick_chat","chat":"wave","from":1}'),
+      );
+      expect(() => codec.decode(bytes), throwsArgumentError);
+    });
   });
 }

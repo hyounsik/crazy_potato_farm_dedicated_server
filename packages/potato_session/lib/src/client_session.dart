@@ -49,6 +49,8 @@ final class ClientSession {
     required this.transport,
     required this.start,
     this.buildNumber = 0,
+    this.playerId = '',
+    this.catalogFiles,
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
     this.hostReconnectTimeout = const Duration(seconds: 15),
@@ -63,6 +65,15 @@ final class ClientSession {
   final ClientTransport transport;
   final RaidMemberStart start;
   final int buildNumber;
+
+  /// This installation's id, sent in [HelloMessage.playerId].
+  final String playerId;
+
+  /// The data files [catalog] was loaded from, sent when a dedicated server
+  /// asks for them ([CatalogRequestMessage]). Without them such a server
+  /// cannot be joined.
+  final Map<String, Object?>? catalogFiles;
+
   final SessionCodec codec;
   final Duration interpolationDelay;
   final Duration hostReconnectTimeout;
@@ -74,6 +85,8 @@ final class ClientSession {
   ClientSessionStage _stage = ClientSessionStage.connecting;
   final _stageController = StreamController<ClientSessionStage>.broadcast();
   SessionJoinRejection? _joinRejection;
+  SessionLobby? _lobby;
+  final _lobbyController = StreamController<SessionLobby>.broadcast();
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -89,6 +102,7 @@ final class ClientSession {
   final List<_TimedSnapshot> _snapshots = [];
   final List<RaidEvent> _events = [];
   final List<RaidRejection> _rejections = [];
+  final List<QuickChatLine> _chats = [];
   RaidResult? _result;
 
   ClientSessionStage get stage => _stage;
@@ -96,6 +110,26 @@ final class ClientSession {
 
   /// Why the host refused the join, when [stage] is [ClientSessionStage.rejected].
   SessionJoinRejection? get joinRejection => _joinRejection;
+
+  /// Whether the link to the host (or server) is up, and its changes. A
+  /// dedicated server's waiting room closes when it drops.
+  bool get isConnected => transport.isConnected;
+  Stream<bool> get connectionStream => transport.connection;
+
+  /// Who is in a dedicated server's waiting room; null in host mode.
+  SessionLobby? get lobby => _lobby;
+  Stream<SessionLobby> get lobbyStream => _lobbyController.stream;
+
+  /// Whether this guest leads a dedicated server's waiting room (first in
+  /// [lobby]) and so picks the zone and sets out.
+  bool get isLeader => _lobby?.you == 0;
+
+  /// Asks a dedicated server to set out to [zone]. Only the leader's request
+  /// counts; the run begins with [RunStartedMessage] as in host mode.
+  void requestStart(String zone) {
+    if (_stage != ClientSessionStage.waiting || !isLeader) return;
+    _send(SessionChannel.reliable, StartRunMessage(zone));
+  }
 
   /// The local mirror of the run, with `focusIndex` pointing at this guest's
   /// member so `run.player`, `run.bag`, `run.companions` and `run.signal` all
@@ -186,6 +220,21 @@ final class ClientSession {
     return out;
   }
 
+  /// Sends [chat] to the party. It shows on this guest's screen right away
+  /// (in [takeChats]); the host's relay of it is not shown twice.
+  void sendChat(QuickChat chat) {
+    if (_run == null || _stage != ClientSessionStage.playing) return;
+    _chats.add((from: _memberIndex, chat: chat));
+    _send(SessionChannel.reliable, QuickChatMessage(chat));
+  }
+
+  /// Collects quick messages since the last call, this guest's own included.
+  List<QuickChatLine> takeChats() {
+    final out = List<QuickChatLine>.of(_chats);
+    _chats.clear();
+    return out;
+  }
+
   /// Collects command rejections received from the host since the last call.
   List<RaidRejection> takeRejections() {
     final out = List<RaidRejection>.of(_rejections);
@@ -230,6 +279,7 @@ final class ClientSession {
         buildNumber: buildNumber,
         catalogHash: catalogHash,
         start: start,
+        playerId: playerId,
       ),
     );
   }
@@ -250,6 +300,17 @@ final class ClientSession {
           _joinRejection = rejection ?? SessionJoinRejection.versionMismatch;
           _setStage(ClientSessionStage.rejected);
         }
+      case CatalogRequestMessage():
+        final files = catalogFiles;
+        if (files == null) {
+          _joinRejection = SessionJoinRejection.versionMismatch;
+          _setStage(ClientSessionStage.rejected);
+        } else {
+          _send(SessionChannel.reliable, CatalogMessage({...files}));
+        }
+      case LobbyMessage(:final lobby):
+        _lobby = lobby;
+        if (!_lobbyController.isClosed) _lobbyController.add(lobby);
       case RunStartedMessage(:final memberIndex, :final runJson):
         _memberIndex = memberIndex;
         final sim = RaidSimulation.fromJson(runJson, catalog)
@@ -265,6 +326,10 @@ final class ClientSession {
         _onSnapshot(snapshot);
       case EventsMessage(:final events):
         _events.addAll(events);
+      case QuickChatMessage(:final chat, :final from):
+        if (_run != null && from >= 0 && from != _memberIndex) {
+          _chats.add((from: from, chat: chat));
+        }
       case CommandRejectedMessage(:final rejection):
         _rejections.add(rejection);
       case MemberResultMessage(:final memberIndex, :final result):
@@ -485,5 +550,6 @@ final class ClientSession {
     await _packetSub.cancel();
     await _connSub.cancel();
     await _stageController.close();
+    await _lobbyController.close();
   }
 }

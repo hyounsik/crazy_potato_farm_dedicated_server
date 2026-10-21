@@ -13,6 +13,20 @@ enum SessionJoinRejection {
   sessionFull,
 }
 
+/// The party's quick messages in a run (탐험 단축 메시지). Only the id
+/// travels; each app words it, so the list can grow without breaking older
+/// builds (an unknown id is dropped).
+enum QuickChat { no, gather, go, ok, follow, help }
+
+/// A quick message on screen: who sent it (their member index, which is
+/// also their party colour) and what.
+typedef QuickChatLine = ({int from, QuickChat chat});
+
+/// Who is in a dedicated server's waiting room, sent to each guest whenever it
+/// changes. The first name is the leader, who picks the zone and sets out;
+/// the order is also the party colour order.
+typedef SessionLobby = ({List<String> names, int you});
+
 /// Deterministic fingerprint of [catalog] so host and guest can check they run
 /// on the same game data before starting (`realtime-session.md`).
 String computeCatalogHash(Catalog catalog) {
@@ -119,6 +133,18 @@ sealed class SessionMessage {
           start: RaidMemberStart.fromJson(
             json['start'] as Map<String, dynamic>,
           ),
+          playerId: json['player_id'] as String? ?? '',
+        ),
+        'catalog_request' => const CatalogRequestMessage(),
+        'catalog' => CatalogMessage(json['files'] as Map<String, dynamic>),
+        'lobby' => LobbyMessage((
+          names: [for (final n in json['names'] as List<Object?>) n! as String],
+          you: json['you'] as int,
+        )),
+        'start_run' => StartRunMessage(json['zone'] as String),
+        'quick_chat' => QuickChatMessage(
+          QuickChat.values.byName(json['chat'] as String),
+          from: json['from'] as int? ?? -1,
         ),
         'welcome' => WelcomeMessage(
           accepted: json['accepted'] as bool,
@@ -159,11 +185,31 @@ sealed class SessionMessage {
       };
 
   Map<String, dynamic> toJson() => switch (this) {
-    HelloMessage(:final buildNumber, :final catalogHash, :final start) => {
-      'type': 'hello',
-      'build': buildNumber,
-      'catalog_hash': catalogHash,
-      'start': start.toJson(),
+    HelloMessage(
+      :final buildNumber,
+      :final catalogHash,
+      :final start,
+      :final playerId,
+    ) =>
+      {
+        'type': 'hello',
+        'build': buildNumber,
+        'catalog_hash': catalogHash,
+        'start': start.toJson(),
+        if (playerId.isNotEmpty) 'player_id': playerId,
+      },
+    CatalogRequestMessage() => {'type': 'catalog_request'},
+    CatalogMessage(:final files) => {'type': 'catalog', 'files': files},
+    LobbyMessage(:final lobby) => {
+      'type': 'lobby',
+      'names': lobby.names,
+      'you': lobby.you,
+    },
+    StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
+    QuickChatMessage(:final chat, :final from) => {
+      'type': 'quick_chat',
+      'chat': chat.name,
+      if (from >= 0) 'from': from,
     },
     WelcomeMessage(:final accepted, :final rejection) => {
       'type': 'welcome',
@@ -211,11 +257,56 @@ final class HelloMessage extends SessionMessage {
     required this.buildNumber,
     required this.catalogHash,
     required this.start,
+    this.playerId = '',
   });
 
   final int buildNumber;
   final String catalogHash;
   final RaidMemberStart start;
+
+  /// This installation's id, so a dedicated server (no accounts) can tell
+  /// the same player from another with the same nickname ([start] carries
+  /// the nickname). Empty in host mode.
+  final String playerId;
+}
+
+/// Dedicated server → guest on reliable: the server has no game data yet,
+/// so send it ([CatalogMessage]). The data is unreleased content and is
+/// never kept in the public server repository (`realtime-session.md`).
+final class CatalogRequestMessage extends SessionMessage {
+  const CatalogRequestMessage();
+}
+
+/// Guest → dedicated server on reliable: the guest's catalog data files,
+/// keyed as `Catalog.load` reads them. The server keeps them while anyone
+/// is connected; later guests must match its catalog hash.
+final class CatalogMessage extends SessionMessage {
+  const CatalogMessage(this.files);
+
+  final Map<String, dynamic> files;
+}
+
+/// Dedicated server → guest on reliable: the waiting room changed.
+final class LobbyMessage extends SessionMessage {
+  const LobbyMessage(this.lobby);
+
+  final SessionLobby lobby;
+}
+
+/// A quick message in a run, on reliable. Guest → host without [from]; the
+/// host relays it to everyone with [from] set to the sender's member index.
+final class QuickChatMessage extends SessionMessage {
+  const QuickChatMessage(this.chat, {this.from = -1});
+
+  final QuickChat chat;
+  final int from;
+}
+
+/// Leader guest → dedicated server on reliable: set out to [zone] now.
+final class StartRunMessage extends SessionMessage {
+  const StartRunMessage(this.zone);
+
+  final String zone;
 }
 
 /// Host → guest on reliable: whether [HelloMessage] was accepted.

@@ -1,5 +1,6 @@
 import 'dart:io';
 
+import 'package:potato_dedicated_server/src/dedicated_room.dart';
 import 'package:potato_dedicated_server/src/websocket_host_transport.dart';
 import 'package:potato_session/potato_session.dart';
 
@@ -8,9 +9,11 @@ import 'package:potato_session/potato_session.dart';
 /// Answers `GET /health` and takes guests' WebSocket connections on
 /// [WebSocketFrame.path] into [transport]. When started with a [password],
 /// a connection must send it in [WebSocketFrame.passwordHeader] or is
-/// refused with 401. What the server hosts on that transport comes next.
+/// refused with 401. On that transport it hosts one exploration party at a
+/// time ([room]).
 class DedicatedServer {
-  DedicatedServer._(this._httpServer, this._password) {
+  DedicatedServer._(this._httpServer, this._password, this.log) {
+    room = DedicatedRoom(transport: transport, log: log);
     _httpServer.listen(_handleRequest);
   }
 
@@ -19,6 +22,12 @@ class DedicatedServer {
 
   /// Guests connected over WebSocket.
   final WebSocketHostTransport transport = WebSocketHostTransport();
+
+  /// The exploration party on [transport].
+  late final DedicatedRoom room;
+
+  /// Where the server reports what happens.
+  final void Function(String message)? log;
 
   /// The port the server is listening on, useful when started with port 0.
   int get port => _httpServer.port;
@@ -29,13 +38,16 @@ class DedicatedServer {
     required InternetAddress address,
     required int port,
     String? password,
+    void Function(String message)? log,
   }) async => DedicatedServer._(
     await HttpServer.bind(address, port),
     password == null || password.isEmpty ? null : password,
+    log,
   );
 
   /// Stops accepting requests and closes open connections.
   Future<void> stop() async {
+    await room.close();
     await transport.close();
     await _httpServer.close(force: true);
   }

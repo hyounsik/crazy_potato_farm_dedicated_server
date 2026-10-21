@@ -6,13 +6,24 @@ const _defaultPort = 8080;
 
 Future<void> main() async {
   final port = _readPort();
+  final password = Platform.environment['PASSWORD'];
   final server = await DedicatedServer.start(
     address: InternetAddress.anyIPv4,
     port: port,
+    password: password,
   );
   // A server process logs to stdout so container and service logs pick it up;
   // dart:developer's log() only reaches an attached debugger.
-  stdout.writeln('Dedicated server listening on port ${server.port}');
+  stdout.writeln(
+    'Dedicated server listening on port ${server.port}'
+    '${password == null || password.isEmpty ? '' : ' (password required)'}',
+  );
+  server.transport.peerConnected.listen(
+    (peer) => stdout.writeln('$peer connected'),
+  );
+  server.transport.peerDisconnected.listen(
+    (peer) => stdout.writeln('$peer disconnected'),
+  );
 
   await ProcessSignal.sigint.watch().first;
   await server.stop();

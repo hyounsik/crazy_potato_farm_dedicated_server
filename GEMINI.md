@@ -41,7 +41,8 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 - 모델(데이터 카탈로그, 세이브 문서, 명령·이벤트)은 Freezed + json_serializable이다. 키는 snake_case, `checked: true`(`packages/potato_core/build.yaml`). 모델을 고치면 패키지 폴더에서 `dart run build_runner build`.
 - **생성 파일(`*.freezed.dart`, `*.g.dart`)은 커밋한다.** 클라이언트가 git 의존성으로 받을 때는 코드 생성이 돌지 않기 때문이다.
 - `potato_core`는 웹에서도 같은 결과를 내야 한다. 정수 연산은 32비트 안에서 하고(웹 정수는 53비트까지만 정확), 무작위는 `dart:math` `Random` 대신 `GameRandom`을 쓴다. 확인: `dart test -p node test/common`.
-- 서버 실행: `dart run bin/server.dart` (포트는 `PORT` 환경 변수, 기본 8080). 상태 확인: `GET /health`.
+- 서버 실행: `dart run bin/server.dart` (포트는 `PORT` 환경 변수, 기본 8080. 접속 비밀번호는 `PASSWORD`, 없으면 누구나). 상태 확인: `GET /health`. 플레이어 접속: WebSocket `/session` (`WebSocketFrame`, 참가자 쪽 `package:potato_session/websocket_client.dart`).
+- `potato_session` 본체(`potato_session.dart`)는 호스트 모드가 쓰므로 `dart:io`를 넣지 않는다. I/O가 필요한 참가자 코드는 별도 라이브러리로 둔다(예: `websocket_client.dart`).
 
 ## 규칙 문서는 두 벌
 

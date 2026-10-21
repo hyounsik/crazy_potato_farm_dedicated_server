@@ -18,7 +18,15 @@ Requires Dart SDK 3.13 or later.
 dart pub get
 dart run bin/server.dart        # listens on PORT (default 8080)
 curl localhost:8080/health      # -> ok
+PASSWORD=secret dart run bin/server.dart   # players must send the password
 ```
+
+Players connect over WebSocket at `ws://<host>:<port>/session` (put a TLS proxy in
+front for `wss://`). The password, when set, goes in the `x-potato-password` header;
+a wrong one is refused with HTTP 401. Each binary message is one session packet:
+the first byte is the channel (0 reliable, 1 unreliable), the rest the payload
+(`WebSocketFrame` in `potato_session`). Clients use `WebSocketClientTransport`
+from `package:potato_session/websocket_client.dart`.
 
 With Docker (first draft, not yet tested):
 

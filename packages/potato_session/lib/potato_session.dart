@@ -12,3 +12,4 @@ export 'package:potato_session/src/client_session.dart';
 export 'package:potato_session/src/host_session.dart';
 export 'package:potato_session/src/session_message.dart';
 export 'package:potato_session/src/transport.dart';
+export 'package:potato_session/src/websocket_frame.dart';

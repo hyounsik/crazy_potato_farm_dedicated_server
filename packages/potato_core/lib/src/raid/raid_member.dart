@@ -61,6 +61,8 @@ final class RaidMember {
     this.signal,
     this.kept,
     this.outcome,
+    this.downLeft,
+    this.revive = 0,
   });
 
   factory RaidMember.fromJson(Map<String, dynamic> json, Catalog catalog) {
@@ -85,6 +87,8 @@ final class RaidMember {
         _ => null,
       },
       outcome: outcome == null ? null : RaidOutcome.values.byName(outcome),
+      downLeft: (json['down_left'] as num?)?.toDouble(),
+      revive: (json['revive'] as num?)?.toDouble() ?? 0,
     );
   }
 
@@ -107,11 +111,22 @@ final class RaidMember {
   /// Set once this member's run is over.
   RaidOutcome? outcome;
 
+  /// Seconds left to be revived while this member is down in a party
+  /// (`PartyRulesData.downSeconds`); null when standing. At zero they fail.
+  double? downLeft;
+
+  /// Seconds of revive built up by teammates standing close; it drains
+  /// slowly while nobody is.
+  double revive;
+
   /// The stick: a direction on the world plane, at most 1 long. Not saved.
   Vec2 move = Vec2.zero;
 
   int get id => player.id;
   bool get isOut => outcome != null;
+
+  /// Down in a party, waiting for a teammate (not out yet).
+  bool get isDowned => downLeft != null && outcome == null;
 
   Map<String, dynamic> toJson() => {
     'player': player.toJson(),
@@ -121,5 +136,7 @@ final class RaidMember {
     'signal': signal?.toJson(),
     'kept': kept?.toJson(),
     'outcome': outcome?.name,
+    if (downLeft != null) 'down_left': downLeft,
+    if (revive > 0) 'revive': revive,
   };
 }

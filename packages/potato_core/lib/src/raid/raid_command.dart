@@ -169,6 +169,9 @@ enum RaidRejection {
   /// A signal is already counting down.
   signalling,
 
+  /// The player is down, waiting for a teammate to revive them.
+  downed,
+
   /// No standing combat companion with that id.
   noSuchCompanion,
 
@@ -225,6 +228,8 @@ sealed class RaidEvent {
           json['exit'] as int,
           player: json['player'] as int?,
         ),
+        'member_downed' => MemberDowned(player: json['player'] as int?),
+        'member_revived' => MemberRevived(player: json['player'] as int?),
         'raid_ended' => RaidEnded(
           RaidOutcome.values.byName(json['outcome'] as String),
           player: json['player'] as int?,
@@ -275,6 +280,11 @@ sealed class RaidEvent {
     SignalLost(:final exit, :final player) => {
       'kind': 'signal_lost',
       'exit': exit,
+      'player': ?player,
+    },
+    MemberDowned(:final player) => {'kind': 'member_downed', 'player': ?player},
+    MemberRevived(:final player) => {
+      'kind': 'member_revived',
       'player': ?player,
     },
     RaidEnded(:final outcome, :final player) => {
@@ -382,6 +392,22 @@ final class SignalLost extends RaidEvent {
   final int exit;
 
   /// The [RaidPlayer.id] whose signal went out.
+  final int? player;
+}
+
+/// A party member went down and waits for a teammate to revive them.
+final class MemberDowned extends RaidEvent {
+  const MemberDowned({this.player});
+
+  /// The [RaidPlayer.id] who went down.
+  final int? player;
+}
+
+/// A teammate revived a downed member.
+final class MemberRevived extends RaidEvent {
+  const MemberRevived({this.player});
+
+  /// The [RaidPlayer.id] who is back up.
   final int? player;
 }
 

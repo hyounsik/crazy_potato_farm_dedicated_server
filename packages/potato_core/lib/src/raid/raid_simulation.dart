@@ -712,6 +712,7 @@ final class RaidSimulation {
   /// Carries out [command] for [member].
   RaidRejection? applyOf(RaidMember member, RaidCommand command) {
     if (member.isOut) return RaidRejection.over;
+    if (member.isDowned) return RaidRejection.downed;
     final player = member.player;
     final bag = member.bag;
     switch (command) {
@@ -948,9 +949,7 @@ final class RaidSimulation {
     _clearDefeated();
     _clearClones();
     _markSeen();
-    for (final m in List.of(_active)) {
-      if (m.player.isDown) _end(m, RaidOutcome.fainted);
-    }
+    _updateDowned(dt);
     if (isOver) return;
     if (isDanger) {
       _updateExits(dt);
@@ -1003,10 +1002,74 @@ final class RaidSimulation {
       signal.left -= dt;
       if (signal.left > 0) continue;
       m.signal = null;
-      if (exitOf(m)?.id == signal.exit) {
-        _end(m, RaidOutcome.extracted);
-      } else {
+      // Whoever sent it, every standing member in that exit leaves together;
+      // a downed one must be revived first (2026-10-21, 사용자).
+      final leaving = [
+        for (final other in _active)
+          if (!other.isDowned && exitOf(other)?.id == signal.exit) other,
+      ];
+      for (final other in leaving) {
+        _end(other, RaidOutcome.extracted);
+      }
+      if (!leaving.contains(m)) {
         _events.add(SignalLost(signal.exit, player: m.id));
+      }
+    }
+  }
+
+  // Downed party members ------------------------------------------------------
+
+  /// A member knocked down waits for a teammate while someone else in the
+  /// party still stands; otherwise they faint at once, as alone. Enemies
+  /// ignore them (they are at 0 health). A teammate close by builds up the
+  /// revive; it drains slowly while nobody is. At [PartyRulesData.downSeconds]
+  /// they fail (`multiplayer.md`, 2026-10-21).
+  void _updateDowned(double dt) {
+    final party = rules.party;
+    for (final m in List.of(_active)) {
+      if (!m.player.isDown || m.isDowned) continue;
+      final standing = _active.any((o) => o != m && !o.player.isDown);
+      if (!standing) {
+        _end(m, RaidOutcome.fainted);
+        continue;
+      }
+      m
+        ..downLeft = party.downSeconds
+        ..revive = 0
+        ..move = Vec2.zero
+        ..player.dashLeft = 0;
+      _events.add(MemberDowned(player: m.id));
+    }
+    for (final m in List.of(_active)) {
+      if (!m.isDowned) continue;
+      final at = m.player.position;
+      final helped = _active.any(
+        (o) =>
+            o != m &&
+            !o.player.isDown &&
+            o.player.position.distanceTo(at) <= party.reviveRadius,
+      );
+      if (helped) {
+        m.revive += dt;
+        if (m.revive >= party.reviveSeconds) {
+          m
+            ..downLeft = null
+            ..revive = 0
+            ..player.hp = m.player.maxHp * party.revivedHp
+            ..player.sinceHit = 0;
+          _events.add(MemberRevived(player: m.id));
+          continue;
+        }
+      } else {
+        m.revive = math.max(0, m.revive - dt * party.reviveDecay);
+      }
+      m.downLeft = m.downLeft! - dt;
+      if (m.downLeft! <= 0) _end(m, RaidOutcome.fainted);
+    }
+    // Nobody left standing to revive anyone: the downed fail together.
+    if (_active.isNotEmpty && _active.every((m) => m.player.isDown)) {
+      for (final m in List.of(_active)) {
+        _end(m, RaidOutcome.fainted);
       }
     }
   }

@@ -19,7 +19,7 @@ mixin _$RaidRulesData {
 /// Game time one run `step` covers.
  int get stepMillis; PlayerRulesData get player;/// How close the player must stand to open a pile or a gathering spot.
  double get pickupRadius; FoodRulesData get food;/// How long an enemy keeps chasing whoever hit it, even out of sight.
- double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones;
+ double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones; PartyRulesData get party;
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +33,20 @@ $RaidRulesDataCopyWith<RaidRulesData> get copyWith => _$RaidRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as RaidRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones)&&(identical(other.party, _this.party) || other.party == _this.party));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RaidRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.pickupRadius,_this.food,_this.enemyAlertSeconds,_this.companion,_this.clones);
+  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.pickupRadius,_this.food,_this.enemyAlertSeconds,_this.companion,_this.clones,_this.party);
 }
 
 @override
 String toString() {
   final _this = this as RaidRulesData;
-  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones})';
+  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones}, party: ${_this.party})';
 }
 
 
@@ -57,11 +57,11 @@ abstract mixin class $RaidRulesDataCopyWith<$Res>  {
   factory $RaidRulesDataCopyWith(RaidRulesData value, $Res Function(RaidRulesData) _then) = _$RaidRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party
 });
 
 
-$PlayerRulesDataCopyWith<$Res> get player;$FoodRulesDataCopyWith<$Res> get food;$CompanionRulesDataCopyWith<$Res> get companion;$CloneRulesDataCopyWith<$Res> get clones;
+$PlayerRulesDataCopyWith<$Res> get player;$FoodRulesDataCopyWith<$Res> get food;$CompanionRulesDataCopyWith<$Res> get companion;$CloneRulesDataCopyWith<$Res> get clones;$PartyRulesDataCopyWith<$Res> get party;
 
 }
 /// @nodoc
@@ -74,7 +74,7 @@ class _$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,}) {
   return _then(RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -83,7 +83,8 @@ as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non
 as FoodRulesData,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
 as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
-as CloneRulesData,
+as CloneRulesData,party: null == party ? _self.party : party // ignore: cast_nullable_to_non_nullable
+as PartyRulesData,
   ));
 }
 /// Create a copy of RaidRulesData
@@ -121,6 +122,15 @@ $CloneRulesDataCopyWith<$Res> get clones {
   
   return $CloneRulesDataCopyWith<$Res>(_self.clones, (value) {
     return _then(_self.copyWith(clones: value));
+  });
+}/// Create a copy of RaidRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PartyRulesDataCopyWith<$Res> get party {
+  
+  return $PartyRulesDataCopyWith<$Res>(_self.party, (value) {
+    return _then(_self.copyWith(party: value));
   });
 }
 }
@@ -204,10 +214,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party);case _:
   return orElse();
 
 }
@@ -225,10 +235,10 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party)  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData():
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -245,10 +255,10 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party)?  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party);case _:
   return null;
 
 }
@@ -260,7 +270,7 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 @JsonSerializable()
 
 class _RaidRulesData implements RaidRulesData {
-  const _RaidRulesData({required this.stepMillis, required this.player, required this.pickupRadius, required this.food, required this.enemyAlertSeconds, required this.companion, required this.clones});
+  const _RaidRulesData({required this.stepMillis, required this.player, required this.pickupRadius, required this.food, required this.enemyAlertSeconds, required this.companion, required this.clones, this.party = const PartyRulesData()});
   factory _RaidRulesData.fromJson(Map<String, dynamic> json) => _$RaidRulesDataFromJson(json);
 
 /// Game time one run `step` covers.
@@ -273,6 +283,7 @@ class _RaidRulesData implements RaidRulesData {
 @override final  double enemyAlertSeconds;
 @override final  CompanionRulesData companion;
 @override final  CloneRulesData clones;
+@override@JsonKey() final  PartyRulesData party;
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -287,18 +298,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones)&&(identical(other.party, party) || other.party == party));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,player,pickupRadius,food,enemyAlertSeconds,companion,clones);
+    return Object.hash(runtimeType,stepMillis,player,pickupRadius,food,enemyAlertSeconds,companion,clones,party);
 }
 
 @override
 String toString() {
-    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, pickupRadius: $pickupRadius, food: $food, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones)';
+    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, pickupRadius: $pickupRadius, food: $food, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones, party: $party)';
 }
 
 
@@ -309,11 +320,11 @@ abstract mixin class _$RaidRulesDataCopyWith<$Res> implements $RaidRulesDataCopy
   factory _$RaidRulesDataCopyWith(_RaidRulesData value, $Res Function(_RaidRulesData) _then) = __$RaidRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party
 });
 
 
-@override $PlayerRulesDataCopyWith<$Res> get player;@override $FoodRulesDataCopyWith<$Res> get food;@override $CompanionRulesDataCopyWith<$Res> get companion;@override $CloneRulesDataCopyWith<$Res> get clones;
+@override $PlayerRulesDataCopyWith<$Res> get player;@override $FoodRulesDataCopyWith<$Res> get food;@override $CompanionRulesDataCopyWith<$Res> get companion;@override $CloneRulesDataCopyWith<$Res> get clones;@override $PartyRulesDataCopyWith<$Res> get party;
 
 }
 /// @nodoc
@@ -326,7 +337,7 @@ class __$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,}) {
   return _then(_RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -335,7 +346,8 @@ as double,food: null == food ? _self.food : food // ignore: cast_nullable_to_non
 as FoodRulesData,enemyAlertSeconds: null == enemyAlertSeconds ? _self.enemyAlertSeconds : enemyAlertSeconds // ignore: cast_nullable_to_non_nullable
 as double,companion: null == companion ? _self.companion : companion // ignore: cast_nullable_to_non_nullable
 as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: cast_nullable_to_non_nullable
-as CloneRulesData,
+as CloneRulesData,party: null == party ? _self.party : party // ignore: cast_nullable_to_non_nullable
+as PartyRulesData,
   ));
 }
 
@@ -375,7 +387,310 @@ $CloneRulesDataCopyWith<$Res> get clones {
   return $CloneRulesDataCopyWith<$Res>(_self.clones, (value) {
     return _then(_self.copyWith(clones: value));
   });
+}/// Create a copy of RaidRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$PartyRulesDataCopyWith<$Res> get party {
+  
+  return $PartyRulesDataCopyWith<$Res>(_self.party, (value) {
+    return _then(_self.copyWith(party: value));
+  });
 }
+}
+
+
+/// @nodoc
+mixin _$PartyRulesData {
+
+/// How long a fallen member can wait to be revived before they fail.
+ double get downSeconds;/// How long a teammate must stay close to revive them.
+ double get reviveSeconds;/// How close (tiles) a teammate must stand to revive.
+ double get reviveRadius;/// Revive progress lost per second while nobody is close, as a share of
+/// the rate it builds up (it drains slowly rather than resetting).
+ double get reviveDecay;/// Share of full health a revived member gets back.
+ double get revivedHp;
+/// Create a copy of PartyRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$PartyRulesDataCopyWith<PartyRulesData> get copyWith => _$PartyRulesDataCopyWithImpl<PartyRulesData>(this as PartyRulesData, _$identity);
+
+  /// Serializes this PartyRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as PartyRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PartyRulesData&&(identical(other.downSeconds, _this.downSeconds) || other.downSeconds == _this.downSeconds)&&(identical(other.reviveSeconds, _this.reviveSeconds) || other.reviveSeconds == _this.reviveSeconds)&&(identical(other.reviveRadius, _this.reviveRadius) || other.reviveRadius == _this.reviveRadius)&&(identical(other.reviveDecay, _this.reviveDecay) || other.reviveDecay == _this.reviveDecay)&&(identical(other.revivedHp, _this.revivedHp) || other.revivedHp == _this.revivedHp));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as PartyRulesData;
+  return Object.hash(runtimeType,_this.downSeconds,_this.reviveSeconds,_this.reviveRadius,_this.reviveDecay,_this.revivedHp);
+}
+
+@override
+String toString() {
+  final _this = this as PartyRulesData;
+  return 'PartyRulesData(downSeconds: ${_this.downSeconds}, reviveSeconds: ${_this.reviveSeconds}, reviveRadius: ${_this.reviveRadius}, reviveDecay: ${_this.reviveDecay}, revivedHp: ${_this.revivedHp})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $PartyRulesDataCopyWith<$Res>  {
+  factory $PartyRulesDataCopyWith(PartyRulesData value, $Res Function(PartyRulesData) _then) = _$PartyRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double downSeconds, double reviveSeconds, double reviveRadius, double reviveDecay, double revivedHp
+});
+
+
+
+
+}
+/// @nodoc
+class _$PartyRulesDataCopyWithImpl<$Res>
+    implements $PartyRulesDataCopyWith<$Res> {
+  _$PartyRulesDataCopyWithImpl(this._self, this._then);
+
+  final PartyRulesData _self;
+  final $Res Function(PartyRulesData) _then;
+
+/// Create a copy of PartyRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? downSeconds = null,Object? reviveSeconds = null,Object? reviveRadius = null,Object? reviveDecay = null,Object? revivedHp = null,}) {
+  return _then(PartyRulesData(
+downSeconds: null == downSeconds ? _self.downSeconds : downSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveSeconds: null == reviveSeconds ? _self.reviveSeconds : reviveSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveRadius: null == reviveRadius ? _self.reviveRadius : reviveRadius // ignore: cast_nullable_to_non_nullable
+as double,reviveDecay: null == reviveDecay ? _self.reviveDecay : reviveDecay // ignore: cast_nullable_to_non_nullable
+as double,revivedHp: null == revivedHp ? _self.revivedHp : revivedHp // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [PartyRulesData].
+extension PartyRulesDataPatterns on PartyRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _PartyRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _PartyRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _PartyRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _PartyRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _PartyRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _PartyRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double downSeconds,  double reviveSeconds,  double reviveRadius,  double reviveDecay,  double revivedHp)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _PartyRulesData() when $default != null:
+return $default(_that.downSeconds,_that.reviveSeconds,_that.reviveRadius,_that.reviveDecay,_that.revivedHp);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double downSeconds,  double reviveSeconds,  double reviveRadius,  double reviveDecay,  double revivedHp)  $default,) {final _that = this;
+switch (_that) {
+case _PartyRulesData():
+return $default(_that.downSeconds,_that.reviveSeconds,_that.reviveRadius,_that.reviveDecay,_that.revivedHp);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double downSeconds,  double reviveSeconds,  double reviveRadius,  double reviveDecay,  double revivedHp)?  $default,) {final _that = this;
+switch (_that) {
+case _PartyRulesData() when $default != null:
+return $default(_that.downSeconds,_that.reviveSeconds,_that.reviveRadius,_that.reviveDecay,_that.revivedHp);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _PartyRulesData implements PartyRulesData {
+  const _PartyRulesData({this.downSeconds = 30, this.reviveSeconds = 4, this.reviveRadius = 1.2, this.reviveDecay = 0.5, this.revivedHp = 0.3});
+  factory _PartyRulesData.fromJson(Map<String, dynamic> json) => _$PartyRulesDataFromJson(json);
+
+/// How long a fallen member can wait to be revived before they fail.
+@override@JsonKey() final  double downSeconds;
+/// How long a teammate must stay close to revive them.
+@override@JsonKey() final  double reviveSeconds;
+/// How close (tiles) a teammate must stand to revive.
+@override@JsonKey() final  double reviveRadius;
+/// Revive progress lost per second while nobody is close, as a share of
+/// the rate it builds up (it drains slowly rather than resetting).
+@override@JsonKey() final  double reviveDecay;
+/// Share of full health a revived member gets back.
+@override@JsonKey() final  double revivedHp;
+
+/// Create a copy of PartyRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$PartyRulesDataCopyWith<_PartyRulesData> get copyWith => __$PartyRulesDataCopyWithImpl<_PartyRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$PartyRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PartyRulesData&&(identical(other.downSeconds, downSeconds) || other.downSeconds == downSeconds)&&(identical(other.reviveSeconds, reviveSeconds) || other.reviveSeconds == reviveSeconds)&&(identical(other.reviveRadius, reviveRadius) || other.reviveRadius == reviveRadius)&&(identical(other.reviveDecay, reviveDecay) || other.reviveDecay == reviveDecay)&&(identical(other.revivedHp, revivedHp) || other.revivedHp == revivedHp));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,downSeconds,reviveSeconds,reviveRadius,reviveDecay,revivedHp);
+}
+
+@override
+String toString() {
+    return 'PartyRulesData(downSeconds: $downSeconds, reviveSeconds: $reviveSeconds, reviveRadius: $reviveRadius, reviveDecay: $reviveDecay, revivedHp: $revivedHp)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$PartyRulesDataCopyWith<$Res> implements $PartyRulesDataCopyWith<$Res> {
+  factory _$PartyRulesDataCopyWith(_PartyRulesData value, $Res Function(_PartyRulesData) _then) = __$PartyRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double downSeconds, double reviveSeconds, double reviveRadius, double reviveDecay, double revivedHp
+});
+
+
+
+
+}
+/// @nodoc
+class __$PartyRulesDataCopyWithImpl<$Res>
+    implements _$PartyRulesDataCopyWith<$Res> {
+  __$PartyRulesDataCopyWithImpl(this._self, this._then);
+
+  final _PartyRulesData _self;
+  final $Res Function(_PartyRulesData) _then;
+
+/// Create a copy of PartyRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? downSeconds = null,Object? reviveSeconds = null,Object? reviveRadius = null,Object? reviveDecay = null,Object? revivedHp = null,}) {
+  return _then(_PartyRulesData(
+downSeconds: null == downSeconds ? _self.downSeconds : downSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveSeconds: null == reviveSeconds ? _self.reviveSeconds : reviveSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveRadius: null == reviveRadius ? _self.reviveRadius : reviveRadius // ignore: cast_nullable_to_non_nullable
+as double,reviveDecay: null == reviveDecay ? _self.reviveDecay : reviveDecay // ignore: cast_nullable_to_non_nullable
+as double,revivedHp: null == revivedHp ? _self.revivedHp : revivedHp // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
 }
 
 

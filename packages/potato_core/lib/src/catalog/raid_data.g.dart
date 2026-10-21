@@ -37,6 +37,12 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
             'clones',
             (v) => CloneRulesData.fromJson(v as Map<String, dynamic>),
           ),
+          party: $checkedConvert(
+            'party',
+            (v) => v == null
+                ? const PartyRulesData()
+                : PartyRulesData.fromJson(v as Map<String, dynamic>),
+          ),
         );
         return val;
       },
@@ -56,6 +62,54 @@ Map<String, dynamic> _$RaidRulesDataToJson(_RaidRulesData instance) =>
       'enemy_alert_seconds': instance.enemyAlertSeconds,
       'companion': instance.companion.toJson(),
       'clones': instance.clones.toJson(),
+      'party': instance.party.toJson(),
+    };
+
+_PartyRulesData _$PartyRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_PartyRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _PartyRulesData(
+          downSeconds: $checkedConvert(
+            'down_seconds',
+            (v) => (v as num?)?.toDouble() ?? 30,
+          ),
+          reviveSeconds: $checkedConvert(
+            'revive_seconds',
+            (v) => (v as num?)?.toDouble() ?? 4,
+          ),
+          reviveRadius: $checkedConvert(
+            'revive_radius',
+            (v) => (v as num?)?.toDouble() ?? 1.2,
+          ),
+          reviveDecay: $checkedConvert(
+            'revive_decay',
+            (v) => (v as num?)?.toDouble() ?? 0.5,
+          ),
+          revivedHp: $checkedConvert(
+            'revived_hp',
+            (v) => (v as num?)?.toDouble() ?? 0.3,
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'downSeconds': 'down_seconds',
+        'reviveSeconds': 'revive_seconds',
+        'reviveRadius': 'revive_radius',
+        'reviveDecay': 'revive_decay',
+        'revivedHp': 'revived_hp',
+      },
+    );
+
+Map<String, dynamic> _$PartyRulesDataToJson(_PartyRulesData instance) =>
+    <String, dynamic>{
+      'down_seconds': instance.downSeconds,
+      'revive_seconds': instance.reviveSeconds,
+      'revive_radius': instance.reviveRadius,
+      'revive_decay': instance.reviveDecay,
+      'revived_hp': instance.revivedHp,
     };
 
 _PlayerRulesData _$PlayerRulesDataFromJson(Map<String, dynamic> json) =>

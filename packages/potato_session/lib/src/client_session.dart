@@ -382,6 +382,8 @@ final class ClientSession {
         ..signal = auth.signal
         ..kept = auth.kept
         ..outcome = auth.outcome
+        ..downLeft = auth.downLeft
+        ..revive = auth.revive
         ..player.hp = auth.player.hp
         ..player.equipped = auth.player.equipped
         ..player.weapon = auth.player.weapon
@@ -445,6 +447,8 @@ final class ClientSession {
           ..bag = memberB.bag
           ..signal = memberB.signal
           ..outcome = memberB.outcome
+          ..downLeft = memberB.downLeft
+          ..revive = memberB.revive
           ..player.hp = memberB.player.hp
           ..player.facing = memberB.player.facing
           ..player.weapon = memberB.player.weapon

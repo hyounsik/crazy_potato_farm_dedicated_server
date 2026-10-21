@@ -125,6 +125,13 @@
     ]
   },
   "raid": {
+        "party": {
+      "down_seconds": 30,
+      "revive_seconds": 4,
+      "revive_radius": 1.2,
+      "revive_decay": 0.5,
+      "revived_hp": 0.3
+    },
     "step_millis": 33,
     "player": {
       "speed": 2.6,

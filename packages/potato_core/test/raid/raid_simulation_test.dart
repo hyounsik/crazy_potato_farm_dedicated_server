@@ -1291,18 +1291,23 @@ void main() {
       expect(picked.player, guest.id);
     });
 
-    test('when one member falls in a danger zone the run goes on and their '
-        'bag stays in a bundle for the survivor to extract with', () {
+    test('when one member falls in a danger zone and nobody revives them the '
+        'run goes on and their bag stays in a bundle for the survivor to '
+        'extract with', () {
       final run = makeParty();
       run.enemies.clear();
       run.clones.clear();
       final [host, guest] = run.members;
       guest.bag.addFrom(ItemStack('seed_food_rare', 2));
-      guest.player.position = host.player.position;
+      // Far from the host, so nobody revives them.
+      guest.player.position = host.player.position + const Vec2(4, 0);
 
-      // Knock the guest down.
+      // Knock the guest down; they wait, then fail.
       guest.player.hp = 0;
       run.step();
+      expect(guest.isDowned, isTrue);
+      expect(guest.outcome, isNull);
+      runFor(run, run.rules.party.downSeconds + 0.1);
       expect(guest.outcome, RaidOutcome.fainted);
       expect(host.outcome, isNull);
       expect(run.isOver, isFalse);
@@ -1313,6 +1318,7 @@ void main() {
       );
 
       // A bundle with what the guest carried is on the floor; host takes it.
+      host.player.position = guest.player.position;
       final bundle = run.pileNearOf(host);
       expect(bundle, isNotNull);
       expect(run.applyOf(host, TakeAllLoot(bundle!.id)), isNull);
@@ -1339,8 +1345,16 @@ void main() {
         final [host, guest] = run.members;
         run.setMoveOf(guest, const Vec2(1, 0));
         runFor(run, 0.5);
+        guest
+          ..downLeft = 12.5
+          ..revive = 1.5;
         final restored = RaidSimulation.fromJson(run.toJson(), catalog);
         expect(restored.members, hasLength(2));
+        expect(restored.members[1].downLeft, 12.5);
+        expect(restored.members[1].revive, 1.5);
+        guest
+          ..downLeft = null
+          ..revive = 0;
         expect(restored.members[1].player.position, guest.player.position);
 
         for (final cmd in const <RaidCommand>[
@@ -1373,10 +1387,136 @@ void main() {
           SignalSent(5, player: host.id),
           SignalLost(5, player: host.id),
           RaidEnded(RaidOutcome.extracted, player: host.id),
+          MemberDowned(player: guest.id),
+          MemberRevived(player: guest.id),
         ]) {
           expect(RaidEvent.fromJson(ev.toJson()).toJson(), ev.toJson());
         }
       },
     );
+
+    group('downed members (2026-10-21)', () {
+      late RaidSimulation run;
+      late RaidMember host;
+      late RaidMember guest;
+      PartyRulesData party() => run.rules.party;
+
+      setUp(() {
+        run = makeParty();
+        run.enemies.clear();
+        run.clones.clear();
+        host = run.members[0];
+        guest = run.members[1];
+        guest.player.position = host.player.position + const Vec2(4, 0);
+      });
+
+      test('a teammate standing close revives them with some health', () {
+        guest.player.hp = 0;
+        run.step();
+        expect(guest.isDowned, isTrue);
+        expect(
+          run.takeEvents().whereType<MemberDowned>().single.player,
+          guest.id,
+        );
+        expect(run.applyOf(guest, const Dash()), RaidRejection.downed);
+
+        host.player.position = guest.player.position + const Vec2(0.5, 0);
+        runFor(run, party().reviveSeconds + 0.1);
+        expect(guest.isDowned, isFalse);
+        expect(guest.outcome, isNull);
+        expect(
+          guest.player.hp,
+          closeTo(guest.player.maxHp * party().revivedHp, 1e-9),
+        );
+        expect(
+          run.takeEvents().whereType<MemberRevived>().single.player,
+          guest.id,
+        );
+      });
+
+      test('revive drains slowly while nobody is close', () {
+        guest.player.hp = 0;
+        run.step();
+        host.player.position = guest.player.position;
+        runFor(run, party().reviveSeconds / 2);
+        final built = guest.revive;
+        expect(built, greaterThan(0));
+        host.player.position = guest.player.position + const Vec2(5, 0);
+        runFor(run, 1);
+        expect(guest.revive, lessThan(built));
+        expect(guest.revive, greaterThan(0));
+      });
+
+      test('works in a safe zone too', () {
+        run = makeParty(zone: 'open');
+        guest = run.members[1];
+        guest.player.hp = 0;
+        run.step();
+        expect(guest.isDowned, isTrue);
+      });
+
+      test('alone, or with nobody left standing, they faint at once', () {
+        final solo = RaidSimulation.party(
+          catalog: catalog,
+          zone: 'danger_open',
+          seed: 7,
+          members: const [RaidMemberStart(food: 50)],
+        );
+        solo.enemies.clear();
+        solo.clones.clear();
+        solo.player.hp = 0;
+        solo.step();
+        expect(solo.members.single.outcome, RaidOutcome.fainted);
+
+        guest.player.hp = 0;
+        run.step();
+        expect(guest.isDowned, isTrue);
+        host.player.hp = 0;
+        run.step();
+        expect(host.outcome, RaidOutcome.fainted);
+        expect(guest.outcome, RaidOutcome.fainted);
+        expect(run.isOver, isTrue);
+      });
+
+      test('everyone standing in the exit leaves together, not the downed', () {
+        final three = RaidSimulation.party(
+          catalog: catalog,
+          zone: 'danger_open',
+          seed: 7,
+          members: const [
+            RaidMemberStart(food: 50),
+            RaidMemberStart(food: 50),
+            RaidMemberStart(food: 50),
+          ],
+        );
+        three.enemies.clear();
+        three.clones.clear();
+        final [a, b, c] = three.members;
+        final exit = three.exits.first;
+        a.player.position = exit.position;
+        b.player.position = exit.position + const Vec2(0.3, 0);
+        // The downed one lies in the exit, out of everyone's revive reach.
+        c.player.position = exit.position + const Vec2(0, 0.6);
+        expect(three.applyOf(a, const Signal()), isNull);
+        c.player.hp = 0;
+        three.step();
+        expect(c.isDowned, isTrue);
+        c.downLeft = 1000;
+        final reach = three.rules.party.reviveRadius;
+        expect(
+          c.player.position.distanceTo(a.player.position),
+          lessThan(reach),
+        );
+        // Hold the revive back so the countdown ends first.
+        final countdown = three.zone.danger!.countdownSeconds;
+        for (var t = 0.0; t < countdown + 0.2; t += three.stepSeconds) {
+          c.revive = 0;
+          three.step();
+        }
+        expect(a.outcome, RaidOutcome.extracted);
+        expect(b.outcome, RaidOutcome.extracted);
+        expect(c.outcome, isNot(RaidOutcome.extracted));
+      });
+    });
   });
 }

@@ -24,10 +24,38 @@ abstract class RaidRulesData with _$RaidRulesData {
     required double enemyAlertSeconds,
     required CompanionRulesData companion,
     required CloneRulesData clones,
+    @Default(PartyRulesData()) PartyRulesData party,
   }) = _RaidRulesData;
 
   factory RaidRulesData.fromJson(Map<String, dynamic> json) =>
       _$RaidRulesDataFromJson(json);
+}
+
+/// A party member who falls waits for teammates instead of leaving at once
+/// (`multiplayer.md`, 2026-10-08; details 2026-10-21). Values are proposals
+/// until balance.
+@freezed
+abstract class PartyRulesData with _$PartyRulesData {
+  const factory PartyRulesData({
+    /// How long a fallen member can wait to be revived before they fail.
+    @Default(30) double downSeconds,
+
+    /// How long a teammate must stay close to revive them.
+    @Default(4) double reviveSeconds,
+
+    /// How close (tiles) a teammate must stand to revive.
+    @Default(1.2) double reviveRadius,
+
+    /// Revive progress lost per second while nobody is close, as a share of
+    /// the rate it builds up (it drains slowly rather than resetting).
+    @Default(0.5) double reviveDecay,
+
+    /// Share of full health a revived member gets back.
+    @Default(0.3) double revivedHp,
+  }) = _PartyRulesData;
+
+  factory PartyRulesData.fromJson(Map<String, dynamic> json) =>
+      _$PartyRulesDataFromJson(json);
 }
 
 @freezed

@@ -126,6 +126,8 @@ final class ClientSession {
   final List<RaidEvent> _events = [];
   final List<RaidRejection> _rejections = [];
   final List<QuickChatLine> _chats = [];
+  final Map<int, ({FarmWalk walk, int seq})> _walkers = {};
+  int _walkSeq = 0;
   RaidResult? _result;
 
   ClientSessionStage get stage => _stage;
@@ -271,13 +273,35 @@ final class ClientSession {
     return out;
   }
 
-  /// Sends [chat] to the party. It shows on this guest's screen right away
-  /// (in [takeChats]); the host's relay of it is not shown twice.
+  /// Sends [chat] to the party in a run, or to everyone on the host's farm
+  /// before it. It shows on this guest's screen right away (in
+  /// [takeChats]); the host's relay of it is not shown twice.
   void sendChat(QuickChat chat) {
-    if (_run == null || _stage != ClientSessionStage.playing) return;
-    _chats.add((from: _memberIndex, chat: chat));
+    final int from;
+    if (_stage == ClientSessionStage.playing && _run != null) {
+      from = _memberIndex;
+    } else if (_stage == ClientSessionStage.waiting && _lobby != null) {
+      from = _lobby!.you;
+    } else {
+      return;
+    }
+    _chats.add((from: from, chat: chat));
     _send(SessionChannel.reliable, QuickChatMessage(chat));
   }
+
+  /// This guest walks on the host's farm (2026-10-22, 사용자): sent on
+  /// unreliable, the host passes it on to everyone there.
+  void sendWalk(FarmWalk walk) {
+    if (_stage != ClientSessionStage.waiting) return;
+    _send(SessionChannel.unreliable, FarmWalkMessage(walk, seq: ++_walkSeq));
+  }
+
+  /// Where the others walk on the host's farm, by their place in the lobby
+  /// (their party colour): the host is 0. Forgotten when the lobby changes,
+  /// since places move up when someone leaves; everyone sends again soon.
+  Map<int, FarmWalk> get walkers => {
+    for (final MapEntry(:key, :value) in _walkers.entries) key: value.walk,
+  };
 
   /// Collects quick messages since the last call, this guest's own included.
   List<QuickChatLine> takeChats() {
@@ -431,6 +455,7 @@ final class ClientSession {
         if (!_farmController.isClosed) _farmController.add(farm);
       case LobbyMessage(:final lobby):
         _lobby = lobby;
+        _walkers.clear();
         if (!_lobbyController.isClosed) _lobbyController.add(lobby);
       case RunStartedMessage(:final memberIndex, :final runJson):
         // First start, or the run as it is now after [resume].
@@ -439,6 +464,9 @@ final class ClientSession {
         _reconcileError = Vec2.zero;
         _lastSentMove = Vec2.zero;
         _memberIndex = memberIndex;
+        // The farm's greetings and walkers stay on the farm.
+        _chats.clear();
+        _walkers.clear();
         final sim = RaidSimulation.fromJson(runJson, catalog)
           ..focusIndex = memberIndex;
         _run = sim;
@@ -453,8 +481,13 @@ final class ClientSession {
       case EventsMessage(:final events):
         _events.addAll(events);
       case QuickChatMessage(:final chat, :final from):
-        if (_run != null && from >= 0 && from != _memberIndex) {
-          _chats.add((from: from, chat: chat));
+        // Own messages show when sent, not again when relayed.
+        final me = _run != null ? _memberIndex : _lobby?.you;
+        if (from >= 0 && from != me) _chats.add((from: from, chat: chat));
+      case FarmWalkMessage(:final walk, :final seq, :final from):
+        final last = _walkers[from]?.seq ?? -1;
+        if (_run == null && from >= 0 && from != _lobby?.you && seq > last) {
+          _walkers[from] = (walk: walk, seq: seq);
         }
       case CommandRejectedMessage(:final rejection):
         _rejections.add(rejection);

@@ -30,7 +30,11 @@ final class HostedGuest {
   /// In the party that sets out; false for a visitor who only looks around
   /// the host's farm (2026-10-22).
   bool inParty;
+
+  /// Where they walk on the host's farm, the latest heard (null: not yet).
+  FarmWalk? walk;
   int _lastMoveSeq = -1;
+  int _lastWalkSeq = -1;
   bool _resultSent = false;
 
   String get name => start.name;
@@ -97,6 +101,7 @@ final class HostSession {
   final List<RaidEvent> _hostEvents = [];
   final List<QuickChatLine> _chats = [];
   Map<String, dynamic>? _sharedFarm;
+  int _walkSeq = 0;
 
   /// Quick messages kept for the host's screen until [takeChats]; a dedicated
   /// server never takes them, so only the latest few are kept.
@@ -142,6 +147,8 @@ final class HostSession {
     _guestOrder
       ..clear()
       ..addAll(_guests.values);
+    // The farm's greetings stay on the farm.
+    _chats.clear();
     final starts = <RaidMemberStart>[
       ?hostStart,
       for (final g in _guestOrder) g.start,
@@ -289,11 +296,31 @@ final class HostSession {
     _broadcast(SessionChannel.reliable, FarmViewMessage(farm));
   }
 
-  /// The host player (member 0) sends [chat] to the party.
+  /// The host player (member 0, first in the lobby) sends [chat] to the
+  /// party in a run, or to the visitors on the farm.
   void sendChat(QuickChat chat) {
-    if (!hostPlays || _run == null || _closed) return;
+    if (!hostPlays || _closed) return;
     _relayChat(0, chat);
   }
+
+  /// The host player walks on their farm: everyone there sees it
+  /// (2026-10-22, 사용자).
+  void sendWalk(FarmWalk walk) {
+    if (!hostPlays || _run != null || _closed) return;
+    _broadcast(
+      SessionChannel.unreliable,
+      FarmWalkMessage(walk, seq: ++_walkSeq, from: 0),
+    );
+  }
+
+  /// Where the guests walk on the host's farm, by their place in the lobby
+  /// (their party colour).
+  Map<int, FarmWalk> get walkers => {
+    for (final (i, g) in _guestOrder.indexed) _lobbySlot(i): ?g.walk,
+  };
+
+  /// A guest's place in the lobby: after the host when the host plays.
+  int _lobbySlot(int guestIndex) => (hostPlays ? 1 : 0) + guestIndex;
 
   void _relayChat(int from, QuickChat chat) {
     _chats.add((from: from, chat: chat));
@@ -321,8 +348,15 @@ final class HostSession {
       case JoinPartyMessage():
         _onJoinParty(packet.peerId);
       case QuickChatMessage(:final chat):
-        final index = _guests[packet.peerId]?.memberIndex;
-        if (_run != null && index != null) _relayChat(index, chat);
+        final guest = _guests[packet.peerId];
+        if (guest == null) break;
+        // In a run by member index; on the farm by place in the lobby.
+        final index = _run != null
+            ? guest.memberIndex
+            : _lobbySlot(_guestOrder.indexOf(guest));
+        if (index != null) _relayChat(index, chat);
+      case FarmWalkMessage(:final walk, :final seq):
+        _onWalk(packet.peerId, walk, seq);
       default:
         break;
     }
@@ -438,6 +472,22 @@ final class HostSession {
     final index = guest.memberIndex;
     if (index == null || index >= sim.members.length) return;
     sim.setMoveOf(sim.members[index], msg.direction);
+  }
+
+  void _onWalk(String peerId, FarmWalk walk, int seq) {
+    final guest = _guests[peerId];
+    if (guest == null || _run != null || seq <= guest._lastWalkSeq) return;
+    guest
+      ..walk = walk
+      .._lastWalkSeq = seq;
+    _broadcast(
+      SessionChannel.unreliable,
+      FarmWalkMessage(
+        walk,
+        seq: seq,
+        from: _lobbySlot(_guestOrder.indexOf(guest)),
+      ),
+    );
   }
 
   void _onCommand(String peerId, CommandMessage msg) {

@@ -438,8 +438,9 @@ void main() {
         start: const RaidMemberStart(name: 'B'),
       );
       await _pumpMicrotasks();
-      // Not before the run.
-      a.sendChat(QuickChat.go);
+      // Said on the farm: left behind when the run starts.
+      a.sendChat(QuickChat.hi);
+      await _pumpMicrotasks();
       host.startRun(
         zone: 'open',
         seed: 1,
@@ -685,6 +686,85 @@ void main() {
       for (final c in [traveller, looker, idle]) {
         await c.close();
       }
+      await host.close();
+    });
+
+    test(
+      'everyone walks and greets on the farm, by place in the lobby',
+      () async {
+        final net = InMemorySessionNetwork();
+        final host = HostSession(
+          catalog: catalog,
+          transport: net.host,
+          hostName: 'Host',
+        );
+        ClientSession visitor(String id) => ClientSession(
+          catalog: catalog,
+          transport: net.connectClient(id),
+          start: RaidMemberStart(name: id),
+          party: false,
+        );
+        final a = visitor('a');
+        final b = visitor('b');
+        await _pumpMicrotasks();
+
+        host.sendWalk(const FarmWalk(at: Vec2(3, 4)));
+        a.sendWalk(const FarmWalk(at: Vec2(5, 6), moving: true));
+        await _pumpMicrotasks();
+        expect(b.walkers.keys, unorderedEquals([0, 1]));
+        expect(b.walkers[0]!.at, const Vec2(3, 4));
+        expect(b.walkers[1]!.at, const Vec2(5, 6));
+        expect(b.walkers[1]!.moving, isTrue);
+        expect(a.walkers.keys, [0], reason: 'not its own walk back');
+        expect(host.walkers.keys, [1]);
+
+        a.sendChat(QuickChat.hi);
+        host.sendChat(QuickChat.welcome);
+        await _pumpMicrotasks();
+        const said = [
+          (from: 1, chat: QuickChat.hi),
+          (from: 0, chat: QuickChat.welcome),
+        ];
+        expect(a.takeChats(), unorderedEquals(said));
+        expect(b.takeChats(), unorderedEquals(said));
+        expect(host.takeChats(), unorderedEquals(said));
+
+        // When a leaves, b moves up to place 1 and walks there.
+        await a.close();
+        net.disconnectClient('a');
+        await _pumpMicrotasks();
+        expect(b.lobby?.you, 1);
+        expect(b.walkers, isEmpty, reason: 'places moved, so forgotten');
+        b.sendWalk(const FarmWalk(at: Vec2(7, 8)));
+        await _pumpMicrotasks();
+        expect(host.walkers[1]!.at, const Vec2(7, 8));
+
+        await b.close();
+        await host.close();
+      },
+    );
+
+    test('a late walk packet is dropped', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      final link = net.connectClient('a');
+      final a = ClientSession(
+        catalog: catalog,
+        transport: link,
+        start: const RaidMemberStart(name: 'a'),
+        party: false,
+      );
+      await _pumpMicrotasks();
+      const codec = JsonSessionCodec();
+      for (final (seq, x) in [(2, 2.0), (1, 1.0)]) {
+        link.send(
+          SessionChannel.unreliable,
+          codec.encode(FarmWalkMessage(FarmWalk(at: Vec2(x, 0)), seq: seq)),
+        );
+      }
+      await _pumpMicrotasks();
+      expect(host.walkers[1]!.at, const Vec2(2, 0));
+      await a.close();
       await host.close();
     });
 

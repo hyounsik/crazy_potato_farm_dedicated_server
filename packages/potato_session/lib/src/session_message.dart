@@ -13,14 +13,56 @@ enum SessionJoinRejection {
   sessionFull,
 }
 
-/// The party's quick messages in a run (탐험 단축 메시지). Only the id
-/// travels; each app words it, so the list can grow without breaking older
-/// builds (an unknown id is dropped).
-enum QuickChat { no, gather, go, ok, follow, help }
+/// Quick messages (단축 메시지): the party's in a run, and greetings on a
+/// multi farm (2026-10-22, 사용자). Only the id travels; each app words it
+/// and picks which set to show where, so the list can grow without
+/// breaking older builds (an unknown id is dropped).
+enum QuickChat {
+  no,
+  gather,
+  go,
+  ok,
+  follow,
+  help,
+  hi,
+  welcome,
+  bye,
+  thanks,
+  come,
+}
 
-/// A quick message on screen: who sent it (their member index, which is
-/// also their party colour) and what.
+/// A quick message on screen: who sent it (their member index in a run,
+/// their place in the lobby on the farm; either is also their party
+/// colour) and what.
 typedef QuickChatLine = ({int from, QuickChat chat});
+
+/// Where a player's character stands on a multi farm and which way it
+/// faces, in tile coordinates (2026-10-22, 사용자). Walking there is only
+/// for show: it changes nothing on the farm, so each player moves their
+/// own and the host passes it on.
+final class FarmWalk {
+  const FarmWalk({
+    required this.at,
+    this.facing = const Vec2(0, 1),
+    this.moving = false,
+  });
+
+  factory FarmWalk.fromJson(Map<String, dynamic> json) => FarmWalk(
+    at: Vec2.fromJson(json['at'] as List<Object?>),
+    facing: Vec2.fromJson(json['face'] as List<Object?>),
+    moving: json['moving'] as bool? ?? false,
+  );
+
+  final Vec2 at;
+  final Vec2 facing;
+  final bool moving;
+
+  Map<String, dynamic> toJson() => {
+    'at': at.toJson(),
+    'face': facing.toJson(),
+    if (moving) 'moving': true,
+  };
+}
 
 /// Who is in the room, sent to each guest whenever it changes: [names] in
 /// the order they came (the host first in host mode; on a dedicated server
@@ -151,6 +193,11 @@ sealed class SessionMessage {
     )),
     'start_run' => StartRunMessage(json['zone'] as String),
     'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
+    'farm_walk' => FarmWalkMessage(
+      FarmWalk.fromJson(json['walk'] as Map<String, dynamic>),
+      seq: json['seq'] as int? ?? 0,
+      from: json['from'] as int? ?? -1,
+    ),
     'quick_chat' => QuickChatMessage(
       QuickChat.values.byName(json['chat'] as String),
       from: json['from'] as int? ?? -1,
@@ -226,6 +273,12 @@ sealed class SessionMessage {
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
     FarmViewMessage(:final farm) => {'type': 'farm_view', 'farm': farm},
+    FarmWalkMessage(:final walk, :final seq, :final from) => {
+      'type': 'farm_walk',
+      'walk': walk.toJson(),
+      'seq': seq,
+      if (from >= 0) 'from': from,
+    },
     QuickChatMessage(:final chat, :final from) => {
       'type': 'quick_chat',
       'chat': chat.name,
@@ -345,12 +398,26 @@ final class LobbyMessage extends SessionMessage {
   final SessionLobby lobby;
 }
 
-/// A quick message in a run, on reliable. Guest → host without [from]; the
-/// host relays it to everyone with [from] set to the sender's member index.
+/// A quick message, on reliable. Guest → host without [from]; the host
+/// relays it to everyone with [from] set to the sender's member index in a
+/// run, or their place in the lobby on the farm.
 final class QuickChatMessage extends SessionMessage {
   const QuickChatMessage(this.chat, {this.from = -1});
 
   final QuickChat chat;
+  final int from;
+}
+
+/// Where a player walks on the host's multi farm, on unreliable, a few
+/// times a second while moving and now and then standing. Guest → host
+/// without [from]; the host passes it on with [from] set to the sender's
+/// place in the lobby, and sends its own as 0. [seq] grows per sender, so
+/// a late packet is dropped.
+final class FarmWalkMessage extends SessionMessage {
+  const FarmWalkMessage(this.walk, {this.seq = 0, this.from = -1});
+
+  final FarmWalk walk;
+  final int seq;
   final int from;
 }
 

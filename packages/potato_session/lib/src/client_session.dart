@@ -269,8 +269,11 @@ final class ClientSession {
 
   /// Sends [chat] to the party in a run, or to everyone on the host's farm
   /// before it. It shows on this guest's screen right away (in
-  /// [takeChats]); the host's relay of it is not shown twice.
-  void sendChat(QuickChat chat) {
+  /// [takeChats]); the host's relay of it is not shown twice. A
+  /// [QuickChat.custom] one needs [text] ([quickChatText]).
+  void sendChat(QuickChat chat, {String? text}) {
+    final words = chat == QuickChat.custom ? quickChatText(text) : null;
+    if (chat == QuickChat.custom && words == null) return;
     final int from;
     if (_stage == ClientSessionStage.playing && _run != null) {
       from = _memberIndex;
@@ -279,8 +282,8 @@ final class ClientSession {
     } else {
       return;
     }
-    _chats.add((from: from, chat: chat));
-    _send(SessionChannel.reliable, QuickChatMessage(chat));
+    _chats.add((from: from, chat: chat, text: words));
+    _send(SessionChannel.reliable, QuickChatMessage(chat, text: words));
   }
 
   /// This guest walks on the host's farm (2026-10-22, 사용자): sent on
@@ -471,10 +474,14 @@ final class ClientSession {
         _onSnapshot(snapshot);
       case EventsMessage(:final events):
         _events.addAll(events);
-      case QuickChatMessage(:final chat, :final from):
+      case QuickChatMessage(:final chat, :final from, :final text):
         // Own messages show when sent, not again when relayed.
         final me = _run != null ? _memberIndex : _lobby?.you;
-        if (from >= 0 && from != me) _chats.add((from: from, chat: chat));
+        final words = chat == QuickChat.custom ? quickChatText(text) : null;
+        if (chat == QuickChat.custom && words == null) break;
+        if (from >= 0 && from != me) {
+          _chats.add((from: from, chat: chat, text: words));
+        }
       case FarmWalkMessage(:final walk, :final seq, :final from):
         final last = _walkers[from]?.seq ?? -1;
         if (_run == null && from >= 0 && from != _lobby?.you && seq > last) {

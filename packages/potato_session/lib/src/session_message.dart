@@ -29,12 +29,31 @@ enum QuickChat {
   bye,
   thanks,
   come,
+
+  /// Words the player typed, in the message's text (2026-10-23). An app
+  /// may leave typing out (a store review); older builds drop it.
+  custom,
+}
+
+/// The longest typed quick message, in characters.
+const int quickChatTextMax = 40;
+
+/// [text] as a typed quick message goes out: one line, trimmed, at most
+/// [quickChatTextMax] characters; null when nothing is left.
+String? quickChatText(String? text) {
+  if (text == null) return null;
+  final line = text.replaceAll(RegExp(r'\s+'), ' ').trim();
+  if (line.isEmpty) return null;
+  final chars = line.runes.toList();
+  return chars.length <= quickChatTextMax
+      ? line
+      : String.fromCharCodes(chars.take(quickChatTextMax));
 }
 
 /// A quick message on screen: who sent it (their member index in a run,
 /// their place in the lobby on the farm; either is also their party
-/// colour) and what.
-typedef QuickChatLine = ({int from, QuickChat chat});
+/// colour), what, and the words of a [QuickChat.custom] one.
+typedef QuickChatLine = ({int from, QuickChat chat, String? text});
 
 /// Where a player's character stands on a multi farm and which way it
 /// faces, in tile coordinates (2026-10-22, 사용자). Walking there is only
@@ -210,6 +229,7 @@ sealed class SessionMessage {
     'quick_chat' => QuickChatMessage(
       QuickChat.values.byName(json['chat'] as String),
       from: json['from'] as int? ?? -1,
+      text: json['text'] as String?,
     ),
     'welcome' => WelcomeMessage(
       accepted: json['accepted'] as bool,
@@ -291,10 +311,11 @@ sealed class SessionMessage {
       'seq': seq,
       if (from >= 0) 'from': from,
     },
-    QuickChatMessage(:final chat, :final from) => {
+    QuickChatMessage(:final chat, :final from, :final text) => {
       'type': 'quick_chat',
       'chat': chat.name,
       if (from >= 0) 'from': from,
+      'text': ?text,
     },
     WelcomeMessage(:final accepted, :final rejection) => {
       'type': 'welcome',
@@ -414,12 +435,14 @@ final class LobbyMessage extends SessionMessage {
 
 /// A quick message, on reliable. Guest → host without [from]; the host
 /// relays it to everyone with [from] set to the sender's member index in a
-/// run, or their place in the lobby on the farm.
+/// run, or their place in the lobby on the farm. A [QuickChat.custom] one
+/// carries its words in [text].
 final class QuickChatMessage extends SessionMessage {
-  const QuickChatMessage(this.chat, {this.from = -1});
+  const QuickChatMessage(this.chat, {this.from = -1, this.text});
 
   final QuickChat chat;
   final int from;
+  final String? text;
 }
 
 /// Where a player walks on the host's multi farm, on unreliable, a few

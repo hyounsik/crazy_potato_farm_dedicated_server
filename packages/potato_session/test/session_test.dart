@@ -467,10 +467,16 @@ void main() {
 
       a.sendChat(QuickChat.help);
       host.sendChat(QuickChat.gather);
+      // Typed (2026-10-23): one line, trimmed and cut; empty goes nowhere.
+      b.sendChat(QuickChat.custom, text: '  저기\n  봐!  ');
+      a.sendChat(QuickChat.custom, text: '   ');
+      host.sendChat(QuickChat.custom, text: 'ㅋ' * 50);
       await _pumpMicrotasks();
-      const sent = [
-        (from: 1, chat: QuickChat.help),
-        (from: 0, chat: QuickChat.gather),
+      final sent = [
+        (from: 1, chat: QuickChat.help, text: null),
+        (from: 0, chat: QuickChat.gather, text: null),
+        (from: 2, chat: QuickChat.custom, text: '저기 봐!'),
+        (from: 0, chat: QuickChat.custom, text: 'ㅋ' * quickChatTextMax),
       ];
 
       expect(a.takeChats(), unorderedEquals(sent));
@@ -774,8 +780,8 @@ void main() {
         host.sendChat(QuickChat.welcome);
         await _pumpMicrotasks();
         const said = [
-          (from: 1, chat: QuickChat.hi),
-          (from: 0, chat: QuickChat.welcome),
+          (from: 1, chat: QuickChat.hi, text: null),
+          (from: 0, chat: QuickChat.welcome, text: null),
         ];
         expect(a.takeChats(), unorderedEquals(said));
         expect(b.takeChats(), unorderedEquals(said));

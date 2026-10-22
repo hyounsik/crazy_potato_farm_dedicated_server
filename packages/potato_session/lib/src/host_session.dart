@@ -362,9 +362,9 @@ final class HostSession {
 
   /// The host player (member 0, first in the lobby) sends [chat] to the
   /// party in a run, or to the visitors on the farm.
-  void sendChat(QuickChat chat) {
+  void sendChat(QuickChat chat, {String? text}) {
     if (!hostPlays || _closed) return;
-    _relayChat(0, chat);
+    _relayChat(0, chat, text);
   }
 
   /// The host player walks on their farm: everyone there sees it
@@ -386,10 +386,17 @@ final class HostSession {
   /// A guest's place in the lobby: after the host when the host plays.
   int _lobbySlot(int guestIndex) => (hostPlays ? 1 : 0) + guestIndex;
 
-  void _relayChat(int from, QuickChat chat) {
-    _chats.add((from: from, chat: chat));
+  /// The host words a typed message the same for everyone: one line, cut
+  /// to [quickChatTextMax], or nothing when empty.
+  void _relayChat(int from, QuickChat chat, [String? text]) {
+    final words = chat == QuickChat.custom ? quickChatText(text) : null;
+    if (chat == QuickChat.custom && words == null) return;
+    _chats.add((from: from, chat: chat, text: words));
     if (_chats.length > _keptChats) _chats.removeAt(0);
-    _broadcast(SessionChannel.reliable, QuickChatMessage(chat, from: from));
+    _broadcast(
+      SessionChannel.reliable,
+      QuickChatMessage(chat, from: from, text: words),
+    );
   }
 
   void _onPacket(SessionPacket packet) {
@@ -411,14 +418,14 @@ final class HostSession {
         _onStartRun(packet.peerId, zone);
       case ReadyMessage(:final ready, :final start):
         _onReady(packet.peerId, ready, start);
-      case QuickChatMessage(:final chat):
+      case QuickChatMessage(:final chat, :final text):
         final guest = _guests[packet.peerId];
         if (guest == null) break;
         // In a run by member index; on the farm by place in the lobby.
         final index = _run != null
             ? guest.memberIndex
             : _lobbySlot(_guestOrder.indexOf(guest));
-        if (index != null) _relayChat(index, chat);
+        if (index != null) _relayChat(index, chat, text);
       case FarmWalkMessage(:final walk, :final seq):
         _onWalk(packet.peerId, walk, seq);
       default:

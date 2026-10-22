@@ -12,6 +12,7 @@ final class HostedGuest {
     this.playerId = '',
     this.memberIndex,
     this.connected = true,
+    this.inParty = true,
   });
 
   /// The guest's link now; a guest who comes back mid-run gets a new one.
@@ -25,6 +26,10 @@ final class HostedGuest {
   /// host plays, 0..3 on a dedicated server.
   int? memberIndex;
   bool connected;
+
+  /// In the party that sets out; false for a visitor who only looks around
+  /// the host's farm (2026-10-22).
+  bool inParty;
   int _lastMoveSeq = -1;
   bool _resultSent = false;
 
@@ -52,6 +57,7 @@ final class HostSession {
     this.snapshotEvery = const Duration(milliseconds: 100),
     this.hostPlays = true,
     this.hostName = '',
+    this.canJoinParty,
     int? maxGuests,
   }) : catalogHash = computeCatalogHash(catalog),
        maxGuests = maxGuests ?? (hostPlays ? 3 : 4) {
@@ -69,6 +75,16 @@ final class HostSession {
 
   /// The host player's name, first in [LobbyMessage] when [hostPlays].
   final String hostName;
+
+  /// Whether the guest on [peerId] may join the party (their permission
+  /// covers exploring); null lets everyone.
+  final bool Function(String peerId)? canJoinParty;
+
+  /// The zone a party is gathering for at the host's farm, or null while
+  /// the host only takes visitors ([openParty]). A dedicated server always
+  /// gathers.
+  String? get partyZone => _partyZone;
+  String? _partyZone;
   final int maxGuests;
 
   late final StreamSubscription<SessionPacket> _packetSub;
@@ -117,6 +133,11 @@ final class HostSession {
     if (_run != null) throw StateError('Run already started');
     if (hostPlays != (hostStart != null)) {
       throw ArgumentError.value(hostStart, 'hostStart');
+    }
+    // Visitors who did not join stay home: their visit is over.
+    for (final g in _guests.values.where((g) => !g.inParty).toList()) {
+      _send(g.peerId, SessionChannel.reliable, const VisitEndedMessage());
+      _guests.remove(g.peerId);
     }
     _guestOrder
       ..clear()
@@ -239,6 +260,27 @@ final class HostSession {
     return out;
   }
 
+  /// Starts gathering a party for [zone]: visitors at the farm see it and
+  /// may join ([JoinPartyMessage]).
+  void openParty(String zone) {
+    if (_run != null || _closed) return;
+    _partyZone = zone;
+    _broadcast(SessionChannel.reliable, PartyStateMessage(zone));
+  }
+
+  /// Stops gathering: everyone at the farm is a visitor again.
+  void closeParty() {
+    if (_run != null || _closed || !hostPlays) return;
+    _partyZone = null;
+    for (final g in _guestOrder) {
+      g.inParty = false;
+    }
+    _broadcast(SessionChannel.reliable, const PartyStateMessage(null));
+    _notifyGuests();
+  }
+
+  bool _mayJoin(String peerId) => canJoinParty?.call(peerId) ?? true;
+
   /// Shows the host's farm document [farm] to the guests gathering in the
   /// waiting room; a guest who joins later gets the latest one.
   void shareFarm(Map<String, dynamic> farm) {
@@ -276,6 +318,8 @@ final class HostSession {
         _onCommand(packet.peerId, msg);
       case StartRunMessage(:final zone):
         _onStartRun(packet.peerId, zone);
+      case JoinPartyMessage():
+        _onJoinParty(packet.peerId);
       case QuickChatMessage(:final chat):
         final index = _guests[packet.peerId]?.memberIndex;
         if (_run != null && index != null) _relayChat(index, chat);
@@ -337,6 +381,7 @@ final class HostSession {
       peerId: peerId,
       start: msg.start,
       playerId: msg.playerId,
+      inParty: !hostPlays || (msg.party && _mayJoin(peerId)),
     );
     _guests[peerId] = guest;
     final existing = _guestOrder.indexWhere((g) => g.peerId == peerId);
@@ -352,6 +397,9 @@ final class HostSession {
     );
     if (_sharedFarm case final farm?) {
       _send(peerId, SessionChannel.reliable, FarmViewMessage(farm));
+    }
+    if (_partyZone case final zone?) {
+      _send(peerId, SessionChannel.reliable, PartyStateMessage(zone));
     }
     _notifyGuests();
   }
@@ -406,6 +454,15 @@ final class HostSession {
     _flushEventsAndResults(sim);
   }
 
+  void _onJoinParty(String peerId) {
+    final guest = _guests[peerId];
+    if (guest == null) return;
+    final ok = _run == null && _partyZone != null && _mayJoin(peerId);
+    if (ok) guest.inParty = true;
+    _send(peerId, SessionChannel.reliable, PartyJoinedMessage(accepted: ok));
+    if (ok) _notifyGuests();
+  }
+
   void _onStartRun(String peerId, String zone) {
     if (hostPlays || _run != null || _guestOrder.isEmpty) return;
     if (_guestOrder.first.peerId != peerId) return;
@@ -445,11 +502,12 @@ final class HostSession {
       if (hostPlays) hostName,
       for (final g in _guestOrder) g.name,
     ];
+    final party = [if (hostPlays) true, for (final g in _guestOrder) g.inParty];
     for (final (i, g) in _guestOrder.indexed) {
       _send(
         g.peerId,
         SessionChannel.reliable,
-        LobbyMessage((names: names, you: first + i)),
+        LobbyMessage((names: names, party: party, you: first + i)),
       );
     }
   }

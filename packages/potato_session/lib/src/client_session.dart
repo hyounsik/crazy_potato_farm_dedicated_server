@@ -28,6 +28,10 @@ enum ClientSessionStage {
   /// starved) and [ClientSession.result] is ready to apply to the guest's farm.
   ended,
 
+  /// A visitor's visit is over: the host set out without them
+  /// ([VisitEndedMessage]).
+  closed,
+
   /// The host disconnected in a danger zone and did not come back in time: the
   /// run is void (`multiplayer.md`), so the guest's farm stays as it was
   /// before setting out.
@@ -50,6 +54,7 @@ final class ClientSession {
     required this.start,
     this.buildNumber = 0,
     this.playerId = '',
+    this.party = true,
     this.catalogFiles,
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
@@ -71,6 +76,10 @@ final class ClientSession {
 
   /// This installation's id, sent in [HelloMessage.playerId].
   final String playerId;
+
+  /// Comes for the party; false for a visitor who looks around the host's
+  /// farm first and may [joinParty] later.
+  final bool party;
 
   /// The data files [catalog] was loaded from, sent when a dedicated server
   /// asks for them ([CatalogRequestMessage]). Without them such a server
@@ -98,6 +107,9 @@ final class ClientSession {
   final _lobbyController = StreamController<SessionLobby>.broadcast();
   Map<String, dynamic>? _sharedFarm;
   final _farmController = StreamController<Map<String, dynamic>>.broadcast();
+  String? _partyZone;
+  final _partyController = StreamController<String?>.broadcast();
+  final _joinedController = StreamController<bool>.broadcast();
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -131,6 +143,28 @@ final class ClientSession {
   /// host mode; on a dedicated server the first is the leader).
   SessionLobby? get lobby => _lobby;
   Stream<SessionLobby> get lobbyStream => _lobbyController.stream;
+
+  /// The zone a party is gathering for at the host's farm, or null.
+  String? get partyZone => _partyZone;
+  Stream<String?> get partyZoneStream => _partyController.stream;
+
+  /// The host's answer to [joinParty]: false when the guest's permission
+  /// does not cover exploring (or the party closed).
+  Stream<bool> get partyJoinedStream => _joinedController.stream;
+
+  /// Whether this guest is in the party (a visitor is not until they join).
+  bool get inParty {
+    final lobby = _lobby;
+    if (lobby == null) return party;
+    return lobby.you < lobby.party.length && lobby.party[lobby.you];
+  }
+
+  /// A visitor asks to join the party gathering at the host's farm; the
+  /// lobby shows when it is taken.
+  void joinParty() {
+    if (_stage != ClientSessionStage.waiting || _partyZone == null) return;
+    _send(SessionChannel.reliable, const JoinPartyMessage());
+  }
 
   /// The host's farm document while the party gathers there (host mode).
   Map<String, dynamic>? get sharedFarm => _sharedFarm;
@@ -346,6 +380,7 @@ final class ClientSession {
         catalogHash: catalogHash,
         start: start,
         playerId: playerId,
+        party: party,
       ),
     );
   }
@@ -384,6 +419,13 @@ final class ClientSession {
         } else {
           _send(SessionChannel.reliable, CatalogMessage({...files}));
         }
+      case PartyStateMessage(:final zone):
+        _partyZone = zone;
+        if (!_partyController.isClosed) _partyController.add(zone);
+      case PartyJoinedMessage(:final accepted):
+        if (!_joinedController.isClosed) _joinedController.add(accepted);
+      case VisitEndedMessage():
+        _setStage(ClientSessionStage.closed);
       case FarmViewMessage(:final farm):
         _sharedFarm = farm;
         if (!_farmController.isClosed) _farmController.add(farm);
@@ -640,5 +682,7 @@ final class ClientSession {
     await _stageController.close();
     await _lobbyController.close();
     await _farmController.close();
+    await _partyController.close();
+    await _joinedController.close();
   }
 }

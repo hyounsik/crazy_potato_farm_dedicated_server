@@ -22,10 +22,11 @@ enum QuickChat { no, gather, go, ok, follow, help }
 /// also their party colour) and what.
 typedef QuickChatLine = ({int from, QuickChat chat});
 
-/// Who is in a dedicated server's waiting room, sent to each guest whenever it
-/// changes. The first name is the leader, who picks the zone and sets out;
-/// the order is also the party colour order.
-typedef SessionLobby = ({List<String> names, int you});
+/// Who is in the room, sent to each guest whenever it changes: [names] in
+/// the order they came (the host first in host mode; on a dedicated server
+/// the first is the leader), [party] whether each is in the party (a
+/// visitor at the host's farm is not until they join), and which is [you].
+typedef SessionLobby = ({List<String> names, List<bool> party, int you});
 
 /// Deterministic fingerprint of [catalog] so host and guest can check they run
 /// on the same game data before starting (`realtime-session.md`).
@@ -125,65 +126,72 @@ final class RaidSnapshot {
 sealed class SessionMessage {
   const SessionMessage();
 
-  factory SessionMessage.fromJson(Map<String, dynamic> json) =>
-      switch (json['type'] as String) {
-        'hello' => HelloMessage(
-          buildNumber: json['build'] as int,
-          catalogHash: json['catalog_hash'] as String,
-          start: RaidMemberStart.fromJson(
-            json['start'] as Map<String, dynamic>,
-          ),
-          playerId: json['player_id'] as String? ?? '',
-        ),
-        'catalog_request' => const CatalogRequestMessage(),
-        'catalog' => CatalogMessage(json['files'] as Map<String, dynamic>),
-        'lobby' => LobbyMessage((
-          names: [for (final n in json['names'] as List<Object?>) n! as String],
-          you: json['you'] as int,
-        )),
-        'start_run' => StartRunMessage(json['zone'] as String),
-        'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
-        'quick_chat' => QuickChatMessage(
-          QuickChat.values.byName(json['chat'] as String),
-          from: json['from'] as int? ?? -1,
-        ),
-        'welcome' => WelcomeMessage(
-          accepted: json['accepted'] as bool,
-          rejection: switch (json['rejection']) {
-            final String r => SessionJoinRejection.values.byName(r),
-            _ => null,
-          },
-        ),
-        'run_started' => RunStartedMessage(
-          memberIndex: json['member_index'] as int,
-          runJson: json['run'] as Map<String, dynamic>,
-        ),
-        'move' => MoveMessage(
-          direction: Vec2.fromJson(json['dir'] as List<Object?>),
-          seq: json['seq'] as int? ?? 0,
-        ),
-        'command' => CommandMessage(
-          RaidCommand.fromJson(json['command'] as Map<String, dynamic>),
-        ),
-        'command_rejected' => CommandRejectedMessage(
-          RaidRejection.values.byName(json['rejection'] as String),
-        ),
-        'snapshot' => SnapshotMessage(
-          RaidSnapshot.fromJson(json['snapshot'] as Map<String, dynamic>),
-        ),
-        'events' => EventsMessage(
-          tick: json['tick'] as int,
-          events: [
-            for (final e in json['events'] as List<Object?>)
-              RaidEvent.fromJson(e! as Map<String, dynamic>),
-          ],
-        ),
-        'member_result' => MemberResultMessage(
-          memberIndex: json['member_index'] as int,
-          result: RaidResult.fromJson(json['result'] as Map<String, dynamic>),
-        ),
-        final other => throw FormatException('Unknown SessionMessage $other'),
-      };
+  factory SessionMessage.fromJson(
+    Map<String, dynamic> json,
+  ) => switch (json['type'] as String) {
+    'hello' => HelloMessage(
+      buildNumber: json['build'] as int,
+      catalogHash: json['catalog_hash'] as String,
+      start: RaidMemberStart.fromJson(json['start'] as Map<String, dynamic>),
+      playerId: json['player_id'] as String? ?? '',
+      party: json['party'] as bool? ?? true,
+    ),
+    'party_state' => PartyStateMessage(json['zone'] as String?),
+    'join_party' => const JoinPartyMessage(),
+    'party_joined' => PartyJoinedMessage(accepted: json['accepted'] as bool),
+    'visit_ended' => const VisitEndedMessage(),
+    'catalog_request' => const CatalogRequestMessage(),
+    'catalog' => CatalogMessage(json['files'] as Map<String, dynamic>),
+    'lobby' => LobbyMessage((
+      names: [for (final n in json['names'] as List<Object?>) n! as String],
+      party: [
+        for (final p in json['party'] as List<Object?>? ?? const []) p! as bool,
+      ],
+      you: json['you'] as int,
+    )),
+    'start_run' => StartRunMessage(json['zone'] as String),
+    'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
+    'quick_chat' => QuickChatMessage(
+      QuickChat.values.byName(json['chat'] as String),
+      from: json['from'] as int? ?? -1,
+    ),
+    'welcome' => WelcomeMessage(
+      accepted: json['accepted'] as bool,
+      rejection: switch (json['rejection']) {
+        final String r => SessionJoinRejection.values.byName(r),
+        _ => null,
+      },
+    ),
+    'run_started' => RunStartedMessage(
+      memberIndex: json['member_index'] as int,
+      runJson: json['run'] as Map<String, dynamic>,
+    ),
+    'move' => MoveMessage(
+      direction: Vec2.fromJson(json['dir'] as List<Object?>),
+      seq: json['seq'] as int? ?? 0,
+    ),
+    'command' => CommandMessage(
+      RaidCommand.fromJson(json['command'] as Map<String, dynamic>),
+    ),
+    'command_rejected' => CommandRejectedMessage(
+      RaidRejection.values.byName(json['rejection'] as String),
+    ),
+    'snapshot' => SnapshotMessage(
+      RaidSnapshot.fromJson(json['snapshot'] as Map<String, dynamic>),
+    ),
+    'events' => EventsMessage(
+      tick: json['tick'] as int,
+      events: [
+        for (final e in json['events'] as List<Object?>)
+          RaidEvent.fromJson(e! as Map<String, dynamic>),
+      ],
+    ),
+    'member_result' => MemberResultMessage(
+      memberIndex: json['member_index'] as int,
+      result: RaidResult.fromJson(json['result'] as Map<String, dynamic>),
+    ),
+    final other => throw FormatException('Unknown SessionMessage $other'),
+  };
 
   Map<String, dynamic> toJson() => switch (this) {
     HelloMessage(
@@ -191,6 +199,7 @@ sealed class SessionMessage {
       :final catalogHash,
       :final start,
       :final playerId,
+      :final party,
     ) =>
       {
         'type': 'hello',
@@ -198,12 +207,21 @@ sealed class SessionMessage {
         'catalog_hash': catalogHash,
         'start': start.toJson(),
         if (playerId.isNotEmpty) 'player_id': playerId,
+        if (!party) 'party': false,
       },
+    PartyStateMessage(:final zone) => {'type': 'party_state', 'zone': zone},
+    JoinPartyMessage() => {'type': 'join_party'},
+    PartyJoinedMessage(:final accepted) => {
+      'type': 'party_joined',
+      'accepted': accepted,
+    },
+    VisitEndedMessage() => {'type': 'visit_ended'},
     CatalogRequestMessage() => {'type': 'catalog_request'},
     CatalogMessage(:final files) => {'type': 'catalog', 'files': files},
     LobbyMessage(:final lobby) => {
       'type': 'lobby',
       'names': lobby.names,
+      'party': lobby.party,
       'you': lobby.you,
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
@@ -260,16 +278,48 @@ final class HelloMessage extends SessionMessage {
     required this.catalogHash,
     required this.start,
     this.playerId = '',
+    this.party = true,
   });
 
   final int buildNumber;
   final String catalogHash;
   final RaidMemberStart start;
 
+  /// Whether the guest comes for the party; false for a visitor who only
+  /// looks around the host's farm until they [JoinPartyMessage].
+  final bool party;
+
   /// This installation's id, so a dedicated server (no accounts) can tell
   /// the same player from another with the same nickname ([start] carries
   /// the nickname). Empty in host mode.
   final String playerId;
+}
+
+/// Host → guest on reliable: whether a party is gathering at the host's
+/// farm, and for which [zone] (null: none). Visitors may then join it.
+final class PartyStateMessage extends SessionMessage {
+  const PartyStateMessage(this.zone);
+
+  final String? zone;
+}
+
+/// Visitor → host on reliable: count me in the party.
+final class JoinPartyMessage extends SessionMessage {
+  const JoinPartyMessage();
+}
+
+/// Host → visitor on reliable: whether [JoinPartyMessage] was taken (no
+/// party gathering, or the visitor's permission does not cover it).
+final class PartyJoinedMessage extends SessionMessage {
+  const PartyJoinedMessage({required this.accepted});
+
+  final bool accepted;
+}
+
+/// Host → visitor on reliable: the host set out without them; the visit is
+/// over.
+final class VisitEndedMessage extends SessionMessage {
+  const VisitEndedMessage();
 }
 
 /// Dedicated server → guest on reliable: the server has no game data yet,

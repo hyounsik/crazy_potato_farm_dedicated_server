@@ -630,4 +630,78 @@ void main() {
       await host.close();
     });
   });
+
+  group('Visiting the host farm (2026-10-22)', () {
+    test('visitors look around, join when a party gathers, and the rest '
+        'go home when it sets out', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        hostName: 'Host',
+        canJoinParty: (peer) => peer != 'lookOnly',
+      );
+      ClientSession visitor(String id) => ClientSession(
+        catalog: catalog,
+        transport: net.connectClient(id),
+        start: RaidMemberStart(name: id),
+        party: false,
+      );
+      final traveller = visitor('traveller');
+      final looker = visitor('lookOnly');
+      final idle = visitor('idle');
+      await _pumpMicrotasks();
+      expect(traveller.stage, ClientSessionStage.waiting);
+      expect(traveller.inParty, isFalse);
+      expect(traveller.lobby?.names, ['Host', 'traveller', 'lookOnly', 'idle']);
+      expect(traveller.lobby?.party, [true, false, false, false]);
+
+      // Not before a party gathers.
+      traveller.joinParty();
+      await _pumpMicrotasks();
+      expect(traveller.inParty, isFalse);
+
+      host.openParty('open');
+      await _pumpMicrotasks();
+      expect(traveller.partyZone, 'open');
+      traveller.joinParty();
+      looker.joinParty();
+      await _pumpMicrotasks();
+      expect(traveller.inParty, isTrue);
+      expect(looker.inParty, isFalse, reason: 'permission does not cover it');
+
+      host.startRun(
+        zone: 'open',
+        seed: 1,
+        hostStart: const RaidMemberStart(name: 'Host'),
+      );
+      await _pumpMicrotasks();
+      expect(traveller.stage, ClientSessionStage.playing);
+      expect(traveller.memberIndex, 1);
+      expect(host.run!.members, hasLength(2));
+      expect(looker.stage, ClientSessionStage.closed);
+      expect(idle.stage, ClientSessionStage.closed);
+
+      for (final c in [traveller, looker, idle]) {
+        await c.close();
+      }
+      await host.close();
+    });
+
+    test('a visitor who arrives while a party gathers sees it', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      host.openParty('open');
+      final late = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('late'),
+        start: const RaidMemberStart(name: 'late'),
+        party: false,
+      );
+      await _pumpMicrotasks();
+      expect(late.partyZone, 'open');
+      await late.close();
+      await host.close();
+    });
+  });
 }

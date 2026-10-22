@@ -46,7 +46,7 @@ typedef _TimedSnapshot = ({Duration at, RaidSnapshot snapshot});
 final class ClientSession {
   ClientSession({
     required this.catalog,
-    required this.transport,
+    required ClientTransport transport,
     required this.start,
     this.buildNumber = 0,
     this.playerId = '',
@@ -54,15 +54,18 @@ final class ClientSession {
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
     this.hostReconnectTimeout = const Duration(seconds: 15),
-  }) : catalogHash = computeCatalogHash(catalog) {
-    _packetSub = transport.packets.listen(_onPacket);
-    _connSub = transport.connection.listen(_onConnection);
+  }) : catalogHash = computeCatalogHash(catalog),
+       _transport = transport {
+    _listen(transport);
     if (transport.isConnected) _sendHello();
   }
 
   final Catalog catalog;
   final String catalogHash;
-  final ClientTransport transport;
+
+  /// The link to the host now; [resume] swaps in a new one.
+  ClientTransport get transport => _transport;
+  ClientTransport _transport;
   final RaidMemberStart start;
   final int buildNumber;
 
@@ -76,11 +79,17 @@ final class ClientSession {
 
   final SessionCodec codec;
   final Duration interpolationDelay;
-  final Duration hostReconnectTimeout;
 
-  late final StreamSubscription<({SessionChannel channel, Uint8List bytes})>
+  /// How long to wait for the host after the link drops in a danger zone
+  /// before the run is void; null waits until [giveUp] or a [resume].
+  final Duration? hostReconnectTimeout;
+
+  late StreamSubscription<({SessionChannel channel, Uint8List bytes})>
   _packetSub;
-  late final StreamSubscription<bool> _connSub;
+  late StreamSubscription<bool> _connSub;
+
+  /// Waiting for the host to take this guest back after [resume].
+  bool _resuming = false;
 
   ClientSessionStage _stage = ClientSessionStage.connecting;
   final _stageController = StreamController<ClientSessionStage>.broadcast();
@@ -183,7 +192,8 @@ final class ClientSession {
     final sim = _run;
     if (_stage == ClientSessionStage.hostDisconnected) {
       _disconnectedFor += elapsed;
-      if (_disconnectedFor >= hostReconnectTimeout) {
+      final timeout = hostReconnectTimeout;
+      if (timeout != null && _disconnectedFor >= timeout) {
         if (sim != null && !sim.isDanger) {
           // Safe zone: keep what was gathered and go home (`multiplayer.md`).
           _finishSafeDisconnect(sim);
@@ -252,7 +262,9 @@ final class ClientSession {
   void _onConnection(bool connected) {
     if (_closed) return;
     if (connected) {
-      if (!_helloSent && _stage == ClientSessionStage.connecting) {
+      if (_resuming) {
+        _sendHello();
+      } else if (!_helloSent && _stage == ClientSessionStage.connecting) {
         _sendHello();
       } else if (_stage == ClientSessionStage.hostDisconnected) {
         _disconnectedFor = Duration.zero;
@@ -269,6 +281,53 @@ final class ClientSession {
         _setStage(ClientSessionStage.hostDisconnected);
       }
     }
+  }
+
+  void _listen(ClientTransport transport) {
+    _packetSub = transport.packets.listen(_onPacket);
+    _connSub = transport.connection.listen(_onConnection);
+  }
+
+  /// Takes [transport] in place of the link that dropped mid-run and asks
+  /// the host to take this guest back as the same member; the host answers
+  /// with the run as it is now (2026-10-22, 사용자). If the run is gone the
+  /// stage turns [ClientSessionStage.aborted]. The caller closes the old
+  /// transport.
+  Future<void> resume(ClientTransport transport) async {
+    if (_closed ||
+        _run == null ||
+        _stage != ClientSessionStage.hostDisconnected) {
+      return;
+    }
+    await _packetSub.cancel();
+    await _connSub.cancel();
+    _transport = transport;
+    _resuming = true;
+    _listen(transport);
+    if (transport.isConnected) _sendHello();
+  }
+
+  /// Stops waiting for the link to come back (2026-10-22, 사용자).
+  ///
+  /// In a safe zone the guest goes home with what they gathered. In a
+  /// danger zone the run is void ([ClientSessionStage.aborted]: back to
+  /// before setting out), since the guest cannot tell their own link
+  /// dropping from the host going away; but a guest who was down (or
+  /// already out) when the link dropped fails, so dropping the link is no
+  /// way out of a lost fight. Judged from the last state this guest got.
+  void giveUp() {
+    final sim = _run;
+    if (sim == null || _stage != ClientSessionStage.hostDisconnected) return;
+    _resuming = false;
+    if (!sim.isDanger) return _finishSafeDisconnect(sim);
+    final me = sim.members[_memberIndex];
+    if (!me.isDowned && !me.player.isDown && !me.isOut) {
+      _setStage(ClientSessionStage.aborted);
+      return;
+    }
+    me.outcome ??= RaidOutcome.fainted;
+    _result = sim.resultOf(me);
+    _setStage(ClientSessionStage.ended);
   }
 
   void _finishSafeDisconnect(RaidSimulation sim) {
@@ -300,6 +359,16 @@ final class ClientSession {
       return;
     }
     switch (msg) {
+      case WelcomeMessage(:final accepted) when _resuming:
+        // Taken back: the run follows. Turned away: the run is gone.
+        if (!accepted) {
+          _resuming = false;
+          _setStage(ClientSessionStage.aborted);
+        }
+      case LobbyMessage() when _resuming:
+        // A new waiting room instead of the run: the run is over.
+        _resuming = false;
+        _setStage(ClientSessionStage.aborted);
       case WelcomeMessage(:final accepted, :final rejection):
         if (accepted) {
           _setStage(ClientSessionStage.waiting);
@@ -322,6 +391,11 @@ final class ClientSession {
         _lobby = lobby;
         if (!_lobbyController.isClosed) _lobbyController.add(lobby);
       case RunStartedMessage(:final memberIndex, :final runJson):
+        // First start, or the run as it is now after [resume].
+        _resuming = false;
+        _disconnectedFor = Duration.zero;
+        _reconcileError = Vec2.zero;
+        _lastSentMove = Vec2.zero;
         _memberIndex = memberIndex;
         final sim = RaidSimulation.fromJson(runJson, catalog)
           ..focusIndex = memberIndex;

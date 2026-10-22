@@ -14,7 +14,8 @@ final class HostedGuest {
     this.connected = true,
   });
 
-  final String peerId;
+  /// The guest's link now; a guest who comes back mid-run gets a new one.
+  String peerId;
   final RaidMemberStart start;
 
   /// The guest's installation id from [HelloMessage.playerId].
@@ -295,6 +296,19 @@ final class HostSession {
       );
       return;
     }
+    // Back mid-run (the link dropped, the app stayed up): the same member
+    // again, with the run as it is now (2026-10-22, 사용자).
+    if (_run != null) {
+      final back = _guestOrder
+          .where(
+            (g) =>
+                g.memberIndex != null &&
+                (g.peerId == peerId ||
+                    (msg.playerId.isNotEmpty && g.playerId == msg.playerId)),
+          )
+          .firstOrNull;
+      if (back != null) return _rejoin(back, peerId);
+    }
     // The same installation again in the waiting room: it replaces the
     // stale connection it left behind.
     if (_run == null && msg.playerId.isNotEmpty) {
@@ -339,6 +353,31 @@ final class HostSession {
     if (_sharedFarm case final farm?) {
       _send(peerId, SessionChannel.reliable, FarmViewMessage(farm));
     }
+    _notifyGuests();
+  }
+
+  void _rejoin(HostedGuest guest, String peerId) {
+    final sim = _run!;
+    final index = guest.memberIndex!;
+    _guests.remove(guest.peerId);
+    guest
+      ..peerId = peerId
+      ..connected = true
+      .._lastMoveSeq = -1
+      .._resultSent = false;
+    _guests[peerId] = guest;
+    _send(
+      peerId,
+      SessionChannel.reliable,
+      const WelcomeMessage(accepted: true),
+    );
+    _send(
+      peerId,
+      SessionChannel.reliable,
+      RunStartedMessage(memberIndex: index, runJson: sim.toJson()),
+    );
+    // A member whose run ended while away gets their result again.
+    _flushEventsAndResults(sim);
     _notifyGuests();
   }
 

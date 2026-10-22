@@ -522,4 +522,112 @@ void main() {
       await host.close();
     });
   });
+
+  group('Coming back mid-run (2026-10-22)', () {
+    Future<(InMemorySessionNetwork, HostSession, ClientSession)> started({
+      String zone = 'danger_open',
+    }) async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      final guest = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'A', food: 20),
+        playerId: 'install-a',
+        hostReconnectTimeout: null,
+      );
+      await _pumpMicrotasks();
+      host.startRun(
+        zone: zone,
+        seed: 2,
+        hostStart: const RaidMemberStart(name: 'H', food: 20),
+      );
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.playing);
+      return (net, host, guest);
+    }
+
+    test('a guest whose link dropped comes back as the same member', () async {
+      final (net, host, guest) = await started();
+      final run = host.run!;
+      run.setMoveOf(run.members[1], const Vec2(1, 0));
+      net.disconnectClient('a');
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.hostDisconnected);
+      expect(host.guests.single.connected, isFalse);
+
+      // Waits as long as it takes (no timeout), the run goes on meanwhile.
+      guest.advance(const Duration(minutes: 5));
+      expect(guest.stage, ClientSessionStage.hostDisconnected);
+      for (var i = 0; i < 20; i++) {
+        host.stepOnce();
+      }
+      final movedTo = run.members[1].player.position;
+
+      await guest.resume(net.connectClient('a2'));
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.playing);
+      expect(guest.memberIndex, 1);
+      expect(guest.run!.members[1].player.position, movedTo);
+      expect(host.guests.single.peerId, 'a2');
+      expect(host.guests.single.connected, isTrue);
+
+      // Commands reach the host from the new link.
+      guest.setMove(const Vec2(0, 1));
+      await _pumpMicrotasks();
+      expect(run.members[1].move, const Vec2(0, 1));
+
+      await guest.close();
+      await host.close();
+    });
+
+    test('if the run is gone the guest run is void', () async {
+      final (net, host, guest) = await started();
+      net.disconnectClient('a');
+      await _pumpMicrotasks();
+      await host.close();
+
+      // Another session with no run takes the hello into its waiting room.
+      final other = InMemorySessionNetwork();
+      final fresh = HostSession(catalog: catalog, transport: other.host);
+      await guest.resume(other.connectClient('a'));
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.aborted);
+
+      await guest.close();
+      await fresh.close();
+    });
+
+    test('giving up voids a danger run for a guest who was standing', () async {
+      final (net, host, guest) = await started();
+      net.disconnectClient('a');
+      await _pumpMicrotasks();
+      guest.giveUp();
+      expect(guest.stage, ClientSessionStage.aborted);
+      await guest.close();
+      await host.close();
+    });
+
+    test('giving up fails it for a guest who was down', () async {
+      final (net, host, guest) = await started();
+      final run = host.run!;
+      run.enemies.clear();
+      run.clones.clear();
+      final me = run.members[1];
+      me.player.position = run.members[0].player.position + const Vec2(4, 0);
+      me.player.hp = 0;
+      host.stepOnce();
+      host.broadcastSnapshot();
+      await _pumpMicrotasks();
+      expect(guest.run!.members[1].isDowned, isTrue);
+
+      net.disconnectClient('a');
+      await _pumpMicrotasks();
+      guest.giveUp();
+      expect(guest.stage, ClientSessionStage.ended);
+      expect(guest.result!.lost, isTrue);
+      await guest.close();
+      await host.close();
+    });
+  });
 }

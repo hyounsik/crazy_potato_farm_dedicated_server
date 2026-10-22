@@ -133,4 +133,65 @@ void main() {
     await until(() => server.room.catalog == null);
     expect(server.room.session, isNull);
   });
+
+  test('a guest whose link dropped mid-run comes back to it', () async {
+    final first = await WebSocketClientTransport.connect(
+      Uri.parse('ws://127.0.0.1:${server.port}'),
+    );
+    final guest = ClientSession(
+      catalog: catalog,
+      transport: first,
+      start: const RaidMemberStart(name: 'Solo', food: 20),
+      buildNumber: 7,
+      playerId: 'install-solo',
+      catalogFiles: files,
+      hostReconnectTimeout: null,
+    );
+    addTearDown(guest.close);
+    await until(() => guest.stage == ClientSessionStage.waiting);
+    final danger = catalog.zones.values.firstWhere((z) => z.danger != null);
+    guest.requestStart(danger.id);
+    await until(() => guest.stage == ClientSessionStage.playing);
+
+    await first.close();
+    // Closing our own end is a dropped link as far as the session knows.
+    await until(() => server.room.session!.guests.single.connected == false);
+    expect(server.room.session!.run, isNotNull, reason: 'kept for a while');
+
+    final again = await WebSocketClientTransport.connect(
+      Uri.parse('ws://127.0.0.1:${server.port}'),
+    );
+    addTearDown(again.close);
+    // The guest's own stage follows its old link; resume once it noticed.
+    await until(() => guest.stage == ClientSessionStage.hostDisconnected);
+    await guest.resume(again);
+    await until(() => guest.stage == ClientSessionStage.playing);
+    expect(guest.memberIndex, 0);
+    expect(server.room.session!.guests.single.connected, isTrue);
+  });
+
+  test('with nobody back in time the run ends', () async {
+    final net = InMemorySessionNetwork();
+    final room = DedicatedRoom(
+      transport: net.host,
+      emptyRunGrace: const Duration(milliseconds: 100),
+      tickEvery: const Duration(milliseconds: 5),
+    );
+    addTearDown(room.close);
+    final guest = ClientSession(
+      catalog: catalog,
+      transport: net.connectClient('g'),
+      start: const RaidMemberStart(name: 'G', food: 20),
+      catalogFiles: files,
+      playerId: 'install-g',
+    );
+    addTearDown(guest.close);
+    await until(() => guest.stage == ClientSessionStage.waiting);
+    guest.requestStart(catalog.zones.keys.first);
+    await until(() => guest.stage == ClientSessionStage.playing);
+
+    net.disconnectClient('g');
+    await until(() => room.session == null);
+    expect(room.catalog, isNull);
+  });
 }

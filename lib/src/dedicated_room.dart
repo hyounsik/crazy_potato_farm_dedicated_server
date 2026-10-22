@@ -23,6 +23,7 @@ final class DedicatedRoom {
     required this.transport,
     this.codec = const JsonSessionCodec(),
     this.tickEvery = const Duration(milliseconds: 16),
+    this.emptyRunGrace = const Duration(minutes: 2),
     this.log,
     Random? random,
   }) : _random = random ?? Random() {
@@ -36,6 +37,10 @@ final class DedicatedRoom {
 
   /// How often the run is stepped while it is going.
   final Duration tickEvery;
+
+  /// How long a run goes on with nobody connected, so a guest whose link
+  /// dropped can come back to it (2026-10-22 *(제안)*).
+  final Duration emptyRunGrace;
 
   /// Where the room reports what happens (catalog in, run started, reset).
   final void Function(String message)? log;
@@ -58,6 +63,7 @@ final class DedicatedRoom {
   StreamSubscription<String>? _startSub;
   Timer? _ticker;
   final Stopwatch _sinceTick = Stopwatch();
+  Duration _emptyFor = Duration.zero;
   bool _closed = false;
 
   /// The waiting room or run now, once a guest has brought a catalog.
@@ -152,6 +158,7 @@ final class DedicatedRoom {
     _sinceTick
       ..reset()
       ..start();
+    _emptyFor = Duration.zero;
     _ticker = Timer.periodic(tickEvery, (_) => _tick());
   }
 
@@ -164,26 +171,39 @@ final class DedicatedRoom {
       ..reset()
       ..start();
     session.advance(elapsed);
-    // A guest who dropped stays in the world defenseless and may never get
-    // out; the run is done for the room once everyone still here is out.
+    // A guest who dropped stays in the world defenseless and may come back
+    // (`HostSession` takes them back as the same member). The run is done
+    // for the room once everyone still here is out; with nobody here it
+    // waits [emptyRunGrace] for someone to come back.
     final stillHere = [
       for (final g in session.guests)
         if (g.connected && g.memberIndex != null) run.members[g.memberIndex!],
     ];
-    if (run.isOver || stillHere.every((m) => m.isOut)) {
+    if (!run.isOver && stillHere.isEmpty) {
+      _emptyFor += elapsed;
+      if (_emptyFor < emptyRunGrace) return;
+      log?.call('Nobody came back');
+      if (_connected.isEmpty) _catalog = null;
+    } else {
+      _emptyFor = Duration.zero;
+      if (!run.isOver && !stillHere.every((m) => m.isOut)) return;
       log?.call('Run over');
-      unawaited(
-        _closeSession().then((_) {
-          if (!_closed && _catalog != null) _openWaitingRoom();
-        }),
-      );
     }
+    unawaited(
+      _closeSession().then((_) {
+        if (!_closed && _catalog != null) _openWaitingRoom();
+      }),
+    );
   }
 
   void _onPeerDisconnected(String peerId) {
     _connected.remove(peerId);
     _pendingHellos.remove(peerId);
     _relay?.disconnect(peerId);
+    // A run in progress keeps going for a guest to come back to; [_tick]
+    // ends it.
+    final run = _session?.run;
+    if (run != null && !run.isOver) return;
     if (_connected.isEmpty && (_session != null || _catalog != null)) {
       log?.call('Everyone left; waiting for a new catalog');
       _catalog = null;

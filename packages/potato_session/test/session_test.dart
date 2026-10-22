@@ -237,14 +237,30 @@ void main() {
       guest.sendCommand(const GoHome());
       await _pumpMicrotasks();
 
-      expect(guest.stage, ClientSessionStage.ended);
+      // Out first: the guest has their result and watches the rest
+      // (2026-10-22, 사용자).
+      expect(guest.stage, ClientSessionStage.playing);
       expect(guest.result, isNotNull);
       expect(guest.result!.outcome, RaidOutcome.wentHome);
 
-      // Host is still running until host also goes home.
+      // Host is still running until host also goes home; then everyone's
+      // run is over.
       expect(host.run!.outcome, isNull);
       host.run!.apply(const GoHome());
       expect(host.run!.isOver, isTrue);
+      host.stepOnce();
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.ended);
+      expect(guest.result!.outcome, RaidOutcome.wentHome);
+
+      // Back at the host's farm, the room still open.
+      host.returnToFarm();
+      await _pumpMicrotasks();
+      expect(host.run, isNull);
+      expect(guest.stage, ClientSessionStage.waiting);
+      expect(guest.run, isNull);
+      expect(guest.lobby?.names, hasLength(2));
+      expect(guest.result, isNotNull, reason: 'kept until brought home');
 
       await guest.close();
       await host.close();
@@ -633,43 +649,48 @@ void main() {
   });
 
   group('Visiting the host farm (2026-10-22)', () {
-    test('visitors look around, join when a party gathers, and the rest '
-        'go home when it sets out', () async {
+    test('everyone at the farm gets ready for the zone the host picks, and '
+        'all of them set out together (2026-10-22)', () async {
       final net = InMemorySessionNetwork();
       final host = HostSession(
         catalog: catalog,
         transport: net.host,
         hostName: 'Host',
-        canJoinParty: (peer) => peer != 'lookOnly',
       );
-      ClientSession visitor(String id) => ClientSession(
+      ClientSession friend(String id) => ClientSession(
         catalog: catalog,
         transport: net.connectClient(id),
         start: RaidMemberStart(name: id),
-        party: false,
       );
-      final traveller = visitor('traveller');
-      final looker = visitor('lookOnly');
-      final idle = visitor('idle');
+      final a = friend('a');
+      final b = friend('b');
       await _pumpMicrotasks();
-      expect(traveller.stage, ClientSessionStage.waiting);
-      expect(traveller.inParty, isFalse);
-      expect(traveller.lobby?.names, ['Host', 'traveller', 'lookOnly', 'idle']);
-      expect(traveller.lobby?.party, [true, false, false, false]);
+      expect(a.stage, ClientSessionStage.waiting);
+      expect(a.lobby?.names, ['Host', 'a', 'b']);
+      expect(a.lobby?.ready, [true, false, false]);
 
-      // Not before a party gathers.
-      traveller.joinParty();
+      // Not before the host picks a zone.
+      a.setReady(true);
       await _pumpMicrotasks();
-      expect(traveller.inParty, isFalse);
+      expect(a.isReady, isFalse);
 
       host.openParty('open');
       await _pumpMicrotasks();
-      expect(traveller.partyZone, 'open');
-      traveller.joinParty();
-      looker.joinParty();
+      expect(a.partyZone, 'open');
+      a.setReady(true);
       await _pumpMicrotasks();
-      expect(traveller.inParty, isTrue);
-      expect(looker.inParty, isFalse, reason: 'permission does not cover it');
+      expect(a.isReady, isTrue);
+      expect(host.allReady, isFalse, reason: 'b is not ready yet');
+      b.setReady(true);
+      await _pumpMicrotasks();
+      expect(host.allReady, isTrue);
+      expect(a.lobby?.ready, [true, true, true]);
+
+      // A new pick starts readiness over.
+      host.openParty('danger_open');
+      await _pumpMicrotasks();
+      expect(host.allReady, isFalse);
+      expect(b.isReady, isFalse);
 
       host.startRun(
         zone: 'open',
@@ -677,15 +698,47 @@ void main() {
         hostStart: const RaidMemberStart(name: 'Host'),
       );
       await _pumpMicrotasks();
-      expect(traveller.stage, ClientSessionStage.playing);
-      expect(traveller.memberIndex, 1);
-      expect(host.run!.members, hasLength(2));
-      expect(looker.stage, ClientSessionStage.closed);
-      expect(idle.stage, ClientSessionStage.closed);
+      expect(host.run!.members, hasLength(3), reason: 'nobody stays behind');
+      expect(a.stage, ClientSessionStage.playing);
+      expect(b.stage, ClientSessionStage.playing);
+      expect(b.memberIndex, 2);
 
-      for (final c in [traveller, looker, idle]) {
-        await c.close();
-      }
+      await a.close();
+      await b.close();
+      await host.close();
+    });
+
+    test('a countdown tells everyone when the party sets out, and a guest '
+        'back from a run sends what they bring now', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(catalog: catalog, transport: net.host);
+      final a = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'a', food: 3),
+      );
+      await _pumpMicrotasks();
+      host.openParty('open', countdown: const Duration(seconds: 30));
+      await _pumpMicrotasks();
+      final left = a.departsAt!.difference(DateTime.now());
+      expect(left.inSeconds, inInclusiveRange(28, 30));
+      expect(host.departsAt, isNotNull);
+
+      a.setReady(true, start: const RaidMemberStart(name: 'a', food: 7));
+      await _pumpMicrotasks();
+      expect(host.guests.single.ready, isTrue);
+      expect(host.guests.single.start.food, 7);
+
+      // Without a pick, a new start still goes through, not ready.
+      host.closeParty();
+      await _pumpMicrotasks();
+      expect(a.departsAt, isNull);
+      a.setReady(true, start: const RaidMemberStart(name: 'a', food: 2));
+      await _pumpMicrotasks();
+      expect(host.guests.single.ready, isFalse);
+      expect(host.guests.single.start.food, 2);
+
+      await a.close();
       await host.close();
     });
 
@@ -702,7 +755,6 @@ void main() {
           catalog: catalog,
           transport: net.connectClient(id),
           start: RaidMemberStart(name: id),
-          party: false,
         );
         final a = visitor('a');
         final b = visitor('b');
@@ -752,7 +804,6 @@ void main() {
         catalog: catalog,
         transport: link,
         start: const RaidMemberStart(name: 'a'),
-        party: false,
       );
       await _pumpMicrotasks();
       const codec = JsonSessionCodec();
@@ -776,7 +827,6 @@ void main() {
         catalog: catalog,
         transport: net.connectClient('late'),
         start: const RaidMemberStart(name: 'late'),
-        party: false,
       );
       await _pumpMicrotasks();
       expect(late.partyZone, 'open');

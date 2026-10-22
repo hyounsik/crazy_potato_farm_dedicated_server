@@ -12,12 +12,14 @@ final class HostedGuest {
     this.playerId = '',
     this.memberIndex,
     this.connected = true,
-    this.inParty = true,
   });
 
   /// The guest's link now; a guest who comes back mid-run gets a new one.
   String peerId;
-  final RaidMemberStart start;
+
+  /// What the guest brings; replaced when they get ready again
+  /// ([ReadyMessage.start]).
+  RaidMemberStart start;
 
   /// The guest's installation id from [HelloMessage.playerId].
   final String playerId;
@@ -27,9 +29,9 @@ final class HostedGuest {
   int? memberIndex;
   bool connected;
 
-  /// In the party that sets out; false for a visitor who only looks around
-  /// the host's farm (2026-10-22).
-  bool inParty;
+  /// Ready to set out for the zone the host picked (2026-10-22, 사용자).
+  /// Everyone in the room goes together, so the host waits for all.
+  bool ready = false;
 
   /// Where they walk on the host's farm, the latest heard (null: not yet).
   FarmWalk? walk;
@@ -61,7 +63,6 @@ final class HostSession {
     this.snapshotEvery = const Duration(milliseconds: 100),
     this.hostPlays = true,
     this.hostName = '',
-    this.canJoinParty,
     int? maxGuests,
   }) : catalogHash = computeCatalogHash(catalog),
        maxGuests = maxGuests ?? (hostPlays ? 3 : 4) {
@@ -80,15 +81,16 @@ final class HostSession {
   /// The host player's name, first in [LobbyMessage] when [hostPlays].
   final String hostName;
 
-  /// Whether the guest on [peerId] may join the party (their permission
-  /// covers exploring); null lets everyone.
-  final bool Function(String peerId)? canJoinParty;
-
-  /// The zone a party is gathering for at the host's farm, or null while
-  /// the host only takes visitors ([openParty]). A dedicated server always
-  /// gathers.
+  /// The zone the host picked to set out for, or null while friends only
+  /// gather at the farm ([openParty]).
   String? get partyZone => _partyZone;
   String? _partyZone;
+
+  /// When everyone sets out anyway, ready or not (2026-10-22, 사용자: 30 s);
+  /// null without a countdown. The owner sets out when it passes.
+  DateTime? get departsAt => _departsAt;
+  DateTime? _departsAt;
+  bool _overSent = false;
   final int maxGuests;
 
   late final StreamSubscription<SessionPacket> _packetSub;
@@ -112,8 +114,12 @@ final class HostSession {
   Duration _sinceSnapshot = Duration.zero;
   bool _closed = false;
 
-  /// Guests currently in the party (waiting room or in the run).
+  /// Guests currently in the room (at the farm or in the run). All of them
+  /// set out together.
   List<HostedGuest> get guests => List.unmodifiable(_guestOrder);
+
+  /// Whether every guest is ready to set out (2026-10-22, 사용자).
+  bool get allReady => _guestOrder.every((g) => g.ready);
 
   /// Fires whenever the guest list or a guest's connection changes.
   Stream<List<HostedGuest>> get guestsChanged => _guestsChanged.stream;
@@ -126,8 +132,9 @@ final class HostSession {
   /// The authoritative run once [startRun] has been called.
   RaidSimulation? get run => _run;
 
-  /// Starts the party run with [hostStart] as member 0 and the joined
-  /// [guests] as members 1..N, and sends [RunStartedMessage] to each guest.
+  /// Starts the party run with [hostStart] as member 0 and every guest in
+  /// the room as members 1..N (nobody stays behind, 2026-10-22, 사용자), and
+  /// sends [RunStartedMessage] to each guest.
   /// Without [hostPlays], [hostStart] is left out and guests are 0..N-1.
   RaidSimulation startRun({
     required String zone,
@@ -138,11 +145,6 @@ final class HostSession {
     if (_run != null) throw StateError('Run already started');
     if (hostPlays != (hostStart != null)) {
       throw ArgumentError.value(hostStart, 'hostStart');
-    }
-    // Visitors who did not join stay home: their visit is over.
-    for (final g in _guests.values.where((g) => !g.inParty).toList()) {
-      _send(g.peerId, SessionChannel.reliable, const VisitEndedMessage());
-      _guests.remove(g.peerId);
     }
     _guestOrder
       ..clear()
@@ -163,6 +165,8 @@ final class HostSession {
     _run = sim;
     _clock = FixedStepClock(Duration(milliseconds: sim.rules.stepMillis));
     _sinceSnapshot = Duration.zero;
+    _departsAt = null;
+    _overSent = false;
 
     final initialJson = sim.toJson();
     for (var i = 0; i < _guestOrder.length; i++) {
@@ -199,6 +203,7 @@ final class HostSession {
     for (var i = 0; i < steps && !sim.isOver; i++) {
       stepOnce();
     }
+    if (sim.isOver) _flushEventsAndResults(sim);
     _sinceSnapshot += elapsed;
     if (_sinceSnapshot >= snapshotEvery) {
       _sinceSnapshot = Duration.zero;
@@ -211,12 +216,21 @@ final class HostSession {
   /// member results to guests on the reliable channel.
   void stepOnce() {
     final sim = _run;
-    if (sim == null || sim.isOver) return;
-    sim.step();
+    if (sim == null) return;
+    // Over already (the host's own last move ended it): only tell everyone.
+    if (!sim.isOver) sim.step();
     _flushEventsAndResults(sim);
   }
 
   void _flushEventsAndResults(RaidSimulation sim) {
+    _flushResults(sim);
+    if (sim.isOver && !_overSent) {
+      _overSent = true;
+      _broadcast(SessionChannel.reliable, const RunOverMessage());
+    }
+  }
+
+  void _flushResults(RaidSimulation sim) {
     final events = sim.takeEvents();
     if (events.isNotEmpty) {
       _hostEvents.addAll(events);
@@ -267,26 +281,76 @@ final class HostSession {
     return out;
   }
 
-  /// Starts gathering a party for [zone]: visitors at the farm see it and
-  /// may join ([JoinPartyMessage]).
-  void openParty(String zone) {
+  /// Picks [zone] to set out for: everyone at the farm gets ready for it
+  /// ([ReadyMessage]); readiness starts over. With a [countdown], everyone
+  /// sets out when it ends, ready or not ([departsAt]).
+  void openParty(String zone, {Duration countdown = Duration.zero}) {
     if (_run != null || _closed) return;
     _partyZone = zone;
-    _broadcast(SessionChannel.reliable, PartyStateMessage(zone));
+    _departsAt = countdown > Duration.zero
+        ? DateTime.now().add(countdown)
+        : null;
+    _setAllReady(false);
+    _broadcast(SessionChannel.reliable, _partyState());
+    _notifyGuests();
   }
 
-  /// Stops gathering: everyone at the farm is a visitor again.
+  PartyStateMessage _partyState() {
+    final at = _departsAt;
+    final left = at == null ? Duration.zero : at.difference(DateTime.now());
+    return PartyStateMessage(
+      _partyZone,
+      left: left.isNegative ? Duration.zero : left,
+    );
+  }
+
+  /// Back at the farm after everyone's run ended, the room still open
+  /// (2026-10-22, 사용자): guests gather again for the next run. Those
+  /// whose link dropped in the run leave the room.
+  void returnToFarm() {
+    if (_run == null || _closed) return;
+    _run = null;
+    _clock = null;
+    _partyZone = null;
+    _departsAt = null;
+    _overSent = false;
+    _hostEvents.clear();
+    _chats.clear();
+    for (final g in _guestOrder.where((g) => !g.connected).toList()) {
+      _guests.remove(g.peerId);
+      _guestOrder.remove(g);
+    }
+    for (final g in _guestOrder) {
+      g
+        ..memberIndex = null
+        ..ready = false
+        ..walk = null
+        .._resultSent = false
+        .._lastMoveSeq = -1
+        .._lastWalkSeq = -1;
+    }
+    _broadcast(SessionChannel.reliable, const BackToFarmMessage());
+    if (_sharedFarm case final farm?) {
+      _broadcast(SessionChannel.reliable, FarmViewMessage(farm));
+    }
+    _notifyGuests();
+  }
+
+  /// Takes the pick back: nobody is getting ready.
   void closeParty() {
     if (_run != null || _closed || !hostPlays) return;
     _partyZone = null;
-    for (final g in _guestOrder) {
-      g.inParty = false;
-    }
+    _departsAt = null;
+    _setAllReady(false);
     _broadcast(SessionChannel.reliable, const PartyStateMessage(null));
     _notifyGuests();
   }
 
-  bool _mayJoin(String peerId) => canJoinParty?.call(peerId) ?? true;
+  void _setAllReady(bool ready) {
+    for (final g in _guestOrder) {
+      g.ready = ready;
+    }
+  }
 
   /// Shows the host's farm document [farm] to the guests gathering in the
   /// waiting room; a guest who joins later gets the latest one.
@@ -345,8 +409,8 @@ final class HostSession {
         _onCommand(packet.peerId, msg);
       case StartRunMessage(:final zone):
         _onStartRun(packet.peerId, zone);
-      case JoinPartyMessage():
-        _onJoinParty(packet.peerId);
+      case ReadyMessage(:final ready, :final start):
+        _onReady(packet.peerId, ready, start);
       case QuickChatMessage(:final chat):
         final guest = _guests[packet.peerId];
         if (guest == null) break;
@@ -415,7 +479,6 @@ final class HostSession {
       peerId: peerId,
       start: msg.start,
       playerId: msg.playerId,
-      inParty: !hostPlays || (msg.party && _mayJoin(peerId)),
     );
     _guests[peerId] = guest;
     final existing = _guestOrder.indexWhere((g) => g.peerId == peerId);
@@ -432,8 +495,8 @@ final class HostSession {
     if (_sharedFarm case final farm?) {
       _send(peerId, SessionChannel.reliable, FarmViewMessage(farm));
     }
-    if (_partyZone case final zone?) {
-      _send(peerId, SessionChannel.reliable, PartyStateMessage(zone));
+    if (_partyZone != null) {
+      _send(peerId, SessionChannel.reliable, _partyState());
     }
     _notifyGuests();
   }
@@ -458,8 +521,12 @@ final class HostSession {
       SessionChannel.reliable,
       RunStartedMessage(memberIndex: index, runJson: sim.toJson()),
     );
-    // A member whose run ended while away gets their result again.
+    // A member whose run ended while away gets their result again, and
+    // the end of everyone's run if it came.
     _flushEventsAndResults(sim);
+    if (_overSent) {
+      _send(peerId, SessionChannel.reliable, const RunOverMessage());
+    }
     _notifyGuests();
   }
 
@@ -504,13 +571,14 @@ final class HostSession {
     _flushEventsAndResults(sim);
   }
 
-  void _onJoinParty(String peerId) {
+  void _onReady(String peerId, bool ready, RaidMemberStart? start) {
     final guest = _guests[peerId];
-    if (guest == null) return;
-    final ok = _run == null && _partyZone != null && _mayJoin(peerId);
-    if (ok) guest.inParty = true;
-    _send(peerId, SessionChannel.reliable, PartyJoinedMessage(accepted: ok));
-    if (ok) _notifyGuests();
+    if (guest == null || _run != null) return;
+    if (start != null) guest.start = start;
+    final next = ready && _partyZone != null;
+    if (guest.ready == next) return;
+    guest.ready = next;
+    _notifyGuests();
   }
 
   void _onStartRun(String peerId, String zone) {
@@ -552,12 +620,12 @@ final class HostSession {
       if (hostPlays) hostName,
       for (final g in _guestOrder) g.name,
     ];
-    final party = [if (hostPlays) true, for (final g in _guestOrder) g.inParty];
+    final ready = [if (hostPlays) true, for (final g in _guestOrder) g.ready];
     for (final (i, g) in _guestOrder.indexed) {
       _send(
         g.peerId,
         SessionChannel.reliable,
-        LobbyMessage((names: names, party: party, you: first + i)),
+        LobbyMessage((names: names, ready: ready, you: first + i)),
       );
     }
   }

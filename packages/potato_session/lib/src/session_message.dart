@@ -66,9 +66,10 @@ final class FarmWalk {
 
 /// Who is in the room, sent to each guest whenever it changes: [names] in
 /// the order they came (the host first in host mode; on a dedicated server
-/// the first is the leader), [party] whether each is in the party (a
-/// visitor at the host's farm is not until they join), and which is [you].
-typedef SessionLobby = ({List<String> names, List<bool> party, int you});
+/// the first is the leader), [ready] whether each is ready to set out for
+/// the zone the host picked (the host always is), and which is [you].
+/// Everyone in the room goes together (2026-10-22, 사용자).
+typedef SessionLobby = ({List<String> names, List<bool> ready, int you});
 
 /// Deterministic fingerprint of [catalog] so host and guest can check they run
 /// on the same game data before starting (`realtime-session.md`).
@@ -176,18 +177,26 @@ sealed class SessionMessage {
       catalogHash: json['catalog_hash'] as String,
       start: RaidMemberStart.fromJson(json['start'] as Map<String, dynamic>),
       playerId: json['player_id'] as String? ?? '',
-      party: json['party'] as bool? ?? true,
     ),
-    'party_state' => PartyStateMessage(json['zone'] as String?),
-    'join_party' => const JoinPartyMessage(),
-    'party_joined' => PartyJoinedMessage(accepted: json['accepted'] as bool),
-    'visit_ended' => const VisitEndedMessage(),
+    'party_state' => PartyStateMessage(
+      json['zone'] as String?,
+      left: Duration(milliseconds: json['left'] as int? ?? 0),
+    ),
+    'ready' => ReadyMessage(
+      ready: json['ready'] as bool,
+      start: switch (json['start']) {
+        final Map<String, dynamic> start => RaidMemberStart.fromJson(start),
+        _ => null,
+      },
+    ),
+    'run_over' => const RunOverMessage(),
+    'back_to_farm' => const BackToFarmMessage(),
     'catalog_request' => const CatalogRequestMessage(),
     'catalog' => CatalogMessage(json['files'] as Map<String, dynamic>),
     'lobby' => LobbyMessage((
       names: [for (final n in json['names'] as List<Object?>) n! as String],
-      party: [
-        for (final p in json['party'] as List<Object?>? ?? const []) p! as bool,
+      ready: [
+        for (final r in json['ready'] as List<Object?>? ?? const []) r! as bool,
       ],
       you: json['you'] as int,
     )),
@@ -246,7 +255,6 @@ sealed class SessionMessage {
       :final catalogHash,
       :final start,
       :final playerId,
-      :final party,
     ) =>
       {
         'type': 'hello',
@@ -254,21 +262,25 @@ sealed class SessionMessage {
         'catalog_hash': catalogHash,
         'start': start.toJson(),
         if (playerId.isNotEmpty) 'player_id': playerId,
-        if (!party) 'party': false,
       },
-    PartyStateMessage(:final zone) => {'type': 'party_state', 'zone': zone},
-    JoinPartyMessage() => {'type': 'join_party'},
-    PartyJoinedMessage(:final accepted) => {
-      'type': 'party_joined',
-      'accepted': accepted,
+    PartyStateMessage(:final zone, :final left) => {
+      'type': 'party_state',
+      'zone': zone,
+      if (left > Duration.zero) 'left': left.inMilliseconds,
     },
-    VisitEndedMessage() => {'type': 'visit_ended'},
+    ReadyMessage(:final ready, :final start) => {
+      'type': 'ready',
+      'ready': ready,
+      if (start != null) 'start': start.toJson(),
+    },
+    RunOverMessage() => {'type': 'run_over'},
+    BackToFarmMessage() => {'type': 'back_to_farm'},
     CatalogRequestMessage() => {'type': 'catalog_request'},
     CatalogMessage(:final files) => {'type': 'catalog', 'files': files},
     LobbyMessage(:final lobby) => {
       'type': 'lobby',
       'names': lobby.names,
-      'party': lobby.party,
+      'ready': lobby.ready,
       'you': lobby.you,
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
@@ -331,16 +343,11 @@ final class HelloMessage extends SessionMessage {
     required this.catalogHash,
     required this.start,
     this.playerId = '',
-    this.party = true,
   });
 
   final int buildNumber;
   final String catalogHash;
   final RaidMemberStart start;
-
-  /// Whether the guest comes for the party; false for a visitor who only
-  /// looks around the host's farm until they [JoinPartyMessage].
-  final bool party;
 
   /// This installation's id, so a dedicated server (no accounts) can tell
   /// the same player from another with the same nickname ([start] carries
@@ -348,31 +355,38 @@ final class HelloMessage extends SessionMessage {
   final String playerId;
 }
 
-/// Host → guest on reliable: whether a party is gathering at the host's
-/// farm, and for which [zone] (null: none). Visitors may then join it.
+/// Host → guest on reliable: the [zone] the host picked to set out for
+/// (null: none yet), and how long until everyone sets out anyway ([left];
+/// zero: no countdown). Everyone's readiness starts over when it changes.
 final class PartyStateMessage extends SessionMessage {
-  const PartyStateMessage(this.zone);
+  const PartyStateMessage(this.zone, {this.left = Duration.zero});
 
   final String? zone;
+  final Duration left;
 }
 
-/// Visitor → host on reliable: count me in the party.
-final class JoinPartyMessage extends SessionMessage {
-  const JoinPartyMessage();
+/// Guest → host on reliable: ready to set out for the zone the host picked,
+/// or not any more (2026-10-22, 사용자). The host sets out once everyone is,
+/// or when the countdown ends. [start] is what the guest brings now (their
+/// farm changed since they came, e.g. after a run); the host keeps it.
+final class ReadyMessage extends SessionMessage {
+  const ReadyMessage({required this.ready, this.start});
+
+  final bool ready;
+  final RaidMemberStart? start;
 }
 
-/// Host → visitor on reliable: whether [JoinPartyMessage] was taken (no
-/// party gathering, or the visitor's permission does not cover it).
-final class PartyJoinedMessage extends SessionMessage {
-  const PartyJoinedMessage({required this.accepted});
-
-  final bool accepted;
+/// Host → guest on reliable: everyone's run is over (2026-10-22, 사용자:
+/// whoever is out first watches until then). Results follow as before.
+final class RunOverMessage extends SessionMessage {
+  const RunOverMessage();
 }
 
-/// Host → visitor on reliable: the host set out without them; the visit is
-/// over.
-final class VisitEndedMessage extends SessionMessage {
-  const VisitEndedMessage();
+/// Host → guest on reliable: the host is back at the farm with the room
+/// still open; everyone gathers there again (2026-10-22, 사용자). The lobby
+/// and the farm follow.
+final class BackToFarmMessage extends SessionMessage {
+  const BackToFarmMessage();
 }
 
 /// Dedicated server → guest on reliable: the server has no game data yet,

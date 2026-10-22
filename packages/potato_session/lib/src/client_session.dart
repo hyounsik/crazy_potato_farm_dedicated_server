@@ -24,13 +24,12 @@ enum ClientSessionStage {
   /// waits up to `hostReconnectTimeout` before voiding the run.
   hostDisconnected,
 
-  /// This guest's run finished normally (extracted, fainted, went home,
-  /// starved) and [ClientSession.result] is ready to apply to the guest's farm.
+  /// Everyone's run is over ([RunOverMessage]; 2026-10-22, 사용자: whoever
+  /// is out first watches until then), or this guest's link dropped in a
+  /// safe zone, and [ClientSession.result] is ready to apply to the guest's
+  /// farm. The host may then take the room back to the farm
+  /// ([BackToFarmMessage]: [waiting] again).
   ended,
-
-  /// A visitor's visit is over: the host set out without them
-  /// ([VisitEndedMessage]).
-  closed,
 
   /// The host disconnected in a danger zone and did not come back in time: the
   /// run is void (`multiplayer.md`), so the guest's farm stays as it was
@@ -54,7 +53,6 @@ final class ClientSession {
     required this.start,
     this.buildNumber = 0,
     this.playerId = '',
-    this.party = true,
     this.catalogFiles,
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
@@ -76,10 +74,6 @@ final class ClientSession {
 
   /// This installation's id, sent in [HelloMessage.playerId].
   final String playerId;
-
-  /// Comes for the party; false for a visitor who looks around the host's
-  /// farm first and may [joinParty] later.
-  final bool party;
 
   /// The data files [catalog] was loaded from, sent when a dedicated server
   /// asks for them ([CatalogRequestMessage]). Without them such a server
@@ -108,8 +102,8 @@ final class ClientSession {
   Map<String, dynamic>? _sharedFarm;
   final _farmController = StreamController<Map<String, dynamic>>.broadcast();
   String? _partyZone;
+  DateTime? _departsAt;
   final _partyController = StreamController<String?>.broadcast();
-  final _joinedController = StreamController<bool>.broadcast();
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -146,26 +140,27 @@ final class ClientSession {
   SessionLobby? get lobby => _lobby;
   Stream<SessionLobby> get lobbyStream => _lobbyController.stream;
 
-  /// The zone a party is gathering for at the host's farm, or null.
+  /// The zone the host picked to set out for, or null.
   String? get partyZone => _partyZone;
   Stream<String?> get partyZoneStream => _partyController.stream;
 
-  /// The host's answer to [joinParty]: false when the guest's permission
-  /// does not cover exploring (or the party closed).
-  Stream<bool> get partyJoinedStream => _joinedController.stream;
+  /// When everyone sets out anyway, ready or not (null: no countdown).
+  DateTime? get departsAt => _departsAt;
 
-  /// Whether this guest is in the party (a visitor is not until they join).
-  bool get inParty {
+  /// Whether this guest said they are ready to set out, as the host has it.
+  bool get isReady {
     final lobby = _lobby;
-    if (lobby == null) return party;
-    return lobby.you < lobby.party.length && lobby.party[lobby.you];
+    if (lobby == null) return false;
+    return lobby.you < lobby.ready.length && lobby.ready[lobby.you];
   }
 
-  /// A visitor asks to join the party gathering at the host's farm; the
-  /// lobby shows when it is taken.
-  void joinParty() {
-    if (_stage != ClientSessionStage.waiting || _partyZone == null) return;
-    _send(SessionChannel.reliable, const JoinPartyMessage());
+  /// Tells the host this guest is ready to set out for the picked zone, or
+  /// not any more (2026-10-22, 사용자); the lobby shows it. [start] is what
+  /// the guest brings now; it may go without being ready (back from a run).
+  void setReady(bool ready, {RaidMemberStart? start}) {
+    if (_stage != ClientSessionStage.waiting) return;
+    if (_partyZone == null && start == null) return;
+    _send(SessionChannel.reliable, ReadyMessage(ready: ready, start: start));
   }
 
   /// The host's farm document while the party gathers there (host mode).
@@ -260,10 +255,9 @@ final class ClientSession {
       }
     }
     _interpolate(sim);
-    if (sim.outcome != null) {
-      _result ??= sim.result;
-      _setStage(ClientSessionStage.ended);
-    }
+    // Out of the run (extracted, fainted...): the result is kept, and the
+    // guest watches until everyone's run is over.
+    if (sim.outcome != null) _result ??= sim.result;
   }
 
   /// Collects events received from the host since the last call.
@@ -404,7 +398,6 @@ final class ClientSession {
         catalogHash: catalogHash,
         start: start,
         playerId: playerId,
-        party: party,
       ),
     );
   }
@@ -443,13 +436,10 @@ final class ClientSession {
         } else {
           _send(SessionChannel.reliable, CatalogMessage({...files}));
         }
-      case PartyStateMessage(:final zone):
+      case PartyStateMessage(:final zone, :final left):
         _partyZone = zone;
+        _departsAt = left > Duration.zero ? DateTime.now().add(left) : null;
         if (!_partyController.isClosed) _partyController.add(zone);
-      case PartyJoinedMessage(:final accepted):
-        if (!_joinedController.isClosed) _joinedController.add(accepted);
-      case VisitEndedMessage():
-        _setStage(ClientSessionStage.closed);
       case FarmViewMessage(:final farm):
         _sharedFarm = farm;
         if (!_farmController.isClosed) _farmController.add(farm);
@@ -464,6 +454,7 @@ final class ClientSession {
         _reconcileError = Vec2.zero;
         _lastSentMove = Vec2.zero;
         _memberIndex = memberIndex;
+        _result = null;
         // The farm's greetings and walkers stay on the farm.
         _chats.clear();
         _walkers.clear();
@@ -498,8 +489,19 @@ final class ClientSession {
           if (sim != null && memberIndex < sim.members.length) {
             sim.members[memberIndex].outcome = result.outcome;
           }
-          _setStage(ClientSessionStage.ended);
         }
+      case RunOverMessage():
+        _setStage(ClientSessionStage.ended);
+      case BackToFarmMessage():
+        _run = null;
+        _clock = null;
+        _snapshots.clear();
+        _walkers.clear();
+        _chats.clear();
+        _partyZone = null;
+        _departsAt = null;
+        if (!_partyController.isClosed) _partyController.add(null);
+        _setStage(ClientSessionStage.waiting);
       default:
         break;
     }
@@ -716,6 +718,5 @@ final class ClientSession {
     await _lobbyController.close();
     await _farmController.close();
     await _partyController.close();
-    await _joinedController.close();
   }
 }

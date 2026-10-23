@@ -10,6 +10,7 @@ final class HostedGuest {
     required this.peerId,
     required this.start,
     this.playerId = '',
+    this.accountId = '',
     this.memberIndex,
     this.connected = true,
   });
@@ -23,6 +24,9 @@ final class HostedGuest {
 
   /// The guest's installation id from [HelloMessage.playerId].
   final String playerId;
+
+  /// The guest's account id from [HelloMessage.accountId] (empty without).
+  final String accountId;
 
   /// Index in `RaidSimulation.members` once the run starts: 1..3 when the
   /// host plays, 0..3 on a dedicated server.
@@ -63,6 +67,7 @@ final class HostSession {
     this.snapshotEvery = const Duration(milliseconds: 100),
     this.hostPlays = true,
     this.hostName = '',
+    this.hostAccountId = '',
     int? maxGuests,
   }) : catalogHash = computeCatalogHash(catalog),
        maxGuests = maxGuests ?? (hostPlays ? 3 : 4) {
@@ -80,6 +85,10 @@ final class HostSession {
 
   /// The host player's name, first in [LobbyMessage] when [hostPlays].
   final String hostName;
+
+  /// The host's account id, first in [SessionLobby.accounts] when
+  /// [hostPlays] (2026-10-23).
+  final String hostAccountId;
 
   /// The zone the host picked to set out for, or null while friends only
   /// gather at the farm ([openParty]).
@@ -188,6 +197,51 @@ final class HostSession {
     _run = sim;
     _clock = FixedStepClock(Duration(milliseconds: sim.rules.stepMillis));
     _sinceSnapshot = Duration.zero;
+  }
+
+  /// The guests in the run, to save with it so a host whose app went down
+  /// can take the party back ([resumeRun]).
+  List<Map<String, dynamic>> get partyRoster => [
+    for (final g in _guestOrder)
+      if (g.memberIndex != null)
+        {
+          'member_index': g.memberIndex,
+          'player_id': g.playerId,
+          'account_id': g.accountId,
+          'start': g.start.toJson(),
+        },
+  ];
+
+  /// Takes back a run saved with [partyRoster] after the host's app went
+  /// down (2026-10-23): every guest is away, standing still, until they
+  /// connect again from the same installation and get the run as it is now.
+  /// A guest without an installation id cannot be told apart and stays away.
+  void resumeRun(RaidSimulation sim, List<Map<String, dynamic>> roster) {
+    if (_run != null) throw StateError('Run already started');
+    _guests.clear();
+    _guestOrder.clear();
+    _chats.clear();
+    for (final entry in roster) {
+      final index = (entry['member_index'] as num).toInt();
+      final playerId = entry['player_id'] as String? ?? '';
+      final guest = HostedGuest(
+        peerId: 'away:$index',
+        start: RaidMemberStart.fromJson(entry['start'] as Map<String, dynamic>),
+        playerId: playerId,
+        accountId: entry['account_id'] as String? ?? '',
+        memberIndex: index,
+        connected: false,
+      );
+      _guests[guest.peerId] = guest;
+      _guestOrder.add(guest);
+      if (index < sim.members.length) {
+        sim.setMoveOf(sim.members[index], Vec2.zero);
+      }
+    }
+    attachRun(sim);
+    _departsAt = null;
+    _overSent = false;
+    _notifyGuests();
   }
 
   /// Advances the run by [elapsed] in fixed steps and sends snapshots every
@@ -486,6 +540,7 @@ final class HostSession {
       peerId: peerId,
       start: msg.start,
       playerId: msg.playerId,
+      accountId: msg.accountId,
     );
     _guests[peerId] = guest;
     final existing = _guestOrder.indexWhere((g) => g.peerId == peerId);
@@ -628,11 +683,20 @@ final class HostSession {
       for (final g in _guestOrder) g.name,
     ];
     final ready = [if (hostPlays) true, for (final g in _guestOrder) g.ready];
+    final accounts = [
+      if (hostPlays) hostAccountId,
+      for (final g in _guestOrder) g.accountId,
+    ];
     for (final (i, g) in _guestOrder.indexed) {
       _send(
         g.peerId,
         SessionChannel.reliable,
-        LobbyMessage((names: names, ready: ready, you: first + i)),
+        LobbyMessage((
+          names: names,
+          ready: ready,
+          you: first + i,
+          accounts: accounts,
+        )),
       );
     }
   }

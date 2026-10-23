@@ -86,6 +86,74 @@ void main() {
       'scatter': {'count': 0},
     };
     zones.add(bossZone);
+    // The same clearing guarded by a zone boss with every new pattern
+    // (2026-10-23), each far off until a test brings it on.
+    ((files['enemies']! as Map<String, dynamic>)['enemies'] as List<Object?>)
+        .add({
+          'id': 'zone_boss',
+          'temper': 'aggressive',
+          'attack': 'melee',
+          'max_hp': 400,
+          'radius': 0.45,
+          'damage': 1,
+          'attack_interval': 100,
+          'reach': 0.2,
+          'boss': {
+            'jump': {
+              'every_seconds': 100,
+              'air_seconds': 2,
+              'lock_seconds': 1,
+              'follow_speed': 3,
+              'radius': 1,
+              'damage': 20,
+            },
+            'burrow': {
+              'every_seconds': 100,
+              'follow_seconds': 1,
+              'lock_seconds': 1,
+              'follow_speed': 3,
+              'follow_ups': 2,
+              'follow_up_lock_seconds': 0.4,
+              'radius': 0.6,
+              'damage': 10,
+            },
+            'clouds': [
+              {
+                'every_seconds': 100,
+                'radius': 2,
+                'seconds': 3,
+                'spread_seconds': 1,
+                'damage_per_second': 4,
+              },
+              {
+                'every_seconds': 100,
+                'radius': 1,
+                'seconds': 3,
+                'spread_seconds': 1,
+                'damage_per_second': 4,
+                'ahead': 3,
+                'count': 3,
+              },
+            ],
+            'shots': [
+              {
+                'every_seconds': 100,
+                'bullets': 5,
+                'spread_degrees': 60,
+                'damage': 3,
+                'speed': 5,
+                'range': 4,
+              },
+            ],
+          },
+        });
+    final zoneBoss = jsonDecode(jsonEncode(bossZone)) as Map<String, dynamic>;
+    zoneBoss['id'] = 'zone_boss_open';
+    zoneBoss['boss'] = <String, dynamic>{
+      ...(zoneBoss['boss'] as Map<String, dynamic>),
+      'enemy': 'zone_boss',
+    };
+    zones.add(zoneBoss);
     // An open map with one plateau to the east, reached by one ramp.
     final hillZone = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
     hillZone['id'] = 'hill_open';
@@ -1554,6 +1622,149 @@ void main() {
         expect(b.outcome, RaidOutcome.extracted);
         expect(c.outcome, isNot(RaidOutcome.extracted));
       });
+    });
+  });
+
+  group('zone bosses (2026-10-23)', () {
+    /// The player in the clearing two tiles from the boss, every pattern
+    /// far off but [pattern], which comes now.
+    (RaidSimulation, RaidEnemy) facing(String pattern) {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'zone_boss_open',
+        seed: 1,
+        food: 100,
+      );
+      run.player
+        ..weapon = 'blank'
+        ..position = const Vec2(12.5, 12.5);
+      final boss = run.boss!;
+      for (final key in boss.cooldowns.keys) {
+        boss.cooldowns[key] = key == pattern ? 0 : 100;
+      }
+      return (run, boss);
+    }
+
+    void runFor(RaidSimulation run, double seconds) {
+      final steps = (seconds / run.stepSeconds).round();
+      for (var i = 0; i < steps && run.outcome == null; i++) {
+        run.step();
+      }
+    }
+
+    test('a jump: the shadow follows, then locks, blinks and lands', () {
+      final (run, boss) = facing('jump');
+      run.step();
+      expect(boss.isJumping, isTrue);
+      expect(boss.isHidden, isTrue);
+      final start = boss.jumpAt;
+
+      // Still following: the shadow goes after the player.
+      run.player.position = const Vec2(12.5, 14.5);
+      runFor(run, 0.5);
+      expect(boss.jumpAt.distanceTo(start), greaterThan(0.5));
+
+      // Locked for the last second: stepping out of the shadow is safe.
+      runFor(run, 0.6);
+      expect(boss.jumpLeft, lessThanOrEqualTo(1));
+      final locked = boss.jumpAt;
+      run.player.position = const Vec2(11.5, 9.5);
+      final hp = run.player.hp;
+      while (boss.isJumping) {
+        run.step();
+      }
+      expect(boss.jumpAt, locked);
+      expect(boss.position, locked);
+      expect(run.player.hp, hp);
+    });
+
+    test('landing on someone hurts them; in the air nothing hits it', () {
+      final (run, boss) = facing('jump');
+      run.step();
+      expect(run.enemies.contains(boss), isTrue);
+      final hp = run.player.hp;
+      runFor(run, 2.1);
+      expect(run.player.hp, lessThanOrEqualTo(hp - 20 + 1e-9));
+    });
+
+    test(
+      'underground: three strikes, the follow-ups where the target went',
+      () {
+        final (run, boss) = facing('burrow');
+        run.step();
+        expect(boss.isBurrowed, isTrue);
+        expect(boss.burrowStrikes, 3);
+        final hp = run.player.hp;
+        // Standing still: the first claw and both follow-ups land.
+        runFor(run, 2.0 + 0.4 + 0.4 + 0.1);
+        expect(boss.isBurrowed, isFalse);
+        // Three claws (and maybe a bite once it is up).
+        expect(run.player.hp, lessThanOrEqualTo(hp - 30 + 1e-9));
+        expect(run.player.hp, greaterThan(hp - 32));
+        // It comes up where the last claw came.
+        expect(boss.position.distanceTo(run.player.position), lessThan(0.6));
+      },
+    );
+
+    test('a step aside after the blink dodges one claw, not the next', () {
+      final (run, boss) = facing('burrow');
+      run.step();
+      runFor(run, 1.5);
+      // Locked under the player: step aside before it comes.
+      run.player.position = const Vec2(12.5, 10.5);
+      final hp = run.player.hp;
+      runFor(run, 0.55);
+      expect(run.player.hp, hp, reason: 'the first claw missed');
+      // The next one goes where the player is now.
+      expect(boss.burrowAt.distanceTo(run.player.position), lessThan(0.01));
+      runFor(run, 0.45);
+      expect(run.player.hp, closeTo(hp - 10, 1e-9));
+    });
+
+    test('gas grows slowly, hurts inside for three seconds, then is gone', () {
+      final (run, boss) = facing('cloud0');
+      run.player.position = boss.position + const Vec2(1.5, 0);
+      run.step();
+      expect(run.clouds, hasLength(1));
+      final cloud = run.clouds.single;
+      expect(cloud.reach, lessThan(0.1));
+      final hp = run.player.hp;
+      runFor(run, 3);
+      expect(run.player.hp, lessThan(hp));
+      expect(run.clouds, isEmpty);
+    });
+
+    test('gas ahead lies in a row toward the target', () {
+      final (run, boss) = facing('cloud1');
+      run.step();
+      expect(run.clouds, hasLength(3));
+      final toward = (run.player.position - boss.position).normalized();
+      final far = run.clouds.last.position - boss.position;
+      expect(far.length, closeTo(3, 1e-9));
+      expect(far.normalized().distanceTo(toward), lessThan(1e-9));
+    });
+
+    test('shots go out as a fan toward the target', () {
+      final (run, boss) = facing('shot0');
+      run.step();
+      final shots = run.bullets.where((b) => b.owner == boss.id).toList();
+      expect(shots, hasLength(5));
+      expect(boss.isAttacking, isTrue);
+    });
+
+    test('a run mid-jump with gas about saves and comes back the same', () {
+      final (run, _) = facing('cloud0');
+      run.step();
+      run.boss!.cooldowns['jump'] = 0;
+      run.boss!.cooldowns['gap'] = 0;
+      run.step();
+      expect(run.boss!.isJumping, isTrue);
+      final restored = RaidSimulation.fromJson(
+        jsonDecode(jsonEncode(run.toJson())) as Map<String, dynamic>,
+        catalog,
+      );
+      expect(jsonEncode(restored.toJson()), jsonEncode(run.toJson()));
+      expect(restored.clouds, hasLength(1));
     });
   });
 }

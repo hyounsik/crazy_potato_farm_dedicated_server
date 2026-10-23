@@ -311,24 +311,113 @@ abstract class EnemyData with _$EnemyData {
 /// [chargeTelegraphSeconds], then runs straight at [chargeSpeed] for up to
 /// [chargeDistance], hurting each body it runs into once; obstacles and the
 /// edge of the boss area stop it, and a dash dodges it. A spray fires
-/// [sprayBullets] shots evenly all around.
+/// [sprayBullets] shots evenly all around. A boss without a charge or a
+/// spray leaves their numbers at 0.
+///
+/// Zone bosses (2026-10-23, 사용자) add [jump], [burrow], [clouds] and
+/// [shots]; a pattern of the same name follows the same rules whichever
+/// boss uses it (`enemies.md`). One pattern runs at a time.
 @freezed
 abstract class BossData with _$BossData {
   const factory BossData({
-    required double chargeEverySeconds,
-    required double chargeTelegraphSeconds,
-    required double chargeSpeed,
-    required double chargeDistance,
-    required double chargeDamage,
-    required double sprayEverySeconds,
-    required int sprayBullets,
-    required double sprayDamage,
-    required double spraySpeed,
-    required double sprayRange,
+    @Default(0.0) double chargeEverySeconds,
+    @Default(0.0) double chargeTelegraphSeconds,
+    @Default(0.0) double chargeSpeed,
+    @Default(0.0) double chargeDistance,
+    @Default(0.0) double chargeDamage,
+    @Default(0.0) double sprayEverySeconds,
+    @Default(0) int sprayBullets,
+    @Default(0.0) double sprayDamage,
+    @Default(0.0) double spraySpeed,
+    @Default(0.0) double sprayRange,
+    BossJumpData? jump,
+    BossBurrowData? burrow,
+    @Default(<BossCloudData>[]) List<BossCloudData> clouds,
+    @Default(<BossShotData>[]) List<BossShotData> shots,
   }) = _BossData;
 
   factory BossData.fromJson(Map<String, dynamic> json) =>
       _$BossDataFromJson(json);
+}
+
+/// Jumps and lands (2026-10-23, 사용자): a shadow shows where, following the
+/// target at [followSpeed] until [lockSeconds] before landing, when it blinks
+/// and stays. Landing hurts everything within [radius] of the shadow. In the
+/// air for [airSeconds] in all, where nothing hits it.
+@freezed
+abstract class BossJumpData with _$BossJumpData {
+  const factory BossJumpData({
+    required double everySeconds,
+    required double airSeconds,
+    @Default(1.0) double lockSeconds,
+    required double followSpeed,
+    required double radius,
+    required double damage,
+  }) = _BossJumpData;
+
+  factory BossJumpData.fromJson(Map<String, dynamic> json) =>
+      _$BossJumpDataFromJson(json);
+}
+
+/// Goes underground and strikes up from below, like a lurker (2026-10-23,
+/// 사용자): the mark follows the target's feet for [followSeconds], blinks
+/// for [lockSeconds] and a claw comes up there (one spot, [radius]). Then
+/// [followUps] quicker strikes, each where the target is then, blinking for
+/// [followUpLockSeconds]. Nothing hits it underground; it comes up at the
+/// last strike.
+@freezed
+abstract class BossBurrowData with _$BossBurrowData {
+  const factory BossBurrowData({
+    required double everySeconds,
+    required double followSeconds,
+    @Default(1.0) double lockSeconds,
+    required double followSpeed,
+    @Default(2) int followUps,
+    required double followUpLockSeconds,
+    required double radius,
+    required double damage,
+  }) = _BossBurrowData;
+
+  factory BossBurrowData.fromJson(Map<String, dynamic> json) =>
+      _$BossBurrowDataFromJson(json);
+}
+
+/// Gas or spores (2026-10-23, 사용자): clouds that grow to [radius] over
+/// [spreadSeconds], stay [seconds] in all and hurt [damagePerSecond]
+/// whoever is inside. They go through obstacles. Around the boss when
+/// [ahead] is 0; otherwise [count] clouds in a row toward the target, the
+/// farthest [ahead] tiles out.
+@freezed
+abstract class BossCloudData with _$BossCloudData {
+  const factory BossCloudData({
+    required double everySeconds,
+    required double radius,
+    @Default(3.0) double seconds,
+    required double spreadSeconds,
+    required double damagePerSecond,
+    @Default(0.0) double ahead,
+    @Default(1) int count,
+  }) = _BossCloudData;
+
+  factory BossCloudData.fromJson(Map<String, dynamic> json) =>
+      _$BossCloudDataFromJson(json);
+}
+
+/// Shots fired as a fan toward the target (ice, thrown dirt): [bullets]
+/// spread over [spreadDegrees]. Obstacles stop them, as every bullet.
+@freezed
+abstract class BossShotData with _$BossShotData {
+  const factory BossShotData({
+    required double everySeconds,
+    required int bullets,
+    @Default(0.0) double spreadDegrees,
+    required double damage,
+    required double speed,
+    required double range,
+  }) = _BossShotData;
+
+  factory BossShotData.fromJson(Map<String, dynamic> json) =>
+      _$BossShotDataFromJson(json);
 }
 
 /// The boss guarding a zone's boss area (the map's clearing).

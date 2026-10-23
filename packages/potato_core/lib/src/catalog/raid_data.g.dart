@@ -645,35 +645,71 @@ _BossData _$BossDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     final val = _BossData(
       chargeEverySeconds: $checkedConvert(
         'charge_every_seconds',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
       chargeTelegraphSeconds: $checkedConvert(
         'charge_telegraph_seconds',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
       chargeSpeed: $checkedConvert(
         'charge_speed',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
       chargeDistance: $checkedConvert(
         'charge_distance',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
       chargeDamage: $checkedConvert(
         'charge_damage',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
       sprayEverySeconds: $checkedConvert(
         'spray_every_seconds',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
-      sprayBullets: $checkedConvert('spray_bullets', (v) => (v as num).toInt()),
+      sprayBullets: $checkedConvert(
+        'spray_bullets',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
       sprayDamage: $checkedConvert(
         'spray_damage',
-        (v) => (v as num).toDouble(),
+        (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
-      spraySpeed: $checkedConvert('spray_speed', (v) => (v as num).toDouble()),
-      sprayRange: $checkedConvert('spray_range', (v) => (v as num).toDouble()),
+      spraySpeed: $checkedConvert(
+        'spray_speed',
+        (v) => (v as num?)?.toDouble() ?? 0.0,
+      ),
+      sprayRange: $checkedConvert(
+        'spray_range',
+        (v) => (v as num?)?.toDouble() ?? 0.0,
+      ),
+      jump: $checkedConvert(
+        'jump',
+        (v) =>
+            v == null ? null : BossJumpData.fromJson(v as Map<String, dynamic>),
+      ),
+      burrow: $checkedConvert(
+        'burrow',
+        (v) => v == null
+            ? null
+            : BossBurrowData.fromJson(v as Map<String, dynamic>),
+      ),
+      clouds: $checkedConvert(
+        'clouds',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => BossCloudData.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <BossCloudData>[],
+      ),
+      shots: $checkedConvert(
+        'shots',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => BossShotData.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <BossShotData>[],
+      ),
     );
     return val;
   },
@@ -702,7 +738,199 @@ Map<String, dynamic> _$BossDataToJson(_BossData instance) => <String, dynamic>{
   'spray_damage': instance.sprayDamage,
   'spray_speed': instance.spraySpeed,
   'spray_range': instance.sprayRange,
+  'jump': instance.jump?.toJson(),
+  'burrow': instance.burrow?.toJson(),
+  'clouds': instance.clouds.map((e) => e.toJson()).toList(),
+  'shots': instance.shots.map((e) => e.toJson()).toList(),
 };
+
+_BossJumpData _$BossJumpDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_BossJumpData',
+      json,
+      ($checkedConvert) {
+        final val = _BossJumpData(
+          everySeconds: $checkedConvert(
+            'every_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          airSeconds: $checkedConvert(
+            'air_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          lockSeconds: $checkedConvert(
+            'lock_seconds',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
+          followSpeed: $checkedConvert(
+            'follow_speed',
+            (v) => (v as num).toDouble(),
+          ),
+          radius: $checkedConvert('radius', (v) => (v as num).toDouble()),
+          damage: $checkedConvert('damage', (v) => (v as num).toDouble()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'everySeconds': 'every_seconds',
+        'airSeconds': 'air_seconds',
+        'lockSeconds': 'lock_seconds',
+        'followSpeed': 'follow_speed',
+      },
+    );
+
+Map<String, dynamic> _$BossJumpDataToJson(_BossJumpData instance) =>
+    <String, dynamic>{
+      'every_seconds': instance.everySeconds,
+      'air_seconds': instance.airSeconds,
+      'lock_seconds': instance.lockSeconds,
+      'follow_speed': instance.followSpeed,
+      'radius': instance.radius,
+      'damage': instance.damage,
+    };
+
+_BossBurrowData _$BossBurrowDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_BossBurrowData',
+      json,
+      ($checkedConvert) {
+        final val = _BossBurrowData(
+          everySeconds: $checkedConvert(
+            'every_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          followSeconds: $checkedConvert(
+            'follow_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          lockSeconds: $checkedConvert(
+            'lock_seconds',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
+          followSpeed: $checkedConvert(
+            'follow_speed',
+            (v) => (v as num).toDouble(),
+          ),
+          followUps: $checkedConvert(
+            'follow_ups',
+            (v) => (v as num?)?.toInt() ?? 2,
+          ),
+          followUpLockSeconds: $checkedConvert(
+            'follow_up_lock_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          radius: $checkedConvert('radius', (v) => (v as num).toDouble()),
+          damage: $checkedConvert('damage', (v) => (v as num).toDouble()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'everySeconds': 'every_seconds',
+        'followSeconds': 'follow_seconds',
+        'lockSeconds': 'lock_seconds',
+        'followSpeed': 'follow_speed',
+        'followUps': 'follow_ups',
+        'followUpLockSeconds': 'follow_up_lock_seconds',
+      },
+    );
+
+Map<String, dynamic> _$BossBurrowDataToJson(_BossBurrowData instance) =>
+    <String, dynamic>{
+      'every_seconds': instance.everySeconds,
+      'follow_seconds': instance.followSeconds,
+      'lock_seconds': instance.lockSeconds,
+      'follow_speed': instance.followSpeed,
+      'follow_ups': instance.followUps,
+      'follow_up_lock_seconds': instance.followUpLockSeconds,
+      'radius': instance.radius,
+      'damage': instance.damage,
+    };
+
+_BossCloudData _$BossCloudDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_BossCloudData',
+      json,
+      ($checkedConvert) {
+        final val = _BossCloudData(
+          everySeconds: $checkedConvert(
+            'every_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          radius: $checkedConvert('radius', (v) => (v as num).toDouble()),
+          seconds: $checkedConvert(
+            'seconds',
+            (v) => (v as num?)?.toDouble() ?? 3.0,
+          ),
+          spreadSeconds: $checkedConvert(
+            'spread_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          damagePerSecond: $checkedConvert(
+            'damage_per_second',
+            (v) => (v as num).toDouble(),
+          ),
+          ahead: $checkedConvert(
+            'ahead',
+            (v) => (v as num?)?.toDouble() ?? 0.0,
+          ),
+          count: $checkedConvert('count', (v) => (v as num?)?.toInt() ?? 1),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'everySeconds': 'every_seconds',
+        'spreadSeconds': 'spread_seconds',
+        'damagePerSecond': 'damage_per_second',
+      },
+    );
+
+Map<String, dynamic> _$BossCloudDataToJson(_BossCloudData instance) =>
+    <String, dynamic>{
+      'every_seconds': instance.everySeconds,
+      'radius': instance.radius,
+      'seconds': instance.seconds,
+      'spread_seconds': instance.spreadSeconds,
+      'damage_per_second': instance.damagePerSecond,
+      'ahead': instance.ahead,
+      'count': instance.count,
+    };
+
+_BossShotData _$BossShotDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_BossShotData',
+      json,
+      ($checkedConvert) {
+        final val = _BossShotData(
+          everySeconds: $checkedConvert(
+            'every_seconds',
+            (v) => (v as num).toDouble(),
+          ),
+          bullets: $checkedConvert('bullets', (v) => (v as num).toInt()),
+          spreadDegrees: $checkedConvert(
+            'spread_degrees',
+            (v) => (v as num?)?.toDouble() ?? 0.0,
+          ),
+          damage: $checkedConvert('damage', (v) => (v as num).toDouble()),
+          speed: $checkedConvert('speed', (v) => (v as num).toDouble()),
+          range: $checkedConvert('range', (v) => (v as num).toDouble()),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'everySeconds': 'every_seconds',
+        'spreadDegrees': 'spread_degrees',
+      },
+    );
+
+Map<String, dynamic> _$BossShotDataToJson(_BossShotData instance) =>
+    <String, dynamic>{
+      'every_seconds': instance.everySeconds,
+      'bullets': instance.bullets,
+      'spread_degrees': instance.spreadDegrees,
+      'damage': instance.damage,
+      'speed': instance.speed,
+      'range': instance.range,
+    };
 
 _ZoneBossData _$ZoneBossDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_ZoneBossData', json, ($checkedConvert) {

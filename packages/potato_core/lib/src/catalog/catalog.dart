@@ -786,20 +786,73 @@ final class Catalog {
     }
     if (enemy.boss case final boss?) {
       final at = '$path.boss';
-      check.positiveNumber('$at.charge_every_seconds', boss.chargeEverySeconds);
-      check.atLeastNumber(
-        '$at.charge_telegraph_seconds',
-        boss.chargeTelegraphSeconds,
-        0,
-      );
-      check.positiveNumber('$at.charge_speed', boss.chargeSpeed);
-      check.positiveNumber('$at.charge_distance', boss.chargeDistance);
-      check.atLeastNumber('$at.charge_damage', boss.chargeDamage, 0);
-      check.positiveNumber('$at.spray_every_seconds', boss.sprayEverySeconds);
+      // A charge and a spray are optional: 0 leaves them out.
+      if (boss.chargeEverySeconds != 0) {
+        check.positiveNumber(
+          '$at.charge_every_seconds',
+          boss.chargeEverySeconds,
+        );
+        check.atLeastNumber(
+          '$at.charge_telegraph_seconds',
+          boss.chargeTelegraphSeconds,
+          0,
+        );
+        check.positiveNumber('$at.charge_speed', boss.chargeSpeed);
+        check.positiveNumber('$at.charge_distance', boss.chargeDistance);
+        check.atLeastNumber('$at.charge_damage', boss.chargeDamage, 0);
+      }
       check.atLeast('$at.spray_bullets', boss.sprayBullets, 0);
-      check.atLeastNumber('$at.spray_damage', boss.sprayDamage, 0);
-      check.positiveNumber('$at.spray_speed', boss.spraySpeed);
-      check.positiveNumber('$at.spray_range', boss.sprayRange);
+      if (boss.sprayBullets > 0) {
+        check.positiveNumber('$at.spray_every_seconds', boss.sprayEverySeconds);
+        check.atLeastNumber('$at.spray_damage', boss.sprayDamage, 0);
+        check.positiveNumber('$at.spray_speed', boss.spraySpeed);
+        check.positiveNumber('$at.spray_range', boss.sprayRange);
+      }
+      if (boss.jump case final jump?) {
+        check.positiveNumber('$at.jump.every_seconds', jump.everySeconds);
+        check.positiveNumber('$at.jump.air_seconds', jump.airSeconds);
+        check.atLeastNumber('$at.jump.lock_seconds', jump.lockSeconds, 0);
+        check.atLeastNumber('$at.jump.follow_speed', jump.followSpeed, 0);
+        check.positiveNumber('$at.jump.radius', jump.radius);
+        check.atLeastNumber('$at.jump.damage', jump.damage, 0);
+      }
+      if (boss.burrow case final burrow?) {
+        check.positiveNumber('$at.burrow.every_seconds', burrow.everySeconds);
+        check.atLeastNumber(
+          '$at.burrow.follow_seconds',
+          burrow.followSeconds,
+          0,
+        );
+        check.atLeastNumber('$at.burrow.lock_seconds', burrow.lockSeconds, 0);
+        check.atLeastNumber('$at.burrow.follow_speed', burrow.followSpeed, 0);
+        check.atLeast('$at.burrow.follow_ups', burrow.followUps, 0);
+        check.atLeastNumber(
+          '$at.burrow.follow_up_lock_seconds',
+          burrow.followUpLockSeconds,
+          0,
+        );
+        check.positiveNumber('$at.burrow.radius', burrow.radius);
+        check.atLeastNumber('$at.burrow.damage', burrow.damage, 0);
+      }
+      for (final (i, cloud) in boss.clouds.indexed) {
+        final c = '$at.clouds[$i]';
+        check.positiveNumber('$c.every_seconds', cloud.everySeconds);
+        check.positiveNumber('$c.radius', cloud.radius);
+        check.positiveNumber('$c.seconds', cloud.seconds);
+        check.atLeastNumber('$c.spread_seconds', cloud.spreadSeconds, 0);
+        check.atLeastNumber('$c.damage_per_second', cloud.damagePerSecond, 0);
+        check.atLeastNumber('$c.ahead', cloud.ahead, 0);
+        check.positive('$c.count', cloud.count);
+      }
+      for (final (i, shot) in boss.shots.indexed) {
+        final c = '$at.shots[$i]';
+        check.positiveNumber('$c.every_seconds', shot.everySeconds);
+        check.positive('$c.bullets', shot.bullets);
+        check.atLeastNumber('$c.spread_degrees', shot.spreadDegrees, 0);
+        check.atLeastNumber('$c.damage', shot.damage, 0);
+        check.positiveNumber('$c.speed', shot.speed);
+        check.positiveNumber('$c.range', shot.range);
+      }
     }
   }
 

@@ -53,6 +53,7 @@ final class ClientSession {
     required this.start,
     this.buildNumber = 0,
     this.playerId = '',
+    this.accountId = '',
     this.catalogFiles,
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
@@ -74,6 +75,10 @@ final class ClientSession {
 
   /// This installation's id, sent in [HelloMessage.playerId].
   final String playerId;
+
+  /// The player's account id in host mode, sent in
+  /// [HelloMessage.accountId] (empty without one).
+  final String accountId;
 
   /// The data files [catalog] was loaded from, sent when a dedicated server
   /// asks for them ([CatalogRequestMessage]). Without them such a server
@@ -401,6 +406,7 @@ final class ClientSession {
         catalogHash: catalogHash,
         start: start,
         playerId: playerId,
+        accountId: accountId,
       ),
     );
   }
@@ -683,6 +689,11 @@ final class ClientSession {
             return cur;
           }(),
       ]);
+
+    // Boss clouds stay put: the latest as they are.
+    sim.clouds
+      ..clear()
+      ..addAll([for (final c in snapB.clouds) RaidCloud.fromJson(c)]);
 
     // Bullets.
     final bulletA = {

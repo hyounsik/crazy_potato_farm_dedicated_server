@@ -200,10 +200,11 @@ final class RaidSimulation {
     required this.clones,
     required this._nextId,
     required this._tick,
+    List<RaidCloud>? clouds,
     this._revealed = false,
     this._clonesIn = 0,
     this._nextCloneAt = 0,
-  });
+  }) : clouds = clouds ?? [];
 
   /// Builds zone [zone]'s map from [seed] and fills it: enemies, gathering
   /// spots, the player at the entry with [food] in the bag, and
@@ -429,6 +430,7 @@ final class RaidSimulation {
       floorItems: list('floor_items', RaidFloorItem.fromJson),
       exits: list('exits', RaidExit.fromJson),
       clones: list('clones', (j) => RaidClone.fromJson(j, catalog.stackOf)),
+      clouds: list('clouds', RaidCloud.fromJson),
       clonesIn: json['clones_in'] as int,
       nextCloneAt: (json['next_clone_at'] as num).toDouble(),
       revealed: json['revealed'] as bool,
@@ -439,7 +441,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 9;
+  static const int formatVersion = 10;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -484,6 +486,9 @@ final class RaidSimulation {
 
   final List<RaidEnemy> enemies;
   final List<RaidBullet> bullets;
+
+  /// Gas and spores bosses left (2026-10-23).
+  final List<RaidCloud> clouds;
   final List<RaidPile> piles;
   final List<RaidFloorItem> floorItems;
 
@@ -972,6 +977,7 @@ final class RaidSimulation {
       if (!enemy.isDown) _updateEnemy(enemy, dt);
     }
     _updateBullets(dt);
+    _updateClouds(dt);
     _pickUpFloorItems();
     _clearDefeated();
     _clearClones();
@@ -1287,7 +1293,8 @@ final class RaidSimulation {
       yield m.player;
       yield* m.companions;
     }
-    yield* enemies;
+    // A boss in the air or underground is out of reach (2026-10-23).
+    yield* enemies.where((e) => !e.isHidden);
     for (final clone in clones) {
       yield clone;
       yield* clone.companions;
@@ -1604,8 +1611,15 @@ final class RaidSimulation {
       ..attackCooldown -= dt
       ..sinceHit += dt
       ..chargeCooldown -= dt
-      ..sprayCooldown -= dt;
+      ..sprayCooldown -= dt
+      ..poseLeft = math.max(0, enemy.poseLeft - dt);
+    for (final key in enemy.cooldowns.keys) {
+      enemy.cooldowns[key] = enemy.cooldowns[key]! - dt;
+    }
     final damage = zone.enemies.damageMultiplier;
+
+    if (enemy.isJumping) return _jumping(enemy, boss.jump!, damage, dt);
+    if (enemy.isBurrowed) return _burrowing(enemy, boss.burrow!, damage, dt);
 
     if (enemy.isCharging) {
       final want = math.min(boss.chargeSpeed * dt, enemy.chargeLeft);
@@ -1661,7 +1675,8 @@ final class RaidSimulation {
       _moveToward(enemy, enemy.home, enemySpeed, dt);
       return;
     }
-    if (enemy.chargeCooldown <= 0) {
+    if (_startPattern(enemy, boss, target, damage)) return;
+    if (enemy.chargeCooldown <= 0 && boss.chargeEverySeconds > 0) {
       final toward = target.position - enemy.position;
       enemy
         ..chargeDirection = toward.isZero
@@ -1690,7 +1705,9 @@ final class RaidSimulation {
           ),
         );
       }
-      enemy.sprayCooldown = boss.sprayEverySeconds;
+      enemy
+        ..sprayCooldown = boss.sprayEverySeconds
+        ..poseLeft = _poseSeconds;
     }
     final d = target.position.distanceTo(enemy.position);
     if (d <= enemy.radius + target.radius + spec.reach) {
@@ -1703,6 +1720,213 @@ final class RaidSimulation {
     final before = enemy.position;
     _moveToward(enemy, target.position, enemySpeed, dt);
     if (!inBossArea(enemy.position)) enemy.position = before;
+  }
+
+  /// How long the attack face stays after a quick pattern (a spray, a
+  /// cloud, shots), and the rest between patterns. *(제안 수치)*
+  static const double _poseSeconds = 0.8;
+  static const double _patternGap = 1.0;
+
+  /// The zone-boss patterns [boss] has, by their cooldown key.
+  static List<(String, double)> _patternsOf(BossData boss) => [
+    if (boss.jump case final jump?) ('jump', jump.everySeconds),
+    if (boss.burrow case final burrow?) ('burrow', burrow.everySeconds),
+    for (final (i, c) in boss.clouds.indexed) ('cloud$i', c.everySeconds),
+    for (final (i, s) in boss.shots.indexed) ('shot$i', s.everySeconds),
+  ];
+
+  /// Starts the first zone-boss pattern whose time has come, unless one
+  /// just ended. Returns whether one started.
+  bool _startPattern(
+    RaidEnemy enemy,
+    BossData boss,
+    RaidBody target,
+    double damage,
+  ) {
+    if ((enemy.cooldowns['gap'] ?? 0) > 0) return false;
+    for (final (key, every) in _patternsOf(boss)) {
+      if ((enemy.cooldowns[key] ?? 0) > 0) continue;
+      enemy.cooldowns[key] = every;
+      enemy.cooldowns['gap'] = _patternGap;
+      final toward = target.position - enemy.position;
+      final facing = toward.isZero ? const Vec2(0, 1) : toward.normalized();
+      switch (key) {
+        case 'jump':
+          final jump = boss.jump!;
+          enemy
+            ..jumpLeft = jump.airSeconds
+            ..jumpAt = target.position;
+        case 'burrow':
+          final burrow = boss.burrow!;
+          enemy
+            ..burrowLeft = burrow.followSeconds + burrow.lockSeconds
+            ..burrowAt = target.position
+            ..burrowStrikes = 1 + burrow.followUps;
+        default:
+          final i = int.parse(key.replaceAll(RegExp(r'\D'), ''));
+          if (key.startsWith('cloud')) {
+            _puff(enemy, boss.clouds[i], facing);
+          } else {
+            _fan(enemy, boss.shots[i], facing, damage);
+          }
+          enemy.poseLeft = _poseSeconds;
+      }
+      return true;
+    }
+    return false;
+  }
+
+  /// In the air: the shadow follows the target until it locks, then the
+  /// boss lands on it and hurts everything under it.
+  void _jumping(RaidEnemy enemy, BossJumpData jump, double damage, double dt) {
+    if (enemy.jumpLeft > jump.lockSeconds) {
+      _trackMark(enemy, enemy.jumpAt, jump.followSpeed * dt, (at) {
+        enemy.jumpAt = at;
+      });
+    }
+    enemy.jumpLeft -= dt;
+    if (enemy.isJumping) return;
+    enemy
+      ..jumpLeft = 0
+      ..position = _landing(enemy.jumpAt, enemy.radius, enemy.position);
+    _slam(enemy, enemy.jumpAt, jump.radius, jump.damage * damage);
+    enemy.cooldowns['gap'] = _patternGap;
+  }
+
+  /// Underground: the mark follows the target's feet until it locks, a claw
+  /// comes up there, then quicker strikes where the target has moved to;
+  /// it comes up at the last.
+  void _burrowing(
+    RaidEnemy enemy,
+    BossBurrowData burrow,
+    double damage,
+    double dt,
+  ) {
+    final first = enemy.burrowStrikes == 1 + burrow.followUps;
+    if (first && enemy.burrowLeft > burrow.lockSeconds) {
+      _trackMark(enemy, enemy.burrowAt, burrow.followSpeed * dt, (at) {
+        enemy.burrowAt = at;
+      });
+    }
+    enemy.burrowLeft -= dt;
+    if (enemy.isBurrowed) return;
+    _slam(enemy, enemy.burrowAt, burrow.radius, burrow.damage * damage);
+    enemy.burrowStrikes--;
+    if (enemy.burrowStrikes > 0) {
+      final target = enemy.target == null ? null : _body(enemy.target!);
+      if (target != null && !target.isDown && inBossArea(target.position)) {
+        enemy.burrowAt = target.position;
+      }
+      enemy.burrowLeft = burrow.followUpLockSeconds;
+      // A follow-up with no blink still waits a step to be seen.
+      if (!enemy.isBurrowed) enemy.burrowLeft = stepSeconds;
+      return;
+    }
+    enemy
+      ..burrowLeft = 0
+      ..burrowStrikes = 0
+      ..position = _landing(enemy.burrowAt, enemy.radius, enemy.position);
+    enemy.cooldowns['gap'] = _patternGap;
+  }
+
+  /// Moves a mark ([from]) up to [step] toward the boss's target, inside the
+  /// boss area.
+  void _trackMark(
+    RaidEnemy enemy,
+    Vec2 from,
+    double step,
+    void Function(Vec2 at) set,
+  ) {
+    final target = enemy.target == null ? null : _body(enemy.target!);
+    if (target == null || target.isDown) return;
+    final toward = target.position - from;
+    final distance = toward.length;
+    if (distance == 0) return;
+    final next = from + toward.scaledTo(math.min(step, distance));
+    if (inBossArea(next)) set(next);
+  }
+
+  /// Where a boss coming down at [at] stands: there when its body fits and
+  /// it is in the area, otherwise where it was.
+  Vec2 _landing(Vec2 at, double radius, Vec2 was) {
+    if (!inBossArea(at)) return was;
+    final x = at.x.floor();
+    final y = at.y.floor();
+    return map.isBlocked(x, y) ? was : at;
+  }
+
+  /// Hurts every body within [radius] of [at] (a landing, a claw).
+  void _slam(RaidEnemy enemy, Vec2 at, double radius, double amount) {
+    for (final body in _wildTargets.toList()) {
+      if (body.position.distanceTo(at) <= radius + body.radius) {
+        _hurt(body, amount, enemy);
+      }
+    }
+  }
+
+  /// Gas or spores: around the boss, or in a row toward [facing].
+  void _puff(RaidEnemy enemy, BossCloudData cloud, Vec2 facing) {
+    for (var i = 0; i < cloud.count; i++) {
+      final at = cloud.ahead <= 0
+          ? enemy.position
+          : enemy.position + facing * (cloud.ahead * (i + 1) / cloud.count);
+      clouds.add(
+        RaidCloud(
+          id: _newId(),
+          position: at,
+          radius: cloud.radius,
+          spreadSeconds: cloud.spreadSeconds,
+          seconds: cloud.seconds,
+          damagePerSecond:
+              cloud.damagePerSecond * zone.enemies.damageMultiplier,
+          owner: enemy.id,
+          kind: enemy.kind,
+        ),
+      );
+    }
+  }
+
+  /// A fan of shots toward [facing].
+  void _fan(RaidEnemy enemy, BossShotData shot, Vec2 facing, double damage) {
+    final spread = shot.spreadDegrees * math.pi / 180;
+    for (var i = 0; i < shot.bullets; i++) {
+      final angle = shot.bullets == 1
+          ? 0.0
+          : -spread / 2 + spread * i / (shot.bullets - 1);
+      final direction = facing.rotated(angle);
+      bullets.add(
+        RaidBullet(
+          id: _newId(),
+          position: enemy.position + direction * enemy.radius,
+          velocity: direction * shot.speed,
+          damage: shot.damage * damage,
+          owner: enemy.id,
+          side: RaidSide.wild,
+          team: wildTeam,
+          remaining: shot.range,
+        ),
+      );
+    }
+  }
+
+  /// Clouds grow, hurt whoever is inside now and then, and fade.
+  void _updateClouds(double dt) {
+    clouds.removeWhere((cloud) {
+      cloud
+        ..age += dt
+        ..sinceTick += dt;
+      if (cloud.sinceTick >= RaidCloud.tickSeconds) {
+        cloud.sinceTick -= RaidCloud.tickSeconds;
+        final from = enemies.where((e) => e.id == cloud.owner).firstOrNull;
+        for (final body in _wildTargets.toList()) {
+          if (body.position.distanceTo(cloud.position) <=
+              cloud.reach + body.radius) {
+            _hurt(body, cloud.damagePerSecond * RaidCloud.tickSeconds, from);
+          }
+        }
+      }
+      return cloud.isGone;
+    });
   }
 
   RaidBody? _nearestInSight(RaidEnemy enemy, double sight) {
@@ -1948,25 +2172,31 @@ final class RaidSimulation {
 
   /// Brings in the first clones on the first step (with the player, and
   /// announced like the rest), then one more whenever its time comes, until
-  /// the zone's number have come in.
+  /// the zone's number have come in. A party meets more of them, one by one
+  /// as alone (2026-10-23, 사용자).
   void _bringClones() {
     final danger = zone.danger!;
-    while (_clonesIn < danger.clonesAtStart) {
+    while (_clonesIn < _clonesAtStart) {
       final before = _clonesIn;
       _spawnClone();
       if (_clonesIn == before) break;
     }
-    if (_clonesIn >= danger.clonesMax || danger.cloneEverySeconds <= 0) return;
+    if (_clonesIn >= _clonesMax || danger.cloneEverySeconds <= 0) return;
     if (_tick * stepSeconds < _nextCloneAt) return;
     _nextCloneAt += danger.cloneEverySeconds;
     _spawnClone();
   }
 
+  int get _clonesAtStart =>
+      (zone.danger!.clonesAtStart * _partyScale(members.length)).round();
+
+  int get _clonesMax =>
+      (zone.danger!.clonesMax * _partyScale(members.length)).round();
+
   /// A default clone fitting the zone's score walks in at an entry site out
   /// of the player's sight (any site if none is), with its potatoes.
   void _spawnClone() {
-    final danger = zone.danger;
-    if (danger == null || _clonesIn >= danger.clonesMax) return;
+    if (zone.danger == null || _clonesIn >= _clonesMax) return;
     final data = _pickDefaultClone();
     if (data == null) return;
     _clonesIn++;
@@ -2301,7 +2531,7 @@ final class RaidSimulation {
   static Vec2 _randomTile(MapData map, GameRandom random) =>
       Vec2(random.nextInt(map.size) + 0.5, random.nextInt(map.size) + 0.5);
 
-  /// How enemy counts, boss health and gathering spots scale with
+  /// How enemy counts, boss health, gathering spots and clones scale with
   /// [partySize]. Kept at 1 until the balance phase sets the numbers.
   static double _partyScale(int partySize) => partySize <= 1 ? 1 : 1;
 
@@ -2397,6 +2627,9 @@ final class RaidSimulation {
           home: at,
           chargeCooldown: data.boss!.chargeEverySeconds / 2,
           sprayCooldown: data.boss!.sprayEverySeconds / 2,
+          cooldowns: {
+            for (final (key, every) in _patternsOf(data.boss!)) key: every / 2,
+          },
         ),
       );
     }
@@ -2535,6 +2768,7 @@ final class RaidSimulation {
     'floor_items': [for (final f in floorItems) f.toJson()],
     'exits': [for (final e in exits) e.toJson()],
     'clones': [for (final c in clones) c.toJson()],
+    'clouds': [for (final c in clouds) c.toJson()],
     'clones_in': _clonesIn,
     'next_clone_at': _nextCloneAt,
     'revealed': _revealed,

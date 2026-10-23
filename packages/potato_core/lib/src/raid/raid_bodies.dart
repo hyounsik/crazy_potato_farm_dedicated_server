@@ -184,8 +184,16 @@ final class RaidEnemy extends RaidBody {
     this.chargeLeft = 0,
     this.chargeDirection = Vec2.zero,
     Set<int>? chargeHits,
+    Map<String, double>? cooldowns,
+    this.jumpLeft = 0,
+    this.jumpAt = Vec2.zero,
+    this.burrowLeft = 0,
+    this.burrowAt = Vec2.zero,
+    this.burrowStrikes = 0,
+    this.poseLeft = 0,
   }) : wanderGoal = wanderGoal ?? home,
-       chargeHits = chargeHits ?? {};
+       chargeHits = chargeHits ?? {},
+       cooldowns = cooldowns ?? {};
 
   factory RaidEnemy.fromJson(Map<String, dynamic> json) => RaidEnemy(
     id: json['id'] as int,
@@ -206,6 +214,23 @@ final class RaidEnemy extends RaidBody {
     chargeLeft: (json['charge_left'] as num).toDouble(),
     chargeDirection: Vec2.fromJson(json['charge_direction'] as List<Object?>),
     chargeHits: {...(json['charge_hits'] as List<Object?>).cast<int>()},
+    cooldowns: {
+      for (final MapEntry(:key, :value)
+          in (json['cooldowns'] as Map<String, dynamic>? ?? const {}).entries)
+        key: (value as num).toDouble(),
+    },
+    jumpLeft: (json['jump_left'] as num?)?.toDouble() ?? 0,
+    jumpAt: switch (json['jump_at']) {
+      final List<Object?> at => Vec2.fromJson(at),
+      _ => Vec2.zero,
+    },
+    burrowLeft: (json['burrow_left'] as num?)?.toDouble() ?? 0,
+    burrowAt: switch (json['burrow_at']) {
+      final List<Object?> at => Vec2.fromJson(at),
+      _ => Vec2.zero,
+    },
+    burrowStrikes: json['burrow_strikes'] as int? ?? 0,
+    poseLeft: (json['pose_left'] as num?)?.toDouble() ?? 0,
   );
 
   /// The enemy's catalog id.
@@ -236,6 +261,37 @@ final class RaidEnemy extends RaidBody {
   bool get isTelegraphing => telegraphLeft > 0;
   bool get isCharging => chargeLeft > 0;
 
+  /// Zone bosses: time to each of the other patterns ([BossData.jump],
+  /// `burrow`, `cloud<i>`, `shot<i>`).
+  final Map<String, double> cooldowns;
+
+  /// A jump: time to landing, and where the shadow is.
+  double jumpLeft;
+  Vec2 jumpAt;
+
+  /// Underground: time to the next strike, where its mark is, and how many
+  /// strikes are still to come counting this one.
+  double burrowLeft;
+  Vec2 burrowAt;
+  int burrowStrikes;
+
+  /// Showing its attack face a little longer after a pattern (2026-10-23,
+  /// 사용자: the face changes while attacking).
+  double poseLeft;
+
+  bool get isJumping => jumpLeft > 0;
+  bool get isBurrowed => burrowLeft > 0;
+
+  /// In the air or underground: nothing reaches it, and it reaches nothing
+  /// but with its pattern.
+  bool get isHidden => isJumping || isBurrowed;
+
+  /// Doing one of its patterns: one runs at a time.
+  bool get isBusy => isTelegraphing || isCharging || isHidden;
+
+  /// Whether the face is the attacking one now.
+  bool get isAttacking => isBusy || poseLeft > 0;
+
   @override
   RaidSide get side => RaidSide.wild;
 
@@ -261,6 +317,81 @@ final class RaidEnemy extends RaidBody {
     'charge_left': chargeLeft,
     'charge_direction': chargeDirection.toJson(),
     'charge_hits': [...chargeHits],
+    if (cooldowns.isNotEmpty) 'cooldowns': cooldowns,
+    if (isJumping) ...{'jump_left': jumpLeft, 'jump_at': jumpAt.toJson()},
+    if (isBurrowed) ...{
+      'burrow_left': burrowLeft,
+      'burrow_at': burrowAt.toJson(),
+      'burrow_strikes': burrowStrikes,
+    },
+    if (poseLeft > 0) 'pose_left': poseLeft,
+  };
+}
+
+/// A cloud of gas or spores a boss left (2026-10-23, 사용자): it grows to
+/// [radius] over [spreadSeconds] and hurts whoever is inside every
+/// [RaidCloud.tickSeconds] until [seconds] pass. Obstacles do not stop it.
+final class RaidCloud {
+  RaidCloud({
+    required this.id,
+    required this.position,
+    required this.radius,
+    required this.spreadSeconds,
+    required this.seconds,
+    required this.damagePerSecond,
+    required this.owner,
+    required this.kind,
+    this.age = 0,
+    this.sinceTick = 0,
+  });
+
+  factory RaidCloud.fromJson(Map<String, dynamic> json) => RaidCloud(
+    id: json['id'] as int,
+    position: Vec2.fromJson(json['position'] as List<Object?>),
+    radius: (json['radius'] as num).toDouble(),
+    spreadSeconds: (json['spread_seconds'] as num).toDouble(),
+    seconds: (json['seconds'] as num).toDouble(),
+    damagePerSecond: (json['damage_per_second'] as num).toDouble(),
+    owner: json['owner'] as int,
+    kind: json['kind'] as String,
+    age: (json['age'] as num).toDouble(),
+    sinceTick: (json['since_tick'] as num?)?.toDouble() ?? 0,
+  );
+
+  /// How often it hurts, so a hit shows now and then rather than every step.
+  static const double tickSeconds = 0.5;
+
+  final int id;
+  final Vec2 position;
+  final double radius;
+  final double spreadSeconds;
+  final double seconds;
+  final double damagePerSecond;
+
+  /// The boss that left it, and its kind (the cloud's colour).
+  final int owner;
+  final String kind;
+  double age;
+  double sinceTick;
+
+  /// How far it reaches now.
+  double get reach => spreadSeconds <= 0
+      ? radius
+      : radius * (age / spreadSeconds).clamp(0.0, 1.0);
+
+  bool get isGone => age >= seconds;
+
+  Map<String, dynamic> toJson() => {
+    'id': id,
+    'position': position.toJson(),
+    'radius': radius,
+    'spread_seconds': spreadSeconds,
+    'seconds': seconds,
+    'damage_per_second': damagePerSecond,
+    'owner': owner,
+    'kind': kind,
+    'age': age,
+    'since_tick': sinceTick,
   };
 }
 

@@ -604,6 +604,49 @@ void main() {
       await host.close();
     });
 
+    test(
+      'a host whose app went down takes the party back (2026-10-23)',
+      () async {
+        final (net, host, guest) = await started();
+        final run = host.run!;
+        for (var i = 0; i < 10; i++) {
+          host.stepOnce();
+        }
+        // What the host's app saved before it went down.
+        final saved =
+            jsonDecode(jsonEncode(run.toJson())) as Map<String, dynamic>;
+        final roster =
+            jsonDecode(jsonEncode(host.partyRoster)) as List<Object?>;
+        final at = run.members[1].player.position;
+        net.disconnectClient('a');
+        await host.close();
+        await _pumpMicrotasks();
+        expect(guest.stage, ClientSessionStage.hostDisconnected);
+
+        final again = InMemorySessionNetwork();
+        final back = HostSession(catalog: catalog, transport: again.host);
+        back.resumeRun(RaidSimulation.fromJson(saved, catalog), [
+          for (final r in roster) r! as Map<String, dynamic>,
+        ]);
+        expect(back.guests.single.connected, isFalse);
+        expect(back.guests.single.name, 'A');
+
+        await guest.resume(again.connectClient('a2'));
+        await _pumpMicrotasks();
+        expect(guest.stage, ClientSessionStage.playing);
+        expect(guest.memberIndex, 1);
+        expect(guest.run!.members[1].player.position, at);
+        expect(back.guests.single.connected, isTrue);
+
+        guest.setMove(const Vec2(0, 1));
+        await _pumpMicrotasks();
+        expect(back.run!.members[1].move, const Vec2(0, 1));
+
+        await guest.close();
+        await back.close();
+      },
+    );
+
     test('if the run is gone the guest run is void', () async {
       final (net, host, guest) = await started();
       net.disconnectClient('a');
@@ -839,5 +882,36 @@ void main() {
       await late.close();
       await host.close();
     });
+  });
+
+  test('the lobby tells the account in each place, to report or block '
+      '(2026-10-23)', () async {
+    final net = InMemorySessionNetwork();
+    final host = HostSession(
+      catalog: catalog,
+      transport: net.host,
+      hostName: 'H',
+      hostAccountId: 'uid-h',
+    );
+    final a = ClientSession(
+      catalog: catalog,
+      transport: net.connectClient('a'),
+      start: const RaidMemberStart(name: 'A'),
+      accountId: 'uid-a',
+    );
+    final b = ClientSession(
+      catalog: catalog,
+      transport: net.connectClient('b'),
+      start: const RaidMemberStart(name: 'B'),
+    );
+    await _pumpMicrotasks();
+    expect(host.guests.first.accountId, 'uid-a');
+    expect(a.lobby!.accounts, ['uid-h', 'uid-a', '']);
+    expect(b.lobby!.accounts, ['uid-h', 'uid-a', '']);
+    expect(b.lobby!.you, 2);
+
+    await a.close();
+    await b.close();
+    await host.close();
   });
 }

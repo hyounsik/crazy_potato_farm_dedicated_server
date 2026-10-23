@@ -3456,7 +3456,7 @@ $BossDataCopyWith<$Res>? get boss {
 /// @nodoc
 mixin _$BossData {
 
- double get chargeEverySeconds; double get chargeTelegraphSeconds; double get chargeSpeed; double get chargeDistance; double get chargeDamage; double get sprayEverySeconds; int get sprayBullets; double get sprayDamage; double get spraySpeed; double get sprayRange;
+ double get chargeEverySeconds; double get chargeTelegraphSeconds; double get chargeSpeed; double get chargeDistance; double get chargeDamage; double get sprayEverySeconds; int get sprayBullets; double get sprayDamage; double get spraySpeed; double get sprayRange; BossJumpData? get jump; BossBurrowData? get burrow; List<BossCloudData> get clouds; List<BossShotData> get shots;
 /// Create a copy of BossData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3470,20 +3470,20 @@ $BossDataCopyWith<BossData> get copyWith => _$BossDataCopyWithImpl<BossData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as BossData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossData&&(identical(other.chargeEverySeconds, _this.chargeEverySeconds) || other.chargeEverySeconds == _this.chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, _this.chargeTelegraphSeconds) || other.chargeTelegraphSeconds == _this.chargeTelegraphSeconds)&&(identical(other.chargeSpeed, _this.chargeSpeed) || other.chargeSpeed == _this.chargeSpeed)&&(identical(other.chargeDistance, _this.chargeDistance) || other.chargeDistance == _this.chargeDistance)&&(identical(other.chargeDamage, _this.chargeDamage) || other.chargeDamage == _this.chargeDamage)&&(identical(other.sprayEverySeconds, _this.sprayEverySeconds) || other.sprayEverySeconds == _this.sprayEverySeconds)&&(identical(other.sprayBullets, _this.sprayBullets) || other.sprayBullets == _this.sprayBullets)&&(identical(other.sprayDamage, _this.sprayDamage) || other.sprayDamage == _this.sprayDamage)&&(identical(other.spraySpeed, _this.spraySpeed) || other.spraySpeed == _this.spraySpeed)&&(identical(other.sprayRange, _this.sprayRange) || other.sprayRange == _this.sprayRange));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossData&&(identical(other.chargeEverySeconds, _this.chargeEverySeconds) || other.chargeEverySeconds == _this.chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, _this.chargeTelegraphSeconds) || other.chargeTelegraphSeconds == _this.chargeTelegraphSeconds)&&(identical(other.chargeSpeed, _this.chargeSpeed) || other.chargeSpeed == _this.chargeSpeed)&&(identical(other.chargeDistance, _this.chargeDistance) || other.chargeDistance == _this.chargeDistance)&&(identical(other.chargeDamage, _this.chargeDamage) || other.chargeDamage == _this.chargeDamage)&&(identical(other.sprayEverySeconds, _this.sprayEverySeconds) || other.sprayEverySeconds == _this.sprayEverySeconds)&&(identical(other.sprayBullets, _this.sprayBullets) || other.sprayBullets == _this.sprayBullets)&&(identical(other.sprayDamage, _this.sprayDamage) || other.sprayDamage == _this.sprayDamage)&&(identical(other.spraySpeed, _this.spraySpeed) || other.spraySpeed == _this.spraySpeed)&&(identical(other.sprayRange, _this.sprayRange) || other.sprayRange == _this.sprayRange)&&(identical(other.jump, _this.jump) || other.jump == _this.jump)&&(identical(other.burrow, _this.burrow) || other.burrow == _this.burrow)&&const DeepCollectionEquality().equals(other.clouds, _this.clouds)&&const DeepCollectionEquality().equals(other.shots, _this.shots));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BossData;
-  return Object.hash(runtimeType,_this.chargeEverySeconds,_this.chargeTelegraphSeconds,_this.chargeSpeed,_this.chargeDistance,_this.chargeDamage,_this.sprayEverySeconds,_this.sprayBullets,_this.sprayDamage,_this.spraySpeed,_this.sprayRange);
+  return Object.hash(runtimeType,_this.chargeEverySeconds,_this.chargeTelegraphSeconds,_this.chargeSpeed,_this.chargeDistance,_this.chargeDamage,_this.sprayEverySeconds,_this.sprayBullets,_this.sprayDamage,_this.spraySpeed,_this.sprayRange,_this.jump,_this.burrow,const DeepCollectionEquality().hash(_this.clouds),const DeepCollectionEquality().hash(_this.shots));
 }
 
 @override
 String toString() {
   final _this = this as BossData;
-  return 'BossData(chargeEverySeconds: ${_this.chargeEverySeconds}, chargeTelegraphSeconds: ${_this.chargeTelegraphSeconds}, chargeSpeed: ${_this.chargeSpeed}, chargeDistance: ${_this.chargeDistance}, chargeDamage: ${_this.chargeDamage}, sprayEverySeconds: ${_this.sprayEverySeconds}, sprayBullets: ${_this.sprayBullets}, sprayDamage: ${_this.sprayDamage}, spraySpeed: ${_this.spraySpeed}, sprayRange: ${_this.sprayRange})';
+  return 'BossData(chargeEverySeconds: ${_this.chargeEverySeconds}, chargeTelegraphSeconds: ${_this.chargeTelegraphSeconds}, chargeSpeed: ${_this.chargeSpeed}, chargeDistance: ${_this.chargeDistance}, chargeDamage: ${_this.chargeDamage}, sprayEverySeconds: ${_this.sprayEverySeconds}, sprayBullets: ${_this.sprayBullets}, sprayDamage: ${_this.sprayDamage}, spraySpeed: ${_this.spraySpeed}, sprayRange: ${_this.sprayRange}, jump: ${_this.jump}, burrow: ${_this.burrow}, clouds: ${_this.clouds}, shots: ${_this.shots})';
 }
 
 
@@ -3494,11 +3494,11 @@ abstract mixin class $BossDataCopyWith<$Res>  {
   factory $BossDataCopyWith(BossData value, $Res Function(BossData) _then) = _$BossDataCopyWithImpl;
 @useResult
 $Res call({
- double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange
+ double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange, BossJumpData? jump, BossBurrowData? burrow, List<BossCloudData> clouds, List<BossShotData> shots
 });
 
 
-
+$BossJumpDataCopyWith<$Res>? get jump;$BossBurrowDataCopyWith<$Res>? get burrow;
 
 }
 /// @nodoc
@@ -3511,7 +3511,7 @@ class _$BossDataCopyWithImpl<$Res>
 
 /// Create a copy of BossData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,Object? jump = freezed,Object? burrow = freezed,Object? clouds = null,Object? shots = null,}) {
   return _then(BossData(
 chargeEverySeconds: null == chargeEverySeconds ? _self.chargeEverySeconds : chargeEverySeconds // ignore: cast_nullable_to_non_nullable
 as double,chargeTelegraphSeconds: null == chargeTelegraphSeconds ? _self.chargeTelegraphSeconds : chargeTelegraphSeconds // ignore: cast_nullable_to_non_nullable
@@ -3523,10 +3523,38 @@ as double,sprayBullets: null == sprayBullets ? _self.sprayBullets : sprayBullets
 as int,sprayDamage: null == sprayDamage ? _self.sprayDamage : sprayDamage // ignore: cast_nullable_to_non_nullable
 as double,spraySpeed: null == spraySpeed ? _self.spraySpeed : spraySpeed // ignore: cast_nullable_to_non_nullable
 as double,sprayRange: null == sprayRange ? _self.sprayRange : sprayRange // ignore: cast_nullable_to_non_nullable
-as double,
+as double,jump: freezed == jump ? _self.jump : jump // ignore: cast_nullable_to_non_nullable
+as BossJumpData?,burrow: freezed == burrow ? _self.burrow : burrow // ignore: cast_nullable_to_non_nullable
+as BossBurrowData?,clouds: null == clouds ? _self.clouds : clouds // ignore: cast_nullable_to_non_nullable
+as List<BossCloudData>,shots: null == shots ? _self.shots : shots // ignore: cast_nullable_to_non_nullable
+as List<BossShotData>,
   ));
 }
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossJumpDataCopyWith<$Res>? get jump {
+    if (_self.jump == null) {
+    return null;
+  }
 
+  return $BossJumpDataCopyWith<$Res>(_self.jump!, (value) {
+    return _then(_self.copyWith(jump: value));
+  });
+}/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossBurrowDataCopyWith<$Res>? get burrow {
+    if (_self.burrow == null) {
+    return null;
+  }
+
+  return $BossBurrowDataCopyWith<$Res>(_self.burrow!, (value) {
+    return _then(_self.copyWith(burrow: value));
+  });
+}
 }
 
 
@@ -3608,10 +3636,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange,  BossJumpData? jump,  BossBurrowData? burrow,  List<BossCloudData> clouds,  List<BossShotData> shots)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BossData() when $default != null:
-return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange,_that.jump,_that.burrow,_that.clouds,_that.shots);case _:
   return orElse();
 
 }
@@ -3629,10 +3657,10 @@ return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.char
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange,  BossJumpData? jump,  BossBurrowData? burrow,  List<BossCloudData> clouds,  List<BossShotData> shots)  $default,) {final _that = this;
 switch (_that) {
 case _BossData():
-return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange,_that.jump,_that.burrow,_that.clouds,_that.shots);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3649,10 +3677,10 @@ return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.char
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chargeEverySeconds,  double chargeTelegraphSeconds,  double chargeSpeed,  double chargeDistance,  double chargeDamage,  double sprayEverySeconds,  int sprayBullets,  double sprayDamage,  double spraySpeed,  double sprayRange,  BossJumpData? jump,  BossBurrowData? burrow,  List<BossCloudData> clouds,  List<BossShotData> shots)?  $default,) {final _that = this;
 switch (_that) {
 case _BossData() when $default != null:
-return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange);case _:
+return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.chargeSpeed,_that.chargeDistance,_that.chargeDamage,_that.sprayEverySeconds,_that.sprayBullets,_that.sprayDamage,_that.spraySpeed,_that.sprayRange,_that.jump,_that.burrow,_that.clouds,_that.shots);case _:
   return null;
 
 }
@@ -3664,19 +3692,35 @@ return $default(_that.chargeEverySeconds,_that.chargeTelegraphSeconds,_that.char
 @JsonSerializable()
 
 class _BossData implements BossData {
-  const _BossData({required this.chargeEverySeconds, required this.chargeTelegraphSeconds, required this.chargeSpeed, required this.chargeDistance, required this.chargeDamage, required this.sprayEverySeconds, required this.sprayBullets, required this.sprayDamage, required this.spraySpeed, required this.sprayRange});
+  const _BossData({this.chargeEverySeconds = 0.0, this.chargeTelegraphSeconds = 0.0, this.chargeSpeed = 0.0, this.chargeDistance = 0.0, this.chargeDamage = 0.0, this.sprayEverySeconds = 0.0, this.sprayBullets = 0, this.sprayDamage = 0.0, this.spraySpeed = 0.0, this.sprayRange = 0.0, this.jump, this.burrow,  List<BossCloudData> clouds = const <BossCloudData>[],  List<BossShotData> shots = const <BossShotData>[]}): _clouds = clouds,_shots = shots;
   factory _BossData.fromJson(Map<String, dynamic> json) => _$BossDataFromJson(json);
 
-@override final  double chargeEverySeconds;
-@override final  double chargeTelegraphSeconds;
-@override final  double chargeSpeed;
-@override final  double chargeDistance;
-@override final  double chargeDamage;
-@override final  double sprayEverySeconds;
-@override final  int sprayBullets;
-@override final  double sprayDamage;
-@override final  double spraySpeed;
-@override final  double sprayRange;
+@override@JsonKey() final  double chargeEverySeconds;
+@override@JsonKey() final  double chargeTelegraphSeconds;
+@override@JsonKey() final  double chargeSpeed;
+@override@JsonKey() final  double chargeDistance;
+@override@JsonKey() final  double chargeDamage;
+@override@JsonKey() final  double sprayEverySeconds;
+@override@JsonKey() final  int sprayBullets;
+@override@JsonKey() final  double sprayDamage;
+@override@JsonKey() final  double spraySpeed;
+@override@JsonKey() final  double sprayRange;
+@override final  BossJumpData? jump;
+@override final  BossBurrowData? burrow;
+ final  List<BossCloudData> _clouds;
+@override@JsonKey() List<BossCloudData> get clouds {
+  if (_clouds is EqualUnmodifiableListView) return _clouds;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_clouds);
+}
+
+ final  List<BossShotData> _shots;
+@override@JsonKey() List<BossShotData> get shots {
+  if (_shots is EqualUnmodifiableListView) return _shots;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_shots);
+}
+
 
 /// Create a copy of BossData
 /// with the given fields replaced by the non-null parameter values.
@@ -3691,18 +3735,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossData&&(identical(other.chargeEverySeconds, chargeEverySeconds) || other.chargeEverySeconds == chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, chargeTelegraphSeconds) || other.chargeTelegraphSeconds == chargeTelegraphSeconds)&&(identical(other.chargeSpeed, chargeSpeed) || other.chargeSpeed == chargeSpeed)&&(identical(other.chargeDistance, chargeDistance) || other.chargeDistance == chargeDistance)&&(identical(other.chargeDamage, chargeDamage) || other.chargeDamage == chargeDamage)&&(identical(other.sprayEverySeconds, sprayEverySeconds) || other.sprayEverySeconds == sprayEverySeconds)&&(identical(other.sprayBullets, sprayBullets) || other.sprayBullets == sprayBullets)&&(identical(other.sprayDamage, sprayDamage) || other.sprayDamage == sprayDamage)&&(identical(other.spraySpeed, spraySpeed) || other.spraySpeed == spraySpeed)&&(identical(other.sprayRange, sprayRange) || other.sprayRange == sprayRange));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossData&&(identical(other.chargeEverySeconds, chargeEverySeconds) || other.chargeEverySeconds == chargeEverySeconds)&&(identical(other.chargeTelegraphSeconds, chargeTelegraphSeconds) || other.chargeTelegraphSeconds == chargeTelegraphSeconds)&&(identical(other.chargeSpeed, chargeSpeed) || other.chargeSpeed == chargeSpeed)&&(identical(other.chargeDistance, chargeDistance) || other.chargeDistance == chargeDistance)&&(identical(other.chargeDamage, chargeDamage) || other.chargeDamage == chargeDamage)&&(identical(other.sprayEverySeconds, sprayEverySeconds) || other.sprayEverySeconds == sprayEverySeconds)&&(identical(other.sprayBullets, sprayBullets) || other.sprayBullets == sprayBullets)&&(identical(other.sprayDamage, sprayDamage) || other.sprayDamage == sprayDamage)&&(identical(other.spraySpeed, spraySpeed) || other.spraySpeed == spraySpeed)&&(identical(other.sprayRange, sprayRange) || other.sprayRange == sprayRange)&&(identical(other.jump, jump) || other.jump == jump)&&(identical(other.burrow, burrow) || other.burrow == burrow)&&const DeepCollectionEquality().equals(other.clouds, _clouds)&&const DeepCollectionEquality().equals(other.shots, _shots));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,chargeEverySeconds,chargeTelegraphSeconds,chargeSpeed,chargeDistance,chargeDamage,sprayEverySeconds,sprayBullets,sprayDamage,spraySpeed,sprayRange);
+    return Object.hash(runtimeType,chargeEverySeconds,chargeTelegraphSeconds,chargeSpeed,chargeDistance,chargeDamage,sprayEverySeconds,sprayBullets,sprayDamage,spraySpeed,sprayRange,jump,burrow,const DeepCollectionEquality().hash(_clouds),const DeepCollectionEquality().hash(_shots));
 }
 
 @override
 String toString() {
-    return 'BossData(chargeEverySeconds: $chargeEverySeconds, chargeTelegraphSeconds: $chargeTelegraphSeconds, chargeSpeed: $chargeSpeed, chargeDistance: $chargeDistance, chargeDamage: $chargeDamage, sprayEverySeconds: $sprayEverySeconds, sprayBullets: $sprayBullets, sprayDamage: $sprayDamage, spraySpeed: $spraySpeed, sprayRange: $sprayRange)';
+    return 'BossData(chargeEverySeconds: $chargeEverySeconds, chargeTelegraphSeconds: $chargeTelegraphSeconds, chargeSpeed: $chargeSpeed, chargeDistance: $chargeDistance, chargeDamage: $chargeDamage, sprayEverySeconds: $sprayEverySeconds, sprayBullets: $sprayBullets, sprayDamage: $sprayDamage, spraySpeed: $spraySpeed, sprayRange: $sprayRange, jump: $jump, burrow: $burrow, clouds: $clouds, shots: $shots)';
 }
 
 
@@ -3713,11 +3757,11 @@ abstract mixin class _$BossDataCopyWith<$Res> implements $BossDataCopyWith<$Res>
   factory _$BossDataCopyWith(_BossData value, $Res Function(_BossData) _then) = __$BossDataCopyWithImpl;
 @override @useResult
 $Res call({
- double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange
+ double chargeEverySeconds, double chargeTelegraphSeconds, double chargeSpeed, double chargeDistance, double chargeDamage, double sprayEverySeconds, int sprayBullets, double sprayDamage, double spraySpeed, double sprayRange, BossJumpData? jump, BossBurrowData? burrow, List<BossCloudData> clouds, List<BossShotData> shots
 });
 
 
-
+@override $BossJumpDataCopyWith<$Res>? get jump;@override $BossBurrowDataCopyWith<$Res>? get burrow;
 
 }
 /// @nodoc
@@ -3730,7 +3774,7 @@ class __$BossDataCopyWithImpl<$Res>
 
 /// Create a copy of BossData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? chargeEverySeconds = null,Object? chargeTelegraphSeconds = null,Object? chargeSpeed = null,Object? chargeDistance = null,Object? chargeDamage = null,Object? sprayEverySeconds = null,Object? sprayBullets = null,Object? sprayDamage = null,Object? spraySpeed = null,Object? sprayRange = null,Object? jump = freezed,Object? burrow = freezed,Object? clouds = null,Object? shots = null,}) {
   return _then(_BossData(
 chargeEverySeconds: null == chargeEverySeconds ? _self.chargeEverySeconds : chargeEverySeconds // ignore: cast_nullable_to_non_nullable
 as double,chargeTelegraphSeconds: null == chargeTelegraphSeconds ? _self.chargeTelegraphSeconds : chargeTelegraphSeconds // ignore: cast_nullable_to_non_nullable
@@ -3742,6 +3786,1183 @@ as double,sprayBullets: null == sprayBullets ? _self.sprayBullets : sprayBullets
 as int,sprayDamage: null == sprayDamage ? _self.sprayDamage : sprayDamage // ignore: cast_nullable_to_non_nullable
 as double,spraySpeed: null == spraySpeed ? _self.spraySpeed : spraySpeed // ignore: cast_nullable_to_non_nullable
 as double,sprayRange: null == sprayRange ? _self.sprayRange : sprayRange // ignore: cast_nullable_to_non_nullable
+as double,jump: freezed == jump ? _self.jump : jump // ignore: cast_nullable_to_non_nullable
+as BossJumpData?,burrow: freezed == burrow ? _self.burrow : burrow // ignore: cast_nullable_to_non_nullable
+as BossBurrowData?,clouds: null == clouds ? _self._clouds : clouds // ignore: cast_nullable_to_non_nullable
+as List<BossCloudData>,shots: null == shots ? _self._shots : shots // ignore: cast_nullable_to_non_nullable
+as List<BossShotData>,
+  ));
+}
+
+/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossJumpDataCopyWith<$Res>? get jump {
+    if (_self.jump == null) {
+    return null;
+  }
+
+  return $BossJumpDataCopyWith<$Res>(_self.jump!, (value) {
+    return _then(_self.copyWith(jump: value));
+  });
+}/// Create a copy of BossData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$BossBurrowDataCopyWith<$Res>? get burrow {
+    if (_self.burrow == null) {
+    return null;
+  }
+
+  return $BossBurrowDataCopyWith<$Res>(_self.burrow!, (value) {
+    return _then(_self.copyWith(burrow: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$BossJumpData {
+
+ double get everySeconds; double get airSeconds; double get lockSeconds; double get followSpeed; double get radius; double get damage;
+/// Create a copy of BossJumpData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BossJumpDataCopyWith<BossJumpData> get copyWith => _$BossJumpDataCopyWithImpl<BossJumpData>(this as BossJumpData, _$identity);
+
+  /// Serializes this BossJumpData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BossJumpData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossJumpData&&(identical(other.everySeconds, _this.everySeconds) || other.everySeconds == _this.everySeconds)&&(identical(other.airSeconds, _this.airSeconds) || other.airSeconds == _this.airSeconds)&&(identical(other.lockSeconds, _this.lockSeconds) || other.lockSeconds == _this.lockSeconds)&&(identical(other.followSpeed, _this.followSpeed) || other.followSpeed == _this.followSpeed)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.damage, _this.damage) || other.damage == _this.damage));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BossJumpData;
+  return Object.hash(runtimeType,_this.everySeconds,_this.airSeconds,_this.lockSeconds,_this.followSpeed,_this.radius,_this.damage);
+}
+
+@override
+String toString() {
+  final _this = this as BossJumpData;
+  return 'BossJumpData(everySeconds: ${_this.everySeconds}, airSeconds: ${_this.airSeconds}, lockSeconds: ${_this.lockSeconds}, followSpeed: ${_this.followSpeed}, radius: ${_this.radius}, damage: ${_this.damage})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BossJumpDataCopyWith<$Res>  {
+  factory $BossJumpDataCopyWith(BossJumpData value, $Res Function(BossJumpData) _then) = _$BossJumpDataCopyWithImpl;
+@useResult
+$Res call({
+ double everySeconds, double airSeconds, double lockSeconds, double followSpeed, double radius, double damage
+});
+
+
+
+
+}
+/// @nodoc
+class _$BossJumpDataCopyWithImpl<$Res>
+    implements $BossJumpDataCopyWith<$Res> {
+  _$BossJumpDataCopyWithImpl(this._self, this._then);
+
+  final BossJumpData _self;
+  final $Res Function(BossJumpData) _then;
+
+/// Create a copy of BossJumpData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? airSeconds = null,Object? lockSeconds = null,Object? followSpeed = null,Object? radius = null,Object? damage = null,}) {
+  return _then(BossJumpData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,airSeconds: null == airSeconds ? _self.airSeconds : airSeconds // ignore: cast_nullable_to_non_nullable
+as double,lockSeconds: null == lockSeconds ? _self.lockSeconds : lockSeconds // ignore: cast_nullable_to_non_nullable
+as double,followSpeed: null == followSpeed ? _self.followSpeed : followSpeed // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BossJumpData].
+extension BossJumpDataPatterns on BossJumpData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BossJumpData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BossJumpData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BossJumpData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BossJumpData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BossJumpData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BossJumpData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double everySeconds,  double airSeconds,  double lockSeconds,  double followSpeed,  double radius,  double damage)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BossJumpData() when $default != null:
+return $default(_that.everySeconds,_that.airSeconds,_that.lockSeconds,_that.followSpeed,_that.radius,_that.damage);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double everySeconds,  double airSeconds,  double lockSeconds,  double followSpeed,  double radius,  double damage)  $default,) {final _that = this;
+switch (_that) {
+case _BossJumpData():
+return $default(_that.everySeconds,_that.airSeconds,_that.lockSeconds,_that.followSpeed,_that.radius,_that.damage);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double everySeconds,  double airSeconds,  double lockSeconds,  double followSpeed,  double radius,  double damage)?  $default,) {final _that = this;
+switch (_that) {
+case _BossJumpData() when $default != null:
+return $default(_that.everySeconds,_that.airSeconds,_that.lockSeconds,_that.followSpeed,_that.radius,_that.damage);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BossJumpData implements BossJumpData {
+  const _BossJumpData({required this.everySeconds, required this.airSeconds, this.lockSeconds = 1.0, required this.followSpeed, required this.radius, required this.damage});
+  factory _BossJumpData.fromJson(Map<String, dynamic> json) => _$BossJumpDataFromJson(json);
+
+@override final  double everySeconds;
+@override final  double airSeconds;
+@override@JsonKey() final  double lockSeconds;
+@override final  double followSpeed;
+@override final  double radius;
+@override final  double damage;
+
+/// Create a copy of BossJumpData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BossJumpDataCopyWith<_BossJumpData> get copyWith => __$BossJumpDataCopyWithImpl<_BossJumpData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BossJumpDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossJumpData&&(identical(other.everySeconds, everySeconds) || other.everySeconds == everySeconds)&&(identical(other.airSeconds, airSeconds) || other.airSeconds == airSeconds)&&(identical(other.lockSeconds, lockSeconds) || other.lockSeconds == lockSeconds)&&(identical(other.followSpeed, followSpeed) || other.followSpeed == followSpeed)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.damage, damage) || other.damage == damage));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,everySeconds,airSeconds,lockSeconds,followSpeed,radius,damage);
+}
+
+@override
+String toString() {
+    return 'BossJumpData(everySeconds: $everySeconds, airSeconds: $airSeconds, lockSeconds: $lockSeconds, followSpeed: $followSpeed, radius: $radius, damage: $damage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BossJumpDataCopyWith<$Res> implements $BossJumpDataCopyWith<$Res> {
+  factory _$BossJumpDataCopyWith(_BossJumpData value, $Res Function(_BossJumpData) _then) = __$BossJumpDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double everySeconds, double airSeconds, double lockSeconds, double followSpeed, double radius, double damage
+});
+
+
+
+
+}
+/// @nodoc
+class __$BossJumpDataCopyWithImpl<$Res>
+    implements _$BossJumpDataCopyWith<$Res> {
+  __$BossJumpDataCopyWithImpl(this._self, this._then);
+
+  final _BossJumpData _self;
+  final $Res Function(_BossJumpData) _then;
+
+/// Create a copy of BossJumpData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? airSeconds = null,Object? lockSeconds = null,Object? followSpeed = null,Object? radius = null,Object? damage = null,}) {
+  return _then(_BossJumpData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,airSeconds: null == airSeconds ? _self.airSeconds : airSeconds // ignore: cast_nullable_to_non_nullable
+as double,lockSeconds: null == lockSeconds ? _self.lockSeconds : lockSeconds // ignore: cast_nullable_to_non_nullable
+as double,followSpeed: null == followSpeed ? _self.followSpeed : followSpeed // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BossBurrowData {
+
+ double get everySeconds; double get followSeconds; double get lockSeconds; double get followSpeed; int get followUps; double get followUpLockSeconds; double get radius; double get damage;
+/// Create a copy of BossBurrowData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BossBurrowDataCopyWith<BossBurrowData> get copyWith => _$BossBurrowDataCopyWithImpl<BossBurrowData>(this as BossBurrowData, _$identity);
+
+  /// Serializes this BossBurrowData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BossBurrowData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossBurrowData&&(identical(other.everySeconds, _this.everySeconds) || other.everySeconds == _this.everySeconds)&&(identical(other.followSeconds, _this.followSeconds) || other.followSeconds == _this.followSeconds)&&(identical(other.lockSeconds, _this.lockSeconds) || other.lockSeconds == _this.lockSeconds)&&(identical(other.followSpeed, _this.followSpeed) || other.followSpeed == _this.followSpeed)&&(identical(other.followUps, _this.followUps) || other.followUps == _this.followUps)&&(identical(other.followUpLockSeconds, _this.followUpLockSeconds) || other.followUpLockSeconds == _this.followUpLockSeconds)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.damage, _this.damage) || other.damage == _this.damage));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BossBurrowData;
+  return Object.hash(runtimeType,_this.everySeconds,_this.followSeconds,_this.lockSeconds,_this.followSpeed,_this.followUps,_this.followUpLockSeconds,_this.radius,_this.damage);
+}
+
+@override
+String toString() {
+  final _this = this as BossBurrowData;
+  return 'BossBurrowData(everySeconds: ${_this.everySeconds}, followSeconds: ${_this.followSeconds}, lockSeconds: ${_this.lockSeconds}, followSpeed: ${_this.followSpeed}, followUps: ${_this.followUps}, followUpLockSeconds: ${_this.followUpLockSeconds}, radius: ${_this.radius}, damage: ${_this.damage})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BossBurrowDataCopyWith<$Res>  {
+  factory $BossBurrowDataCopyWith(BossBurrowData value, $Res Function(BossBurrowData) _then) = _$BossBurrowDataCopyWithImpl;
+@useResult
+$Res call({
+ double everySeconds, double followSeconds, double lockSeconds, double followSpeed, int followUps, double followUpLockSeconds, double radius, double damage
+});
+
+
+
+
+}
+/// @nodoc
+class _$BossBurrowDataCopyWithImpl<$Res>
+    implements $BossBurrowDataCopyWith<$Res> {
+  _$BossBurrowDataCopyWithImpl(this._self, this._then);
+
+  final BossBurrowData _self;
+  final $Res Function(BossBurrowData) _then;
+
+/// Create a copy of BossBurrowData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? followSeconds = null,Object? lockSeconds = null,Object? followSpeed = null,Object? followUps = null,Object? followUpLockSeconds = null,Object? radius = null,Object? damage = null,}) {
+  return _then(BossBurrowData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,followSeconds: null == followSeconds ? _self.followSeconds : followSeconds // ignore: cast_nullable_to_non_nullable
+as double,lockSeconds: null == lockSeconds ? _self.lockSeconds : lockSeconds // ignore: cast_nullable_to_non_nullable
+as double,followSpeed: null == followSpeed ? _self.followSpeed : followSpeed // ignore: cast_nullable_to_non_nullable
+as double,followUps: null == followUps ? _self.followUps : followUps // ignore: cast_nullable_to_non_nullable
+as int,followUpLockSeconds: null == followUpLockSeconds ? _self.followUpLockSeconds : followUpLockSeconds // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BossBurrowData].
+extension BossBurrowDataPatterns on BossBurrowData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BossBurrowData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BossBurrowData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BossBurrowData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BossBurrowData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BossBurrowData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BossBurrowData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double everySeconds,  double followSeconds,  double lockSeconds,  double followSpeed,  int followUps,  double followUpLockSeconds,  double radius,  double damage)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BossBurrowData() when $default != null:
+return $default(_that.everySeconds,_that.followSeconds,_that.lockSeconds,_that.followSpeed,_that.followUps,_that.followUpLockSeconds,_that.radius,_that.damage);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double everySeconds,  double followSeconds,  double lockSeconds,  double followSpeed,  int followUps,  double followUpLockSeconds,  double radius,  double damage)  $default,) {final _that = this;
+switch (_that) {
+case _BossBurrowData():
+return $default(_that.everySeconds,_that.followSeconds,_that.lockSeconds,_that.followSpeed,_that.followUps,_that.followUpLockSeconds,_that.radius,_that.damage);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double everySeconds,  double followSeconds,  double lockSeconds,  double followSpeed,  int followUps,  double followUpLockSeconds,  double radius,  double damage)?  $default,) {final _that = this;
+switch (_that) {
+case _BossBurrowData() when $default != null:
+return $default(_that.everySeconds,_that.followSeconds,_that.lockSeconds,_that.followSpeed,_that.followUps,_that.followUpLockSeconds,_that.radius,_that.damage);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BossBurrowData implements BossBurrowData {
+  const _BossBurrowData({required this.everySeconds, required this.followSeconds, this.lockSeconds = 1.0, required this.followSpeed, this.followUps = 2, required this.followUpLockSeconds, required this.radius, required this.damage});
+  factory _BossBurrowData.fromJson(Map<String, dynamic> json) => _$BossBurrowDataFromJson(json);
+
+@override final  double everySeconds;
+@override final  double followSeconds;
+@override@JsonKey() final  double lockSeconds;
+@override final  double followSpeed;
+@override@JsonKey() final  int followUps;
+@override final  double followUpLockSeconds;
+@override final  double radius;
+@override final  double damage;
+
+/// Create a copy of BossBurrowData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BossBurrowDataCopyWith<_BossBurrowData> get copyWith => __$BossBurrowDataCopyWithImpl<_BossBurrowData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BossBurrowDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossBurrowData&&(identical(other.everySeconds, everySeconds) || other.everySeconds == everySeconds)&&(identical(other.followSeconds, followSeconds) || other.followSeconds == followSeconds)&&(identical(other.lockSeconds, lockSeconds) || other.lockSeconds == lockSeconds)&&(identical(other.followSpeed, followSpeed) || other.followSpeed == followSpeed)&&(identical(other.followUps, followUps) || other.followUps == followUps)&&(identical(other.followUpLockSeconds, followUpLockSeconds) || other.followUpLockSeconds == followUpLockSeconds)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.damage, damage) || other.damage == damage));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,everySeconds,followSeconds,lockSeconds,followSpeed,followUps,followUpLockSeconds,radius,damage);
+}
+
+@override
+String toString() {
+    return 'BossBurrowData(everySeconds: $everySeconds, followSeconds: $followSeconds, lockSeconds: $lockSeconds, followSpeed: $followSpeed, followUps: $followUps, followUpLockSeconds: $followUpLockSeconds, radius: $radius, damage: $damage)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BossBurrowDataCopyWith<$Res> implements $BossBurrowDataCopyWith<$Res> {
+  factory _$BossBurrowDataCopyWith(_BossBurrowData value, $Res Function(_BossBurrowData) _then) = __$BossBurrowDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double everySeconds, double followSeconds, double lockSeconds, double followSpeed, int followUps, double followUpLockSeconds, double radius, double damage
+});
+
+
+
+
+}
+/// @nodoc
+class __$BossBurrowDataCopyWithImpl<$Res>
+    implements _$BossBurrowDataCopyWith<$Res> {
+  __$BossBurrowDataCopyWithImpl(this._self, this._then);
+
+  final _BossBurrowData _self;
+  final $Res Function(_BossBurrowData) _then;
+
+/// Create a copy of BossBurrowData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? followSeconds = null,Object? lockSeconds = null,Object? followSpeed = null,Object? followUps = null,Object? followUpLockSeconds = null,Object? radius = null,Object? damage = null,}) {
+  return _then(_BossBurrowData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,followSeconds: null == followSeconds ? _self.followSeconds : followSeconds // ignore: cast_nullable_to_non_nullable
+as double,lockSeconds: null == lockSeconds ? _self.lockSeconds : lockSeconds // ignore: cast_nullable_to_non_nullable
+as double,followSpeed: null == followSpeed ? _self.followSpeed : followSpeed // ignore: cast_nullable_to_non_nullable
+as double,followUps: null == followUps ? _self.followUps : followUps // ignore: cast_nullable_to_non_nullable
+as int,followUpLockSeconds: null == followUpLockSeconds ? _self.followUpLockSeconds : followUpLockSeconds // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BossCloudData {
+
+ double get everySeconds; double get radius; double get seconds; double get spreadSeconds; double get damagePerSecond; double get ahead; int get count;
+/// Create a copy of BossCloudData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BossCloudDataCopyWith<BossCloudData> get copyWith => _$BossCloudDataCopyWithImpl<BossCloudData>(this as BossCloudData, _$identity);
+
+  /// Serializes this BossCloudData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BossCloudData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossCloudData&&(identical(other.everySeconds, _this.everySeconds) || other.everySeconds == _this.everySeconds)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.seconds, _this.seconds) || other.seconds == _this.seconds)&&(identical(other.spreadSeconds, _this.spreadSeconds) || other.spreadSeconds == _this.spreadSeconds)&&(identical(other.damagePerSecond, _this.damagePerSecond) || other.damagePerSecond == _this.damagePerSecond)&&(identical(other.ahead, _this.ahead) || other.ahead == _this.ahead)&&(identical(other.count, _this.count) || other.count == _this.count));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BossCloudData;
+  return Object.hash(runtimeType,_this.everySeconds,_this.radius,_this.seconds,_this.spreadSeconds,_this.damagePerSecond,_this.ahead,_this.count);
+}
+
+@override
+String toString() {
+  final _this = this as BossCloudData;
+  return 'BossCloudData(everySeconds: ${_this.everySeconds}, radius: ${_this.radius}, seconds: ${_this.seconds}, spreadSeconds: ${_this.spreadSeconds}, damagePerSecond: ${_this.damagePerSecond}, ahead: ${_this.ahead}, count: ${_this.count})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BossCloudDataCopyWith<$Res>  {
+  factory $BossCloudDataCopyWith(BossCloudData value, $Res Function(BossCloudData) _then) = _$BossCloudDataCopyWithImpl;
+@useResult
+$Res call({
+ double everySeconds, double radius, double seconds, double spreadSeconds, double damagePerSecond, double ahead, int count
+});
+
+
+
+
+}
+/// @nodoc
+class _$BossCloudDataCopyWithImpl<$Res>
+    implements $BossCloudDataCopyWith<$Res> {
+  _$BossCloudDataCopyWithImpl(this._self, this._then);
+
+  final BossCloudData _self;
+  final $Res Function(BossCloudData) _then;
+
+/// Create a copy of BossCloudData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? radius = null,Object? seconds = null,Object? spreadSeconds = null,Object? damagePerSecond = null,Object? ahead = null,Object? count = null,}) {
+  return _then(BossCloudData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
+as double,spreadSeconds: null == spreadSeconds ? _self.spreadSeconds : spreadSeconds // ignore: cast_nullable_to_non_nullable
+as double,damagePerSecond: null == damagePerSecond ? _self.damagePerSecond : damagePerSecond // ignore: cast_nullable_to_non_nullable
+as double,ahead: null == ahead ? _self.ahead : ahead // ignore: cast_nullable_to_non_nullable
+as double,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BossCloudData].
+extension BossCloudDataPatterns on BossCloudData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BossCloudData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BossCloudData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BossCloudData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BossCloudData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BossCloudData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BossCloudData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double everySeconds,  double radius,  double seconds,  double spreadSeconds,  double damagePerSecond,  double ahead,  int count)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BossCloudData() when $default != null:
+return $default(_that.everySeconds,_that.radius,_that.seconds,_that.spreadSeconds,_that.damagePerSecond,_that.ahead,_that.count);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double everySeconds,  double radius,  double seconds,  double spreadSeconds,  double damagePerSecond,  double ahead,  int count)  $default,) {final _that = this;
+switch (_that) {
+case _BossCloudData():
+return $default(_that.everySeconds,_that.radius,_that.seconds,_that.spreadSeconds,_that.damagePerSecond,_that.ahead,_that.count);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double everySeconds,  double radius,  double seconds,  double spreadSeconds,  double damagePerSecond,  double ahead,  int count)?  $default,) {final _that = this;
+switch (_that) {
+case _BossCloudData() when $default != null:
+return $default(_that.everySeconds,_that.radius,_that.seconds,_that.spreadSeconds,_that.damagePerSecond,_that.ahead,_that.count);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BossCloudData implements BossCloudData {
+  const _BossCloudData({required this.everySeconds, required this.radius, this.seconds = 3.0, required this.spreadSeconds, required this.damagePerSecond, this.ahead = 0.0, this.count = 1});
+  factory _BossCloudData.fromJson(Map<String, dynamic> json) => _$BossCloudDataFromJson(json);
+
+@override final  double everySeconds;
+@override final  double radius;
+@override@JsonKey() final  double seconds;
+@override final  double spreadSeconds;
+@override final  double damagePerSecond;
+@override@JsonKey() final  double ahead;
+@override@JsonKey() final  int count;
+
+/// Create a copy of BossCloudData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BossCloudDataCopyWith<_BossCloudData> get copyWith => __$BossCloudDataCopyWithImpl<_BossCloudData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BossCloudDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossCloudData&&(identical(other.everySeconds, everySeconds) || other.everySeconds == everySeconds)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.seconds, seconds) || other.seconds == seconds)&&(identical(other.spreadSeconds, spreadSeconds) || other.spreadSeconds == spreadSeconds)&&(identical(other.damagePerSecond, damagePerSecond) || other.damagePerSecond == damagePerSecond)&&(identical(other.ahead, ahead) || other.ahead == ahead)&&(identical(other.count, count) || other.count == count));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,everySeconds,radius,seconds,spreadSeconds,damagePerSecond,ahead,count);
+}
+
+@override
+String toString() {
+    return 'BossCloudData(everySeconds: $everySeconds, radius: $radius, seconds: $seconds, spreadSeconds: $spreadSeconds, damagePerSecond: $damagePerSecond, ahead: $ahead, count: $count)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BossCloudDataCopyWith<$Res> implements $BossCloudDataCopyWith<$Res> {
+  factory _$BossCloudDataCopyWith(_BossCloudData value, $Res Function(_BossCloudData) _then) = __$BossCloudDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double everySeconds, double radius, double seconds, double spreadSeconds, double damagePerSecond, double ahead, int count
+});
+
+
+
+
+}
+/// @nodoc
+class __$BossCloudDataCopyWithImpl<$Res>
+    implements _$BossCloudDataCopyWith<$Res> {
+  __$BossCloudDataCopyWithImpl(this._self, this._then);
+
+  final _BossCloudData _self;
+  final $Res Function(_BossCloudData) _then;
+
+/// Create a copy of BossCloudData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? radius = null,Object? seconds = null,Object? spreadSeconds = null,Object? damagePerSecond = null,Object? ahead = null,Object? count = null,}) {
+  return _then(_BossCloudData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
+as double,seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
+as double,spreadSeconds: null == spreadSeconds ? _self.spreadSeconds : spreadSeconds // ignore: cast_nullable_to_non_nullable
+as double,damagePerSecond: null == damagePerSecond ? _self.damagePerSecond : damagePerSecond // ignore: cast_nullable_to_non_nullable
+as double,ahead: null == ahead ? _self.ahead : ahead // ignore: cast_nullable_to_non_nullable
+as double,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$BossShotData {
+
+ double get everySeconds; int get bullets; double get spreadDegrees; double get damage; double get speed; double get range;
+/// Create a copy of BossShotData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$BossShotDataCopyWith<BossShotData> get copyWith => _$BossShotDataCopyWithImpl<BossShotData>(this as BossShotData, _$identity);
+
+  /// Serializes this BossShotData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as BossShotData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BossShotData&&(identical(other.everySeconds, _this.everySeconds) || other.everySeconds == _this.everySeconds)&&(identical(other.bullets, _this.bullets) || other.bullets == _this.bullets)&&(identical(other.spreadDegrees, _this.spreadDegrees) || other.spreadDegrees == _this.spreadDegrees)&&(identical(other.damage, _this.damage) || other.damage == _this.damage)&&(identical(other.speed, _this.speed) || other.speed == _this.speed)&&(identical(other.range, _this.range) || other.range == _this.range));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as BossShotData;
+  return Object.hash(runtimeType,_this.everySeconds,_this.bullets,_this.spreadDegrees,_this.damage,_this.speed,_this.range);
+}
+
+@override
+String toString() {
+  final _this = this as BossShotData;
+  return 'BossShotData(everySeconds: ${_this.everySeconds}, bullets: ${_this.bullets}, spreadDegrees: ${_this.spreadDegrees}, damage: ${_this.damage}, speed: ${_this.speed}, range: ${_this.range})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $BossShotDataCopyWith<$Res>  {
+  factory $BossShotDataCopyWith(BossShotData value, $Res Function(BossShotData) _then) = _$BossShotDataCopyWithImpl;
+@useResult
+$Res call({
+ double everySeconds, int bullets, double spreadDegrees, double damage, double speed, double range
+});
+
+
+
+
+}
+/// @nodoc
+class _$BossShotDataCopyWithImpl<$Res>
+    implements $BossShotDataCopyWith<$Res> {
+  _$BossShotDataCopyWithImpl(this._self, this._then);
+
+  final BossShotData _self;
+  final $Res Function(BossShotData) _then;
+
+/// Create a copy of BossShotData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? bullets = null,Object? spreadDegrees = null,Object? damage = null,Object? speed = null,Object? range = null,}) {
+  return _then(BossShotData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,bullets: null == bullets ? _self.bullets : bullets // ignore: cast_nullable_to_non_nullable
+as int,spreadDegrees: null == spreadDegrees ? _self.spreadDegrees : spreadDegrees // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
+as double,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
+as double,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [BossShotData].
+extension BossShotDataPatterns on BossShotData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _BossShotData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _BossShotData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _BossShotData value)  $default,){
+final _that = this;
+switch (_that) {
+case _BossShotData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _BossShotData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _BossShotData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double everySeconds,  int bullets,  double spreadDegrees,  double damage,  double speed,  double range)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _BossShotData() when $default != null:
+return $default(_that.everySeconds,_that.bullets,_that.spreadDegrees,_that.damage,_that.speed,_that.range);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double everySeconds,  int bullets,  double spreadDegrees,  double damage,  double speed,  double range)  $default,) {final _that = this;
+switch (_that) {
+case _BossShotData():
+return $default(_that.everySeconds,_that.bullets,_that.spreadDegrees,_that.damage,_that.speed,_that.range);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double everySeconds,  int bullets,  double spreadDegrees,  double damage,  double speed,  double range)?  $default,) {final _that = this;
+switch (_that) {
+case _BossShotData() when $default != null:
+return $default(_that.everySeconds,_that.bullets,_that.spreadDegrees,_that.damage,_that.speed,_that.range);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _BossShotData implements BossShotData {
+  const _BossShotData({required this.everySeconds, required this.bullets, this.spreadDegrees = 0.0, required this.damage, required this.speed, required this.range});
+  factory _BossShotData.fromJson(Map<String, dynamic> json) => _$BossShotDataFromJson(json);
+
+@override final  double everySeconds;
+@override final  int bullets;
+@override@JsonKey() final  double spreadDegrees;
+@override final  double damage;
+@override final  double speed;
+@override final  double range;
+
+/// Create a copy of BossShotData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$BossShotDataCopyWith<_BossShotData> get copyWith => __$BossShotDataCopyWithImpl<_BossShotData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$BossShotDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BossShotData&&(identical(other.everySeconds, everySeconds) || other.everySeconds == everySeconds)&&(identical(other.bullets, bullets) || other.bullets == bullets)&&(identical(other.spreadDegrees, spreadDegrees) || other.spreadDegrees == spreadDegrees)&&(identical(other.damage, damage) || other.damage == damage)&&(identical(other.speed, speed) || other.speed == speed)&&(identical(other.range, range) || other.range == range));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,everySeconds,bullets,spreadDegrees,damage,speed,range);
+}
+
+@override
+String toString() {
+    return 'BossShotData(everySeconds: $everySeconds, bullets: $bullets, spreadDegrees: $spreadDegrees, damage: $damage, speed: $speed, range: $range)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$BossShotDataCopyWith<$Res> implements $BossShotDataCopyWith<$Res> {
+  factory _$BossShotDataCopyWith(_BossShotData value, $Res Function(_BossShotData) _then) = __$BossShotDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double everySeconds, int bullets, double spreadDegrees, double damage, double speed, double range
+});
+
+
+
+
+}
+/// @nodoc
+class __$BossShotDataCopyWithImpl<$Res>
+    implements _$BossShotDataCopyWith<$Res> {
+  __$BossShotDataCopyWithImpl(this._self, this._then);
+
+  final _BossShotData _self;
+  final $Res Function(_BossShotData) _then;
+
+/// Create a copy of BossShotData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? bullets = null,Object? spreadDegrees = null,Object? damage = null,Object? speed = null,Object? range = null,}) {
+  return _then(_BossShotData(
+everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
+as double,bullets: null == bullets ? _self.bullets : bullets // ignore: cast_nullable_to_non_nullable
+as int,spreadDegrees: null == spreadDegrees ? _self.spreadDegrees : spreadDegrees // ignore: cast_nullable_to_non_nullable
+as double,damage: null == damage ? _self.damage : damage // ignore: cast_nullable_to_non_nullable
+as double,speed: null == speed ? _self.speed : speed // ignore: cast_nullable_to_non_nullable
+as double,range: null == range ? _self.range : range // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

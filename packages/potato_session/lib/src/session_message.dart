@@ -88,7 +88,16 @@ final class FarmWalk {
 /// the first is the leader), [ready] whether each is ready to set out for
 /// the zone the host picked (the host always is), and which is [you].
 /// Everyone in the room goes together (2026-10-22, 사용자).
-typedef SessionLobby = ({List<String> names, List<bool> ready, int you});
+typedef SessionLobby = ({
+  List<String> names,
+  List<bool> ready,
+  int you,
+
+  /// Each place's account id in host mode (empty when not known, and on a
+  /// dedicated server), so a player can report or block another
+  /// (2026-10-23, 사용자).
+  List<String> accounts,
+});
 
 /// Deterministic fingerprint of [catalog] so host and guest can check they run
 /// on the same game data before starting (`realtime-session.md`).
@@ -130,6 +139,7 @@ final class RaidSnapshot {
     required this.floorItems,
     required this.exits,
     required this.clones,
+    this.clouds = const [],
   });
 
   factory RaidSnapshot.fromRun(RaidSimulation run) => RaidSnapshot(
@@ -142,6 +152,7 @@ final class RaidSnapshot {
     floorItems: [for (final f in run.floorItems) f.toJson()],
     exits: [for (final e in run.exits) e.toJson()],
     clones: [for (final c in run.clones) c.toJson()],
+    clouds: [for (final c in run.clouds) c.toJson()],
   );
 
   factory RaidSnapshot.fromJson(Map<String, dynamic> json) {
@@ -158,6 +169,10 @@ final class RaidSnapshot {
       floorItems: maps('floor_items'),
       exits: maps('exits'),
       clones: maps('clones'),
+      clouds: [
+        for (final e in json['clouds'] as List<Object?>? ?? const [])
+          e! as Map<String, dynamic>,
+      ],
     );
   }
 
@@ -171,6 +186,9 @@ final class RaidSnapshot {
   final List<Map<String, dynamic>> exits;
   final List<Map<String, dynamic>> clones;
 
+  /// Boss gas and spores (2026-10-23).
+  final List<Map<String, dynamic>> clouds;
+
   Map<String, dynamic> toJson() => {
     'tick': tick,
     'revealed': revealed,
@@ -181,6 +199,7 @@ final class RaidSnapshot {
     'floor_items': floorItems,
     'exits': exits,
     'clones': clones,
+    if (clouds.isNotEmpty) 'clouds': clouds,
   };
 }
 
@@ -196,6 +215,7 @@ sealed class SessionMessage {
       catalogHash: json['catalog_hash'] as String,
       start: RaidMemberStart.fromJson(json['start'] as Map<String, dynamic>),
       playerId: json['player_id'] as String? ?? '',
+      accountId: json['account_id'] as String? ?? '',
     ),
     'party_state' => PartyStateMessage(
       json['zone'] as String?,
@@ -218,6 +238,10 @@ sealed class SessionMessage {
         for (final r in json['ready'] as List<Object?>? ?? const []) r! as bool,
       ],
       you: json['you'] as int,
+      accounts: [
+        for (final a in json['accounts'] as List<Object?>? ?? const [])
+          a! as String,
+      ],
     )),
     'start_run' => StartRunMessage(json['zone'] as String),
     'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
@@ -275,6 +299,7 @@ sealed class SessionMessage {
       :final catalogHash,
       :final start,
       :final playerId,
+      :final accountId,
     ) =>
       {
         'type': 'hello',
@@ -282,6 +307,7 @@ sealed class SessionMessage {
         'catalog_hash': catalogHash,
         'start': start.toJson(),
         if (playerId.isNotEmpty) 'player_id': playerId,
+        if (accountId.isNotEmpty) 'account_id': accountId,
       },
     PartyStateMessage(:final zone, :final left) => {
       'type': 'party_state',
@@ -302,6 +328,7 @@ sealed class SessionMessage {
       'names': lobby.names,
       'ready': lobby.ready,
       'you': lobby.you,
+      if (lobby.accounts.any((a) => a.isNotEmpty)) 'accounts': lobby.accounts,
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
     FarmViewMessage(:final farm) => {'type': 'farm_view', 'farm': farm},
@@ -364,11 +391,16 @@ final class HelloMessage extends SessionMessage {
     required this.catalogHash,
     required this.start,
     this.playerId = '',
+    this.accountId = '',
   });
 
   final int buildNumber;
   final String catalogHash;
   final RaidMemberStart start;
+
+  /// The player's account id in host mode, so others in the room can
+  /// report or block them (2026-10-23, 사용자). Empty without one.
+  final String accountId;
 
   /// This installation's id, so a dedicated server (no accounts) can tell
   /// the same player from another with the same nickname ([start] carries

@@ -634,6 +634,7 @@ final class RaidPile {
     required this.kind,
     required this.loot,
     this.seen = false,
+    this.owner,
   });
 
   factory RaidPile.fromJson(Map<String, dynamic> json) => RaidPile(
@@ -642,12 +643,22 @@ final class RaidPile {
     kind: PileKind.values.byName(json['kind'] as String),
     loot: LootPile.fromJson(json['loot'] as List<Object?>),
     seen: json['seen'] as bool,
+    owner: json['owner'] as int?,
   );
 
   final int id;
   final Vec2 position;
   final PileKind kind;
   final LootPile loot;
+
+  /// The party member (index in `RaidSimulation.members`) this one is for,
+  /// or null for everyone. In a party, what defeated enemies and clones
+  /// leave comes once per member (2026-10-23): only its owner sees and
+  /// opens it.
+  final int? owner;
+
+  /// Whether member [index] may see and open it.
+  bool isFor(int index) => owner == null || owner == index;
 
   /// The player has had it in sight: bundles stay on the minimap.
   bool seen;
@@ -658,6 +669,7 @@ final class RaidPile {
     'kind': kind.name,
     'loot': loot.toJson(),
     'seen': seen,
+    'owner': ?owner,
   };
 }
 

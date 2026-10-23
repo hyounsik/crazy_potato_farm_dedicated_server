@@ -1215,6 +1215,43 @@ void main() {
           const [RaidMemberStart(food: 50), RaidMemberStart(food: 50)],
     );
 
+    test('what a fallen clone leaves comes once per member; each opens only '
+        'their own (2026-10-23)', () {
+      final run = RaidSimulation.party(
+        catalog: catalog,
+        zone: 'clone_open',
+        seed: 1,
+        members: const [RaidMemberStart(food: 50), RaidMemberStart(food: 50)],
+      );
+      run.step();
+      final clone = run.clones.single;
+      clone.bag.addFrom(ItemStack('food', 12));
+      clone.hp = 0;
+      run.step();
+      final shares = [
+        for (final p in run.piles)
+          if (p.kind == PileKind.cloneBundle) p,
+      ];
+      expect([for (final p in shares) p.owner], [0, 1]);
+      expect([for (final p in shares) p.loot.items.single.count], [12, 12]);
+
+      final host = run.members[0];
+      final guest = run.members[1];
+      host.player.position = shares[0].position;
+      guest.player.position = shares[0].position;
+      expect(run.pileNearOf(guest)?.id, shares[1].id, reason: 'only theirs');
+      expect(
+        run.applyOf(guest, TakeAllLoot(shares[0].id)),
+        RaidRejection.noSuchPile,
+      );
+      expect(run.applyOf(guest, TakeAllLoot(shares[1].id)), isNull);
+      expect(
+        shares[0].loot.items.single.count,
+        12,
+        reason: 'host keeps theirs',
+      );
+    });
+
     test('members share a team, buff potatoes reach all, and both shoot the '
         'same enemy without hurting each other', () {
       final plain = makeParty();

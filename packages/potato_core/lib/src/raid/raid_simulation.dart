@@ -694,10 +694,11 @@ final class RaidSimulation {
 
   /// The pile [member] stands next to, if any; the nearest one wins.
   RaidPile? pileNearOf(RaidMember member) {
+    final index = members.indexOf(member);
     RaidPile? best;
     var bestDistance = rules.pickupRadius;
     for (final pile in piles) {
-      if (pile.loot.isEmpty) continue;
+      if (pile.loot.isEmpty || !pile.isFor(index)) continue;
       final d = pile.position.distanceTo(member.player.position);
       if (d <= bestDistance) {
         best = pile;
@@ -885,7 +886,9 @@ final class RaidSimulation {
     final at = member.player.position;
     RaidPile? pile;
     for (final p in piles) {
+      // Never into someone's own share: what is dropped is for everyone.
       if (p.kind == PileKind.bundle &&
+          p.owner == null &&
           p.position.distanceTo(at) <= rules.pickupRadius) {
         pile = p;
       }
@@ -910,12 +913,36 @@ final class RaidSimulation {
   Object _reachablePile(RaidMember member, int id) {
     for (final pile in piles) {
       if (pile.id != id) continue;
+      // Someone else's share is not there for this member.
+      if (!pile.isFor(members.indexOf(member))) break;
       final reach = rules.pickupRadius;
       return pile.position.distanceTo(member.player.position) <= reach
           ? pile
           : RaidRejection.tooFar;
     }
     return RaidRejection.noSuchPile;
+  }
+
+  /// Leaves loot at [at]: one pile alone, or in a party one per member
+  /// still out here, each with its own [roll] (2026-10-23, 사용자: everyone
+  /// gets their own, so friends never race for it).
+  void _leaveLoot(Vec2 at, PileKind kind, LootPile Function() roll) {
+    if (members.length <= 1) {
+      piles.add(RaidPile(id: _newId(), position: at, kind: kind, loot: roll()));
+      return;
+    }
+    for (final (index, member) in members.indexed) {
+      if (member.isOut) continue;
+      piles.add(
+        RaidPile(
+          id: _newId(),
+          position: at,
+          kind: kind,
+          loot: roll(),
+          owner: index,
+        ),
+      );
+    }
   }
 
   void _dropEmptyBundle(RaidPile pile) {
@@ -1870,38 +1897,32 @@ final class RaidSimulation {
       if (!enemy.isDown) return false;
       _events.add(EnemyDefeated(enemy.id, enemy.kind));
       if (zone.boss case final boss? when boss.enemy == enemy.kind) {
-        piles.add(
-          RaidPile(
-            id: _newId(),
-            position: enemy.position,
-            kind: PileKind.bossBundle,
-            loot: LootPile.roll(
-              catalog.lootTables[boss.loot]!,
-              catalog.stackOf,
-              _random,
-              makeSeed: _seedMaker(catalog, zone, _random),
-              makeGear: _gearMaker(catalog, zone, _random),
-              weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
-            ),
+        _leaveLoot(
+          enemy.position,
+          PileKind.bossBundle,
+          () => LootPile.roll(
+            catalog.lootTables[boss.loot]!,
+            catalog.stackOf,
+            _random,
+            makeSeed: _seedMaker(catalog, zone, _random),
+            makeGear: _gearMaker(catalog, zone, _random),
+            weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
           ),
         );
         return true;
       }
       final roll = _random.nextDouble();
       if (roll < drops.bundleChance) {
-        piles.add(
-          RaidPile(
-            id: _newId(),
-            position: enemy.position,
-            kind: PileKind.bundle,
-            loot: LootPile.roll(
-              catalog.lootTables[drops.bundle]!,
-              catalog.stackOf,
-              _random,
-              makeSeed: _seedMaker(catalog, zone, _random),
-              makeGear: _gearMaker(catalog, zone, _random),
-              weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
-            ),
+        _leaveLoot(
+          enemy.position,
+          PileKind.bundle,
+          () => LootPile.roll(
+            catalog.lootTables[drops.bundle]!,
+            catalog.stackOf,
+            _random,
+            makeSeed: _seedMaker(catalog, zone, _random),
+            makeGear: _gearMaker(catalog, zone, _random),
+            weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
           ),
         );
       } else if (roll < drops.bundleChance + drops.itemChance) {
@@ -2263,13 +2284,11 @@ final class RaidSimulation {
       if (!clone.isDown) return false;
       final items = [for (final s in clone.bag.slots) ?s];
       if (items.isNotEmpty) {
-        piles.add(
-          RaidPile(
-            id: _newId(),
-            position: clone.position,
-            kind: PileKind.cloneBundle,
-            loot: LootPile(items),
-          ),
+        // Each member's share is a copy of what it gathered.
+        _leaveLoot(
+          clone.position,
+          PileKind.cloneBundle,
+          () => LootPile([for (final s in items) s.copyWithCount(s.count)]),
         );
       }
       _events.add(CloneDown(clone.id));

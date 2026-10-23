@@ -1618,6 +1618,29 @@ final class RaidSimulation {
     }
     final damage = zone.enemies.damageMultiplier;
 
+    enemy.swingLeft = math.max(0, enemy.swingLeft - dt);
+    if (enemy.isWindingUp) {
+      enemy.windupLeft -= dt;
+      if (!enemy.isWindingUp) {
+        if (enemy.windupCloud == burrowWindup) {
+          _goUnderground(enemy, boss.burrow!);
+        } else {
+          final cloud = boss.clouds[enemy.windupCloud];
+          _puff(enemy, cloud, enemy.windupAt);
+          enemy.holdLeft = cloud.seconds;
+        }
+      }
+      return;
+    }
+    if (enemy.holdLeft > 0) {
+      enemy.holdLeft -= dt;
+      if (enemy.holdLeft <= 0) {
+        enemy
+          ..holdLeft = 0
+          ..cooldowns['gap'] = _patternGap;
+      }
+      return;
+    }
     if (enemy.isJumping) return _jumping(enemy, boss.jump!, damage, dt);
     if (enemy.isBurrowed) return _burrowing(enemy, boss.burrow!, damage, dt);
 
@@ -1713,7 +1736,10 @@ final class RaidSimulation {
     if (d <= enemy.radius + target.radius + spec.reach) {
       if (enemy.attackCooldown <= 0) {
         _hurt(target, spec.damage * damage, enemy);
-        enemy.attackCooldown = spec.attackInterval;
+        enemy
+          ..attackCooldown = spec.attackInterval
+          ..swingLeft = _swingSeconds
+          ..swingAt = target.position;
       }
       return;
     }
@@ -1725,7 +1751,17 @@ final class RaidSimulation {
   /// How long the attack face stays after a quick pattern (a spray, a
   /// cloud, shots), and the rest between patterns. *(제안 수치)*
   static const double _poseSeconds = 0.8;
-  static const double _patternGap = 1.0;
+  static const double _patternGap = 2.5;
+
+  /// The wind-up before gas, and how long a swing shows (2026-10-23,
+  /// 사용자: a second before it spews; every boss swings).
+  static const double _windupSeconds = 1.0;
+  static const double _swingSeconds = 0.3;
+
+  /// How fast a landing shadow or a claw's mark follows its target before it
+  /// locks: 80% of the player's base speed, so walking away outruns it but
+  /// only just (2026-10-23, 사용자).
+  double get _markSpeed => rules.player.speed * 0.8;
 
   /// The zone-boss patterns [boss] has, by their cooldown key.
   static List<(String, double)> _patternsOf(BossData boss) => [
@@ -1757,19 +1793,23 @@ final class RaidSimulation {
             ..jumpLeft = jump.airSeconds
             ..jumpAt = target.position;
         case 'burrow':
-          final burrow = boss.burrow!;
+          // It shudders a second first, then goes under (2026-10-23, 사용자).
           enemy
-            ..burrowLeft = burrow.followSeconds + burrow.lockSeconds
-            ..burrowAt = target.position
-            ..burrowStrikes = 1 + burrow.followUps;
+            ..windupLeft = _windupSeconds
+            ..windupCloud = burrowWindup
+            ..windupAt = facing;
         default:
           final i = int.parse(key.replaceAll(RegExp(r'\D'), ''));
           if (key.startsWith('cloud')) {
-            _puff(enemy, boss.clouds[i], facing);
+            // It stops and winds up first, then spews and stays put.
+            enemy
+              ..windupLeft = _windupSeconds
+              ..windupCloud = i
+              ..windupAt = facing;
           } else {
             _fan(enemy, boss.shots[i], facing, damage);
+            enemy.poseLeft = _poseSeconds;
           }
-          enemy.poseLeft = _poseSeconds;
       }
       return true;
     }
@@ -1780,7 +1820,7 @@ final class RaidSimulation {
   /// boss lands on it and hurts everything under it.
   void _jumping(RaidEnemy enemy, BossJumpData jump, double damage, double dt) {
     if (enemy.jumpLeft > jump.lockSeconds) {
-      _trackMark(enemy, enemy.jumpAt, jump.followSpeed * dt, (at) {
+      _trackMark(enemy, enemy.jumpAt, _markSpeed * dt, (at) {
         enemy.jumpAt = at;
       });
     }
@@ -1804,7 +1844,7 @@ final class RaidSimulation {
   ) {
     final first = enemy.burrowStrikes == 1 + burrow.followUps;
     if (first && enemy.burrowLeft > burrow.lockSeconds) {
-      _trackMark(enemy, enemy.burrowAt, burrow.followSpeed * dt, (at) {
+      _trackMark(enemy, enemy.burrowAt, _markSpeed * dt, (at) {
         enemy.burrowAt = at;
       });
     }
@@ -1827,6 +1867,18 @@ final class RaidSimulation {
       ..burrowStrikes = 0
       ..position = _landing(enemy.burrowAt, enemy.radius, enemy.position);
     enemy.cooldowns['gap'] = _patternGap;
+  }
+
+  /// [RaidEnemy.windupCloud] while it winds up to go underground.
+  static const int burrowWindup = -1;
+
+  /// Under the ground: the mark starts at the target's feet.
+  void _goUnderground(RaidEnemy enemy, BossBurrowData burrow) {
+    final target = enemy.target == null ? null : _body(enemy.target!);
+    enemy
+      ..burrowLeft = burrow.followSeconds + burrow.lockSeconds
+      ..burrowAt = target?.position ?? enemy.position
+      ..burrowStrikes = 1 + burrow.followUps;
   }
 
   /// Moves a mark ([from]) up to [step] toward the boss's target, inside the
@@ -1864,26 +1916,24 @@ final class RaidSimulation {
     }
   }
 
-  /// Gas or spores: around the boss, or in a row toward [facing].
+  /// Gas or spores spewed where the boss stands: all around, or a fan
+  /// toward [facing].
   void _puff(RaidEnemy enemy, BossCloudData cloud, Vec2 facing) {
-    for (var i = 0; i < cloud.count; i++) {
-      final at = cloud.ahead <= 0
-          ? enemy.position
-          : enemy.position + facing * (cloud.ahead * (i + 1) / cloud.count);
-      clouds.add(
-        RaidCloud(
-          id: _newId(),
-          position: at,
-          radius: cloud.radius,
-          spreadSeconds: cloud.spreadSeconds,
-          seconds: cloud.seconds,
-          damagePerSecond:
-              cloud.damagePerSecond * zone.enemies.damageMultiplier,
-          owner: enemy.id,
-          kind: enemy.kind,
-        ),
-      );
-    }
+    clouds.add(
+      RaidCloud(
+        id: _newId(),
+        position: enemy.position,
+        radius: cloud.radius,
+        spreadSeconds: cloud.spreadSeconds,
+        seconds: cloud.seconds,
+        damagePerSecond: cloud.damagePerSecond * zone.enemies.damageMultiplier,
+        owner: enemy.id,
+        kind: enemy.kind,
+        direction: facing,
+        fan: cloud.fanDegrees * math.pi / 180,
+      ),
+    );
+    enemy.poseLeft = cloud.seconds;
   }
 
   /// A fan of shots toward [facing].
@@ -1919,8 +1969,7 @@ final class RaidSimulation {
         cloud.sinceTick -= RaidCloud.tickSeconds;
         final from = enemies.where((e) => e.id == cloud.owner).firstOrNull;
         for (final body in _wildTargets.toList()) {
-          if (body.position.distanceTo(cloud.position) <=
-              cloud.reach + body.radius) {
+          if (cloud.covers(body.position, body.radius)) {
             _hurt(body, cloud.damagePerSecond * RaidCloud.tickSeconds, from);
           }
         }

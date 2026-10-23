@@ -760,11 +760,7 @@ _BossJumpData _$BossJumpDataFromJson(Map<String, dynamic> json) =>
           ),
           lockSeconds: $checkedConvert(
             'lock_seconds',
-            (v) => (v as num?)?.toDouble() ?? 1.0,
-          ),
-          followSpeed: $checkedConvert(
-            'follow_speed',
-            (v) => (v as num).toDouble(),
+            (v) => (v as num?)?.toDouble() ?? 0.7,
           ),
           radius: $checkedConvert('radius', (v) => (v as num).toDouble()),
           damage: $checkedConvert('damage', (v) => (v as num).toDouble()),
@@ -775,7 +771,6 @@ _BossJumpData _$BossJumpDataFromJson(Map<String, dynamic> json) =>
         'everySeconds': 'every_seconds',
         'airSeconds': 'air_seconds',
         'lockSeconds': 'lock_seconds',
-        'followSpeed': 'follow_speed',
       },
     );
 
@@ -784,7 +779,6 @@ Map<String, dynamic> _$BossJumpDataToJson(_BossJumpData instance) =>
       'every_seconds': instance.everySeconds,
       'air_seconds': instance.airSeconds,
       'lock_seconds': instance.lockSeconds,
-      'follow_speed': instance.followSpeed,
       'radius': instance.radius,
       'damage': instance.damage,
     };
@@ -805,11 +799,7 @@ _BossBurrowData _$BossBurrowDataFromJson(Map<String, dynamic> json) =>
           ),
           lockSeconds: $checkedConvert(
             'lock_seconds',
-            (v) => (v as num?)?.toDouble() ?? 1.0,
-          ),
-          followSpeed: $checkedConvert(
-            'follow_speed',
-            (v) => (v as num).toDouble(),
+            (v) => (v as num?)?.toDouble() ?? 0.7,
           ),
           followUps: $checkedConvert(
             'follow_ups',
@@ -828,7 +818,6 @@ _BossBurrowData _$BossBurrowDataFromJson(Map<String, dynamic> json) =>
         'everySeconds': 'every_seconds',
         'followSeconds': 'follow_seconds',
         'lockSeconds': 'lock_seconds',
-        'followSpeed': 'follow_speed',
         'followUps': 'follow_ups',
         'followUpLockSeconds': 'follow_up_lock_seconds',
       },
@@ -839,7 +828,6 @@ Map<String, dynamic> _$BossBurrowDataToJson(_BossBurrowData instance) =>
       'every_seconds': instance.everySeconds,
       'follow_seconds': instance.followSeconds,
       'lock_seconds': instance.lockSeconds,
-      'follow_speed': instance.followSpeed,
       'follow_ups': instance.followUps,
       'follow_up_lock_seconds': instance.followUpLockSeconds,
       'radius': instance.radius,
@@ -869,11 +857,10 @@ _BossCloudData _$BossCloudDataFromJson(Map<String, dynamic> json) =>
             'damage_per_second',
             (v) => (v as num).toDouble(),
           ),
-          ahead: $checkedConvert(
-            'ahead',
+          fanDegrees: $checkedConvert(
+            'fan_degrees',
             (v) => (v as num?)?.toDouble() ?? 0.0,
           ),
-          count: $checkedConvert('count', (v) => (v as num?)?.toInt() ?? 1),
         );
         return val;
       },
@@ -881,6 +868,7 @@ _BossCloudData _$BossCloudDataFromJson(Map<String, dynamic> json) =>
         'everySeconds': 'every_seconds',
         'spreadSeconds': 'spread_seconds',
         'damagePerSecond': 'damage_per_second',
+        'fanDegrees': 'fan_degrees',
       },
     );
 
@@ -891,8 +879,7 @@ Map<String, dynamic> _$BossCloudDataToJson(_BossCloudData instance) =>
       'seconds': instance.seconds,
       'spread_seconds': instance.spreadSeconds,
       'damage_per_second': instance.damagePerSecond,
-      'ahead': instance.ahead,
-      'count': instance.count,
+      'fan_degrees': instance.fanDegrees,
     };
 
 _BossShotData _$BossShotDataFromJson(Map<String, dynamic> json) =>

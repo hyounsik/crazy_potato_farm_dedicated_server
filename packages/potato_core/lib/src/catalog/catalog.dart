@@ -812,7 +812,6 @@ final class Catalog {
         check.positiveNumber('$at.jump.every_seconds', jump.everySeconds);
         check.positiveNumber('$at.jump.air_seconds', jump.airSeconds);
         check.atLeastNumber('$at.jump.lock_seconds', jump.lockSeconds, 0);
-        check.atLeastNumber('$at.jump.follow_speed', jump.followSpeed, 0);
         check.positiveNumber('$at.jump.radius', jump.radius);
         check.atLeastNumber('$at.jump.damage', jump.damage, 0);
       }
@@ -824,7 +823,6 @@ final class Catalog {
           0,
         );
         check.atLeastNumber('$at.burrow.lock_seconds', burrow.lockSeconds, 0);
-        check.atLeastNumber('$at.burrow.follow_speed', burrow.followSpeed, 0);
         check.atLeast('$at.burrow.follow_ups', burrow.followUps, 0);
         check.atLeastNumber(
           '$at.burrow.follow_up_lock_seconds',
@@ -841,8 +839,7 @@ final class Catalog {
         check.positiveNumber('$c.seconds', cloud.seconds);
         check.atLeastNumber('$c.spread_seconds', cloud.spreadSeconds, 0);
         check.atLeastNumber('$c.damage_per_second', cloud.damagePerSecond, 0);
-        check.atLeastNumber('$c.ahead', cloud.ahead, 0);
-        check.positive('$c.count', cloud.count);
+        check.atLeastNumber('$c.fan_degrees', cloud.fanDegrees, 0);
       }
       for (final (i, shot) in boss.shots.indexed) {
         final c = '$at.shots[$i]';

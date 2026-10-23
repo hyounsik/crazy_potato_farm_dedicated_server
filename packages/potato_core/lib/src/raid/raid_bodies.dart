@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/vec2.dart';
@@ -191,6 +193,12 @@ final class RaidEnemy extends RaidBody {
     this.burrowAt = Vec2.zero,
     this.burrowStrikes = 0,
     this.poseLeft = 0,
+    this.windupLeft = 0,
+    this.windupCloud = 0,
+    this.windupAt = Vec2.zero,
+    this.holdLeft = 0,
+    this.swingLeft = 0,
+    this.swingAt = Vec2.zero,
   }) : wanderGoal = wanderGoal ?? home,
        chargeHits = chargeHits ?? {},
        cooldowns = cooldowns ?? {};
@@ -231,6 +239,18 @@ final class RaidEnemy extends RaidBody {
     },
     burrowStrikes: json['burrow_strikes'] as int? ?? 0,
     poseLeft: (json['pose_left'] as num?)?.toDouble() ?? 0,
+    windupLeft: (json['windup_left'] as num?)?.toDouble() ?? 0,
+    windupCloud: json['windup_cloud'] as int? ?? 0,
+    windupAt: switch (json['windup_at']) {
+      final List<Object?> at => Vec2.fromJson(at),
+      _ => Vec2.zero,
+    },
+    holdLeft: (json['hold_left'] as num?)?.toDouble() ?? 0,
+    swingLeft: (json['swing_left'] as num?)?.toDouble() ?? 0,
+    swingAt: switch (json['swing_at']) {
+      final List<Object?> at => Vec2.fromJson(at),
+      _ => Vec2.zero,
+    },
   );
 
   /// The enemy's catalog id.
@@ -279,6 +299,23 @@ final class RaidEnemy extends RaidBody {
   /// 사용자: the face changes while attacking).
   double poseLeft;
 
+  /// About to spew gas or go underground (2026-10-23, 사용자: a second's
+  /// shudder first): time left, which of its clouds (-1: underground), and
+  /// toward where.
+  double windupLeft;
+  int windupCloud;
+  Vec2 windupAt;
+
+  /// Standing where it spewed until its gas is gone.
+  double holdLeft;
+
+  /// Its plain swing at whoever is next to it, just landed: time the swing
+  /// shows, and toward where (2026-10-23, 사용자: every boss swings).
+  double swingLeft;
+  Vec2 swingAt;
+
+  bool get isWindingUp => windupLeft > 0;
+
   bool get isJumping => jumpLeft > 0;
   bool get isBurrowed => burrowLeft > 0;
 
@@ -287,7 +324,8 @@ final class RaidEnemy extends RaidBody {
   bool get isHidden => isJumping || isBurrowed;
 
   /// Doing one of its patterns: one runs at a time.
-  bool get isBusy => isTelegraphing || isCharging || isHidden;
+  bool get isBusy =>
+      isTelegraphing || isCharging || isHidden || isWindingUp || holdLeft > 0;
 
   /// Whether the face is the attacking one now.
   bool get isAttacking => isBusy || poseLeft > 0;
@@ -325,6 +363,16 @@ final class RaidEnemy extends RaidBody {
       'burrow_strikes': burrowStrikes,
     },
     if (poseLeft > 0) 'pose_left': poseLeft,
+    if (isWindingUp) ...{
+      'windup_left': windupLeft,
+      'windup_cloud': windupCloud,
+      'windup_at': windupAt.toJson(),
+    },
+    if (holdLeft > 0) 'hold_left': holdLeft,
+    if (swingLeft > 0) ...{
+      'swing_left': swingLeft,
+      'swing_at': swingAt.toJson(),
+    },
   };
 }
 
@@ -341,6 +389,8 @@ final class RaidCloud {
     required this.damagePerSecond,
     required this.owner,
     required this.kind,
+    this.direction = Vec2.zero,
+    this.fan = 0,
     this.age = 0,
     this.sinceTick = 0,
   });
@@ -354,6 +404,11 @@ final class RaidCloud {
     damagePerSecond: (json['damage_per_second'] as num).toDouble(),
     owner: json['owner'] as int,
     kind: json['kind'] as String,
+    direction: switch (json['direction']) {
+      final List<Object?> at => Vec2.fromJson(at),
+      _ => Vec2.zero,
+    },
+    fan: (json['fan'] as num?)?.toDouble() ?? 0,
     age: (json['age'] as num).toDouble(),
     sinceTick: (json['since_tick'] as num?)?.toDouble() ?? 0,
   );
@@ -371,6 +426,11 @@ final class RaidCloud {
   /// The boss that left it, and its kind (the cloud's colour).
   final int owner;
   final String kind;
+
+  /// A fan of gas: the way it goes and how wide, in radians. All around when
+  /// [fan] is 0.
+  final Vec2 direction;
+  final double fan;
   double age;
   double sinceTick;
 
@@ -381,6 +441,15 @@ final class RaidCloud {
 
   bool get isGone => age >= seconds;
 
+  /// Whether [at] (with a body [radius] wide) is in the gas now.
+  bool covers(Vec2 at, double radius) {
+    final away = at - position;
+    if (away.length > reach + radius) return false;
+    if (fan <= 0 || away.length <= radius) return true;
+    final cos = (away.x * direction.x + away.y * direction.y) / away.length;
+    return cos >= math.cos(fan / 2);
+  }
+
   Map<String, dynamic> toJson() => {
     'id': id,
     'position': position.toJson(),
@@ -390,6 +459,7 @@ final class RaidCloud {
     'damage_per_second': damagePerSecond,
     'owner': owner,
     'kind': kind,
+    if (fan > 0) ...{'direction': direction.toJson(), 'fan': fan},
     'age': age,
     'since_tick': sinceTick,
   };

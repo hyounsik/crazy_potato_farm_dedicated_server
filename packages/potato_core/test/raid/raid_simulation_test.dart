@@ -102,16 +102,14 @@ void main() {
             'jump': {
               'every_seconds': 100,
               'air_seconds': 2,
-              'lock_seconds': 1,
-              'follow_speed': 3,
+              'lock_seconds': 0.7,
               'radius': 1,
               'damage': 20,
             },
             'burrow': {
               'every_seconds': 100,
               'follow_seconds': 1,
-              'lock_seconds': 1,
-              'follow_speed': 3,
+              'lock_seconds': 0.7,
               'follow_ups': 2,
               'follow_up_lock_seconds': 0.4,
               'radius': 0.6,
@@ -131,8 +129,7 @@ void main() {
                 'seconds': 3,
                 'spread_seconds': 1,
                 'damage_per_second': 4,
-                'ahead': 3,
-                'count': 3,
+                'fan_degrees': 60,
               },
             ],
             'shots': [
@@ -1664,9 +1661,9 @@ void main() {
       runFor(run, 0.5);
       expect(boss.jumpAt.distanceTo(start), greaterThan(0.5));
 
-      // Locked for the last second: stepping out of the shadow is safe.
-      runFor(run, 0.6);
-      expect(boss.jumpLeft, lessThanOrEqualTo(1));
+      // Locked for the last 0.7 s: stepping out of the shadow is safe.
+      runFor(run, 0.85);
+      expect(boss.jumpLeft, lessThanOrEqualTo(0.7));
       final locked = boss.jumpAt;
       run.player.position = const Vec2(11.5, 9.5);
       final hp = run.player.hp;
@@ -1676,6 +1673,19 @@ void main() {
       expect(boss.jumpAt, locked);
       expect(boss.position, locked);
       expect(run.player.hp, hp);
+    });
+
+    test('the shadow follows at 80% of the player\'s base speed', () {
+      final (run, boss) = facing('jump');
+      run.step();
+      // Far enough that it keeps going for the whole half second.
+      run.player.position = const Vec2(12.5, 16.5);
+      final from = boss.jumpAt;
+      runFor(run, 0.5);
+      expect(
+        boss.jumpAt.distanceTo(from),
+        closeTo(run.rules.player.speed * 0.8 * 0.5, 0.05),
+      );
     });
 
     test('landing on someone hurts them; in the air nothing hits it', () {
@@ -1692,11 +1702,15 @@ void main() {
       () {
         final (run, boss) = facing('burrow');
         run.step();
+        // It shudders a second before it goes under (2026-10-23).
+        expect(boss.isWindingUp, isTrue);
+        expect(boss.isBurrowed, isFalse);
+        runFor(run, 1.05);
         expect(boss.isBurrowed, isTrue);
         expect(boss.burrowStrikes, 3);
         final hp = run.player.hp;
         // Standing still: the first claw and both follow-ups land.
-        runFor(run, 2.0 + 0.4 + 0.4 + 0.1);
+        runFor(run, 1.0 + 0.7 + 0.4 + 0.4 + 0.1);
         expect(boss.isBurrowed, isFalse);
         // Three claws (and maybe a bite once it is up).
         expect(run.player.hp, lessThanOrEqualTo(hp - 30 + 1e-9));
@@ -1709,7 +1723,8 @@ void main() {
     test('a step aside after the blink dodges one claw, not the next', () {
       final (run, boss) = facing('burrow');
       run.step();
-      runFor(run, 1.5);
+      runFor(run, 1.0);
+      runFor(run, 1.2);
       // Locked under the player: step aside before it comes.
       run.player.position = const Vec2(12.5, 10.5);
       final hp = run.player.hp;
@@ -1721,27 +1736,46 @@ void main() {
       expect(run.player.hp, closeTo(hp - 10, 1e-9));
     });
 
-    test('gas grows slowly, hurts inside for three seconds, then is gone', () {
+    test('gas: it stops, winds up a second, spews all around and stays put '
+        'until the gas is gone', () {
       final (run, boss) = facing('cloud0');
       run.player.position = boss.position + const Vec2(1.5, 0);
+      final spot = boss.position;
       run.step();
-      expect(run.clouds, hasLength(1));
-      final cloud = run.clouds.single;
-      expect(cloud.reach, lessThan(0.1));
-      final hp = run.player.hp;
-      runFor(run, 3);
-      expect(run.player.hp, lessThan(hp));
+      expect(boss.isWindingUp, isTrue);
+      expect(boss.isAttacking, isTrue);
       expect(run.clouds, isEmpty);
+      runFor(run, 1.05);
+      expect(run.clouds, hasLength(1));
+      expect(run.clouds.single.reach, lessThan(0.2));
+      final hp = run.player.hp;
+      runFor(run, 2.85);
+      expect(run.player.hp, lessThan(hp));
+      expect(boss.position, spot, reason: 'it stood where it spewed');
+      runFor(run, 0.2);
+      expect(run.clouds, isEmpty);
+      expect(boss.holdLeft, 0);
     });
 
-    test('gas ahead lies in a row toward the target', () {
+    test('gas ahead spreads out as a fan toward the target, not behind', () {
       final (run, boss) = facing('cloud1');
+      final spot = boss.position;
       run.step();
-      expect(run.clouds, hasLength(3));
-      final toward = (run.player.position - boss.position).normalized();
-      final far = run.clouds.last.position - boss.position;
-      expect(far.length, closeTo(3, 1e-9));
-      expect(far.normalized().distanceTo(toward), lessThan(1e-9));
+      runFor(run, 2.0);
+      final cloud = run.clouds.single;
+      expect(cloud.fan, greaterThan(0));
+      final toward = (run.player.position - spot).normalized();
+      expect(cloud.covers(spot + toward * 0.9, 0.1), isTrue);
+      expect(cloud.covers(spot - toward * 0.9, 0.1), isFalse);
+      expect(boss.position, spot);
+    });
+
+    test('every boss swings at whoever is next to it', () {
+      final (run, boss) = facing('none');
+      run.player.position = boss.position + const Vec2(0.7, 0);
+      run.step();
+      expect(boss.swingLeft, greaterThan(0));
+      expect(boss.swingAt, run.player.position);
     });
 
     test('shots go out as a fan toward the target', () {
@@ -1752,13 +1786,11 @@ void main() {
       expect(boss.isAttacking, isTrue);
     });
 
-    test('a run mid-jump with gas about saves and comes back the same', () {
+    test('a run with gas about saves and comes back the same', () {
       final (run, _) = facing('cloud0');
       run.step();
-      run.boss!.cooldowns['jump'] = 0;
-      run.boss!.cooldowns['gap'] = 0;
-      run.step();
-      expect(run.boss!.isJumping, isTrue);
+      runFor(run, 1.05);
+      expect(run.boss!.holdLeft, greaterThan(0));
       final restored = RaidSimulation.fromJson(
         jsonDecode(jsonEncode(run.toJson())) as Map<String, dynamic>,
         catalog,

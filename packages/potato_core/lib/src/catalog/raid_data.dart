@@ -341,16 +341,16 @@ abstract class BossData with _$BossData {
 }
 
 /// Jumps and lands (2026-10-23, 사용자): a shadow shows where, following the
-/// target at [followSpeed] until [lockSeconds] before landing, when it blinks
-/// and stays. Landing hurts everything within [radius] of the shadow. In the
+/// target until [lockSeconds] before landing, when it blinks and stays. The
+/// shadow follows at 80% of the player's base speed, as every boss mark
+/// does (사용자). Landing hurts everything within [radius] of the shadow. In the
 /// air for [airSeconds] in all, where nothing hits it.
 @freezed
 abstract class BossJumpData with _$BossJumpData {
   const factory BossJumpData({
     required double everySeconds,
     required double airSeconds,
-    @Default(1.0) double lockSeconds,
-    required double followSpeed,
+    @Default(0.7) double lockSeconds,
     required double radius,
     required double damage,
   }) = _BossJumpData;
@@ -360,8 +360,9 @@ abstract class BossJumpData with _$BossJumpData {
 }
 
 /// Goes underground and strikes up from below, like a lurker (2026-10-23,
-/// 사용자): the mark follows the target's feet for [followSeconds], blinks
-/// for [lockSeconds] and a claw comes up there (one spot, [radius]). Then
+/// 사용자): the mark follows the target's feet for [followSeconds] (at 80%
+/// of the player's base speed), blinks for [lockSeconds] and a claw comes up
+/// there (one spot, [radius]). Then
 /// [followUps] quicker strikes, each where the target is then, blinking for
 /// [followUpLockSeconds]. Nothing hits it underground; it comes up at the
 /// last strike.
@@ -370,8 +371,7 @@ abstract class BossBurrowData with _$BossBurrowData {
   const factory BossBurrowData({
     required double everySeconds,
     required double followSeconds,
-    @Default(1.0) double lockSeconds,
-    required double followSpeed,
+    @Default(0.7) double lockSeconds,
     @Default(2) int followUps,
     required double followUpLockSeconds,
     required double radius,
@@ -382,11 +382,12 @@ abstract class BossBurrowData with _$BossBurrowData {
       _$BossBurrowDataFromJson(json);
 }
 
-/// Gas or spores (2026-10-23, 사용자): clouds that grow to [radius] over
-/// [spreadSeconds], stay [seconds] in all and hurt [damagePerSecond]
-/// whoever is inside. They go through obstacles. Around the boss when
-/// [ahead] is 0; otherwise [count] clouds in a row toward the target, the
-/// farthest [ahead] tiles out.
+/// Gas or spores (2026-10-23, 사용자): the boss stops where it is, winds up
+/// for a second and spews; the gas spreads out to [radius] over
+/// [spreadSeconds], stays [seconds] in all and hurts [damagePerSecond]
+/// whoever is inside. It goes through obstacles. All around the boss when
+/// [fanDegrees] is 0; otherwise a fan that wide toward the target, reaching
+/// further out as it spreads. The boss stays put until the gas is gone.
 @freezed
 abstract class BossCloudData with _$BossCloudData {
   const factory BossCloudData({
@@ -395,8 +396,7 @@ abstract class BossCloudData with _$BossCloudData {
     @Default(3.0) double seconds,
     required double spreadSeconds,
     required double damagePerSecond,
-    @Default(0.0) double ahead,
-    @Default(1) int count,
+    @Default(0.0) double fanDegrees,
   }) = _BossCloudData;
 
   factory BossCloudData.fromJson(Map<String, dynamic> json) =>

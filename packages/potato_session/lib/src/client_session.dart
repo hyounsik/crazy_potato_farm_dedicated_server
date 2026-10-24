@@ -20,13 +20,15 @@ enum ClientSessionStage {
   /// snapshots.
   playing,
 
-  /// The host's connection dropped during a danger run; the scene pauses and
-  /// waits up to `hostReconnectTimeout` before voiding the run.
+  /// The host went quiet or its link dropped mid-run, in either zone
+  /// (2026-10-24, 사용자: a safe zone waits too, so a host whose app went
+  /// down takes the party back): the scene pauses and waits for the host up
+  /// to `hostReconnectTimeout`.
   hostDisconnected,
 
   /// Everyone's run is over ([RunOverMessage]; 2026-10-22, 사용자: whoever
-  /// is out first watches until then), or this guest's link dropped in a
-  /// safe zone, and [ClientSession.result] is ready to apply to the guest's
+  /// is out first watches until then), or a safe run was lost (given up,
+  /// or gone when the host came back), and [ClientSession.result] is ready to apply to the guest's
   /// farm. The host may then take the room back to the farm
   /// ([BackToFarmMessage]: [waiting] again).
   ended,
@@ -58,6 +60,7 @@ final class ClientSession {
     this.codec = const JsonSessionCodec(),
     this.interpolationDelay = const Duration(milliseconds: 100),
     this.hostReconnectTimeout = const Duration(seconds: 15),
+    this.hostSilence = const Duration(milliseconds: 1500),
   }) : catalogHash = computeCatalogHash(catalog),
        _transport = transport {
     _listen(transport);
@@ -88,9 +91,17 @@ final class ClientSession {
   final SessionCodec codec;
   final Duration interpolationDelay;
 
-  /// How long to wait for the host after the link drops in a danger zone
-  /// before the run is void; null waits until [giveUp] or a [resume].
+  /// How long to wait for the host after the link drops before the run is
+  /// lost (void in a danger zone, home with what was gathered in a safe
+  /// one); null waits until [giveUp] or a [resume].
   final Duration? hostReconnectTimeout;
+
+  /// How long the host may send nothing mid-run before the guest waits for
+  /// it ([ClientSessionStage.hostDisconnected]); null only waits for the
+  /// link to drop. The host sends a snapshot every 100ms, and an app that
+  /// went down can take its link many seconds to drop (2026-10-24, 사용자:
+  /// the guest should know right away). A word from the host plays on.
+  final Duration? hostSilence;
 
   late StreamSubscription<({SessionChannel channel, Uint8List bytes})>
   _packetSub;
@@ -115,6 +126,7 @@ final class ClientSession {
   FixedStepClock? _clock;
   Duration _clientClock = Duration.zero;
   Duration _disconnectedFor = Duration.zero;
+  Duration _quietFor = Duration.zero;
   int _moveSeq = 0;
   Vec2 _lastSentMove = Vec2.zero;
   Vec2 _reconcileError = Vec2.zero;
@@ -229,18 +241,18 @@ final class ClientSession {
     if (_stage == ClientSessionStage.hostDisconnected) {
       _disconnectedFor += elapsed;
       final timeout = hostReconnectTimeout;
-      if (timeout != null && _disconnectedFor >= timeout) {
-        if (sim != null && !sim.isDanger) {
-          // Safe zone: keep what was gathered and go home (`multiplayer.md`).
-          _finishSafeDisconnect(sim);
-        } else {
-          _setStage(ClientSessionStage.aborted);
-        }
-      }
+      if (timeout != null && _disconnectedFor >= timeout) _runLost();
       return;
     }
     final clock = _clock;
     if (sim == null || clock == null || _stage != ClientSessionStage.playing) {
+      return;
+    }
+    _quietFor += elapsed;
+    final silence = hostSilence;
+    if (silence != null && _quietFor >= silence) {
+      _disconnectedFor = Duration.zero;
+      _setStage(ClientSessionStage.hostDisconnected);
       return;
     }
     final clamped = elapsed > maxElapsed ? maxElapsed : elapsed;
@@ -327,19 +339,33 @@ final class ClientSession {
       } else if (!_helloSent && _stage == ClientSessionStage.connecting) {
         _sendHello();
       } else if (_stage == ClientSessionStage.hostDisconnected) {
-        _disconnectedFor = Duration.zero;
-        _setStage(ClientSessionStage.playing);
+        _playOn();
       }
       return;
     }
+    if (_stage == ClientSessionStage.playing && _run != null) {
+      _disconnectedFor = Duration.zero;
+      _setStage(ClientSessionStage.hostDisconnected);
+    }
+  }
+
+  /// The host is heard from again on the same link.
+  void _playOn() {
+    _disconnectedFor = Duration.zero;
+    _quietFor = Duration.zero;
+    _setStage(ClientSessionStage.playing);
+  }
+
+  /// The run is not coming back: void in a danger zone (the guest cannot
+  /// tell their own link dropping from the host going away), home with what
+  /// was gathered in a safe one (`multiplayer.md`).
+  void _runLost() {
+    _resuming = false;
     final sim = _run;
-    if (_stage == ClientSessionStage.playing && sim != null) {
-      if (!sim.isDanger) {
-        _finishSafeDisconnect(sim);
-      } else {
-        _disconnectedFor = Duration.zero;
-        _setStage(ClientSessionStage.hostDisconnected);
-      }
+    if (sim != null && !sim.isDanger) {
+      _finishSafeDisconnect(sim);
+    } else {
+      _setStage(ClientSessionStage.aborted);
     }
   }
 
@@ -419,17 +445,14 @@ final class ClientSession {
     } on Object {
       return;
     }
+    _quietFor = Duration.zero;
     switch (msg) {
       case WelcomeMessage(:final accepted) when _resuming:
         // Taken back: the run follows. Turned away: the run is gone.
-        if (!accepted) {
-          _resuming = false;
-          _setStage(ClientSessionStage.aborted);
-        }
+        if (!accepted) _runLost();
       case LobbyMessage() when _resuming:
         // A new waiting room instead of the run: the run is over.
-        _resuming = false;
-        _setStage(ClientSessionStage.aborted);
+        _runLost();
       case WelcomeMessage(:final accepted, :final rejection):
         if (accepted) {
           _setStage(ClientSessionStage.waiting);
@@ -477,6 +500,9 @@ final class ClientSession {
           ..add((at: Duration.zero, snapshot: RaidSnapshot.fromRun(sim)));
         _setStage(ClientSessionStage.playing);
       case SnapshotMessage(:final snapshot):
+        if (_stage == ClientSessionStage.hostDisconnected && !_resuming) {
+          _playOn();
+        }
         _onSnapshot(snapshot);
       case EventsMessage(:final events):
         _events.addAll(events);

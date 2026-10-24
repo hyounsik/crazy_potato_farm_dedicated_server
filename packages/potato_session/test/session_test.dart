@@ -664,6 +664,44 @@ void main() {
       await fresh.close();
     });
 
+    test('a safe zone waits for the host too (2026-10-24)', () async {
+      final (net, host, guest) = await started(zone: 'open');
+      net.disconnectHost();
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.hostDisconnected);
+      guest.advance(const Duration(minutes: 5));
+      expect(guest.stage, ClientSessionStage.hostDisconnected);
+
+      // The host came back without the run: home with what was gathered.
+      await host.close();
+      final other = InMemorySessionNetwork();
+      final fresh = HostSession(catalog: catalog, transport: other.host);
+      await guest.resume(other.connectClient('a'));
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.ended);
+      expect(guest.result!.outcome, RaidOutcome.wentHome);
+
+      await guest.close();
+      await fresh.close();
+    });
+
+    test('a quiet host is waited for at once, and plays on when heard '
+        '(2026-10-24)', () async {
+      final (net, host, guest) = await started();
+      guest.advance(const Duration(milliseconds: 1000));
+      expect(guest.stage, ClientSessionStage.playing);
+      guest.advance(const Duration(milliseconds: 600));
+      expect(guest.stage, ClientSessionStage.hostDisconnected);
+      expect(guest.isConnected, isTrue);
+
+      host.broadcastSnapshot();
+      await _pumpMicrotasks();
+      expect(guest.stage, ClientSessionStage.playing);
+
+      await guest.close();
+      await host.close();
+    });
+
     test('giving up voids a danger run for a guest who was standing', () async {
       final (net, host, guest) = await started();
       net.disconnectClient('a');

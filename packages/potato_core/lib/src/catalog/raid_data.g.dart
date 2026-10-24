@@ -388,7 +388,10 @@ _DefaultCloneData _$DefaultCloneDataFromJson(Map<String, dynamic> json) =>
       ($checkedConvert) {
         final val = _DefaultCloneData(
           id: $checkedConvert('id', (v) => v as String),
-          name: $checkedConvert('name', (v) => v as String),
+          name: $checkedConvert(
+            'name',
+            (v) => const LocalizedTextConverter().fromJson(v as Object),
+          ),
           weapon: $checkedConvert('weapon', (v) => v as String),
           weaponLevel: $checkedConvert(
             'weapon_level',
@@ -423,7 +426,7 @@ _DefaultCloneData _$DefaultCloneDataFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DefaultCloneDataToJson(_DefaultCloneData instance) =>
     <String, dynamic>{
       'id': instance.id,
-      'name': instance.name,
+      'name': const LocalizedTextConverter().toJson(instance.name),
       'weapon': instance.weapon,
       'weapon_level': instance.weaponLevel,
       'bag_slots': instance.bagSlots,

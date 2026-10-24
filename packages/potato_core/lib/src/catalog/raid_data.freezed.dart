@@ -1930,8 +1930,8 @@ as double,
 /// @nodoc
 mixin _$DefaultCloneData {
 
- String get id;/// Shown over its head.
- String get name; String get weapon; int get weaponLevel; int get bagSlots;/// Zone scores it fits, both ends included.
+ String get id;/// Shown over its head, in the player's language (2026-10-24).
+@LocalizedTextConverter() LocalizedText get name; String get weapon; int get weaponLevel; int get bagSlots;/// Zone scores it fits, both ends included.
  int get scoreMin; int get scoreMax; List<CloneCompanionData> get companions;
 /// Create a copy of DefaultCloneData
 /// with the given fields replaced by the non-null parameter values.
@@ -1970,7 +1970,7 @@ abstract mixin class $DefaultCloneDataCopyWith<$Res>  {
   factory $DefaultCloneDataCopyWith(DefaultCloneData value, $Res Function(DefaultCloneData) _then) = _$DefaultCloneDataCopyWithImpl;
 @useResult
 $Res call({
- String id, String name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
+ String id,@LocalizedTextConverter() LocalizedText name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
 });
 
 
@@ -1991,7 +1991,7 @@ class _$DefaultCloneDataCopyWithImpl<$Res>
   return _then(DefaultCloneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
+as LocalizedText,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
 as String,weaponLevel: null == weaponLevel ? _self.weaponLevel : weaponLevel // ignore: cast_nullable_to_non_nullable
 as int,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
 as int,scoreMin: null == scoreMin ? _self.scoreMin : scoreMin // ignore: cast_nullable_to_non_nullable
@@ -2082,7 +2082,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id, @LocalizedTextConverter()  LocalizedText name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _DefaultCloneData() when $default != null:
 return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
@@ -2103,7 +2103,7 @@ return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlot
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id, @LocalizedTextConverter()  LocalizedText name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)  $default,) {final _that = this;
 switch (_that) {
 case _DefaultCloneData():
 return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
@@ -2123,7 +2123,7 @@ return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlot
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id, @LocalizedTextConverter()  LocalizedText name,  String weapon,  int weaponLevel,  int bagSlots,  int scoreMin,  int scoreMax,  List<CloneCompanionData> companions)?  $default,) {final _that = this;
 switch (_that) {
 case _DefaultCloneData() when $default != null:
 return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlots,_that.scoreMin,_that.scoreMax,_that.companions);case _:
@@ -2138,12 +2138,12 @@ return $default(_that.id,_that.name,_that.weapon,_that.weaponLevel,_that.bagSlot
 @JsonSerializable()
 
 class _DefaultCloneData implements DefaultCloneData {
-  const _DefaultCloneData({required this.id, required this.name, required this.weapon, this.weaponLevel = 0, required this.bagSlots, required this.scoreMin, required this.scoreMax,  List<CloneCompanionData> companions = const <CloneCompanionData>[]}): _companions = companions;
+  const _DefaultCloneData({required this.id, @LocalizedTextConverter() required this.name, required this.weapon, this.weaponLevel = 0, required this.bagSlots, required this.scoreMin, required this.scoreMax,  List<CloneCompanionData> companions = const <CloneCompanionData>[]}): _companions = companions;
   factory _DefaultCloneData.fromJson(Map<String, dynamic> json) => _$DefaultCloneDataFromJson(json);
 
 @override final  String id;
-/// Shown over its head.
-@override final  String name;
+/// Shown over its head, in the player's language (2026-10-24).
+@override@LocalizedTextConverter() final  LocalizedText name;
 @override final  String weapon;
 @override@JsonKey() final  int weaponLevel;
 @override final  int bagSlots;
@@ -2193,7 +2193,7 @@ abstract mixin class _$DefaultCloneDataCopyWith<$Res> implements $DefaultCloneDa
   factory _$DefaultCloneDataCopyWith(_DefaultCloneData value, $Res Function(_DefaultCloneData) _then) = __$DefaultCloneDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
+ String id,@LocalizedTextConverter() LocalizedText name, String weapon, int weaponLevel, int bagSlots, int scoreMin, int scoreMax, List<CloneCompanionData> companions
 });
 
 
@@ -2214,7 +2214,7 @@ class __$DefaultCloneDataCopyWithImpl<$Res>
   return _then(_DefaultCloneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as String,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
+as LocalizedText,weapon: null == weapon ? _self.weapon : weapon // ignore: cast_nullable_to_non_nullable
 as String,weaponLevel: null == weaponLevel ? _self.weaponLevel : weaponLevel // ignore: cast_nullable_to_non_nullable
 as int,bagSlots: null == bagSlots ? _self.bagSlots : bagSlots // ignore: cast_nullable_to_non_nullable
 as int,scoreMin: null == scoreMin ? _self.scoreMin : scoreMin // ignore: cast_nullable_to_non_nullable

@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/localized_text.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -182,8 +183,8 @@ abstract class DefaultCloneData with _$DefaultCloneData {
   const factory DefaultCloneData({
     required String id,
 
-    /// Shown over its head.
-    required String name,
+    /// Shown over its head, in the player's language (2026-10-24).
+    @LocalizedTextConverter() required LocalizedText name,
     required String weapon,
     @Default(0) int weaponLevel,
     required int bagSlots,

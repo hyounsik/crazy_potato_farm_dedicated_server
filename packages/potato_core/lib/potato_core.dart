@@ -9,6 +9,7 @@ export 'src/catalog/building_data.dart';
 export 'src/catalog/catalog.dart';
 export 'src/catalog/grade.dart';
 export 'src/catalog/item_data.dart';
+export 'src/catalog/localized_text.dart';
 export 'src/catalog/potato_type_data.dart';
 export 'src/catalog/raid_data.dart';
 export 'src/catalog/rules_data.dart';

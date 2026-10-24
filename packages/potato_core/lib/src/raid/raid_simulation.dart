@@ -2284,7 +2284,7 @@ final class RaidSimulation {
       weapon: data.weapon,
       weaponLevel: data.weaponLevel,
       cloneId: data.id,
-      name: data.name,
+      name: data.name.text,
       bag: Bag(data.bagSlots, catalog.stackOf),
       stayLeft:
           rules.clones.staySecondsMin +

@@ -81,6 +81,8 @@ final class _Builder {
           _chunk(piece);
         case PlateauPiece():
           _plateau(piece);
+        case HollowPiece():
+          _hollow(piece);
       }
     }
     _pickExitSites();
@@ -144,6 +146,26 @@ final class _Builder {
     }
     for (final tile in grown) {
       _set(tile.x, tile.y, MapTile.terrain);
+    }
+  }
+
+  /// Grows a pond or a pit over open low tiles like a blob.
+  void _hollow(HollowPiece piece) {
+    bool free(TilePos t) =>
+        _inside(t.x, t.y) &&
+        _at(t.x, t.y) == MapTile.open &&
+        heights[t.y * size + t.x] == MapHeight.low;
+    if (!free(piece.center)) return;
+    final grown = <TilePos>[piece.center];
+    final inside = {piece.center};
+    final limit = piece.area * 20;
+    for (var i = 0; i < limit && grown.length < piece.area; i++) {
+      final from = grown[random.nextInt(grown.length)];
+      final next = from.neighbors4[random.nextInt(4)];
+      if (free(next) && inside.add(next)) grown.add(next);
+    }
+    for (final tile in grown) {
+      _set(tile.x, tile.y, MapTile.hollow);
     }
   }
 

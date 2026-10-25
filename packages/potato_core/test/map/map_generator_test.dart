@@ -23,6 +23,31 @@ void main() {
     expect(_checksum(rows), _seed1Checksum);
   });
 
+  test('a hollow grows over open low ground and leaves the way open '
+      '(2026-10-25)', () {
+    final base = sampleRecipe();
+    final recipe = base.copyWith(
+      terrain: [
+        ...base.terrain,
+        const TerrainPiece.hollow(center: TilePos(8, 4), area: 12),
+      ],
+    );
+    for (var seed = 0; seed < 20; seed++) {
+      final map = generate(seed, recipe: recipe);
+      var hollow = 0;
+      for (var y = 0; y < map.size; y++) {
+        for (var x = 0; x < map.size; x++) {
+          if (map.tileAt(x, y) != MapTile.hollow) continue;
+          hollow++;
+          expect(map.heightAt(x, y), MapHeight.low);
+        }
+      }
+      expect(hollow, greaterThan(0), reason: 'seed $seed');
+      final reached = map.reachableFrom(map.entry);
+      expect(map.exits.every(reached.contains), isTrue);
+    }
+  });
+
   test('every exit and marker can be walked to from the entry', () {
     for (var seed = 0; seed < 40; seed++) {
       final map = generate(seed);

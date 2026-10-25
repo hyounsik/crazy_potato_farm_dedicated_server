@@ -455,6 +455,11 @@ abstract class ZoneData with _$ZoneData {
 
     /// Who guards the map's clearing, if anyone.
     ZoneBossData? boss,
+
+    /// Which region's pictures the map is drawn with (`grassland`,
+    /// `desert`, ...): ground, high ground, trees and the like. Only the
+    /// look; the rules are the same (2026-10-25, phase 8 drafts).
+    @Default('grassland') String look,
   }) = _ZoneData;
 
   factory ZoneData.fromJson(Map<String, dynamic> json) =>

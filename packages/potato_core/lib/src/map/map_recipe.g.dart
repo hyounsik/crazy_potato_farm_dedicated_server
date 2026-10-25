@@ -188,6 +188,26 @@ Map<String, dynamic> _$PlateauPieceToJson(PlateauPiece instance) =>
       'type': instance.$type,
     };
 
+HollowPiece _$HollowPieceFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('HollowPiece', json, ($checkedConvert) {
+      final val = HollowPiece(
+        center: $checkedConvert(
+          'center',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        area: $checkedConvert('area', (v) => (v as num).toInt()),
+        $type: $checkedConvert('type', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'type'});
+
+Map<String, dynamic> _$HollowPieceToJson(HollowPiece instance) =>
+    <String, dynamic>{
+      'center': instance.center.toJson(),
+      'area': instance.area,
+      'type': instance.$type,
+    };
+
 ChunkPiece _$ChunkPieceFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ChunkPiece', json, ($checkedConvert) {
       final val = ChunkPiece(

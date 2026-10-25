@@ -109,6 +109,14 @@ sealed class TerrainPiece with _$TerrainPiece {
     @Default(2) int ramps,
   }) = PlateauPiece;
 
+  /// A pond or a pit ([MapTile.hollow]) of about [area] tiles grown from
+  /// [center] over open low ground, its shape from the map seed. Place it
+  /// before plateaus and after other terrain (2026-10-25).
+  const factory TerrainPiece.hollow({
+    required TilePos center,
+    required int area,
+  }) = HollowPiece;
+
   /// A hand-made [MapChunk] named [chunk], its top-left at [origin], turned
   /// [quarterTurns] times clockwise.
   const factory TerrainPiece.chunk({

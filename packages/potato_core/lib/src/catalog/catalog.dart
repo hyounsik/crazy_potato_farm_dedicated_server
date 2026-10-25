@@ -870,7 +870,7 @@ final class Catalog {
     for (final (index, piece) in map.terrain.indexed) {
       final at = '$path.map.terrain[$index]';
       switch (piece) {
-        case BlobPiece(:final area):
+        case BlobPiece(:final area) || HollowPiece(:final area):
           check.positive('$at.area', area);
         case WallPiece(:final thickness, :final gap):
           check.positive('$at.thickness', thickness);

@@ -14,7 +14,12 @@ enum MapTile {
   terrain('#'),
 
   /// A scattered obstacle; see [MapData.obstacles] for its look and size.
-  obstacle('o');
+  obstacle('o'),
+
+  /// Ground cut away, a pond or a pit by the zone's look: nobody walks in,
+  /// but shots and sight cross it (2026-10-25, 사용자: a floor tile, not a
+  /// wall).
+  hollow('~');
 
   const MapTile(this.symbol);
 
@@ -157,9 +162,18 @@ final class MapData {
 
   bool isInside(int x, int y) => x >= 0 && y >= 0 && x < size && y < size;
 
-  /// Outside the map counts as blocked.
+  /// Whether walkers cannot stand on tile ([x], [y]). Outside the map
+  /// counts as blocked.
   bool isBlocked(int x, int y) =>
       !isInside(x, y) || _tiles[y * size + x] != MapTile.open;
+
+  /// Whether tile ([x], [y]) stops shots and sight: terrain and obstacles
+  /// stand up, a [MapTile.hollow] does not. Outside the map stops them.
+  bool blocksShots(int x, int y) {
+    if (!isInside(x, y)) return true;
+    final tile = _tiles[y * size + x];
+    return tile == MapTile.terrain || tile == MapTile.obstacle;
+  }
 
   /// Outside the map counts as low.
   MapHeight heightAt(int x, int y) =>

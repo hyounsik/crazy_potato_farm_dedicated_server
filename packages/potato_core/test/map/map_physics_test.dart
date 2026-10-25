@@ -43,4 +43,33 @@ void main() {
     expect(path.any((p) => p.y > 6), isTrue, reason: 'passes below the wall');
     expect(map.findPath(const Vec2(2.5, 1.5), const Vec2(4.5, 1.5)), isEmpty);
   });
+
+  group('a pond or a pit (2026-10-25)', () {
+    // The same wall, but hollow: walkers go round, shots and sight cross.
+    final pond = MapData(
+      size: 8,
+      tiles: [
+        for (var y = 0; y < 8; y++)
+          for (var x = 0; x < 8; x++)
+            x == 4 && y <= 5 ? MapTile.hollow : MapTile.open,
+      ],
+      entry: const TilePos(1, 1),
+    );
+
+    test('blocks walking, not shots or sight', () {
+      expect(pond.isBlocked(4, 2), isTrue);
+      expect(pond.blocksShots(4, 2), isFalse);
+      expect(pond.overlapsCircle(const Vec2(3.9, 2.5), 0.2), isTrue);
+      expect(
+        pond.hasLineOfSight(const Vec2(2.5, 2.5), const Vec2(6.5, 2.5)),
+        isTrue,
+      );
+    });
+
+    test('paths go round it, never straight across', () {
+      final path = pond.findPath(const Vec2(2.5, 2.5), const Vec2(6.5, 2.5));
+      expect(path, isNotEmpty);
+      expect(path.any((p) => p.y > 5), isTrue);
+    });
+  });
 }

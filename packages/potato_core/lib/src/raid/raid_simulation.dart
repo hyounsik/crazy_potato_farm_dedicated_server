@@ -2126,7 +2126,10 @@ final class RaidSimulation {
         ..position = bullet.position + move
         ..remaining -= move.length;
       if (bullet.remaining <= 0 ||
-          map.isBlocked(bullet.position.x.floor(), bullet.position.y.floor())) {
+          map.blocksShots(
+            bullet.position.x.floor(),
+            bullet.position.y.floor(),
+          )) {
         return true;
       }
       // Shots from below stop at the cliff.

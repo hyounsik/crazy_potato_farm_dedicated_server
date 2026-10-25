@@ -966,6 +966,7 @@ _ZoneData _$ZoneDataFromJson(
       (v) =>
           v == null ? null : ZoneBossData.fromJson(v as Map<String, dynamic>),
     ),
+    look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
   );
   return val;
 });
@@ -979,6 +980,7 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'drops': instance.drops.toJson(),
   'danger': instance.danger?.toJson(),
   'boss': instance.boss?.toJson(),
+  'look': instance.look,
 };
 
 _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>

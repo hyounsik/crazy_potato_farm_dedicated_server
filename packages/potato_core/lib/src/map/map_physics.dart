@@ -57,15 +57,22 @@ extension MapPhysics on MapData {
     return next;
   }
 
-  /// Whether a straight line from [a] to [b] crosses no blocked tile. Shots
-  /// stop at obstacles, and auto-aim skips targets behind them.
-  bool hasLineOfSight(Vec2 a, Vec2 b) {
+  /// Whether a straight line from [a] to [b] crosses nothing standing up.
+  /// Shots stop at obstacles, and auto-aim skips targets behind them; they
+  /// cross ponds and pits ([MapData.blocksShots]).
+  bool hasLineOfSight(Vec2 a, Vec2 b) => _lineClear(a, b, blocksShots);
+
+  /// Whether a straight line from [a] to [b] crosses no tile walkers cannot
+  /// stand on.
+  bool _walkLine(Vec2 a, Vec2 b) => _lineClear(a, b, isBlocked);
+
+  bool _lineClear(Vec2 a, Vec2 b, bool Function(int, int) stops) {
     final steps = math.max(1, (a.distanceTo(b) / 0.1).ceil());
     for (var i = 1; i < steps; i++) {
       final t = i / steps;
       final x = a.x + (b.x - a.x) * t;
       final y = a.y + (b.y - a.y) * t;
-      if (isBlocked(x.floor(), y.floor())) return false;
+      if (stops(x.floor(), y.floor())) return false;
     }
     return true;
   }
@@ -80,7 +87,7 @@ extension MapPhysics on MapData {
     final gy = to.y.floor();
     if (isBlocked(gx, gy)) return const [];
     // Straight-line shortcuts must not hop a cliff either.
-    bool clear(Vec2 a, Vec2 b) => hasLineOfSight(a, b) && _sameWalk(a, b);
+    bool clear(Vec2 a, Vec2 b) => _walkLine(a, b) && _sameWalk(a, b);
     if (sx == gx && sy == gy) return [to];
 
     int key(int x, int y) => y * size + x;

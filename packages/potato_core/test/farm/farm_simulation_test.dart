@@ -125,6 +125,13 @@ void main() {
       expect(doorOf(3, 2), const TilePos(5, 8));
       expect(doorOf(2, 2), const TilePos(4, 8));
       expect(doorOf(1, 1), const TilePos(4, 7));
+      final field = farm.fields.first;
+      expect(field.door, doorBelow(field.rect));
+      expect(
+        doorBelow(TileRect(origin: const TilePos(2, 3), width: 1, height: 1)),
+        const TilePos(2, 4),
+        reason: 'a 1x1 field: right below it',
+      );
     });
 
     test('open blocks are saved; older saves keep the starting land', () {

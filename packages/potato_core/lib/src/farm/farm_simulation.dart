@@ -2138,6 +2138,10 @@ final class FarmField {
 
   /// Where it lies. Changes when the field is resized or moved.
   TileRect rect;
+
+  /// The tile in front of its gate ([doorBelow]), where its path starts
+  /// (2026-10-26, 사용자).
+  TilePos get door => doorBelow(rect);
   final Map<TilePos, Potato> _potatoes = {};
 
   /// The bug or blight on this field, if any.

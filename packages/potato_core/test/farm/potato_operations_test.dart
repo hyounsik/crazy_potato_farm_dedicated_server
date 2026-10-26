@@ -298,6 +298,33 @@ void main() {
     });
   });
 
+  test('the top bar rates: food grown potatoes make, upkeep all pay, by '
+      'the hour (2026-10-27)', () {
+    // With upkeep, which the quiet catalog leaves out.
+    open(sampleCatalog());
+    expect(farm.foodPerHour, 0);
+    expect(farm.upkeepPerHour, 0);
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+    final food = catalog.potatoType(PotatoType.food);
+    expect(farm.foodPerHour, 0, reason: 'still growing');
+    farm.runSteps(food.growSeconds);
+    expect(farm.foodPerHour, 3600 / food.production!.everySeconds);
+    // Breeding potatoes need a compost yard to be planted.
+    build('compost_yard', const TilePos(8, 8));
+    final tile = _a + const TilePos(1, 0);
+    expect(
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: _breeding)),
+      isNull,
+    );
+    final breeder = farm.field(1)!.potatoAt(tile)!;
+    expect(farm.upkeepOf(breeder), greaterThan(0));
+    expect(
+      farm.upkeepPerHour,
+      farm.upkeepOf(breeder) * 3600 / catalog.rules.potatoes.upkeepEverySeconds,
+      reason: 'food potatoes pay none',
+    );
+  });
+
   group('pests', () {
     setUp(
       () => open(

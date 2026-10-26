@@ -369,6 +369,41 @@ final class FarmSimulation {
   /// Baby potatoes [potato] eats per upkeep payment now.
   int upkeepOf(Potato potato) => _effects.upkeepOf(potato, effectsOn(potato));
 
+  /// Baby potatoes the grown food potatoes in the fields make in an hour at
+  /// their rates now (2026-10-27, for the top bar).
+  double get foodPerHour {
+    var total = 0.0;
+    for (final field in _fields.values) {
+      for (final potato in field._potatoes.values) {
+        final data = catalog.potatoType(potato.type);
+        final production = data.production;
+        if (production == null || !potato.isGrown(data)) continue;
+        final amount = production.amount[potato.grade] ?? 0;
+        total +=
+            amount *
+            _work(potato, field).rates.foodYield *
+            3600 /
+            production.everySeconds;
+      }
+    }
+    return total;
+  }
+
+  /// Baby potatoes upkeep takes in an hour now: the planted potatoes and
+  /// the guards, as [_payUpkeep] charges them.
+  double get upkeepPerHour {
+    var total = 0;
+    for (final field in _fields.values) {
+      for (final potato in field._potatoes.values) {
+        total += _effects.upkeepOf(potato, _work(potato, field).sums);
+      }
+    }
+    for (final guard in _guards.values) {
+      total += _effects.upkeepOf(guard.potato, _work(guard.potato).sums);
+    }
+    return total * 3600 / _rules.potatoes.upkeepEverySeconds;
+  }
+
   /// How many potatoes of [type] the farm's buildings look after, or null
   /// for a type with no limit.
   int? capacityOf(PotatoType type) {

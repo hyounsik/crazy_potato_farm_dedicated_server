@@ -41,7 +41,8 @@ Catalog quietSampleCatalog([
   void Function(Map<String, dynamic> files)? change,
 ]) => sampleCatalogWith((files) {
   final pests = rulesOf(files)['pests'] as Map<String, dynamic>;
-  (pests['bug'] as Map)['chance_max'] = 0.0;
+  // Bugs come with what is stored; more than any test stores keeps them off.
+  (pests['bug'] as Map)['stored_per_bug'] = 1000000;
   (pests['blight'] as Map)['chance'] = 0.0;
   for (final type in (files['potato_types'] as Map)['potato_types'] as List) {
     (type as Map).remove('upkeep');

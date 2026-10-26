@@ -341,9 +341,10 @@ mixin _$ProductionData {
 
 /// Working time between two batches.
  int get everySeconds;/// Baby potatoes in one batch, by the potato's grade.
- Map<Grade, int> get amount;/// Baby potatoes kept on the potato until harvested. Batches past this
-/// are lost, so a farm left alone stops piling up.
- int get storeMax;
+ Map<Grade, int> get amount;/// Baby potatoes kept on the potato until harvested; batches past this
+/// are lost. Null for no limit (2026-10-26: bugs, growing with what is
+/// stored, keep a farm left alone from piling up instead).
+ int? get storeMax;
 /// Create a copy of ProductionData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -381,7 +382,7 @@ abstract mixin class $ProductionDataCopyWith<$Res>  {
   factory $ProductionDataCopyWith(ProductionData value, $Res Function(ProductionData) _then) = _$ProductionDataCopyWithImpl;
 @useResult
 $Res call({
- int everySeconds, Map<Grade, int> amount, int storeMax
+ int everySeconds, Map<Grade, int> amount, int? storeMax
 });
 
 
@@ -398,12 +399,12 @@ class _$ProductionDataCopyWithImpl<$Res>
 
 /// Create a copy of ProductionData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? amount = null,Object? storeMax = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? everySeconds = null,Object? amount = null,Object? storeMax = freezed,}) {
   return _then(ProductionData(
 everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
 as int,amount: null == amount ? _self.amount : amount // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,storeMax: null == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
-as int,
+as Map<Grade, int>,storeMax: freezed == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 
@@ -488,7 +489,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int everySeconds,  Map<Grade, int> amount,  int storeMax)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int everySeconds,  Map<Grade, int> amount,  int? storeMax)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ProductionData() when $default != null:
 return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
@@ -509,7 +510,7 @@ return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int everySeconds,  Map<Grade, int> amount,  int storeMax)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int everySeconds,  Map<Grade, int> amount,  int? storeMax)  $default,) {final _that = this;
 switch (_that) {
 case _ProductionData():
 return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
@@ -529,7 +530,7 @@ return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int everySeconds,  Map<Grade, int> amount,  int storeMax)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int everySeconds,  Map<Grade, int> amount,  int? storeMax)?  $default,) {final _that = this;
 switch (_that) {
 case _ProductionData() when $default != null:
 return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
@@ -544,7 +545,7 @@ return $default(_that.everySeconds,_that.amount,_that.storeMax);case _:
 @JsonSerializable()
 
 class _ProductionData implements ProductionData {
-  const _ProductionData({required this.everySeconds, required  Map<Grade, int> amount, required this.storeMax}): _amount = amount;
+  const _ProductionData({required this.everySeconds, required  Map<Grade, int> amount, this.storeMax}): _amount = amount;
   factory _ProductionData.fromJson(Map<String, dynamic> json) => _$ProductionDataFromJson(json);
 
 /// Working time between two batches.
@@ -558,9 +559,10 @@ class _ProductionData implements ProductionData {
   return EqualUnmodifiableMapView(_amount);
 }
 
-/// Baby potatoes kept on the potato until harvested. Batches past this
-/// are lost, so a farm left alone stops piling up.
-@override final  int storeMax;
+/// Baby potatoes kept on the potato until harvested; batches past this
+/// are lost. Null for no limit (2026-10-26: bugs, growing with what is
+/// stored, keep a farm left alone from piling up instead).
+@override final  int? storeMax;
 
 /// Create a copy of ProductionData
 /// with the given fields replaced by the non-null parameter values.
@@ -597,7 +599,7 @@ abstract mixin class _$ProductionDataCopyWith<$Res> implements $ProductionDataCo
   factory _$ProductionDataCopyWith(_ProductionData value, $Res Function(_ProductionData) _then) = __$ProductionDataCopyWithImpl;
 @override @useResult
 $Res call({
- int everySeconds, Map<Grade, int> amount, int storeMax
+ int everySeconds, Map<Grade, int> amount, int? storeMax
 });
 
 
@@ -614,12 +616,12 @@ class __$ProductionDataCopyWithImpl<$Res>
 
 /// Create a copy of ProductionData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? amount = null,Object? storeMax = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? everySeconds = null,Object? amount = null,Object? storeMax = freezed,}) {
   return _then(_ProductionData(
 everySeconds: null == everySeconds ? _self.everySeconds : everySeconds // ignore: cast_nullable_to_non_nullable
 as int,amount: null == amount ? _self._amount : amount // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,storeMax: null == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
-as int,
+as Map<Grade, int>,storeMax: freezed == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
+as int?,
   ));
 }
 

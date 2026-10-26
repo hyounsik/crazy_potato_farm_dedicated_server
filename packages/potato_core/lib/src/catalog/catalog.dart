@@ -404,8 +404,8 @@ final class Catalog {
       pests.checkEverySeconds,
       farm.stepMillis,
     );
-    check.probability('pests.bug.chance_per_stored', pests.bug.chancePerStored);
-    check.probability('pests.bug.chance_max', pests.bug.chanceMax);
+    check.positive('pests.bug.stored_per_bug', pests.bug.storedPerBug);
+    check.positive('pests.bug.quiet_seconds', pests.bug.quietSeconds);
     check.everySteps(
       'pests.bug.eat_every_seconds',
       pests.bug.eatEverySeconds,
@@ -459,7 +459,9 @@ final class Catalog {
     check.atLeastNumber('workbench.damage_percent', bench.damagePercent, 0);
     final breeding = rules.breeding;
     check.positive('breeding.seed_every_seconds', breeding.seedEverySeconds);
-    check.positive('breeding.store_max', breeding.storeMax);
+    if (breeding.storeMax case final max?) {
+      check.positive('breeding.store_max', max);
+    }
     if (breeding.typeWeights.values.fold(0, (a, b) => a + b) <= 0) {
       check.issue('breeding.type_weights', 'must add up to more than 0');
     }
@@ -604,7 +606,9 @@ final class Catalog {
     }
     if (production == null) return;
     check.positive('$path.production.every_seconds', production.everySeconds);
-    check.positive('$path.production.store_max', production.storeMax);
+    if (production.storeMax case final max?) {
+      check.positive('$path.production.store_max', max);
+    }
     for (final grade in Grade.values) {
       final amount = production.amount[grade];
       if (amount == null) {

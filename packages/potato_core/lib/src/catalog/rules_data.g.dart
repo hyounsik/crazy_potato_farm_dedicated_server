@@ -360,11 +360,11 @@ _BugRulesData _$BugRulesDataFromJson(
   json,
   ($checkedConvert) {
     final val = _BugRulesData(
-      chancePerStored: $checkedConvert(
-        'chance_per_stored',
-        (v) => (v as num).toDouble(),
+      storedPerBug: $checkedConvert(
+        'stored_per_bug',
+        (v) => (v as num).toInt(),
       ),
-      chanceMax: $checkedConvert('chance_max', (v) => (v as num).toDouble()),
+      quietSeconds: $checkedConvert('quiet_seconds', (v) => (v as num).toInt()),
       eatEverySeconds: $checkedConvert(
         'eat_every_seconds',
         (v) => (v as num).toInt(),
@@ -375,8 +375,8 @@ _BugRulesData _$BugRulesDataFromJson(
     return val;
   },
   fieldKeyMap: const {
-    'chancePerStored': 'chance_per_stored',
-    'chanceMax': 'chance_max',
+    'storedPerBug': 'stored_per_bug',
+    'quietSeconds': 'quiet_seconds',
     'eatEverySeconds': 'eat_every_seconds',
     'eatAmount': 'eat_amount',
     'clearSeconds': 'clear_seconds',
@@ -385,8 +385,8 @@ _BugRulesData _$BugRulesDataFromJson(
 
 Map<String, dynamic> _$BugRulesDataToJson(_BugRulesData instance) =>
     <String, dynamic>{
-      'chance_per_stored': instance.chancePerStored,
-      'chance_max': instance.chanceMax,
+      'stored_per_bug': instance.storedPerBug,
+      'quiet_seconds': instance.quietSeconds,
       'eat_every_seconds': instance.eatEverySeconds,
       'eat_amount': instance.eatAmount,
       'clear_seconds': instance.clearSeconds,
@@ -750,7 +750,7 @@ _BreedingRulesData _$BreedingRulesDataFromJson(Map<String, dynamic> json) =>
             'seed_every_seconds',
             (v) => (v as num).toInt(),
           ),
-          storeMax: $checkedConvert('store_max', (v) => (v as num).toInt()),
+          storeMax: $checkedConvert('store_max', (v) => (v as num?)?.toInt()),
           typeWeights: $checkedConvert(
             'type_weights',
             (v) => (v as Map<String, dynamic>).map(

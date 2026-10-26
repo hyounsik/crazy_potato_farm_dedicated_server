@@ -231,9 +231,14 @@ _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>
               ? null
               : PestDocument.fromJson(v as Map<String, dynamic>),
         ),
+        leftover: $checkedConvert('leftover', (v) => (v as num?)?.toInt() ?? 0),
+        quietUntilTick: $checkedConvert(
+          'quiet_until_tick',
+          (v) => (v as num?)?.toInt() ?? 0,
+        ),
       );
       return val;
-    });
+    }, fieldKeyMap: const {'quietUntilTick': 'quiet_until_tick'});
 
 Map<String, dynamic> _$FieldDocumentToJson(_FieldDocument instance) =>
     <String, dynamic>{
@@ -241,6 +246,8 @@ Map<String, dynamic> _$FieldDocumentToJson(_FieldDocument instance) =>
       'rect': instance.rect.toJson(),
       'potatoes': instance.potatoes.map((e) => e.toJson()).toList(),
       'pest': instance.pest?.toJson(),
+      'leftover': instance.leftover,
+      'quiet_until_tick': instance.quietUntilTick,
     };
 
 _PestDocument _$PestDocumentFromJson(Map<String, dynamic> json) =>

@@ -538,7 +538,10 @@ $EquippedCopyWith<$Res>? get equipped {
 /// @nodoc
 mixin _$FieldDocument {
 
- int get id; TileRect get rect; List<PotatoDocument> get potatoes; PestDocument? get pest;
+ int get id; TileRect get rect; List<PotatoDocument> get potatoes; PestDocument? get pest;/// Baby potatoes left by potatoes that died here, until harvested
+/// (2026-10-26).
+ int get leftover;/// The step before which bugs cannot come back after being cleared.
+ int get quietUntilTick;
 /// Create a copy of FieldDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -552,20 +555,20 @@ $FieldDocumentCopyWith<FieldDocument> get copyWith => _$FieldDocumentCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as FieldDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.rect, _this.rect) || other.rect == _this.rect)&&const DeepCollectionEquality().equals(other.potatoes, _this.potatoes)&&(identical(other.pest, _this.pest) || other.pest == _this.pest));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FieldDocument&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.rect, _this.rect) || other.rect == _this.rect)&&const DeepCollectionEquality().equals(other.potatoes, _this.potatoes)&&(identical(other.pest, _this.pest) || other.pest == _this.pest)&&(identical(other.leftover, _this.leftover) || other.leftover == _this.leftover)&&(identical(other.quietUntilTick, _this.quietUntilTick) || other.quietUntilTick == _this.quietUntilTick));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FieldDocument;
-  return Object.hash(runtimeType,_this.id,_this.rect,const DeepCollectionEquality().hash(_this.potatoes),_this.pest);
+  return Object.hash(runtimeType,_this.id,_this.rect,const DeepCollectionEquality().hash(_this.potatoes),_this.pest,_this.leftover,_this.quietUntilTick);
 }
 
 @override
 String toString() {
   final _this = this as FieldDocument;
-  return 'FieldDocument(id: ${_this.id}, rect: ${_this.rect}, potatoes: ${_this.potatoes}, pest: ${_this.pest})';
+  return 'FieldDocument(id: ${_this.id}, rect: ${_this.rect}, potatoes: ${_this.potatoes}, pest: ${_this.pest}, leftover: ${_this.leftover}, quietUntilTick: ${_this.quietUntilTick})';
 }
 
 
@@ -576,7 +579,7 @@ abstract mixin class $FieldDocumentCopyWith<$Res>  {
   factory $FieldDocumentCopyWith(FieldDocument value, $Res Function(FieldDocument) _then) = _$FieldDocumentCopyWithImpl;
 @useResult
 $Res call({
- int id, TileRect rect, List<PotatoDocument> potatoes, PestDocument? pest
+ int id, TileRect rect, List<PotatoDocument> potatoes, PestDocument? pest, int leftover, int quietUntilTick
 });
 
 
@@ -593,13 +596,15 @@ class _$FieldDocumentCopyWithImpl<$Res>
 
 /// Create a copy of FieldDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? rect = null,Object? potatoes = null,Object? pest = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? rect = null,Object? potatoes = null,Object? pest = freezed,Object? leftover = null,Object? quietUntilTick = null,}) {
   return _then(FieldDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,rect: null == rect ? _self.rect : rect // ignore: cast_nullable_to_non_nullable
 as TileRect,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
 as List<PotatoDocument>,pest: freezed == pest ? _self.pest : pest // ignore: cast_nullable_to_non_nullable
-as PestDocument?,
+as PestDocument?,leftover: null == leftover ? _self.leftover : leftover // ignore: cast_nullable_to_non_nullable
+as int,quietUntilTick: null == quietUntilTick ? _self.quietUntilTick : quietUntilTick // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 /// Create a copy of FieldDocument
@@ -705,10 +710,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest,  int leftover,  int quietUntilTick)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FieldDocument() when $default != null:
-return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
+return $default(_that.id,_that.rect,_that.potatoes,_that.pest,_that.leftover,_that.quietUntilTick);case _:
   return orElse();
 
 }
@@ -726,10 +731,10 @@ return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest,  int leftover,  int quietUntilTick)  $default,) {final _that = this;
 switch (_that) {
 case _FieldDocument():
-return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
+return $default(_that.id,_that.rect,_that.potatoes,_that.pest,_that.leftover,_that.quietUntilTick);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -746,10 +751,10 @@ return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int id,  TileRect rect,  List<PotatoDocument> potatoes,  PestDocument? pest,  int leftover,  int quietUntilTick)?  $default,) {final _that = this;
 switch (_that) {
 case _FieldDocument() when $default != null:
-return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
+return $default(_that.id,_that.rect,_that.potatoes,_that.pest,_that.leftover,_that.quietUntilTick);case _:
   return null;
 
 }
@@ -761,7 +766,7 @@ return $default(_that.id,_that.rect,_that.potatoes,_that.pest);case _:
 @JsonSerializable()
 
 class _FieldDocument implements FieldDocument {
-  const _FieldDocument({required this.id, required this.rect, required  List<PotatoDocument> potatoes, this.pest}): _potatoes = potatoes;
+  const _FieldDocument({required this.id, required this.rect, required  List<PotatoDocument> potatoes, this.pest, this.leftover = 0, this.quietUntilTick = 0}): _potatoes = potatoes;
   factory _FieldDocument.fromJson(Map<String, dynamic> json) => _$FieldDocumentFromJson(json);
 
 @override final  int id;
@@ -774,6 +779,11 @@ class _FieldDocument implements FieldDocument {
 }
 
 @override final  PestDocument? pest;
+/// Baby potatoes left by potatoes that died here, until harvested
+/// (2026-10-26).
+@override@JsonKey() final  int leftover;
+/// The step before which bugs cannot come back after being cleared.
+@override@JsonKey() final  int quietUntilTick;
 
 /// Create a copy of FieldDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -788,18 +798,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.rect, rect) || other.rect == rect)&&const DeepCollectionEquality().equals(other.potatoes, _potatoes)&&(identical(other.pest, pest) || other.pest == pest));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FieldDocument&&(identical(other.id, id) || other.id == id)&&(identical(other.rect, rect) || other.rect == rect)&&const DeepCollectionEquality().equals(other.potatoes, _potatoes)&&(identical(other.pest, pest) || other.pest == pest)&&(identical(other.leftover, leftover) || other.leftover == leftover)&&(identical(other.quietUntilTick, quietUntilTick) || other.quietUntilTick == quietUntilTick));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,rect,const DeepCollectionEquality().hash(_potatoes),pest);
+    return Object.hash(runtimeType,id,rect,const DeepCollectionEquality().hash(_potatoes),pest,leftover,quietUntilTick);
 }
 
 @override
 String toString() {
-    return 'FieldDocument(id: $id, rect: $rect, potatoes: $potatoes, pest: $pest)';
+    return 'FieldDocument(id: $id, rect: $rect, potatoes: $potatoes, pest: $pest, leftover: $leftover, quietUntilTick: $quietUntilTick)';
 }
 
 
@@ -810,7 +820,7 @@ abstract mixin class _$FieldDocumentCopyWith<$Res> implements $FieldDocumentCopy
   factory _$FieldDocumentCopyWith(_FieldDocument value, $Res Function(_FieldDocument) _then) = __$FieldDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- int id, TileRect rect, List<PotatoDocument> potatoes, PestDocument? pest
+ int id, TileRect rect, List<PotatoDocument> potatoes, PestDocument? pest, int leftover, int quietUntilTick
 });
 
 
@@ -827,13 +837,15 @@ class __$FieldDocumentCopyWithImpl<$Res>
 
 /// Create a copy of FieldDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? rect = null,Object? potatoes = null,Object? pest = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? rect = null,Object? potatoes = null,Object? pest = freezed,Object? leftover = null,Object? quietUntilTick = null,}) {
   return _then(_FieldDocument(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as int,rect: null == rect ? _self.rect : rect // ignore: cast_nullable_to_non_nullable
 as TileRect,potatoes: null == potatoes ? _self._potatoes : potatoes // ignore: cast_nullable_to_non_nullable
 as List<PotatoDocument>,pest: freezed == pest ? _self.pest : pest // ignore: cast_nullable_to_non_nullable
-as PestDocument?,
+as PestDocument?,leftover: null == leftover ? _self.leftover : leftover // ignore: cast_nullable_to_non_nullable
+as int,quietUntilTick: null == quietUntilTick ? _self.quietUntilTick : quietUntilTick // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

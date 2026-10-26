@@ -2705,9 +2705,10 @@ $PestRewardDataCopyWith<$Res> get reward {
 /// @nodoc
 mixin _$BugRulesData {
 
-/// Chance per check for each stored baby potato in the field.
- double get chancePerStored;/// The chance never goes past this, however much is stored.
- double get chanceMax;/// Game time between two bites.
+/// Baby potatoes stored in a field for each bug on it.
+ int get storedPerBug;/// Game time after bugs are cleared before they can come back to that
+/// field.
+ int get quietSeconds;/// Game time between two bites of one bug.
  int get eatEverySeconds;/// Baby potatoes eaten per bite.
  int get eatAmount;/// Game time one guard at full strength needs to clear it.
  int get clearSeconds;
@@ -2724,20 +2725,20 @@ $BugRulesDataCopyWith<BugRulesData> get copyWith => _$BugRulesDataCopyWithImpl<B
 @override
 bool operator ==(Object other) {
   final _this = this as BugRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BugRulesData&&(identical(other.chancePerStored, _this.chancePerStored) || other.chancePerStored == _this.chancePerStored)&&(identical(other.chanceMax, _this.chanceMax) || other.chanceMax == _this.chanceMax)&&(identical(other.eatEverySeconds, _this.eatEverySeconds) || other.eatEverySeconds == _this.eatEverySeconds)&&(identical(other.eatAmount, _this.eatAmount) || other.eatAmount == _this.eatAmount)&&(identical(other.clearSeconds, _this.clearSeconds) || other.clearSeconds == _this.clearSeconds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BugRulesData&&(identical(other.storedPerBug, _this.storedPerBug) || other.storedPerBug == _this.storedPerBug)&&(identical(other.quietSeconds, _this.quietSeconds) || other.quietSeconds == _this.quietSeconds)&&(identical(other.eatEverySeconds, _this.eatEverySeconds) || other.eatEverySeconds == _this.eatEverySeconds)&&(identical(other.eatAmount, _this.eatAmount) || other.eatAmount == _this.eatAmount)&&(identical(other.clearSeconds, _this.clearSeconds) || other.clearSeconds == _this.clearSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BugRulesData;
-  return Object.hash(runtimeType,_this.chancePerStored,_this.chanceMax,_this.eatEverySeconds,_this.eatAmount,_this.clearSeconds);
+  return Object.hash(runtimeType,_this.storedPerBug,_this.quietSeconds,_this.eatEverySeconds,_this.eatAmount,_this.clearSeconds);
 }
 
 @override
 String toString() {
   final _this = this as BugRulesData;
-  return 'BugRulesData(chancePerStored: ${_this.chancePerStored}, chanceMax: ${_this.chanceMax}, eatEverySeconds: ${_this.eatEverySeconds}, eatAmount: ${_this.eatAmount}, clearSeconds: ${_this.clearSeconds})';
+  return 'BugRulesData(storedPerBug: ${_this.storedPerBug}, quietSeconds: ${_this.quietSeconds}, eatEverySeconds: ${_this.eatEverySeconds}, eatAmount: ${_this.eatAmount}, clearSeconds: ${_this.clearSeconds})';
 }
 
 
@@ -2748,7 +2749,7 @@ abstract mixin class $BugRulesDataCopyWith<$Res>  {
   factory $BugRulesDataCopyWith(BugRulesData value, $Res Function(BugRulesData) _then) = _$BugRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double chancePerStored, double chanceMax, int eatEverySeconds, int eatAmount, int clearSeconds
+ int storedPerBug, int quietSeconds, int eatEverySeconds, int eatAmount, int clearSeconds
 });
 
 
@@ -2765,11 +2766,11 @@ class _$BugRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of BugRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? chancePerStored = null,Object? chanceMax = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? storedPerBug = null,Object? quietSeconds = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
   return _then(BugRulesData(
-chancePerStored: null == chancePerStored ? _self.chancePerStored : chancePerStored // ignore: cast_nullable_to_non_nullable
-as double,chanceMax: null == chanceMax ? _self.chanceMax : chanceMax // ignore: cast_nullable_to_non_nullable
-as double,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
+storedPerBug: null == storedPerBug ? _self.storedPerBug : storedPerBug // ignore: cast_nullable_to_non_nullable
+as int,quietSeconds: null == quietSeconds ? _self.quietSeconds : quietSeconds // ignore: cast_nullable_to_non_nullable
+as int,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
 as int,eatAmount: null == eatAmount ? _self.eatAmount : eatAmount // ignore: cast_nullable_to_non_nullable
 as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
 as int,
@@ -2857,10 +2858,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int storedPerBug,  int quietSeconds,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BugRulesData() when $default != null:
-return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+return $default(_that.storedPerBug,_that.quietSeconds,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
   return orElse();
 
 }
@@ -2878,10 +2879,10 @@ return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int storedPerBug,  int quietSeconds,  int eatEverySeconds,  int eatAmount,  int clearSeconds)  $default,) {final _that = this;
 switch (_that) {
 case _BugRulesData():
-return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+return $default(_that.storedPerBug,_that.quietSeconds,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2898,10 +2899,10 @@ return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double chancePerStored,  double chanceMax,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int storedPerBug,  int quietSeconds,  int eatEverySeconds,  int eatAmount,  int clearSeconds)?  $default,) {final _that = this;
 switch (_that) {
 case _BugRulesData() when $default != null:
-return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
+return $default(_that.storedPerBug,_that.quietSeconds,_that.eatEverySeconds,_that.eatAmount,_that.clearSeconds);case _:
   return null;
 
 }
@@ -2913,14 +2914,15 @@ return $default(_that.chancePerStored,_that.chanceMax,_that.eatEverySeconds,_tha
 @JsonSerializable()
 
 class _BugRulesData implements BugRulesData {
-  const _BugRulesData({required this.chancePerStored, required this.chanceMax, required this.eatEverySeconds, required this.eatAmount, required this.clearSeconds});
+  const _BugRulesData({required this.storedPerBug, required this.quietSeconds, required this.eatEverySeconds, required this.eatAmount, required this.clearSeconds});
   factory _BugRulesData.fromJson(Map<String, dynamic> json) => _$BugRulesDataFromJson(json);
 
-/// Chance per check for each stored baby potato in the field.
-@override final  double chancePerStored;
-/// The chance never goes past this, however much is stored.
-@override final  double chanceMax;
-/// Game time between two bites.
+/// Baby potatoes stored in a field for each bug on it.
+@override final  int storedPerBug;
+/// Game time after bugs are cleared before they can come back to that
+/// field.
+@override final  int quietSeconds;
+/// Game time between two bites of one bug.
 @override final  int eatEverySeconds;
 /// Baby potatoes eaten per bite.
 @override final  int eatAmount;
@@ -2940,18 +2942,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BugRulesData&&(identical(other.chancePerStored, chancePerStored) || other.chancePerStored == chancePerStored)&&(identical(other.chanceMax, chanceMax) || other.chanceMax == chanceMax)&&(identical(other.eatEverySeconds, eatEverySeconds) || other.eatEverySeconds == eatEverySeconds)&&(identical(other.eatAmount, eatAmount) || other.eatAmount == eatAmount)&&(identical(other.clearSeconds, clearSeconds) || other.clearSeconds == clearSeconds));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BugRulesData&&(identical(other.storedPerBug, storedPerBug) || other.storedPerBug == storedPerBug)&&(identical(other.quietSeconds, quietSeconds) || other.quietSeconds == quietSeconds)&&(identical(other.eatEverySeconds, eatEverySeconds) || other.eatEverySeconds == eatEverySeconds)&&(identical(other.eatAmount, eatAmount) || other.eatAmount == eatAmount)&&(identical(other.clearSeconds, clearSeconds) || other.clearSeconds == clearSeconds));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,chancePerStored,chanceMax,eatEverySeconds,eatAmount,clearSeconds);
+    return Object.hash(runtimeType,storedPerBug,quietSeconds,eatEverySeconds,eatAmount,clearSeconds);
 }
 
 @override
 String toString() {
-    return 'BugRulesData(chancePerStored: $chancePerStored, chanceMax: $chanceMax, eatEverySeconds: $eatEverySeconds, eatAmount: $eatAmount, clearSeconds: $clearSeconds)';
+    return 'BugRulesData(storedPerBug: $storedPerBug, quietSeconds: $quietSeconds, eatEverySeconds: $eatEverySeconds, eatAmount: $eatAmount, clearSeconds: $clearSeconds)';
 }
 
 
@@ -2962,7 +2964,7 @@ abstract mixin class _$BugRulesDataCopyWith<$Res> implements $BugRulesDataCopyWi
   factory _$BugRulesDataCopyWith(_BugRulesData value, $Res Function(_BugRulesData) _then) = __$BugRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double chancePerStored, double chanceMax, int eatEverySeconds, int eatAmount, int clearSeconds
+ int storedPerBug, int quietSeconds, int eatEverySeconds, int eatAmount, int clearSeconds
 });
 
 
@@ -2979,11 +2981,11 @@ class __$BugRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of BugRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? chancePerStored = null,Object? chanceMax = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? storedPerBug = null,Object? quietSeconds = null,Object? eatEverySeconds = null,Object? eatAmount = null,Object? clearSeconds = null,}) {
   return _then(_BugRulesData(
-chancePerStored: null == chancePerStored ? _self.chancePerStored : chancePerStored // ignore: cast_nullable_to_non_nullable
-as double,chanceMax: null == chanceMax ? _self.chanceMax : chanceMax // ignore: cast_nullable_to_non_nullable
-as double,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
+storedPerBug: null == storedPerBug ? _self.storedPerBug : storedPerBug // ignore: cast_nullable_to_non_nullable
+as int,quietSeconds: null == quietSeconds ? _self.quietSeconds : quietSeconds // ignore: cast_nullable_to_non_nullable
+as int,eatEverySeconds: null == eatEverySeconds ? _self.eatEverySeconds : eatEverySeconds // ignore: cast_nullable_to_non_nullable
 as int,eatAmount: null == eatAmount ? _self.eatAmount : eatAmount // ignore: cast_nullable_to_non_nullable
 as int,clearSeconds: null == clearSeconds ? _self.clearSeconds : clearSeconds // ignore: cast_nullable_to_non_nullable
 as int,
@@ -4888,8 +4890,9 @@ mixin _$BreedingRulesData {
 
 /// Working time between two seeds from one grown breeding potato at
 /// base speed (see `FarmStat.seedSpeed`).
- int get seedEverySeconds;/// Seeds one breeding potato holds before it stops making more.
- int get storeMax;/// How often each type comes up.
+ int get seedEverySeconds;/// Seeds one breeding potato holds before it stops making more; null for
+/// no limit (2026-10-26).
+ int? get storeMax;/// How often each type comes up.
  Map<PotatoType, int> get typeWeights;
 /// Create a copy of BreedingRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -4928,7 +4931,7 @@ abstract mixin class $BreedingRulesDataCopyWith<$Res>  {
   factory $BreedingRulesDataCopyWith(BreedingRulesData value, $Res Function(BreedingRulesData) _then) = _$BreedingRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int seedEverySeconds, int storeMax, Map<PotatoType, int> typeWeights
+ int seedEverySeconds, int? storeMax, Map<PotatoType, int> typeWeights
 });
 
 
@@ -4945,11 +4948,11 @@ class _$BreedingRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of BreedingRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? seedEverySeconds = null,Object? storeMax = null,Object? typeWeights = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? seedEverySeconds = null,Object? storeMax = freezed,Object? typeWeights = null,}) {
   return _then(BreedingRulesData(
 seedEverySeconds: null == seedEverySeconds ? _self.seedEverySeconds : seedEverySeconds // ignore: cast_nullable_to_non_nullable
-as int,storeMax: null == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
-as int,typeWeights: null == typeWeights ? _self.typeWeights : typeWeights // ignore: cast_nullable_to_non_nullable
+as int,storeMax: freezed == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
+as int?,typeWeights: null == typeWeights ? _self.typeWeights : typeWeights // ignore: cast_nullable_to_non_nullable
 as Map<PotatoType, int>,
   ));
 }
@@ -5035,7 +5038,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seedEverySeconds,  int storeMax,  Map<PotatoType, int> typeWeights)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seedEverySeconds,  int? storeMax,  Map<PotatoType, int> typeWeights)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BreedingRulesData() when $default != null:
 return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
@@ -5056,7 +5059,7 @@ return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seedEverySeconds,  int storeMax,  Map<PotatoType, int> typeWeights)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seedEverySeconds,  int? storeMax,  Map<PotatoType, int> typeWeights)  $default,) {final _that = this;
 switch (_that) {
 case _BreedingRulesData():
 return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
@@ -5076,7 +5079,7 @@ return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seedEverySeconds,  int storeMax,  Map<PotatoType, int> typeWeights)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seedEverySeconds,  int? storeMax,  Map<PotatoType, int> typeWeights)?  $default,) {final _that = this;
 switch (_that) {
 case _BreedingRulesData() when $default != null:
 return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
@@ -5091,14 +5094,15 @@ return $default(_that.seedEverySeconds,_that.storeMax,_that.typeWeights);case _:
 @JsonSerializable()
 
 class _BreedingRulesData implements BreedingRulesData {
-  const _BreedingRulesData({required this.seedEverySeconds, required this.storeMax, required  Map<PotatoType, int> typeWeights}): _typeWeights = typeWeights;
+  const _BreedingRulesData({required this.seedEverySeconds, this.storeMax, required  Map<PotatoType, int> typeWeights}): _typeWeights = typeWeights;
   factory _BreedingRulesData.fromJson(Map<String, dynamic> json) => _$BreedingRulesDataFromJson(json);
 
 /// Working time between two seeds from one grown breeding potato at
 /// base speed (see `FarmStat.seedSpeed`).
 @override final  int seedEverySeconds;
-/// Seeds one breeding potato holds before it stops making more.
-@override final  int storeMax;
+/// Seeds one breeding potato holds before it stops making more; null for
+/// no limit (2026-10-26).
+@override final  int? storeMax;
 /// How often each type comes up.
  final  Map<PotatoType, int> _typeWeights;
 /// How often each type comes up.
@@ -5144,7 +5148,7 @@ abstract mixin class _$BreedingRulesDataCopyWith<$Res> implements $BreedingRules
   factory _$BreedingRulesDataCopyWith(_BreedingRulesData value, $Res Function(_BreedingRulesData) _then) = __$BreedingRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int seedEverySeconds, int storeMax, Map<PotatoType, int> typeWeights
+ int seedEverySeconds, int? storeMax, Map<PotatoType, int> typeWeights
 });
 
 
@@ -5161,11 +5165,11 @@ class __$BreedingRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of BreedingRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? seedEverySeconds = null,Object? storeMax = null,Object? typeWeights = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? seedEverySeconds = null,Object? storeMax = freezed,Object? typeWeights = null,}) {
   return _then(_BreedingRulesData(
 seedEverySeconds: null == seedEverySeconds ? _self.seedEverySeconds : seedEverySeconds // ignore: cast_nullable_to_non_nullable
-as int,storeMax: null == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
-as int,typeWeights: null == typeWeights ? _self._typeWeights : typeWeights // ignore: cast_nullable_to_non_nullable
+as int,storeMax: freezed == storeMax ? _self.storeMax : storeMax // ignore: cast_nullable_to_non_nullable
+as int?,typeWeights: null == typeWeights ? _self._typeWeights : typeWeights // ignore: cast_nullable_to_non_nullable
 as Map<PotatoType, int>,
   ));
 }

@@ -208,10 +208,7 @@ void main() {
     final harvested = farm.totals.foodHarvestedByGuards;
     expect(harvested, greaterThan(0));
     expect(farm.food, before + harvested);
-    expect(
-      food.stored,
-      lessThan(catalog.potatoType(PotatoType.food).production!.storeMax),
-    );
+    expect(food.stored, lessThan(harvested), reason: 'taken as it comes');
   });
 
   test('a harvesting guard walks to the field and takes from it evenly', () {

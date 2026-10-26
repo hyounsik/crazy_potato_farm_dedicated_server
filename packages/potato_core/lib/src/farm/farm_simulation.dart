@@ -608,6 +608,7 @@ final class FarmSimulation {
   void _stepField(FarmField field, int millis) {
     final pest = field.pest;
     if (pest != null) _harm(field, pest, millis);
+    _settleBugs(field);
     List<TilePos>? dead;
     final seedEvery = _rules.breeding.seedEverySeconds * 1000;
     for (final MapEntry(key: tile, value: potato) in field._potatoes.entries) {
@@ -624,7 +625,8 @@ final class FarmSimulation {
         );
       }
       for (var i = 0; i < change.seedsDue; i++) {
-        if (potato.seeds.length >= _rules.breeding.storeMax) break;
+        final max = _rules.breeding.storeMax;
+        if (max != null && potato.seeds.length >= max) break;
         final seed = _bredSeed(potato, field);
         potato.seeds.add(seed);
         _events.add(
@@ -639,8 +641,10 @@ final class FarmSimulation {
     }
     for (final tile in dead ?? const <TilePos>[]) {
       final potato = field._take(tile)!;
-      // Seeds it made are kept; baby potatoes on it are lost.
+      // Seeds it made are kept; baby potatoes on it stay in the field
+      // (2026-10-26, user).
       potato.takeSeeds().forEach(_gainSeed);
+      field.leftover += potato.takeStored();
       _events.add(
         FarmEvent.died(
           fieldId: field.id,
@@ -662,12 +666,17 @@ final class FarmSimulation {
           totals.lifeLostToBlightMillis += extra;
         }
       case PestKind.bug:
+        // Each bug bites on its own: the more stored, the faster it goes.
         final bug = _rules.pests.bug;
         final everyMillis = bug.eatEverySeconds * 1000;
-        pest.biteMillis += millis;
+        pest.biteMillis += millis * bugsOn(field);
         while (pest.biteMillis >= everyMillis) {
           pest.biteMillis -= everyMillis;
           var left = bug.eatAmount;
+          final fromPile = math.min(left, field.leftover);
+          field.leftover -= fromPile;
+          left -= fromPile;
+          totals.foodEatenByBugs += fromPile;
           for (final potato in field._potatoes.values) {
             if (left == 0) break;
             final eaten = math.min(left, potato.stored);
@@ -845,39 +854,55 @@ final class FarmSimulation {
     }
   }
 
-  /// Rolls for a new pest on each field that has potatoes and no pest.
-  /// Bugs only come where baby potatoes are stored, more likely the more
-  /// there are; blight can come to any planted field.
+  /// Rolls for blight on each planted field with no pest. Bugs do not
+  /// roll: they follow what is stored ([_settleBugs]).
   void _rollPests() {
     if (!isUnlocked(StoryUnlock.pests)) return;
     final rules = _rules.pests;
     for (final field in _fields.values) {
       if (field.pest != null || field._potatoes.isEmpty) continue;
-      var stored = 0;
-      for (final potato in field._potatoes.values) {
-        stored += potato.stored;
-      }
       final sums = <String, StatSum>{}
         ..addAll(field._sums(_effects))
         ..addAll(_totemSums());
-      PestKind? kind;
-      if (stored > 0 &&
-          _random.chance(
-            sums.apply(
-              FarmStat.blightChance,
-              math.min(rules.bug.chanceMax, stored * rules.bug.chancePerStored),
-            ),
-          )) {
-        kind = PestKind.bug;
-      } else if (_random.chance(
+      if (!_random.chance(
         sums.apply(FarmStat.blightChance, rules.blight.chance),
       )) {
-        kind = PestKind.blight;
+        continue;
       }
-      if (kind == null) continue;
-      field.pest = Pest(kind: kind);
-      totals.pestsAppeared++;
-      _events.add(FarmEvent.pestAppeared(fieldId: field.id, kind: kind));
+      _appear(field, PestKind.blight);
+    }
+  }
+
+  void _appear(FarmField field, PestKind kind) {
+    field.pest = Pest(kind: kind);
+    totals.pestsAppeared++;
+    _events.add(FarmEvent.pestAppeared(fieldId: field.id, kind: kind));
+  }
+
+  /// Bugs on [field] (2026-10-26, user): one for each `stored_per_bug`
+  /// baby potatoes stored there, at least one while they are there; none
+  /// for another pest or none.
+  int bugsOn(FarmField field) {
+    if (field.pest?.kind != PestKind.bug) return 0;
+    return math.max(1, field.stored ~/ _rules.pests.bug.storedPerBug);
+  }
+
+  /// Brings bugs to [field] once enough is stored there (not while it is
+  /// quiet after a clearing, nor over blight), and sends them off when the
+  /// store falls short again: their number is worked out from the store,
+  /// so they need no life of their own.
+  void _settleBugs(FarmField field) {
+    if (!isUnlocked(StoryUnlock.pests)) return;
+    final enough = field.stored >= _rules.pests.bug.storedPerBug;
+    final pest = field.pest;
+    if (pest == null && enough && _tick >= field.quietUntilTick) {
+      _appear(field, PestKind.bug);
+    } else if (pest?.kind == PestKind.bug && !enough) {
+      field.pest = null;
+      for (final guard in _guards.values) {
+        if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
+      }
+      _events.add(FarmEvent.fieldChanged(fieldId: field.id));
     }
   }
 
@@ -958,7 +983,9 @@ final class FarmSimulation {
   /// user: food and bred seeds come in together). A rare seed may turn up
   /// with the food.
   FarmRejection? _collect(FarmField field, Iterable<Potato> potatoes) {
-    var taken = 0;
+    // What dead potatoes left comes in with any harvest of the field.
+    var taken = field.leftover;
+    field.leftover = 0;
     final seeds = <Seed>[];
     for (final potato in potatoes) {
       taken += potato.takeStored();
@@ -1067,6 +1094,7 @@ final class FarmSimulation {
     final field = _fields[fieldId];
     if (field == null) return FarmRejection.noSuchField;
     if (field._potatoes.isNotEmpty) return FarmRejection.fieldNotEmpty;
+    food += field.leftover;
     _fields.remove(fieldId);
     _stopGuardsAt(fieldId);
     _events.add(FarmEvent.fieldChanged(fieldId: fieldId));
@@ -1799,6 +1827,12 @@ final class FarmSimulation {
   void _clear(FarmField field, {required bool byTap}) {
     final pest = field.pest!;
     field.pest = null;
+    if (pest.kind == PestKind.bug) {
+      // All its bugs go at once and stay away a while (2026-10-26, user).
+      field.quietUntilTick =
+          _tick +
+          _rules.pests.bug.quietSeconds * 1000 ~/ _rules.farm.stepMillis;
+    }
     final reward = _rules.pests.reward;
     final gained =
         reward.foodMin + _random.nextInt(reward.foodMax - reward.foodMin + 1);
@@ -2051,10 +2085,7 @@ final class FarmSimulation {
     FarmField? richest;
     var most = 0;
     for (final field in _fields.values) {
-      var stored = 0;
-      for (final potato in field._potatoes.values) {
-        stored += potato.stored;
-      }
+      final stored = field.stored;
       if (stored > most) {
         most = stored;
         richest = field;
@@ -2079,7 +2110,8 @@ final class FarmSimulation {
     final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
     final amount = effect?.valueInUse?.floor() ?? 0;
     final potatoes = field._potatoes.values.toList();
-    var taken = 0;
+    var taken = math.min(amount, field.leftover);
+    field.leftover -= taken;
     while (taken < amount) {
       Potato? richest;
       for (final potato in potatoes) {
@@ -2130,6 +2162,8 @@ final class FarmField {
     required this.rect,
     Map<TilePos, Potato> potatoes = const {},
     this.pest,
+    this.leftover = 0,
+    this.quietUntilTick = 0,
   }) {
     _potatoes.addEntries(_byId(potatoes.entries));
   }
@@ -2146,6 +2180,18 @@ final class FarmField {
 
   /// The bug or blight on this field, if any.
   Pest? pest;
+
+  /// Baby potatoes left by potatoes that died here (2026-10-26, user: not
+  /// lost with them). They come in with the field's next harvest, and bugs
+  /// eat them first.
+  int leftover;
+
+  /// The step before which bugs cannot come back after being cleared.
+  int quietUntilTick;
+
+  /// Baby potatoes waiting here: on its potatoes and left over.
+  int get stored =>
+      _potatoes.values.fold(leftover, (sum, potato) => sum + potato.stored);
 
   /// Bumped whenever the potatoes here change, so cached effects redo.
   int _version = 0;

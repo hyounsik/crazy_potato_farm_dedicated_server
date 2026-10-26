@@ -44,13 +44,14 @@ void main() {
       expect(p.stored, 1);
     });
 
-    test('makes food by grade and stops at the store limit', () {
+    test('makes food by grade and keeps it all (no store limit since '
+        '2026-10-26)', () {
       final p = potato(Grade.rare)..live(120000, food, PotatoRates.base);
       p.live(90000, food, PotatoRates.base);
       expect(p.stored, 6);
       p.live(600000, food, PotatoRates.base);
-      expect(p.stored, 12);
-      expect(p.takeStored(), 12);
+      expect(p.stored, 46);
+      expect(p.takeStored(), 46);
       expect(p.stored, 0);
     });
 

@@ -53,9 +53,10 @@ abstract class ProductionData with _$ProductionData {
     /// Baby potatoes in one batch, by the potato's grade.
     required Map<Grade, int> amount,
 
-    /// Baby potatoes kept on the potato until harvested. Batches past this
-    /// are lost, so a farm left alone stops piling up.
-    required int storeMax,
+    /// Baby potatoes kept on the potato until harvested; batches past this
+    /// are lost. Null for no limit (2026-10-26: bugs, growing with what is
+    /// stored, keep a farm left alone from piling up instead).
+    int? storeMax,
   }) = _ProductionData;
 
   factory ProductionData.fromJson(Map<String, dynamic> json) =>

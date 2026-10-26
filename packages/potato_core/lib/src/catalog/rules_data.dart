@@ -205,17 +205,21 @@ abstract class PestRulesData with _$PestRulesData {
       _$PestRulesDataFromJson(json);
 }
 
-/// Bugs eat the baby potatoes stored on a field's potatoes.
+/// Bugs eat the baby potatoes stored on a field (2026-10-26): they come
+/// once [storedPerBug] are stored there, one more for each [storedPerBug]
+/// more, and leave as the store shrinks; each bites on its own, so a field
+/// left alone stops piling up where it makes as much as they eat.
 @freezed
 abstract class BugRulesData with _$BugRulesData {
   const factory BugRulesData({
-    /// Chance per check for each stored baby potato in the field.
-    required double chancePerStored,
+    /// Baby potatoes stored in a field for each bug on it.
+    required int storedPerBug,
 
-    /// The chance never goes past this, however much is stored.
-    required double chanceMax,
+    /// Game time after bugs are cleared before they can come back to that
+    /// field.
+    required int quietSeconds,
 
-    /// Game time between two bites.
+    /// Game time between two bites of one bug.
     required int eatEverySeconds,
 
     /// Baby potatoes eaten per bite.
@@ -421,8 +425,9 @@ abstract class BreedingRulesData with _$BreedingRulesData {
     /// base speed (see `FarmStat.seedSpeed`).
     required int seedEverySeconds,
 
-    /// Seeds one breeding potato holds before it stops making more.
-    required int storeMax,
+    /// Seeds one breeding potato holds before it stops making more; null for
+    /// no limit (2026-10-26).
+    int? storeMax,
 
     /// How often each type comes up.
     required Map<PotatoType, int> typeWeights,

@@ -69,7 +69,7 @@ _ProductionData _$ProductionDataFromJson(
               MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
         ),
       ),
-      storeMax: $checkedConvert('store_max', (v) => (v as num).toInt()),
+      storeMax: $checkedConvert('store_max', (v) => (v as num?)?.toInt()),
     );
     return val;
   },

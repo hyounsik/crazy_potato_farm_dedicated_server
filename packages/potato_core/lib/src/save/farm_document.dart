@@ -127,6 +127,8 @@ abstract class FarmDocument with _$FarmDocument {
             ),
             null => null,
           },
+          leftover: field.leftover,
+          quietUntilTick: field.quietUntilTick,
         ),
     ],
     buildings: [
@@ -224,6 +226,8 @@ abstract class FarmDocument with _$FarmDocument {
               ),
               null => null,
             },
+            leftover: field.leftover,
+            quietUntilTick: field.quietUntilTick,
           ),
       ],
       buildings: [
@@ -292,6 +296,13 @@ abstract class FieldDocument with _$FieldDocument {
     required TileRect rect,
     required List<PotatoDocument> potatoes,
     PestDocument? pest,
+
+    /// Baby potatoes left by potatoes that died here, until harvested
+    /// (2026-10-26).
+    @Default(0) int leftover,
+
+    /// The step before which bugs cannot come back after being cleared.
+    @Default(0) int quietUntilTick,
   }) = _FieldDocument;
 
   factory FieldDocument.fromJson(Map<String, dynamic> json) =>

@@ -58,8 +58,8 @@
   "pests": {
     "check_every_seconds": 60,
     "bug": {
-      "chance_per_stored": 0.05,
-      "chance_max": 0.5,
+      "stored_per_bug": 5,
+      "quiet_seconds": 120,
       "eat_every_seconds": 30,
       "eat_amount": 1,
       "clear_seconds": 20
@@ -125,7 +125,7 @@
     ]
   },
   "raid": {
-        "party": {
+    "party": {
       "down_seconds": 30,
       "revive_seconds": 4,
       "revive_radius": 1.2,

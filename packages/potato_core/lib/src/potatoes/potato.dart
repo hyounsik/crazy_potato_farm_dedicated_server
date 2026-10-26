@@ -119,7 +119,10 @@ final class Potato {
       final batches = productionMillis ~/ everyMillis;
       productionMillis -= batches * everyMillis;
       final made = batches * (production.amount[grade] ?? 0);
-      stored = math.min(production.storeMax, stored + made);
+      stored = switch (production.storeMax) {
+        final max? => math.min(max, stored + made),
+        null => stored + made,
+      };
     }
     var seedsDue = 0;
     if (seedEveryMillis != null) {

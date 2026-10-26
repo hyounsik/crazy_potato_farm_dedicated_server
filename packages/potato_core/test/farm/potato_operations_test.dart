@@ -327,27 +327,84 @@ void main() {
       expect(farm.totals.lifeLostToBlightMillis, potato.livedMillis);
     });
 
-    test('bugs come where food is stored and eat it', () {
-      open(
-        quietSampleCatalog((files) {
-          final bug = (rulesOf(files)['pests'] as Map)['bug'] as Map;
-          bug['chance_max'] = 1.0;
-          bug['chance_per_stored'] = 1.0;
-        }),
+    group('bugs (2026-10-26: as many as the store feeds, no limit on it)', () {
+      setUp(
+        () => open(
+          quietSampleCatalog((files) {
+            final pests = rulesOf(files)['pests'] as Map;
+            (pests['bug'] as Map)
+              ..['stored_per_bug'] = 5
+              // One bug eats slower than one potato makes, so the store
+              // can grow past it.
+              ..['eat_every_seconds'] = 90;
+            (pests['blight'] as Map)['chance'] = 0.0;
+          }),
+        ),
       );
-      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
-      final potato = farm.field(1)!.potatoAt(_a)!;
-      final food = catalog.potatoType(PotatoType.food);
-      // Grown, plus long enough to store some, ending on a pest check.
-      farm.runSteps(checkSteps() * 4);
-      expect(farm.field(1)!.pest?.kind, PestKind.bug);
 
-      final stored = potato.stored;
-      final eatSteps = catalog.rules.pests.bug.eatEverySeconds;
-      farm.runSteps(eatSteps);
-      final made = eatSteps ~/ food.production!.everySeconds;
-      expect(potato.stored, stored + made - catalog.rules.pests.bug.eatAmount);
-      expect(farm.totals.foodEatenByBugs, greaterThan(0));
+      int perBug() => catalog.rules.pests.bug.storedPerBug;
+
+      /// Steps until [done], failing after an hour of game time.
+      void stepUntil(bool Function() done) {
+        for (var i = 0; i < 3600 && !done(); i++) {
+          farm.step();
+        }
+        expect(done(), isTrue);
+      }
+
+      test('come once enough is stored, more the more is stored, and eat '
+          'from it', () {
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+        final field = farm.field(1)!;
+        stepUntil(() => field.pest != null);
+        expect(field.pest!.kind, PestKind.bug);
+        expect(field.stored, perBug());
+        expect(farm.bugsOn(field), 1);
+        expect(farm.totals.pestsAppeared, 1);
+        // Food keeps coming (no store limit) faster than one bug eats.
+        stepUntil(() => field.stored >= perBug() * 3);
+        expect(farm.bugsOn(field), 3);
+        expect(farm.totals.foodEatenByBugs, greaterThan(0));
+      });
+
+      test('leave when the store falls short, and stay away a while once '
+          'cleared', () {
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+        final field = farm.field(1)!;
+        stepUntil(() => field.pest != null);
+        expect(farm.apply(const FarmCommand.harvestField(fieldId: 1)), isNull);
+        farm.step();
+        expect(field.pest, isNull, reason: 'nothing left to eat');
+
+        stepUntil(() => field.pest != null);
+        expect(farm.apply(FarmCommand.clearPest(fieldId: 1)), isNull);
+        final quiet = catalog.rules.pests.bug.quietSeconds;
+        farm.runSteps(quiet - 1);
+        expect(field.stored, greaterThanOrEqualTo(perBug()));
+        expect(field.pest, isNull, reason: 'still quiet');
+        farm.runSteps(1);
+        expect(field.pest?.kind, PestKind.bug);
+      });
+
+      test('what a dead potato stored stays in the field: harvested with it, '
+          'eaten by bugs till then', () {
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+        final field = farm.field(1)!;
+        final food = catalog.potatoType(PotatoType.food);
+        farm.runSteps(food.growSeconds + food.lifespanSeconds);
+        expect(field.potatoAt(_a), isNull, reason: 'died');
+        expect(field.leftover, greaterThan(0));
+        expect(field.pest?.kind, PestKind.bug);
+        final left = field.leftover;
+        farm.runSteps(catalog.rules.pests.bug.eatEverySeconds);
+        expect(field.leftover, lessThan(left), reason: 'bugs eat the pile');
+
+        final before = farm.food;
+        final pile = field.leftover;
+        expect(farm.apply(const FarmCommand.harvestField(fieldId: 1)), isNull);
+        expect(farm.food, before + pile);
+        expect(field.leftover, 0);
+      });
     });
 
     test('tapping clears a pest and pays a reward', () {

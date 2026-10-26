@@ -255,6 +255,31 @@ void main() {
       expect(loaded.field(1)!.rect.origin, const TilePos(9, 12));
       expect(loaded.building(building.id)!.origin, const TilePos(9, 8));
     });
+
+    test('a building that no longer fits where it was saved moves to the '
+        'nearest place it fits (kinds grew, 2026-10-25)', () {
+      final building = farm.buildings.first;
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      // Saved on the starting field, as a grown footprint would overlap it.
+      for (final saved in json['buildings'] as List) {
+        if ((saved as Map)['id'] == building.id) {
+          saved['origin'] = {'x': 12, 'y': 9};
+        }
+      }
+      final loaded = FarmDocument.decode(json).toSimulation(catalog);
+      final moved = loaded.building(building.id)!;
+      expect(moved.origin, isNot(const TilePos(12, 9)));
+      expect(loaded.canPlace(moved.rect, ignoring: moved.id), isTrue);
+      for (final other in loaded.buildings) {
+        expect(
+          loaded.canPlace(other.rect, ignoring: other.id),
+          isTrue,
+          reason: other.kind,
+        );
+      }
+    });
   });
 
   group('plant', () {

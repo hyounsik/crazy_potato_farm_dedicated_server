@@ -95,7 +95,36 @@ final class FarmSimulation {
       _adopt(away.potato);
     }
     _graves.forEach(_adopt);
+    _settleBuildings();
     _unlockDone();
+  }
+
+  /// Moves each building that no longer fits where it stands (a save from
+  /// before its kind grew: house, training ground and graveyard on
+  /// 2026-10-25) to the nearest place it fits. One that fits nowhere stays.
+  void _settleBuildings() {
+    final size = _rules.farm.size;
+    for (final building in _buildings.values) {
+      if (canPlace(building.rect, ignoring: building.id)) continue;
+      final from = building.origin;
+      TilePos? best;
+      var bestDistance = 0;
+      for (var y = 0; y < size; y++) {
+        for (var x = 0; x < size; x++) {
+          final distance = (x - from.x).abs() + (y - from.y).abs();
+          if (best != null && distance >= bestDistance) continue;
+          final rect = TileRect(
+            origin: TilePos(x, y),
+            width: building.data.width,
+            height: building.data.height,
+          );
+          if (!canPlace(rect, ignoring: building.id)) continue;
+          best = TilePos(x, y);
+          bestDistance = distance;
+        }
+      }
+      if (best != null) building.origin = best;
+    }
   }
 
   /// A new farm laid out by the catalog's `new_farm` rules.

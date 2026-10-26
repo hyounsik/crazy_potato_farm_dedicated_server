@@ -98,6 +98,35 @@ void main() {
       expect(farm.apply(const FarmCommand.makeField(rect: rect)), isNull);
     });
 
+    test('nothing goes on the entrance, which moves down as land opens', () {
+      farm.food = 1000;
+      final entrance = farm.entrance;
+      expect(farm.isOpen(entrance), isTrue);
+      expect(farm.isOpen(entrance + const TilePos(0, 1)), isFalse);
+      expect(
+        farm.canPlace(TileRect(origin: entrance, width: 1, height: 1)),
+        isFalse,
+      );
+      final below = TilePos(entrance.x ~/ 4, entrance.y ~/ 4 + 1);
+      expect(farm.apply(FarmCommand.openBlock(block: below)), isNull);
+      expect(farm.entrance.y, entrance.y + 4);
+    });
+
+    test('every door is below the middle of the bottom side, the left '
+        'middle on an even width', () {
+      TilePos doorOf(int width, int height) => FarmBuilding(
+        id: 1,
+        data: catalog.buildings.values.first.copyWith(
+          width: width,
+          height: height,
+        ),
+        origin: const TilePos(4, 6),
+      ).door;
+      expect(doorOf(3, 2), const TilePos(5, 8));
+      expect(doorOf(2, 2), const TilePos(4, 8));
+      expect(doorOf(1, 1), const TilePos(4, 7));
+    });
+
     test('open blocks are saved; older saves keep the starting land', () {
       farm.food = 1000;
       farm.apply(const FarmCommand.openBlock(block: TilePos(1, 2)));

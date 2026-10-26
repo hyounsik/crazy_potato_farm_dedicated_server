@@ -444,12 +444,30 @@ final class FarmSimulation {
         math.max(0, opened) * _rules.farm.blockStepFood;
   }
 
-  /// Whether a building could stand on [rect]: on open land, with one free
-  /// tile (corners included) between it and every field and building.
+  /// The farm's way in: the middle of the open land's bottom row, where the
+  /// fence opens onto the truck yard below. Nothing is built on it, so a
+  /// field can never shut the gate. It moves down as land opens.
+  TilePos get entrance {
+    final farm = _rules.farm;
+    if (_openBlocks.isEmpty) return TilePos(farm.size ~/ 2, farm.size - 1);
+    final bottom = _openBlocks.map((b) => b.y).reduce(math.max);
+    final row = [
+      for (final block in _openBlocks)
+        if (block.y == bottom) farm.blockRect(block),
+    ];
+    final left = row.map((r) => r.left).reduce(math.min);
+    final right = row.map((r) => r.right).reduce(math.max);
+    return TilePos((left + right) ~/ 2, row.first.bottom - 1);
+  }
+
+  /// Whether a building could stand on [rect]: on open land, off the
+  /// [entrance], with one free tile (corners included) between it and every
+  /// field and building.
   /// [ignoring] is a building or field to leave out, e.g. one being moved
   /// (ids are shared, so one id names either).
   bool canPlace(TileRect rect, {int? ignoring}) {
     if (!rect.tiles.every(isOpen)) return false;
+    if (rect.contains(entrance)) return false;
     final others = [
       for (final field in _fields.values)
         if (field.id != ignoring) field.rect,
@@ -1746,10 +1764,11 @@ final class FarmSimulation {
     return null;
   }
 
-  /// The tile in front of a building where its guards come out.
+  /// The tile in front of a building where its guards come out: its
+  /// [FarmBuilding.door], kept on the farm.
   TilePos _doorOf(FarmBuilding building) {
-    final rect = building.rect;
-    return TilePos(rect.left, math.min(rect.bottom, _rules.farm.size - 1));
+    final door = building.door;
+    return TilePos(door.x, math.min(door.y, _rules.farm.size - 1));
   }
 
   /// The tile next to [field] nearest to [from], where a guard stands.

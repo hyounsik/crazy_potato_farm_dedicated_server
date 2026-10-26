@@ -42,10 +42,6 @@ sealed class FarmCommand with _$FarmCommand {
   const factory FarmCommand.disassembleGear({required int index}) =
       DisassembleGear;
 
-  /// Takes the seeds compost yard [buildingId] has made into the pouch.
-  const factory FarmCommand.collectSeeds({required int buildingId}) =
-      CollectSeeds;
-
   /// Lights totem [buildingId] for baby potatoes.
   const factory FarmCommand.lightTotem({required int buildingId}) = LightTotem;
 
@@ -252,9 +248,6 @@ enum FarmRejection {
 
   /// Not enough materials.
   notEnoughMaterials,
-
-  /// The yard has no seeds waiting.
-  nothingStored,
 
   /// As many totems stand as the farm allows.
   totemLimit,

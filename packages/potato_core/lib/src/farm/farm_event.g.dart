@@ -22,7 +22,6 @@ PotatoPlanted _$PotatoPlantedFromJson(Map<String, dynamic> json) =>
             'seed',
             (v) => Seed.fromJson(v as Map<String, dynamic>),
           ),
-          gradeUp: $checkedConvert('grade_up', (v) => v as bool? ?? false),
           $type: $checkedConvert('runtimeType', (v) => v as String?),
         );
         return val;
@@ -30,7 +29,6 @@ PotatoPlanted _$PotatoPlantedFromJson(Map<String, dynamic> json) =>
       fieldKeyMap: const {
         'fieldId': 'field_id',
         'potatoId': 'potato_id',
-        'gradeUp': 'grade_up',
         r'$type': 'runtimeType',
       },
     );
@@ -41,7 +39,6 @@ Map<String, dynamic> _$PotatoPlantedToJson(PotatoPlanted instance) =>
       'tile': instance.tile.toJson(),
       'potato_id': instance.potatoId,
       'seed': instance.seed.toJson(),
-      'grade_up': instance.gradeUp,
       'runtimeType': instance.$type,
     };
 
@@ -300,7 +297,8 @@ SeedMade _$SeedMadeFromJson(Map<String, dynamic> json) => $checkedCreate(
   json,
   ($checkedConvert) {
     final val = SeedMade(
-      buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
+      fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
       seed: $checkedConvert(
         'seed',
         (v) => Seed.fromJson(v as Map<String, dynamic>),
@@ -309,11 +307,16 @@ SeedMade _$SeedMadeFromJson(Map<String, dynamic> json) => $checkedCreate(
     );
     return val;
   },
-  fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
+  fieldKeyMap: const {
+    'fieldId': 'field_id',
+    'potatoId': 'potato_id',
+    r'$type': 'runtimeType',
+  },
 );
 
 Map<String, dynamic> _$SeedMadeToJson(SeedMade instance) => <String, dynamic>{
-  'building_id': instance.buildingId,
+  'field_id': instance.fieldId,
+  'potato_id': instance.potatoId,
   'seed': instance.seed.toJson(),
   'runtimeType': instance.$type,
 };
@@ -661,6 +664,14 @@ FoodHarvested _$FoodHarvestedFromJson(Map<String, dynamic> json) =>
           'seed',
           (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
         ),
+        seeds: $checkedConvert(
+          'seeds',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map((e) => Seed.fromJson(e as Map<String, dynamic>))
+                  .toList() ??
+              const <Seed>[],
+        ),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -671,6 +682,7 @@ Map<String, dynamic> _$FoodHarvestedToJson(FoodHarvested instance) =>
       'field_id': instance.fieldId,
       'food': instance.food,
       'seed': instance.seed?.toJson(),
+      'seeds': instance.seeds.map((e) => e.toJson()).toList(),
       'runtimeType': instance.$type,
     };
 

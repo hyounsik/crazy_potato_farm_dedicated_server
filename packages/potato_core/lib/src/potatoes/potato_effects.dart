@@ -94,7 +94,7 @@ final class PotatoEffects {
     return sums;
   }
 
-  /// [potato]'s rates for growing, aging and making food, given what
+  /// [potato]'s rates for growing, aging and making food and seeds, given what
   /// reaches it ([sums] = its own effects plus its field's).
   PotatoRates ratesOf(Potato potato, StatSums sums) {
     final level = catalog.rules.potatoes.level;
@@ -105,6 +105,7 @@ final class PotatoEffects {
       growth: _positive(sums.apply(FarmStat.growthSpeed, 1)),
       aging: _positive(sums.apply(FarmStat.agingRate, 1)),
       foodYield: _positive(sums.apply(FarmStat.foodYield, yieldBase)),
+      seedSpeed: _positive(sums.apply(FarmStat.seedSpeed, 1)),
     );
   }
 
@@ -126,8 +127,8 @@ final class PotatoEffects {
     return cost < 0 ? 0 : cost;
   }
 
-  /// Chance that a seed planted beside breeding potato [breeder] comes up
-  /// a grade higher.
+  /// Chance that a seed breeding potato [breeder] makes comes out a grade
+  /// higher.
   double gradeUpChanceOf(Potato breeder, StatSums sums) {
     final base =
         catalog.rules.potatoes.breedingGradeUpChance *

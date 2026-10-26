@@ -132,26 +132,6 @@ DisassembleGear _$DisassembleGearFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DisassembleGearToJson(DisassembleGear instance) =>
     <String, dynamic>{'index': instance.index, 'runtimeType': instance.$type};
 
-CollectSeeds _$CollectSeedsFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      'CollectSeeds',
-      json,
-      ($checkedConvert) {
-        final val = CollectSeeds(
-          buildingId: $checkedConvert('building_id', (v) => (v as num).toInt()),
-          $type: $checkedConvert('runtimeType', (v) => v as String?),
-        );
-        return val;
-      },
-      fieldKeyMap: const {'buildingId': 'building_id', r'$type': 'runtimeType'},
-    );
-
-Map<String, dynamic> _$CollectSeedsToJson(CollectSeeds instance) =>
-    <String, dynamic>{
-      'building_id': instance.buildingId,
-      'runtimeType': instance.$type,
-    };
-
 LightTotem _$LightTotemFromJson(Map<String, dynamic> json) => $checkedCreate(
   'LightTotem',
   json,

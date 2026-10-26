@@ -22,11 +22,20 @@ void main() {
       expect(p.live(119000, food, PotatoRates.base), (
         grew: false,
         died: false,
+        seedsDue: 0,
       ));
       expect(p.isGrown(food), isFalse);
-      expect(p.live(1000, food, PotatoRates.base), (grew: true, died: false));
+      expect(p.live(1000, food, PotatoRates.base), (
+        grew: true,
+        died: false,
+        seedsDue: 0,
+      ));
       expect(p.isGrown(food), isTrue);
-      expect(p.live(1000, food, PotatoRates.base), (grew: false, died: false));
+      expect(p.live(1000, food, PotatoRates.base), (
+        grew: false,
+        died: false,
+        seedsDue: 0,
+      ));
     });
 
     test('counts time past growth in the same step as work', () {

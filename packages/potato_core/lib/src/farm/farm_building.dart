@@ -1,5 +1,4 @@
 import 'package:potato_core/src/catalog/building_data.dart';
-import 'package:potato_core/src/potatoes/seed.dart';
 import 'package:potato_core/src/common/tile.dart';
 
 /// A building standing on the farm.
@@ -11,8 +10,7 @@ final class FarmBuilding {
     this.level = 1,
     this.litUntilTick = 0,
     this.readyTick = 0,
-    List<Seed> storedSeeds = const [],
-  }) : storedSeeds = List.of(storedSeeds);
+  });
 
   /// Shares the id sequence with fields and potatoes.
   final int id;
@@ -28,10 +26,6 @@ final class FarmBuilding {
   /// again after its wait.
   int litUntilTick;
   int readyTick;
-
-  /// For compost yards: seeds its breeding potatoes made, waiting to be
-  /// taken.
-  final List<Seed> storedSeeds;
 
   String get kind => data.id;
 

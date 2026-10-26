@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 6;
+const int farmFormatVersion = 7;
 
 /// The oldest format this code reads. Older documents (before abilities and
 /// levels) are not upgraded while the game is in development: the client
@@ -32,6 +32,22 @@ _farmMigrations = [
   // 5 → 6: the story locks features on new farms. Farms made before it
   // keep everything open and skip the story.
   (json) => json..['story_skipped'] = true,
+  // 6 → 7: breeding potatoes grow in fields again (2026-10-26, user).
+  // Those living in compost yards go to the fridge; the seeds the yards
+  // held come back to the farm.
+  (json) {
+    final breeders = (json.remove('breeders') as List?) ?? const [];
+    json['fridge'] = [
+      ...?(json['fridge'] as List?),
+      for (final breeder in breeders) (breeder as Map)['potato'],
+    ];
+    final returned = [...?(json['returned_seeds'] as List?)];
+    for (final building in (json['buildings'] as List?) ?? const []) {
+      final stored = (building as Map).remove('stored_seeds') as List?;
+      if (stored != null) returned.addAll(stored);
+    }
+    return json..['returned_seeds'] = returned;
+  },
 ];
 
 /// Brings a decoded farm document up to [farmFormatVersion].

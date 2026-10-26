@@ -86,17 +86,6 @@ final class Guard {
   }
 }
 
-/// A breeding potato living in a compost yard: it grows there, then makes
-/// seeds that pile up in the yard (see `FarmBuilding.storedSeeds`).
-final class Breeder {
-  Breeder({required this.potato, required this.buildingId});
-
-  final Potato potato;
-
-  /// The compost yard it lives in.
-  int buildingId;
-}
-
 /// A potato out exploring, and where it came from.
 final class AwayPotato {
   AwayPotato({required this.potato, this.fieldId, this.tile, this.buildingId});

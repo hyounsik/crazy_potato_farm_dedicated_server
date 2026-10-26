@@ -15,14 +15,11 @@ part 'farm_event.g.dart';
 /// when the event is reported.
 @freezed
 sealed class FarmEvent with _$FarmEvent {
-  /// [gradeUp] is true when a breeding potato in the field raised the new
-  /// potato one grade above [seed].
   const factory FarmEvent.planted({
     required int fieldId,
     required TilePos tile,
     required int potatoId,
     required Seed seed,
-    @Default(false) bool gradeUp,
   }) = PotatoPlanted;
 
   /// A potato finished growing. [fieldId] and [tile] are null for a combat
@@ -88,9 +85,11 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.totemLit({required int buildingId}) = TotemLit;
 
-  /// A breeding potato in compost yard [buildingId] made [seed].
+  /// Breeding potato [potatoId] in field [fieldId] made [seed]; it waits on
+  /// the potato until harvested.
   const factory FarmEvent.seedMade({
-    required int buildingId,
+    required int fieldId,
+    required int potatoId,
     required Seed seed,
   }) = SeedMade;
 
@@ -168,10 +167,13 @@ sealed class FarmEvent with _$FarmEvent {
 
   /// [food] baby potatoes moved from potatoes in a field to the farm, and
   /// sometimes a [seed] with them (a rare harvest).
+  /// [food] baby potatoes and the [seeds] breeding potatoes made came in
+  /// from field [fieldId]; [seed] is a rare one found with the food.
   const factory FarmEvent.harvested({
     required int fieldId,
     required int food,
     Seed? seed,
+    @Default(<Seed>[]) List<Seed> seeds,
   }) = FoodHarvested;
 
   const factory FarmEvent.departed({

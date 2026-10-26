@@ -35,7 +35,10 @@ abstract class FarmDocument with _$FarmDocument {
     required List<FieldDocument> fields,
     @Default(<BuildingDocument>[]) List<BuildingDocument> buildings,
     @Default(<GuardDocument>[]) List<GuardDocument> guards,
-    @Default(<BreederDocument>[]) List<BreederDocument> breeders,
+
+    /// Seeds left over by an upgrade with nowhere to wait (format 7: those
+    /// compost yards held); the farm takes them in when it loads.
+    @Default(<Seed>[]) List<Seed> returnedSeeds,
 
     /// Potatoes in the fridge; their `tile` is null.
     @Default(<PotatoDocument>[]) List<PotatoDocument> fridge,
@@ -135,7 +138,6 @@ abstract class FarmDocument with _$FarmDocument {
           level: building.level,
           litUntilTick: building.litUntilTick,
           readyTick: building.readyTick,
-          storedSeeds: List.of(building.storedSeeds),
         ),
     ],
     guards: [
@@ -149,13 +151,6 @@ abstract class FarmDocument with _$FarmDocument {
           walkTo: guard.walkTo,
           walkMillis: guard.walkMillis,
           walkTotalMillis: guard.walkTotalMillis,
-        ),
-    ],
-    breeders: [
-      for (final breeder in farm.breeders)
-        BreederDocument(
-          potato: PotatoDocument.of(breeder.potato),
-          buildingId: breeder.buildingId,
         ),
     ],
     fridge: [for (final potato in farm.fridge) PotatoDocument.of(potato)],
@@ -242,7 +237,6 @@ abstract class FarmDocument with _$FarmDocument {
             level: building.level,
             litUntilTick: building.litUntilTick,
             readyTick: building.readyTick,
-            storedSeeds: building.storedSeeds,
           ),
       ],
       guards: [
@@ -256,13 +250,6 @@ abstract class FarmDocument with _$FarmDocument {
             walkTo: guard.walkTo,
             walkMillis: guard.walkMillis,
             walkTotalMillis: guard.walkTotalMillis,
-          ),
-      ],
-      breeders: [
-        for (final breeder in breeders)
-          Breeder(
-            potato: breeder.potato.toPotato(),
-            buildingId: breeder.buildingId,
           ),
       ],
       fridge: [for (final potato in fridge) potato.toPotato()],
@@ -292,6 +279,7 @@ abstract class FarmDocument with _$FarmDocument {
       totals: FarmTotals.fromJson(totals),
       storyDone: storyDone,
       storySkipped: storySkipped,
+      returnedSeeds: returnedSeeds,
     );
     return farm..addMissingStartBuildings(also: missingBuildings);
   }
@@ -333,9 +321,6 @@ abstract class BuildingDocument with _$BuildingDocument {
     /// For totems: when its light goes out and when it can be lit again.
     @Default(0) int litUntilTick,
     @Default(0) int readyTick,
-
-    /// For compost yards: seeds waiting to be taken.
-    @Default(<Seed>[]) List<Seed> storedSeeds,
   }) = _BuildingDocument;
 
   factory BuildingDocument.fromJson(Map<String, dynamic> json) =>
@@ -389,6 +374,9 @@ abstract class PotatoDocument with _$PotatoDocument {
     required int livedMillis,
     required int productionMillis,
     required int stored,
+
+    /// Seeds a breeding potato made, waiting to be harvested.
+    @Default(<Seed>[]) List<Seed> seeds,
     @Default(false) bool weak,
   }) = _PotatoDocument;
 
@@ -409,6 +397,7 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: potato.livedMillis,
     productionMillis: potato.productionMillis,
     stored: potato.stored,
+    seeds: List.of(potato.seeds),
     weak: potato.weak,
   );
 
@@ -423,6 +412,7 @@ abstract class PotatoDocument with _$PotatoDocument {
     livedMillis: livedMillis,
     productionMillis: productionMillis,
     stored: stored,
+    seeds: seeds,
     weak: weak,
   );
 }
@@ -482,16 +472,4 @@ abstract class MailDocument with _$MailDocument {
     read: read,
     claimed: claimed,
   );
-}
-
-/// A breeding potato in a compost yard.
-@freezed
-abstract class BreederDocument with _$BreederDocument {
-  const factory BreederDocument({
-    required PotatoDocument potato,
-    required int buildingId,
-  }) = _BreederDocument;
-
-  factory BreederDocument.fromJson(Map<String, dynamic> json) =>
-      _$BreederDocumentFromJson(json);
 }

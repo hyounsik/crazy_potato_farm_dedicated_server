@@ -4886,8 +4886,9 @@ as double,
 /// @nodoc
 mixin _$BreedingRulesData {
 
-/// Game time between two seeds from one grown breeding potato.
- int get seedEverySeconds;/// Seeds one yard holds before it stops filling.
+/// Working time between two seeds from one grown breeding potato at
+/// base speed (see `FarmStat.seedSpeed`).
+ int get seedEverySeconds;/// Seeds one breeding potato holds before it stops making more.
  int get storeMax;/// How often each type comes up.
  Map<PotatoType, int> get typeWeights;
 /// Create a copy of BreedingRulesData
@@ -5093,9 +5094,10 @@ class _BreedingRulesData implements BreedingRulesData {
   const _BreedingRulesData({required this.seedEverySeconds, required this.storeMax, required  Map<PotatoType, int> typeWeights}): _typeWeights = typeWeights;
   factory _BreedingRulesData.fromJson(Map<String, dynamic> json) => _$BreedingRulesDataFromJson(json);
 
-/// Game time between two seeds from one grown breeding potato.
+/// Working time between two seeds from one grown breeding potato at
+/// base speed (see `FarmStat.seedSpeed`).
 @override final  int seedEverySeconds;
-/// Seeds one yard holds before it stops filling.
+/// Seeds one breeding potato holds before it stops making more.
 @override final  int storeMax;
 /// How often each type comes up.
  final  Map<PotatoType, int> _typeWeights;

@@ -412,15 +412,16 @@ abstract class CombatPowerRulesData with _$CombatPowerRulesData {
       _$CombatPowerRulesDataFromJson(json);
 }
 
-/// Breeding potatoes making seeds in compost yards. Values are
-/// placeholders until the balance phase.
+/// Breeding potatoes making seeds in fields (2026-10-26, user; before, in
+/// compost yards). Values are placeholders until the balance phase.
 @freezed
 abstract class BreedingRulesData with _$BreedingRulesData {
   const factory BreedingRulesData({
-    /// Game time between two seeds from one grown breeding potato.
+    /// Working time between two seeds from one grown breeding potato at
+    /// base speed (see `FarmStat.seedSpeed`).
     required int seedEverySeconds,
 
-    /// Seeds one yard holds before it stops filling.
+    /// Seeds one breeding potato holds before it stops making more.
     required int storeMax,
 
     /// How often each type comes up.

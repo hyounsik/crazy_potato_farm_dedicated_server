@@ -22,8 +22,9 @@ final class Potato {
     this.livedMillis = 0,
     this.productionMillis = 0,
     this.stored = 0,
+    List<Seed> seeds = const [],
     this.weak = false,
-  });
+  }) : seeds = List.of(seeds);
 
   /// Unique within the farm, and never reused.
   final int id;
@@ -50,6 +51,10 @@ final class Potato {
 
   /// Baby potatoes made and waiting to be harvested.
   int stored;
+
+  /// Seeds a breeding potato made, waiting to be harvested with the baby
+  /// potatoes (2026-10-26, user).
+  final List<Seed> seeds;
 
   /// Its last upkeep went unpaid, so it works slower until the next one is
   /// paid. Food potatoes never are.
@@ -79,15 +84,18 @@ final class Potato {
   /// Life left from 1 (just grown) to 0 (about to die).
   double get lifeLeft => math.max(0, 1 - livedMillis / lifespanMillis);
 
-  /// Advances this potato by [millis] of game time at [rates].
+  /// Advances this potato by [millis] of game time at [rates]. A breeding
+  /// potato also works toward a seed every [seedEveryMillis]; [seedsDue]
+  /// is how many it has earned (the farm makes them, it holds the dice).
   ///
   /// Time past the end of growth in the same step already counts as working
   /// time, so a step size never changes when a potato starts producing.
-  ({bool grew, bool died}) live(
+  ({bool grew, bool died, int seedsDue}) live(
     int millis,
     PotatoTypeData data,
-    PotatoRates rates,
-  ) {
+    PotatoRates rates, {
+    int? seedEveryMillis,
+  }) {
     final growMillis = data.growSeconds * 1000;
     var working = millis;
     var grew = false;
@@ -101,7 +109,7 @@ final class Potato {
       grownMillis = math.min(grown, growMillis);
       grew = grownMillis == growMillis;
     }
-    if (working == 0) return (grew: grew, died: isDead);
+    if (working == 0) return (grew: grew, died: isDead, seedsDue: 0);
 
     livedMillis += (working * rates.aging).floor();
     final production = data.production;
@@ -113,7 +121,13 @@ final class Potato {
       final made = batches * (production.amount[grade] ?? 0);
       stored = math.min(production.storeMax, stored + made);
     }
-    return (grew: grew, died: isDead);
+    var seedsDue = 0;
+    if (seedEveryMillis != null) {
+      productionMillis += (working * rates.seedSpeed).floor();
+      seedsDue = productionMillis ~/ seedEveryMillis;
+      productionMillis -= seedsDue * seedEveryMillis;
+    }
+    return (grew: grew, died: isDead, seedsDue: seedsDue);
   }
 
   /// Empties the store and returns how much was in it.
@@ -122,12 +136,24 @@ final class Potato {
     stored = 0;
     return taken;
   }
+
+  /// Empties the seed store and returns what was in it.
+  List<Seed> takeSeeds() {
+    final taken = List.of(seeds);
+    seeds.clear();
+    return taken;
+  }
 }
 
 /// How fast a potato does things right now, from its level, its abilities
 /// and the buff potatoes beside it. 1 is the base speed.
 final class PotatoRates {
-  const PotatoRates({this.growth = 1, this.aging = 1, this.foodYield = 1});
+  const PotatoRates({
+    this.growth = 1,
+    this.aging = 1,
+    this.foodYield = 1,
+    this.seedSpeed = 1,
+  });
 
   static const PotatoRates base = PotatoRates();
 
@@ -136,4 +162,7 @@ final class PotatoRates {
 
   /// Production speed: more batches in the same time.
   final double foodYield;
+
+  /// Seed making speed of a breeding potato.
+  final double seedSpeed;
 }

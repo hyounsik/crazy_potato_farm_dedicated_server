@@ -50,6 +50,12 @@ abstract final class FarmStat {
   static const String upkeep = 'potato.upkeep';
   static const String growthSpeed = 'potato.growth_speed';
   static const String foodYield = 'food.yield';
+
+  /// How fast a breeding potato makes seeds, apart from [foodYield]
+  /// (2026-10-26, user: baby potato and seed output are separate stats).
+  static const String seedSpeed = 'breeding.seed_speed';
+
+  /// Chance that a seed a breeding potato makes comes out a grade higher.
   static const String gradeUpChance = 'breeding.grade_up_chance';
   static const String blightChance = 'field.blight_chance';
   static const String harvestRareChance = 'field.harvest_rare_chance';

@@ -165,18 +165,16 @@ void main() {
         ),
       );
       farm.food = 10000;
+      farm.pouchSlots = 1000;
       build('compost_yard', const TilePos(8, 8));
-      final yard = farm.buildings.singleWhere((b) => b.kind == 'compost_yard');
       // breeding.eye ×2 on a 0.5 chance: always.
-      final seed = _seed(PotatoType.breeding, 'breeding.eye');
-      farm.seeds.add(seed);
-      farm.apply(FarmCommand.train(buildingId: yard.id, seed: seed));
+      final breeder = plant(_seed(PotatoType.breeding, 'breeding.eye'));
       farm.runSteps(
         catalog.potatoType(PotatoType.breeding).growSeconds +
             catalog.rules.breeding.seedEverySeconds * 3,
       );
-      expect(yard.storedSeeds, isNotEmpty);
-      for (final bred in yard.storedSeeds) {
+      expect(breeder.seeds, isNotEmpty);
+      for (final bred in breeder.seeds) {
         expect(bred.grade, Grade.rare);
       }
     });

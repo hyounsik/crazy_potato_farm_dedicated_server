@@ -182,17 +182,16 @@ void main() {
       );
     });
 
-    test('breeding seeds go into compost yards, not fields', () {
+    test('breeding seeds go into fields, within the compost yards\' limit', () {
       final yard = build('compost_yard', const TilePos(8, 8));
       expect(
-        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding)),
+        farm.apply(FarmCommand.train(buildingId: yard, seed: _breeding)),
         FarmRejection.wrongPlace,
       );
       expect(
-        farm.apply(FarmCommand.train(buildingId: yard, seed: _breeding)),
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding)),
         isNull,
       );
-      expect(farm.breeders.single.buildingId, yard);
       expect(farm.countOf(PotatoType.breeding), 1);
     });
 
@@ -474,16 +473,19 @@ void main() {
     });
   });
 
-  group('compost yard', () {
-    int yardWithBreeder() {
+  group('breeding in a field', () {
+    Potato grownBreeder() {
       farm.pouchSlots = 1000;
-      final yard = build('compost_yard', const TilePos(8, 8));
-      farm.apply(FarmCommand.train(buildingId: yard, seed: _breeding));
+      build('compost_yard', const TilePos(8, 8));
+      expect(
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _breeding)),
+        isNull,
+      );
       farm.runSteps(catalog.potatoType(PotatoType.breeding).growSeconds);
-      return yard;
+      return farm.field(1)!.potatoAt(_a)!;
     }
 
-    test('a grown breeder makes seeds that pile up to the limit', () {
+    test('a grown breeder makes seeds that pile up on it to the limit', () {
       open(
         quietSampleCatalog(
           (files) =>
@@ -491,50 +493,158 @@ void main() {
                   1.0,
         ),
       );
-      final id = yardWithBreeder();
-      final yard = farm.building(id)!;
-      final every = catalog.rules.breeding.seedEverySeconds;
-      farm.runSteps(every * 10);
-      expect(yard.storedSeeds, hasLength(catalog.rules.breeding.storeMax));
-      final breeder = farm.breeders.single.potato;
-      for (final seed in yard.storedSeeds) {
+      final breeder = grownBreeder();
+      farm.runSteps(catalog.rules.breeding.seedEverySeconds * 10);
+      expect(breeder.seeds, hasLength(catalog.rules.breeding.storeMax));
+      for (final seed in breeder.seeds) {
         expect(seed.grade, Grade.rare, reason: 'a normal breeder, always up');
         expect(seed.level, breeder.level);
         expect(catalog.abilities[seed.ability]!.pool, seed.type.name);
       }
       expect(farm.takeEvents().whereType<SeedMade>(), isNotEmpty);
+    });
 
-      final before = farm.seeds.total;
-      expect(farm.apply(FarmCommand.collectSeeds(buildingId: id)), isNull);
-      expect(farm.seeds.total, before + catalog.rules.breeding.storeMax);
-      expect(yard.storedSeeds, isEmpty);
+    test('harvesting takes the seeds in with the baby potatoes', () {
+      final breeder = grownBreeder();
       expect(
-        farm.apply(FarmCommand.collectSeeds(buildingId: id)),
-        FarmRejection.nothingStored,
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: _food)),
+        isNull,
       );
-    });
-
-    test('a demolished yard sends its breeders to the fridge', () {
-      final id = yardWithBreeder();
-      farm.runSteps(catalog.rules.breeding.seedEverySeconds);
-      final waiting = farm.building(id)!.storedSeeds.length;
+      farm.runSteps(
+        catalog.potatoType(PotatoType.food).growSeconds +
+            catalog.rules.breeding.seedEverySeconds * 2,
+      );
+      final made = breeder.seeds.length;
+      expect(made, greaterThan(0));
       final before = farm.seeds.total;
-      final breeder = farm.breeders.single.potato.id;
-      expect(farm.apply(FarmCommand.demolish(buildingId: id)), isNull);
-      expect(farm.breeders, isEmpty);
-      expect(farm.fridge.single.id, breeder);
-      expect(farm.seeds.total, before + waiting, reason: 'seeds are kept');
+      farm.takeEvents();
+      expect(farm.apply(const FarmCommand.harvestField(fieldId: 1)), isNull);
+      final harvested = farm.takeEvents().whereType<FoodHarvested>().single;
+      expect(harvested.food, greaterThan(0));
+      expect(harvested.seeds, hasLength(made));
+      expect(breeder.seeds, isEmpty);
+      expect(farm.seeds.total, greaterThanOrEqualTo(before + made));
     });
 
-    test('breeders and their seeds are saved', () {
-      final id = yardWithBreeder();
+    test('a breeder alone can be harvested for its seeds', () {
+      final breeder = grownBreeder();
+      expect(
+        farm.apply(FarmCommand.harvest(fieldId: 1, tile: _a)),
+        FarmRejection.nothingToHarvest,
+      );
+      farm.runSteps(catalog.rules.breeding.seedEverySeconds);
+      expect(breeder.seeds, hasLength(1));
+      expect(farm.apply(FarmCommand.harvest(fieldId: 1, tile: _a)), isNull);
+      expect(breeder.seeds, isEmpty);
+    });
+
+    test('seed speed makes seeds sooner, apart from food yield', () {
+      open(
+        quietSampleCatalog((files) {
+          (files['potato_abilities']! as Map)['abilities'] = [
+            ...((files['potato_abilities']! as Map)['abilities'] as List),
+            {
+              'id': 'buff.sow',
+              'pool': 'buff',
+              'effects': [
+                {
+                  'context': 'farm',
+                  'target': 'field',
+                  'kind': 'stat',
+                  'stat': 'breeding.seed_speed',
+                  'op': 'mul',
+                  'value': 2.0,
+                },
+              ],
+              'rarity': 'very_low',
+            },
+          ];
+        }),
+      );
+      final breeder = grownBreeder();
+      build('statue', const TilePos(8, 12));
+      final sow = Seed(
+        type: PotatoType.buff,
+        grade: Grade.normal,
+        level: 0,
+        ability: 'buff.sow',
+      );
+      farm.seeds.add(sow);
+      expect(
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: _b, seed: sow)),
+        isNull,
+      );
+      expect(farm.effectsOn(breeder)[FarmStat.foodYield], isNull);
+      farm.runSteps(catalog.rules.breeding.seedEverySeconds);
+      expect(breeder.seeds, hasLength(2), reason: 'twice as fast');
+    });
+
+    test('an uprooted or dead breeder hands its seeds to the pouch', () {
+      final breeder = grownBreeder();
+      farm.runSteps(catalog.rules.breeding.seedEverySeconds * 2);
+      final made = breeder.seeds.length;
+      final before = farm.seeds.total;
+      expect(farm.apply(FarmCommand.uproot(potatoId: breeder.id)), isNull);
+      expect(farm.seeds.total, before + made);
+      expect(breeder.seeds, isEmpty);
+
+      expect(
+        farm.apply(
+          FarmCommand.replant(potatoId: breeder.id, fieldId: 1, tile: _a),
+        ),
+        isNull,
+        reason: 'breeders go back into fields',
+      );
+      farm.runSteps(catalog.rules.breeding.seedEverySeconds);
+      final left = breeder.seeds.length;
+      final kept = farm.seeds.total;
+      farm.runSteps(
+        catalog.potatoType(PotatoType.breeding).lifespanSeconds * 2,
+      );
+      expect(farm.field(1)!.potatoAt(_a), isNull);
+      expect(farm.seeds.total, greaterThanOrEqualTo(kept + left));
+    });
+
+    test('breeders keep their seeds through a save', () {
+      final breeder = grownBreeder();
       farm.runSteps(catalog.rules.breeding.seedEverySeconds);
       final json = jsonDecode(
         jsonEncode(FarmDocument.of(farm).toJson()),
       ) as Map<String, dynamic>;
       final loaded = FarmDocument.decode(json).toSimulation(catalog);
-      expect(loaded.breeders.single.potato.id, farm.breeders.single.potato.id);
-      expect(loaded.building(id)!.storedSeeds, farm.building(id)!.storedSeeds);
+      expect(loaded.field(1)!.potatoAt(_a)!.seeds, breeder.seeds);
+    });
+
+    test('a version 6 farm moves yard breeders to the fridge and their '
+        'seeds to the pouch', () {
+      farm.pouchSlots = 1000;
+      final yard = build('compost_yard', const TilePos(8, 8));
+      final breeder = Potato(
+        id: 900,
+        type: PotatoType.breeding,
+        grade: Grade.normal,
+        level: 0,
+        abilities: [_breeding.ability],
+      )..grownMillis = 1000;
+      final json = jsonDecode(
+        jsonEncode(FarmDocument.of(farm).toJson()),
+      ) as Map<String, dynamic>;
+      json['format_version'] = 6;
+      json.remove('returned_seeds');
+      json['breeders'] = [
+        {'potato': PotatoDocument.of(breeder).toJson(), 'building_id': yard},
+      ];
+      final stored = [_food.toJson(), _buff.toJson()];
+      for (final building in json['buildings'] as List) {
+        if ((building as Map)['id'] == yard) building['stored_seeds'] = stored;
+      }
+      final before = farm.seeds.total;
+      final loaded = FarmDocument.decode(
+        jsonDecode(jsonEncode(json)) as Map<String, dynamic>,
+      ).toSimulation(catalog);
+      expect(loaded.fridge.map((p) => p.id), contains(900));
+      expect(loaded.seeds.total, before + 2);
+      expect(FarmDocument.of(loaded).returnedSeeds, isEmpty);
     });
   });
 

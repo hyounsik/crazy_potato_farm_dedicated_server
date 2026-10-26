@@ -120,6 +120,46 @@ void main() {
       putUp('totem_growth', const TilePos(8, 10));
     });
 
+    test('totems may stand right next to each other, not on one another '
+        'nor next to anything else (2026-10-27)', () {
+      putUp('totem_growth', const TilePos(8, 8));
+      putUp('totem_harvest', const TilePos(9, 8));
+      final building = farm.buildings.last;
+      expect(
+        farm.canPlace(building.rect, totem: true),
+        isFalse,
+        reason: 'not on one',
+      );
+      expect(
+        farm.canPlace(
+          const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
+          totem: true,
+        ),
+        isTrue,
+        reason: 'corner to corner with a totem',
+      );
+      expect(
+        farm.canPlace(
+          const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
+        ),
+        isFalse,
+        reason: 'anything else keeps its distance',
+      );
+      final field = farm.fields.first.rect;
+      expect(
+        farm.canPlace(
+          TileRect(
+            origin: field.origin - const TilePos(1, 1),
+            width: 1,
+            height: 1,
+          ),
+          totem: true,
+        ),
+        isFalse,
+        reason: 'a totem keeps its distance from a field',
+      );
+    });
+
     test('a lit growth totem speeds growth, then goes out and waits', () {
       final id = putUp('totem_growth', const TilePos(8, 8));
       final seed = plainSeed(PotatoType.food, Grade.normal);

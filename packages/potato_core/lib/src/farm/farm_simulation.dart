@@ -103,7 +103,10 @@ final class FarmSimulation {
   void _settleBuildings() {
     final size = _rules.farm.size;
     for (final building in _buildings.values) {
-      if (canPlace(building.rect, ignoring: building.id)) continue;
+      final totem = building.data.totem != null;
+      if (canPlace(building.rect, ignoring: building.id, totem: totem)) {
+        continue;
+      }
       final from = building.origin;
       TilePos? best;
       var bestDistance = 0;
@@ -116,7 +119,7 @@ final class FarmSimulation {
             width: building.data.width,
             height: building.data.height,
           );
-          if (!canPlace(rect, ignoring: building.id)) continue;
+          if (!canPlace(rect, ignoring: building.id, totem: totem)) continue;
           best = TilePos(x, y);
           bestDistance = distance;
         }
@@ -497,19 +500,25 @@ final class FarmSimulation {
 
   /// Whether a building could stand on [rect]: on open land, off the
   /// [entrance], with one free tile (corners included) between it and every
-  /// field and building.
+  /// field and building. A [totem] may stand right next to other totems
+  /// (2026-10-27, 사용자), though not on them.
   /// [ignoring] is a building or field to leave out, e.g. one being moved
   /// (ids are shared, so one id names either).
-  bool canPlace(TileRect rect, {int? ignoring}) {
+  bool canPlace(TileRect rect, {int? ignoring, bool totem = false}) {
     if (!rect.tiles.every(isOpen)) return false;
     if (rect.contains(entrance)) return false;
     final others = [
       for (final field in _fields.values)
-        if (field.id != ignoring) field.rect,
+        if (field.id != ignoring) (rect: field.rect, totem: false),
       for (final building in _buildings.values)
-        if (building.id != ignoring) building.rect,
+        if (building.id != ignoring)
+          (rect: building.rect, totem: building.data.totem != null),
     ];
-    for (final other in others) {
+    for (final (rect: other, totem: otherTotem) in others) {
+      if (totem && otherTotem) {
+        if (rect.overlaps(other)) return false;
+        continue;
+      }
       final margin = TileRect(
         origin: other.origin - const TilePos(1, 1),
         width: other.width + 2,
@@ -1144,7 +1153,10 @@ final class FarmSimulation {
       width: building.data.width,
       height: building.data.height,
     );
-    if (!canPlace(rect, ignoring: buildingId)) return FarmRejection.blocked;
+    final totem = building.data.totem != null;
+    if (!canPlace(rect, ignoring: buildingId, totem: totem)) {
+      return FarmRejection.blocked;
+    }
     building.origin = origin;
     _events.add(
       FarmEvent.buildingMoved(buildingId: buildingId, origin: origin),
@@ -1171,7 +1183,9 @@ final class FarmSimulation {
       return FarmRejection.totemLimit;
     }
     final building = FarmBuilding(id: _nextId, data: data, origin: origin);
-    if (!canPlace(building.rect)) return FarmRejection.blocked;
+    if (!canPlace(building.rect, totem: data.totem != null)) {
+      return FarmRejection.blocked;
+    }
     final cost = data.levels.first.cost;
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
@@ -1483,6 +1497,7 @@ final class FarmSimulation {
       TilePos? spot;
       bool fits(TilePos origin) => canPlace(
         TileRect(origin: origin, width: data.width, height: data.height),
+        totem: data.totem != null,
       );
       if (fits(start.origin)) {
         spot = start.origin;

@@ -75,6 +75,14 @@ final class _Read {
     for (final b in bullets) {
       bulletAt[b.id] = b.position;
     }
+    for (final m in members) {
+      bodyAt[m.player.id] = m.player.position;
+    }
+    bodyAt
+      ..addAll(companionAt)
+      ..addAll(enemyAt)
+      ..addAll(cloneAt)
+      ..addAll(cloneCompanionAt);
   }
 
   final List<RaidMember> members;
@@ -88,6 +96,9 @@ final class _Read {
   final Map<int, Vec2> cloneAt = {};
   final Map<int, Vec2> cloneCompanionAt = {};
   final Map<int, Vec2> bulletAt = {};
+
+  /// Every body by id, to find where a bullet was fired from.
+  final Map<int, Vec2> bodyAt = {};
 }
 
 /// Drives a guest's view of a party run hosted by [HostSession].
@@ -749,13 +760,32 @@ final class ClientSession {
       ..clear()
       ..addAll(b.clouds);
 
-    // Bullets.
-    for (final bullet in b.bullets) {
-      bullet.position = lerp(a.bulletAt[bullet.id], b.bulletAt[bullet.id]!);
-    }
+    // Bullets fly straight, too fast for snapshots a tenth of a second
+    // apart (a rapid shot lives about 0.27 s): each is flown from where the
+    // newer snapshot saw it at its own speed (2026-10-28, 사용자: rapid
+    // fire stuttered). One the older snapshot had not seen yet starts from
+    // whoever fired it, and none flies past the distance it had left.
+    final ahead = (targetTime - after.at).inMicroseconds / 1e6;
     sim.bullets
       ..clear()
-      ..addAll(b.bullets);
+      ..addAll([
+        for (final bullet in b.bullets)
+          if (_flown(bullet, a, b, ahead) case final at?) bullet..position = at,
+      ]);
+  }
+
+  /// Where [bullet] is [ahead] seconds after snapshot [b] saw it (behind it
+  /// when negative), or null while it is not out of the gun yet or already
+  /// spent.
+  static Vec2? _flown(RaidBullet bullet, _Read a, _Read b, double ahead) {
+    final seen = b.bulletAt[bullet.id]!;
+    final speed = bullet.velocity.length;
+    if (ahead * speed > bullet.remaining) return null;
+    if (ahead < 0 && !a.bulletAt.containsKey(bullet.id)) {
+      final from = b.bodyAt[bullet.owner];
+      if (from != null && -ahead * speed > seen.distanceTo(from)) return null;
+    }
+    return seen + bullet.velocity * ahead;
   }
 
   static Vec2 _lerpVec(Vec2 a, Vec2 b, double t) =>

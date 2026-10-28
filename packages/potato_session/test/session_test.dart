@@ -267,6 +267,62 @@ void main() {
     });
   });
 
+  test('a fast shot flies out of the gun smoothly on the guest\'s screen '
+      '(2026-10-28)', () async {
+    final net = InMemorySessionNetwork();
+    final host = HostSession(catalog: catalog, transport: net.host);
+    final guest = ClientSession(
+      catalog: catalog,
+      transport: net.connectClient('guest_2'),
+      start: const RaidMemberStart(name: 'Guest Two'),
+    );
+    await _pumpMicrotasks();
+    host.startRun(
+      zone: 'open',
+      seed: 7,
+      hostStart: const RaidMemberStart(name: 'Host One'),
+    );
+    await _pumpMicrotasks();
+    const frame = Duration(milliseconds: 10);
+    Future<void> tick() async {
+      host.advance(frame);
+      guest.advance(frame);
+      await _pumpMicrotasks();
+    }
+
+    for (var i = 0; i < 30; i++) {
+      await tick();
+    }
+    final shooter = host.run!.player;
+    final from = shooter.position;
+    host.run!.bullets.add(
+      RaidBullet(
+        id: 999999,
+        position: from,
+        velocity: const Vec2(0, 9),
+        damage: 0,
+        owner: shooter.id,
+        side: shooter.side,
+        team: shooter.team,
+        remaining: 4,
+      ),
+    );
+    final seen = <double>[];
+    for (var i = 0; i < 40; i++) {
+      await tick();
+      for (final b in guest.run!.bullets) {
+        if (b.id == 999999) seen.add(b.position.distanceTo(from));
+      }
+    }
+    expect(seen, isNotEmpty);
+    expect(seen.first, lessThan(0.3), reason: 'out of the gun, not mid-air');
+    for (var i = 1; i < seen.length; i++) {
+      expect(seen[i] - seen[i - 1], inInclusiveRange(0, 0.2), reason: '$i');
+    }
+    await guest.close();
+    await host.close();
+  });
+
   group('Disconnection Handling', () {
     test(
       'guest disconnect stops guest movement and leaves character defenseless',

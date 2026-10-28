@@ -146,20 +146,18 @@ void main() {
     expect(r.apply(const EquipFromBag(1)), RaidRejection.noGear);
   });
 
-  test('a belt with too few slots for the potatoes is refused', () {
+  test('the belt cannot be changed during a run (2026-10-28)', () {
     const one = Gear(
       kind: GearKind.belt,
       grade: Grade.normal,
       level: 0,
       slots: [PotatoType.buff],
     );
-    final r = run(
-      team: const [
-        CompanionStart(potatoId: 1, type: PotatoType.food, grade: Grade.normal),
-      ],
-    );
+    final r = run(equipped: const Equipped(belt: one));
     r.bag.replace(0, stackOf(one));
-    expect(r.apply(const EquipFromBag(0)), RaidRejection.beltTooSmall);
+    expect(r.apply(const EquipFromBag(0)), RaidRejection.beltLocked);
+    expect(r.apply(const Unequip(GearKind.belt)), RaidRejection.beltLocked);
+    expect(r.player.equipped.belt, one);
   });
 
   test('taking off the bag keeps it and drops what no longer fits', () {

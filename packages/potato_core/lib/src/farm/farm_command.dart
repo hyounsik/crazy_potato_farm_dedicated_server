@@ -43,6 +43,11 @@ sealed class FarmCommand with _$FarmCommand {
   const factory FarmCommand.disassembleGear({required int index}) =
       DisassembleGear;
 
+  /// Breaks the gear in bag slot [slot] into materials, as at the workbench
+  /// (the sorting window, 2026-10-28, 사용자).
+  const factory FarmCommand.disassembleBagGear({required int slot}) =
+      DisassembleBagGear;
+
   /// Lights totem [buildingId] for baby potatoes.
   const factory FarmCommand.lightTotem({required int buildingId}) = LightTotem;
 
@@ -204,14 +209,25 @@ sealed class FarmCommand with _$FarmCommand {
     int? gearIndex,
   }) = LoadBed;
 
-  /// Moves the stack on bed slot [slot] into storage.
+  /// Packs [count] of [item] from storage into the bag, to take along on
+  /// the next run or to a friend's farm (2026-10-28, 사용자: the farm has a
+  /// bag too). What does not fit stays in storage.
+  const factory FarmCommand.loadBag({
+    required String item,
+    @Default(1) int count,
+    Seed? seed,
+    int? gearIndex,
+  }) = LoadBag;
+
+  /// Moves the stack on bed slot [slot] into storage, as much as fits.
   const factory FarmCommand.unloadBed({required int slot}) = UnloadBed;
 
-  /// Moves the stack in bag slot [slot] into storage.
+  /// Moves the stack in bag slot [slot] into storage, as much as fits.
   const factory FarmCommand.unloadBag({required int slot}) = UnloadBag;
 
-  /// Moves everything left in the bag into storage: closing the sorting
-  /// window at home (2026-10-28, 사용자).
+  /// Moves what fits of the bag into storage: closing the sorting window at
+  /// home (2026-10-28, 사용자). Gear past a full box and seeds past a full
+  /// pouch stay in the bag.
   const factory FarmCommand.unpackBag() = UnpackBag;
 
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>
@@ -331,4 +347,10 @@ enum FarmRejection {
 
   /// Nothing in that bed or bag slot.
   emptySlot,
+
+  /// The bag has no room for it.
+  bagFull,
+
+  /// What is in the bag would not fit that smaller bag.
+  bagTooSmall,
 }

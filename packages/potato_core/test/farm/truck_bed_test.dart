@@ -187,4 +187,88 @@ void main() {
     expect(back.bed.countOf('food'), 30);
     expect(back.bag.countOf('material'), 4);
   });
+
+  test('what storage has no room for stays in the bag', () {
+    final pieces = [
+      for (var i = 0; i <= farm.gearSlots; i++) rapid.copyWith(level: i),
+    ];
+    farm.apply(
+      FarmCommand.returnHome(
+        food: 0,
+        bag: [for (final p in pieces) ItemStack.ofGear('gear_rapid_normal', p)],
+      ),
+    );
+    final room = farm.gearSlots - farm.gear.length;
+    expect(farm.apply(const FarmCommand.unpackBag()), null);
+    expect(farm.gear.length, farm.gearSlots, reason: 'the box is full');
+    expect(farm.bagItems, hasLength(pieces.length - room));
+    final last = farm.bag.slots.indexWhere((s) => s != null);
+    expect(
+      farm.apply(FarmCommand.unloadBag(slot: last)),
+      FarmRejection.boxFull,
+    );
+
+    expect(farm.apply(FarmCommand.disassembleBagGear(slot: last)), null);
+    expect(farm.bag.slots[last], isNull);
+    expect(farm.materials, isNotEmpty);
+  });
+
+  test('seeds past a full pouch stay in the bag, not in the overflow', () {
+    final rare = plainSeed(PotatoType.food, Grade.rare);
+    farm.pouchSlots = farm.seeds.total + 1;
+    farm.apply(
+      FarmCommand.returnHome(
+        food: 0,
+        bag: [ItemStack('seed_food_rare', 3, seed: rare)],
+      ),
+    );
+    farm.apply(const FarmCommand.unpackBag());
+    expect(farm.pouchRoom, 0);
+    expect(farm.overflow, isEmpty);
+    expect(farm.bag.countOf('seed_food_rare'), 2);
+  });
+
+  test('storage packs into the bag for the next run', () {
+    expect(
+      farm.apply(const FarmCommand.loadBag(item: 'food', count: 20)),
+      null,
+    );
+    expect(farm.food, 80);
+    final start = memberStartFor(farm, food: 0);
+    final run = RaidSimulation.party(
+      catalog: catalog,
+      zone: 'sample_zone',
+      seed: 1,
+      members: [start],
+    );
+    expect(run.bag.countOf('food'), 20);
+  });
+
+  test('a smaller bag is refused while what is in the bag would not fit', () {
+    const big = Gear(kind: GearKind.bag, grade: Grade.rare, level: 1);
+    farm.apply(FarmCommand.returnHome(food: 0, gear: const [big]));
+    farm.apply(FarmCommand.equipGear(index: farm.gear.indexOf(big)));
+    final slots = farm.bag.capacity;
+    farm.apply(
+      FarmCommand.returnHome(
+        food: 0,
+        bag: [for (var i = 0; i < slots; i++) ItemStack('material', 1)],
+      ),
+    );
+    // Materials merge into stacks: spread them over gear instead.
+    farm.apply(
+      FarmCommand.returnHome(
+        food: 0,
+        bag: [
+          for (var i = 0; i < slots; i++)
+            ItemStack.ofGear('gear_rapid_normal', rapid.copyWith(level: i)),
+        ],
+      ),
+    );
+    expect(farm.bagItems, hasLength(slots));
+    expect(
+      farm.apply(const FarmCommand.unequipGear(kind: GearKind.bag)),
+      FarmRejection.bagTooSmall,
+    );
+  });
 }

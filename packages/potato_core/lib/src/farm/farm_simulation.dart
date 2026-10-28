@@ -593,6 +593,7 @@ final class FarmSimulation {
     EquipGear(:final index) => _equipGear(index),
     UnequipGear(:final kind) => _unequipGear(kind),
     DisassembleGear(:final index) => _disassembleGear(index),
+    DisassembleBagGear(:final slot) => _disassembleBagGear(slot),
     LightTotem(:final buildingId) => _lightTotem(buildingId),
     RaiseTotemLimit() => _raiseTotemLimit(),
     WidenPouch() => _widen(pouch: true),
@@ -657,8 +658,20 @@ final class FarmSimulation {
         zone,
         bag,
       ),
-    LoadBed(:final item, :final count, :final seed, :final gearIndex) =>
-      _loadBed(item, count, seed, gearIndex),
+    LoadBed(:final item, :final count, :final seed, :final gearIndex) => _load(
+      bed,
+      item,
+      count,
+      seed,
+      gearIndex,
+    ),
+    LoadBag(:final item, :final count, :final seed, :final gearIndex) => _load(
+      _bag,
+      item,
+      count,
+      seed,
+      gearIndex,
+    ),
     UnloadBed(:final slot) => _unload(bed, slot),
     UnloadBag(:final slot) => _unload(_bag, slot),
     UnpackBag() => _unpackBag(),
@@ -1417,6 +1430,9 @@ final class FarmSimulation {
     if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
     final piece = _gear[index];
     if (!_gearStats.canWear(piece, progress)) return FarmRejection.cannotWear;
+    if (piece.kind == GearKind.bag && !_bagFits(piece)) {
+      return FarmRejection.bagTooSmall;
+    }
     final old = equipped.of(piece.kind);
     equipped = equipped.wearing(piece.kind, piece);
     if (old == null) {
@@ -1424,6 +1440,7 @@ final class FarmSimulation {
     } else {
       _gear[index] = old;
     }
+    if (piece.kind == GearKind.bag) _fitBag();
     return null;
   }
 
@@ -1432,20 +1449,37 @@ final class FarmSimulation {
     final piece = equipped.of(kind);
     if (piece == null) return FarmRejection.noSuchGear;
     if (_gear.length >= gearSlots) return FarmRejection.boxFull;
+    if (kind == GearKind.bag && !_bagFits(null)) {
+      return FarmRejection.bagTooSmall;
+    }
     _gear.add(piece);
     equipped = equipped.wearing(kind, null);
+    if (kind == GearKind.bag) _fitBag();
     return null;
   }
+
+  /// Whether what is in the bag fits [bag] (null for none worn).
+  bool _bagFits(Gear? bag) => bagItems.length <= _gearStats.bagSlots(bag);
 
   /// Breaks box piece [index] into materials.
   FarmRejection? _disassembleGear(int index) {
     if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
-    final piece = _gear.removeAt(index);
+    _breakUp(_gear.removeAt(index));
+    return null;
+  }
+
+  FarmRejection? _disassembleBagGear(int slot) {
+    if (slot < 0 || slot >= _bag.capacity) return FarmRejection.emptySlot;
+    if (_bag.slots[slot]?.gear == null) return FarmRejection.noSuchGear;
+    _breakUp(_bag.replace(slot, null)!.gear!);
+    return null;
+  }
+
+  void _breakUp(Gear piece) {
     final materials = _gearStats.disassembly(piece);
     final item = _rules.workbench.material;
     if (materials > 0) _materials[item] = (_materials[item] ?? 0) + materials;
     _events.add(FarmEvent.gearDisassembled(materials: materials));
-    return null;
   }
 
   /// Totems standing on the farm.
@@ -1905,29 +1939,47 @@ final class FarmSimulation {
     }
   }
 
-  /// Puts [stack] into storage. Seeds that do not fit the pouch wait like
-  /// any others; items storage has no place for are dropped.
-  void store(ItemStack stack) {
-    if (stack.count <= 0) return;
+  /// How much of [stack] storage has room for: all baby potatoes and
+  /// materials, seeds up to the pouch's free slots, gear while the box has
+  /// a free slot.
+  int roomFor(ItemStack stack) => switch (catalog.items[stack.item]?.kind) {
+    ItemKind.food || ItemKind.material => stack.count,
+    ItemKind.seed => stack.seed == null ? 0 : math.min(stack.count, pouchRoom),
+    ItemKind.gear => stack.gear != null && _gear.length < gearSlots ? 1 : 0,
+    null => 0,
+  };
+
+  /// Puts what fits of [stack] into storage and takes it off the stack, so
+  /// what is left there did not fit (2026-10-28, 사용자: it stays in the
+  /// bag). [force] puts it all in, past the pouch or box: for what was just
+  /// taken out.
+  void store(ItemStack stack, {bool force = false}) {
+    final count = force ? stack.count : roomFor(stack);
+    if (count <= 0) return;
+    stack.count -= count;
     switch (catalog.items[stack.item]?.kind) {
       case ItemKind.food:
-        food += stack.count;
+        food += count;
       case ItemKind.seed:
-        if (stack.seed case final seed?) {
-          for (var i = 0; i < stack.count; i++) {
-            _gainSeed(seed);
-          }
+        for (var i = 0; i < count; i++) {
+          _seeds.add(stack.seed!);
         }
       case ItemKind.material:
-        _materials[stack.item] = (_materials[stack.item] ?? 0) + stack.count;
+        _materials[stack.item] = (_materials[stack.item] ?? 0) + count;
       case ItemKind.gear:
-        if (stack.gear case final piece?) _gear.add(piece);
+        _gear.add(stack.gear!);
       case null:
         break;
     }
   }
 
-  FarmRejection? _loadBed(String item, int count, Seed? seed, int? gearIndex) {
+  FarmRejection? _load(
+    Bag into,
+    String item,
+    int count,
+    Seed? seed,
+    int? gearIndex,
+  ) {
     final stack = takeStored(
       item,
       count: count,
@@ -1935,26 +1987,46 @@ final class FarmSimulation {
       gearIndex: gearIndex,
     );
     if (stack == null) return FarmRejection.notStored;
-    final moved = bed.addFrom(stack);
-    store(stack);
-    return moved == 0 ? FarmRejection.bedFull : null;
+    final moved = into.addFrom(stack);
+    store(stack, force: true);
+    if (moved > 0) return null;
+    return identical(into, bed) ? FarmRejection.bedFull : FarmRejection.bagFull;
   }
 
   FarmRejection? _unload(Bag from, int slot) {
     if (slot < 0 || slot >= from.capacity) return FarmRejection.emptySlot;
-    final stack = from.replace(slot, null);
+    final stack = from.slots[slot];
     if (stack == null) return FarmRejection.emptySlot;
+    final before = stack.count;
     store(stack);
-    return null;
+    if (stack.count == 0) from.replace(slot, null);
+    if (stack.count < before) return null;
+    return catalog.items[stack.item]?.kind == ItemKind.gear
+        ? FarmRejection.boxFull
+        : FarmRejection.pouchFull;
   }
 
   FarmRejection? _unpackBag() {
     for (var i = 0; i < _bag.capacity; i++) {
-      if (_bag.replace(i, null) case final stack?) store(stack);
+      if (_bag.slots[i] case final stack?) {
+        store(stack);
+        if (stack.count == 0) _bag.replace(i, null);
+      }
     }
-    final slots = _gearStats.bagSlots(equipped.bag);
-    if (_bag.capacity != slots) _bag = Bag(slots, catalog.stackOf);
+    _fitBag();
     return null;
+  }
+
+  /// The bag takes the size of the worn one once what is in it fits.
+  void _fitBag() {
+    final slots = _gearStats.bagSlots(equipped.bag);
+    if (_bag.capacity == slots) return;
+    final items = bagItems;
+    if (items.length > slots) return;
+    _bag = Bag(slots, catalog.stackOf);
+    for (final stack in items) {
+      _bag.addFrom(stack);
+    }
   }
 
   /// Puts a returning companion back where it came from, if that place is

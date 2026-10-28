@@ -132,6 +132,18 @@ DisassembleGear _$DisassembleGearFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$DisassembleGearToJson(DisassembleGear instance) =>
     <String, dynamic>{'index': instance.index, 'runtimeType': instance.$type};
 
+DisassembleBagGear _$DisassembleBagGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('DisassembleBagGear', json, ($checkedConvert) {
+      final val = DisassembleBagGear(
+        slot: $checkedConvert('slot', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$DisassembleBagGearToJson(DisassembleBagGear instance) =>
+    <String, dynamic>{'slot': instance.slot, 'runtimeType': instance.$type};
+
 LightTotem _$LightTotemFromJson(Map<String, dynamic> json) => $checkedCreate(
   'LightTotem',
   json,
@@ -680,6 +692,29 @@ LoadBed _$LoadBedFromJson(Map<String, dynamic> json) =>
     }, fieldKeyMap: const {'gearIndex': 'gear_index', r'$type': 'runtimeType'});
 
 Map<String, dynamic> _$LoadBedToJson(LoadBed instance) => <String, dynamic>{
+  'item': instance.item,
+  'count': instance.count,
+  'seed': instance.seed?.toJson(),
+  'gear_index': instance.gearIndex,
+  'runtimeType': instance.$type,
+};
+
+LoadBag _$LoadBagFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('LoadBag', json, ($checkedConvert) {
+      final val = LoadBag(
+        item: $checkedConvert('item', (v) => v as String),
+        count: $checkedConvert('count', (v) => (v as num?)?.toInt() ?? 1),
+        seed: $checkedConvert(
+          'seed',
+          (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        gearIndex: $checkedConvert('gear_index', (v) => (v as num?)?.toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'gearIndex': 'gear_index', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$LoadBagToJson(LoadBag instance) => <String, dynamic>{
   'item': instance.item,
   'count': instance.count,
   'seed': instance.seed?.toJson(),

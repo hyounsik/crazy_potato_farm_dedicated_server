@@ -184,6 +184,9 @@ enum RaidRejection {
   /// The companions would not fit that belt.
   beltTooSmall,
 
+  /// The belt stays as it set out for the whole run (2026-10-28, 사용자).
+  beltLocked,
+
   /// Nothing in that bag slot.
   emptySlot,
 }

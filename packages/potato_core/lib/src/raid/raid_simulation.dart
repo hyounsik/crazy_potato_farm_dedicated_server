@@ -818,9 +818,7 @@ final class RaidSimulation {
     final piece = bag.slots[slot]?.gear;
     if (piece == null) return RaidRejection.noGear;
     if (!_gear.canWear(piece, member.progress)) return RaidRejection.cannotWear;
-    if (piece.kind == GearKind.belt && !_beltFits(member, piece)) {
-      return RaidRejection.beltTooSmall;
-    }
+    if (piece.kind == GearKind.belt) return RaidRejection.beltLocked;
     final old = member.player.equipped.of(piece.kind);
     bag.replace(slot, old == null ? null : _stackOf(old));
     _wear(member, piece.kind, piece);
@@ -831,9 +829,7 @@ final class RaidSimulation {
   RaidRejection? _unequip(RaidMember member, GearKind kind) {
     final piece = member.player.equipped.of(kind);
     if (piece == null) return RaidRejection.noGear;
-    if (kind == GearKind.belt && !_beltFits(member, null)) {
-      return RaidRejection.beltTooSmall;
-    }
+    if (kind == GearKind.belt) return RaidRejection.beltLocked;
     final stack = _stackOf(piece);
     final bag = member.bag;
     if (kind == GearKind.bag) {
@@ -849,9 +845,6 @@ final class RaidSimulation {
     _wear(member, kind, null);
     return null;
   }
-
-  bool _beltFits(RaidMember member, Gear? belt) =>
-      _gear.fitBelt(belt, [for (final c in member.companions) c.type]) != null;
 
   ItemStack _stackOf(Gear piece) =>
       ItemStack.ofGear(catalog.gearItemOf(piece) ?? '', piece);

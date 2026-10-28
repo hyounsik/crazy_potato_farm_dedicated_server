@@ -4,6 +4,7 @@ import 'dart:io';
 
 import 'package:potato_dedicated_server/potato_dedicated_server.dart';
 import 'package:potato_session/potato_session.dart';
+import 'package:potato_session/zlib_codec.dart';
 import 'package:potato_session/websocket_client.dart';
 import 'package:test/test.dart';
 
@@ -51,6 +52,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:${server.port}'),
     );
     final session = ClientSession(
+      codec: const ZlibSessionCodec(),
       catalog: catalog,
       transport: transport,
       start: RaidMemberStart(name: name),
@@ -120,6 +122,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:${server.port}'),
     );
     final guest = ClientSession(
+      codec: const ZlibSessionCodec(),
       catalog: catalog,
       transport: transport,
       start: const RaidMemberStart(name: 'Solo'),
@@ -139,6 +142,7 @@ void main() {
       Uri.parse('ws://127.0.0.1:${server.port}'),
     );
     final guest = ClientSession(
+      codec: const ZlibSessionCodec(),
       catalog: catalog,
       transport: first,
       start: const RaidMemberStart(name: 'Solo', food: 20),
@@ -179,6 +183,7 @@ void main() {
     );
     addTearDown(room.close);
     final guest = ClientSession(
+      codec: const ZlibSessionCodec(),
       catalog: catalog,
       transport: net.connectClient('g'),
       start: const RaidMemberStart(name: 'G', food: 20),

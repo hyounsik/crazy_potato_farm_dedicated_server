@@ -3,6 +3,7 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:potato_session/potato_session.dart';
+import 'package:potato_session/zlib_codec.dart';
 
 /// The one exploration party a dedicated server hosts at a time.
 ///
@@ -21,7 +22,7 @@ import 'package:potato_session/potato_session.dart';
 final class DedicatedRoom {
   DedicatedRoom({
     required this.transport,
-    this.codec = const JsonSessionCodec(),
+    this.codec = const ZlibSessionCodec(),
     this.tickEvery = const Duration(milliseconds: 16),
     this.emptyRunGrace = const Duration(minutes: 2),
     this.log,

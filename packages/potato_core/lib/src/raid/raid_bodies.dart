@@ -203,55 +203,67 @@ final class RaidEnemy extends RaidBody {
        chargeHits = chargeHits ?? {},
        cooldowns = cooldowns ?? {};
 
-  factory RaidEnemy.fromJson(Map<String, dynamic> json) => RaidEnemy(
-    id: json['id'] as int,
-    position: Vec2.fromJson(json['position'] as List<Object?>),
-    radius: (json['radius'] as num).toDouble(),
-    maxHp: (json['max_hp'] as num).toDouble(),
-    hp: (json['hp'] as num).toDouble(),
-    kind: json['kind'] as String,
-    home: Vec2.fromJson(json['home'] as List<Object?>),
-    target: json['target'] as int?,
-    attackCooldown: (json['attack_cooldown'] as num).toDouble(),
-    sinceHit: _seconds(json['since_hit']),
-    wanderGoal: Vec2.fromJson(json['wander_goal'] as List<Object?>),
-    wanderTimer: (json['wander_timer'] as num).toDouble(),
-    chargeCooldown: (json['charge_cooldown'] as num).toDouble(),
-    sprayCooldown: (json['spray_cooldown'] as num).toDouble(),
-    telegraphLeft: (json['telegraph_left'] as num).toDouble(),
-    chargeLeft: (json['charge_left'] as num).toDouble(),
-    chargeDirection: Vec2.fromJson(json['charge_direction'] as List<Object?>),
-    chargeHits: {...(json['charge_hits'] as List<Object?>).cast<int>()},
-    cooldowns: {
-      for (final MapEntry(:key, :value)
-          in (json['cooldowns'] as Map<String, dynamic>? ?? const {}).entries)
-        key: (value as num).toDouble(),
-    },
-    jumpLeft: (json['jump_left'] as num?)?.toDouble() ?? 0,
-    jumpAt: switch (json['jump_at']) {
+  /// Reads [toJson], or the lighter [toViewJson] with what only the host
+  /// needs left out (it stands where it is, at rest).
+  factory RaidEnemy.fromJson(Map<String, dynamic> json) {
+    final position = Vec2.fromJson(json['position'] as List<Object?>);
+    double number(String key) => (json[key] as num?)?.toDouble() ?? 0;
+    Vec2 at(String key, [Vec2 or = Vec2.zero]) => switch (json[key]) {
       final List<Object?> at => Vec2.fromJson(at),
-      _ => Vec2.zero,
-    },
-    burrowLeft: (json['burrow_left'] as num?)?.toDouble() ?? 0,
-    burrowAt: switch (json['burrow_at']) {
-      final List<Object?> at => Vec2.fromJson(at),
-      _ => Vec2.zero,
-    },
-    burrowStrikes: json['burrow_strikes'] as int? ?? 0,
-    poseLeft: (json['pose_left'] as num?)?.toDouble() ?? 0,
-    windupLeft: (json['windup_left'] as num?)?.toDouble() ?? 0,
-    windupCloud: json['windup_cloud'] as int? ?? 0,
-    windupAt: switch (json['windup_at']) {
-      final List<Object?> at => Vec2.fromJson(at),
-      _ => Vec2.zero,
-    },
-    holdLeft: (json['hold_left'] as num?)?.toDouble() ?? 0,
-    swingLeft: (json['swing_left'] as num?)?.toDouble() ?? 0,
-    swingAt: switch (json['swing_at']) {
-      final List<Object?> at => Vec2.fromJson(at),
-      _ => Vec2.zero,
-    },
-  );
+      _ => or,
+    };
+    return RaidEnemy(
+      id: json['id'] as int,
+      position: position,
+      radius: (json['radius'] as num).toDouble(),
+      maxHp: (json['max_hp'] as num).toDouble(),
+      hp: (json['hp'] as num).toDouble(),
+      kind: json['kind'] as String,
+      home: at('home', position),
+      target: json['target'] as int?,
+      attackCooldown: number('attack_cooldown'),
+      sinceHit: _seconds(json['since_hit']),
+      wanderGoal: at('wander_goal', position),
+      wanderTimer: number('wander_timer'),
+      chargeCooldown: number('charge_cooldown'),
+      sprayCooldown: number('spray_cooldown'),
+      telegraphLeft: number('telegraph_left'),
+      chargeLeft: number('charge_left'),
+      chargeDirection: at('charge_direction'),
+      chargeHits: {
+        ...(json['charge_hits'] as List<Object?>? ?? const []).cast<int>(),
+      },
+      cooldowns: {
+        for (final MapEntry(:key, :value)
+            in (json['cooldowns'] as Map<String, dynamic>? ?? const {}).entries)
+          key: (value as num).toDouble(),
+      },
+      jumpLeft: (json['jump_left'] as num?)?.toDouble() ?? 0,
+      jumpAt: switch (json['jump_at']) {
+        final List<Object?> at => Vec2.fromJson(at),
+        _ => Vec2.zero,
+      },
+      burrowLeft: (json['burrow_left'] as num?)?.toDouble() ?? 0,
+      burrowAt: switch (json['burrow_at']) {
+        final List<Object?> at => Vec2.fromJson(at),
+        _ => Vec2.zero,
+      },
+      burrowStrikes: json['burrow_strikes'] as int? ?? 0,
+      poseLeft: (json['pose_left'] as num?)?.toDouble() ?? 0,
+      windupLeft: (json['windup_left'] as num?)?.toDouble() ?? 0,
+      windupCloud: json['windup_cloud'] as int? ?? 0,
+      windupAt: switch (json['windup_at']) {
+        final List<Object?> at => Vec2.fromJson(at),
+        _ => Vec2.zero,
+      },
+      holdLeft: (json['hold_left'] as num?)?.toDouble() ?? 0,
+      swingLeft: (json['swing_left'] as num?)?.toDouble() ?? 0,
+      swingAt: switch (json['swing_at']) {
+        final List<Object?> at => Vec2.fromJson(at),
+        _ => Vec2.zero,
+      },
+    );
+  }
 
   /// The enemy's catalog id.
   final String kind;
@@ -374,6 +386,46 @@ final class RaidEnemy extends RaidBody {
       'swing_at': swingAt.toJson(),
     },
   };
+
+  /// What a guest's screen draws (2026-10-28, a lighter snapshot): where
+  /// it is, its health, and what it is doing now, rounded; nothing only
+  /// the host's AI uses (home, target, wandering, the other cooldowns).
+  /// [fromJson] reads it back. Bosses keep [toJson]: the screen shows their
+  /// home and whom they go for.
+  Map<String, dynamic> toViewJson() {
+    double r(double v, [int places = 2]) => _rounded(v, places);
+    List<double> v(Vec2 at) => [r(at.x, 3), r(at.y, 3)];
+    return {
+      'id': id,
+      'position': v(position),
+      'radius': radius,
+      'max_hp': maxHp,
+      'hp': r(hp),
+      'kind': kind,
+      if (attackCooldown > 0) 'attack_cooldown': r(attackCooldown),
+      if (telegraphLeft > 0) 'telegraph_left': r(telegraphLeft),
+      if (chargeLeft > 0) 'charge_left': r(chargeLeft),
+      if (telegraphLeft > 0 || chargeLeft > 0)
+        'charge_direction': v(chargeDirection),
+      if (isJumping) ...{'jump_left': r(jumpLeft), 'jump_at': v(jumpAt)},
+      if (isBurrowed) ...{
+        'burrow_left': r(burrowLeft),
+        'burrow_at': v(burrowAt),
+        'burrow_strikes': burrowStrikes,
+      },
+      if (poseLeft > 0) 'pose_left': r(poseLeft),
+      if (isWindingUp) ...{
+        'windup_left': r(windupLeft),
+        'windup_cloud': windupCloud,
+        'windup_at': v(windupAt),
+      },
+      if (holdLeft > 0) 'hold_left': r(holdLeft),
+      if (swingLeft > 0) ...{
+        'swing_left': r(swingLeft),
+        'swing_at': v(swingAt),
+      },
+    };
+  }
 }
 
 /// A cloud of gas or spores a boss left (2026-10-23, 사용자): it grows to
@@ -952,3 +1004,8 @@ double _seconds(Object? json) =>
     json == null ? double.infinity : (json as num).toDouble();
 
 double? _secondsJson(double seconds) => seconds.isFinite ? seconds : null;
+
+double _rounded(double value, int places) {
+  final scale = math.pow(10, places);
+  return (value * scale).roundToDouble() / scale;
+}

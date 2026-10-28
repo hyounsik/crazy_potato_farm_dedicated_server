@@ -264,6 +264,39 @@ void main() {
     return enemy;
   }
 
+  test('an enemy\'s view keeps what the screen draws (2026-10-28)', () {
+    final enemy = RaidEnemy(
+      id: 7,
+      position: const Vec2(3.123456, 4.987654),
+      radius: 0.4,
+      maxHp: 30,
+      hp: 12.3456,
+      kind: 'rat',
+      home: const Vec2(1, 1),
+      target: 99,
+      attackCooldown: 0.4567,
+      telegraphLeft: 0.3,
+      chargeDirection: const Vec2(0, 1),
+    );
+    final view = enemy.toViewJson();
+    expect(view.containsKey('home'), isFalse);
+    expect(view.containsKey('wander_goal'), isFalse);
+    expect(view.containsKey('target'), isFalse);
+    final back = RaidEnemy.fromJson(
+      jsonDecode(jsonEncode(view)) as Map<String, dynamic>,
+    );
+    expect(back.position.x, closeTo(3.123, 1e-9));
+    expect(back.hp, closeTo(12.35, 1e-9));
+    expect(back.attackCooldown, closeTo(0.46, 1e-9));
+    expect(back.isTelegraphing, isTrue);
+    expect(back.chargeDirection, const Vec2(0, 1));
+    expect(back.home, back.position, reason: 'at rest where it stands');
+    expect(
+      jsonEncode(view).length,
+      lessThan(jsonEncode(enemy.toJson()).length ~/ 2),
+    );
+  });
+
   group('a new run', () {
     test('fills the zone the same way for the same seed', () {
       RaidSimulation start() => RaidSimulation.start(

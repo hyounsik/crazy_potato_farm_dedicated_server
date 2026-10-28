@@ -146,7 +146,14 @@ final class RaidSnapshot {
     tick: run.tick,
     revealed: run.exitsRevealed,
     members: [for (final m in run.members) m.toJson()],
-    enemies: [for (final e in run.enemies) e.toJson()],
+    // The screen's share of each enemy; bosses whole (2026-10-28).
+    enemies: [
+      for (final e in run.enemies)
+        if (run.catalog.enemies[e.kind]?.boss != null)
+          e.toJson()
+        else
+          e.toViewJson(),
+    ],
     bullets: [for (final b in run.bullets) b.toJson()],
     piles: [for (final p in run.piles) p.toJson()],
     floorItems: [for (final f in run.floorItems) f.toJson()],

@@ -3603,7 +3603,9 @@ mixin _$StorageRulesData {
  int get gearSlots; int get gearStep; int get gearStepFood; int get gearMax;/// How long a seed that did not fit waits before it turns into baby
 /// potatoes.
  int get overflowSeconds;/// Baby potatoes a seed turns into, by grade.
- Map<Grade, int> get seedFood;
+ Map<Grade, int> get seedFood;/// Slots in the truck bed, the same for everyone and never widened
+/// (`multiplayer.md`, 2026-10-28).
+ int get bedSlots;
 /// Create a copy of StorageRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -3617,20 +3619,20 @@ $StorageRulesDataCopyWith<StorageRulesData> get copyWith => _$StorageRulesDataCo
 @override
 bool operator ==(Object other) {
   final _this = this as StorageRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StorageRulesData&&(identical(other.pouchSlots, _this.pouchSlots) || other.pouchSlots == _this.pouchSlots)&&(identical(other.pouchStep, _this.pouchStep) || other.pouchStep == _this.pouchStep)&&(identical(other.pouchStepFood, _this.pouchStepFood) || other.pouchStepFood == _this.pouchStepFood)&&(identical(other.pouchMax, _this.pouchMax) || other.pouchMax == _this.pouchMax)&&(identical(other.gearSlots, _this.gearSlots) || other.gearSlots == _this.gearSlots)&&(identical(other.gearStep, _this.gearStep) || other.gearStep == _this.gearStep)&&(identical(other.gearStepFood, _this.gearStepFood) || other.gearStepFood == _this.gearStepFood)&&(identical(other.gearMax, _this.gearMax) || other.gearMax == _this.gearMax)&&(identical(other.overflowSeconds, _this.overflowSeconds) || other.overflowSeconds == _this.overflowSeconds)&&const DeepCollectionEquality().equals(other.seedFood, _this.seedFood));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StorageRulesData&&(identical(other.pouchSlots, _this.pouchSlots) || other.pouchSlots == _this.pouchSlots)&&(identical(other.pouchStep, _this.pouchStep) || other.pouchStep == _this.pouchStep)&&(identical(other.pouchStepFood, _this.pouchStepFood) || other.pouchStepFood == _this.pouchStepFood)&&(identical(other.pouchMax, _this.pouchMax) || other.pouchMax == _this.pouchMax)&&(identical(other.gearSlots, _this.gearSlots) || other.gearSlots == _this.gearSlots)&&(identical(other.gearStep, _this.gearStep) || other.gearStep == _this.gearStep)&&(identical(other.gearStepFood, _this.gearStepFood) || other.gearStepFood == _this.gearStepFood)&&(identical(other.gearMax, _this.gearMax) || other.gearMax == _this.gearMax)&&(identical(other.overflowSeconds, _this.overflowSeconds) || other.overflowSeconds == _this.overflowSeconds)&&const DeepCollectionEquality().equals(other.seedFood, _this.seedFood)&&(identical(other.bedSlots, _this.bedSlots) || other.bedSlots == _this.bedSlots));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as StorageRulesData;
-  return Object.hash(runtimeType,_this.pouchSlots,_this.pouchStep,_this.pouchStepFood,_this.pouchMax,_this.gearSlots,_this.gearStep,_this.gearStepFood,_this.gearMax,_this.overflowSeconds,const DeepCollectionEquality().hash(_this.seedFood));
+  return Object.hash(runtimeType,_this.pouchSlots,_this.pouchStep,_this.pouchStepFood,_this.pouchMax,_this.gearSlots,_this.gearStep,_this.gearStepFood,_this.gearMax,_this.overflowSeconds,const DeepCollectionEquality().hash(_this.seedFood),_this.bedSlots);
 }
 
 @override
 String toString() {
   final _this = this as StorageRulesData;
-  return 'StorageRulesData(pouchSlots: ${_this.pouchSlots}, pouchStep: ${_this.pouchStep}, pouchStepFood: ${_this.pouchStepFood}, pouchMax: ${_this.pouchMax}, gearSlots: ${_this.gearSlots}, gearStep: ${_this.gearStep}, gearStepFood: ${_this.gearStepFood}, gearMax: ${_this.gearMax}, overflowSeconds: ${_this.overflowSeconds}, seedFood: ${_this.seedFood})';
+  return 'StorageRulesData(pouchSlots: ${_this.pouchSlots}, pouchStep: ${_this.pouchStep}, pouchStepFood: ${_this.pouchStepFood}, pouchMax: ${_this.pouchMax}, gearSlots: ${_this.gearSlots}, gearStep: ${_this.gearStep}, gearStepFood: ${_this.gearStepFood}, gearMax: ${_this.gearMax}, overflowSeconds: ${_this.overflowSeconds}, seedFood: ${_this.seedFood}, bedSlots: ${_this.bedSlots})';
 }
 
 
@@ -3641,7 +3643,7 @@ abstract mixin class $StorageRulesDataCopyWith<$Res>  {
   factory $StorageRulesDataCopyWith(StorageRulesData value, $Res Function(StorageRulesData) _then) = _$StorageRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int pouchSlots, int pouchStep, int pouchStepFood, int pouchMax, int gearSlots, int gearStep, int gearStepFood, int gearMax, int overflowSeconds, Map<Grade, int> seedFood
+ int pouchSlots, int pouchStep, int pouchStepFood, int pouchMax, int gearSlots, int gearStep, int gearStepFood, int gearMax, int overflowSeconds, Map<Grade, int> seedFood, int bedSlots
 });
 
 
@@ -3658,7 +3660,7 @@ class _$StorageRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of StorageRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? pouchSlots = null,Object? pouchStep = null,Object? pouchStepFood = null,Object? pouchMax = null,Object? gearSlots = null,Object? gearStep = null,Object? gearStepFood = null,Object? gearMax = null,Object? overflowSeconds = null,Object? seedFood = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? pouchSlots = null,Object? pouchStep = null,Object? pouchStepFood = null,Object? pouchMax = null,Object? gearSlots = null,Object? gearStep = null,Object? gearStepFood = null,Object? gearMax = null,Object? overflowSeconds = null,Object? seedFood = null,Object? bedSlots = null,}) {
   return _then(StorageRulesData(
 pouchSlots: null == pouchSlots ? _self.pouchSlots : pouchSlots // ignore: cast_nullable_to_non_nullable
 as int,pouchStep: null == pouchStep ? _self.pouchStep : pouchStep // ignore: cast_nullable_to_non_nullable
@@ -3670,7 +3672,8 @@ as int,gearStepFood: null == gearStepFood ? _self.gearStepFood : gearStepFood //
 as int,gearMax: null == gearMax ? _self.gearMax : gearMax // ignore: cast_nullable_to_non_nullable
 as int,overflowSeconds: null == overflowSeconds ? _self.overflowSeconds : overflowSeconds // ignore: cast_nullable_to_non_nullable
 as int,seedFood: null == seedFood ? _self.seedFood : seedFood // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,
+as Map<Grade, int>,bedSlots: null == bedSlots ? _self.bedSlots : bedSlots // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 
@@ -3755,10 +3758,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood,  int bedSlots)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StorageRulesData() when $default != null:
-return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood);case _:
+return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood,_that.bedSlots);case _:
   return orElse();
 
 }
@@ -3776,10 +3779,10 @@ return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouch
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood,  int bedSlots)  $default,) {final _that = this;
 switch (_that) {
 case _StorageRulesData():
-return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood);case _:
+return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood,_that.bedSlots);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -3796,10 +3799,10 @@ return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouch
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int pouchSlots,  int pouchStep,  int pouchStepFood,  int pouchMax,  int gearSlots,  int gearStep,  int gearStepFood,  int gearMax,  int overflowSeconds,  Map<Grade, int> seedFood,  int bedSlots)?  $default,) {final _that = this;
 switch (_that) {
 case _StorageRulesData() when $default != null:
-return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood);case _:
+return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouchMax,_that.gearSlots,_that.gearStep,_that.gearStepFood,_that.gearMax,_that.overflowSeconds,_that.seedFood,_that.bedSlots);case _:
   return null;
 
 }
@@ -3811,7 +3814,7 @@ return $default(_that.pouchSlots,_that.pouchStep,_that.pouchStepFood,_that.pouch
 @JsonSerializable()
 
 class _StorageRulesData implements StorageRulesData {
-  const _StorageRulesData({required this.pouchSlots, required this.pouchStep, required this.pouchStepFood, required this.pouchMax, required this.gearSlots, required this.gearStep, required this.gearStepFood, required this.gearMax, required this.overflowSeconds, required  Map<Grade, int> seedFood}): _seedFood = seedFood;
+  const _StorageRulesData({required this.pouchSlots, required this.pouchStep, required this.pouchStepFood, required this.pouchMax, required this.gearSlots, required this.gearStep, required this.gearStepFood, required this.gearMax, required this.overflowSeconds, required  Map<Grade, int> seedFood, this.bedSlots = 8}): _seedFood = seedFood;
   factory _StorageRulesData.fromJson(Map<String, dynamic> json) => _$StorageRulesDataFromJson(json);
 
 /// Seeds a new farm's pouch holds, one per slot.
@@ -3838,6 +3841,9 @@ class _StorageRulesData implements StorageRulesData {
   return EqualUnmodifiableMapView(_seedFood);
 }
 
+/// Slots in the truck bed, the same for everyone and never widened
+/// (`multiplayer.md`, 2026-10-28).
+@override@JsonKey() final  int bedSlots;
 
 /// Create a copy of StorageRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -3852,18 +3858,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StorageRulesData&&(identical(other.pouchSlots, pouchSlots) || other.pouchSlots == pouchSlots)&&(identical(other.pouchStep, pouchStep) || other.pouchStep == pouchStep)&&(identical(other.pouchStepFood, pouchStepFood) || other.pouchStepFood == pouchStepFood)&&(identical(other.pouchMax, pouchMax) || other.pouchMax == pouchMax)&&(identical(other.gearSlots, gearSlots) || other.gearSlots == gearSlots)&&(identical(other.gearStep, gearStep) || other.gearStep == gearStep)&&(identical(other.gearStepFood, gearStepFood) || other.gearStepFood == gearStepFood)&&(identical(other.gearMax, gearMax) || other.gearMax == gearMax)&&(identical(other.overflowSeconds, overflowSeconds) || other.overflowSeconds == overflowSeconds)&&const DeepCollectionEquality().equals(other.seedFood, _seedFood));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StorageRulesData&&(identical(other.pouchSlots, pouchSlots) || other.pouchSlots == pouchSlots)&&(identical(other.pouchStep, pouchStep) || other.pouchStep == pouchStep)&&(identical(other.pouchStepFood, pouchStepFood) || other.pouchStepFood == pouchStepFood)&&(identical(other.pouchMax, pouchMax) || other.pouchMax == pouchMax)&&(identical(other.gearSlots, gearSlots) || other.gearSlots == gearSlots)&&(identical(other.gearStep, gearStep) || other.gearStep == gearStep)&&(identical(other.gearStepFood, gearStepFood) || other.gearStepFood == gearStepFood)&&(identical(other.gearMax, gearMax) || other.gearMax == gearMax)&&(identical(other.overflowSeconds, overflowSeconds) || other.overflowSeconds == overflowSeconds)&&const DeepCollectionEquality().equals(other.seedFood, _seedFood)&&(identical(other.bedSlots, bedSlots) || other.bedSlots == bedSlots));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,pouchSlots,pouchStep,pouchStepFood,pouchMax,gearSlots,gearStep,gearStepFood,gearMax,overflowSeconds,const DeepCollectionEquality().hash(_seedFood));
+    return Object.hash(runtimeType,pouchSlots,pouchStep,pouchStepFood,pouchMax,gearSlots,gearStep,gearStepFood,gearMax,overflowSeconds,const DeepCollectionEquality().hash(_seedFood),bedSlots);
 }
 
 @override
 String toString() {
-    return 'StorageRulesData(pouchSlots: $pouchSlots, pouchStep: $pouchStep, pouchStepFood: $pouchStepFood, pouchMax: $pouchMax, gearSlots: $gearSlots, gearStep: $gearStep, gearStepFood: $gearStepFood, gearMax: $gearMax, overflowSeconds: $overflowSeconds, seedFood: $seedFood)';
+    return 'StorageRulesData(pouchSlots: $pouchSlots, pouchStep: $pouchStep, pouchStepFood: $pouchStepFood, pouchMax: $pouchMax, gearSlots: $gearSlots, gearStep: $gearStep, gearStepFood: $gearStepFood, gearMax: $gearMax, overflowSeconds: $overflowSeconds, seedFood: $seedFood, bedSlots: $bedSlots)';
 }
 
 
@@ -3874,7 +3880,7 @@ abstract mixin class _$StorageRulesDataCopyWith<$Res> implements $StorageRulesDa
   factory _$StorageRulesDataCopyWith(_StorageRulesData value, $Res Function(_StorageRulesData) _then) = __$StorageRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int pouchSlots, int pouchStep, int pouchStepFood, int pouchMax, int gearSlots, int gearStep, int gearStepFood, int gearMax, int overflowSeconds, Map<Grade, int> seedFood
+ int pouchSlots, int pouchStep, int pouchStepFood, int pouchMax, int gearSlots, int gearStep, int gearStepFood, int gearMax, int overflowSeconds, Map<Grade, int> seedFood, int bedSlots
 });
 
 
@@ -3891,7 +3897,7 @@ class __$StorageRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of StorageRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? pouchSlots = null,Object? pouchStep = null,Object? pouchStepFood = null,Object? pouchMax = null,Object? gearSlots = null,Object? gearStep = null,Object? gearStepFood = null,Object? gearMax = null,Object? overflowSeconds = null,Object? seedFood = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? pouchSlots = null,Object? pouchStep = null,Object? pouchStepFood = null,Object? pouchMax = null,Object? gearSlots = null,Object? gearStep = null,Object? gearStepFood = null,Object? gearMax = null,Object? overflowSeconds = null,Object? seedFood = null,Object? bedSlots = null,}) {
   return _then(_StorageRulesData(
 pouchSlots: null == pouchSlots ? _self.pouchSlots : pouchSlots // ignore: cast_nullable_to_non_nullable
 as int,pouchStep: null == pouchStep ? _self.pouchStep : pouchStep // ignore: cast_nullable_to_non_nullable
@@ -3903,7 +3909,8 @@ as int,gearStepFood: null == gearStepFood ? _self.gearStepFood : gearStepFood //
 as int,gearMax: null == gearMax ? _self.gearMax : gearMax // ignore: cast_nullable_to_non_nullable
 as int,overflowSeconds: null == overflowSeconds ? _self.overflowSeconds : overflowSeconds // ignore: cast_nullable_to_non_nullable
 as int,seedFood: null == seedFood ? _self._seedFood : seedFood // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,
+as Map<Grade, int>,bedSlots: null == bedSlots ? _self.bedSlots : bedSlots // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

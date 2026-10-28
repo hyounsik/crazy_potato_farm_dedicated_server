@@ -307,6 +307,10 @@ abstract class StorageRulesData with _$StorageRulesData {
 
     /// Baby potatoes a seed turns into, by grade.
     required Map<Grade, int> seedFood,
+
+    /// Slots in the truck bed, the same for everyone and never widened
+    /// (`multiplayer.md`, 2026-10-28).
+    @Default(8) int bedSlots,
   }) = _StorageRulesData;
 
   factory StorageRulesData.fromJson(Map<String, dynamic> json) =>

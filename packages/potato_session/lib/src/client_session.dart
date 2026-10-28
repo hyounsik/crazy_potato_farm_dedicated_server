@@ -121,6 +121,7 @@ final class ClientSession {
     this.interpolationDelay = const Duration(milliseconds: 100),
     this.hostReconnectTimeout = const Duration(seconds: 15),
     this.hostSilence = const Duration(milliseconds: 1500),
+    this.bed = const [],
   }) : catalogHash = computeCatalogHash(catalog),
        _transport = transport {
     _listen(transport);
@@ -135,6 +136,9 @@ final class ClientSession {
   ClientTransport _transport;
   final RaidMemberStart start;
   final int buildNumber;
+
+  /// The guest's truck bed as they bring it ([HelloMessage.bed]).
+  final List<ItemStack?> bed;
 
   /// This installation's id, sent in [HelloMessage.playerId].
   final String playerId;
@@ -180,6 +184,10 @@ final class ClientSession {
   String? _partyZone;
   DateTime? _departsAt;
   final _partyController = StreamController<String?>.broadcast();
+  List<TruckBedView> _beds = const [];
+  final _bedsController = StreamController<List<TruckBedView>>.broadcast();
+  final _bedGifts =
+      StreamController<({ItemStack? stack, BedRefusal? refusal})>.broadcast();
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -335,6 +343,40 @@ final class ClientSession {
     // Out of the run (extracted, fainted...): the result is kept, and the
     // guest watches until everyone's run is over.
     if (sim.outcome != null) _result ??= sim.result;
+  }
+
+  /// Every truck bed in the host's room by place in the lobby, the host's
+  /// first (2026-10-28); this guest's is at `lobby.you`.
+  List<TruckBedView> get beds => _beds;
+  Stream<List<TruckBedView>> get bedsStream => _bedsController.stream;
+
+  /// Stacks the host hands this guest: taken from a bed, or not let on one
+  /// (with why). The guest puts them on their own side.
+  Stream<({ItemStack? stack, BedRefusal? refusal})> get bedGifts =>
+      _bedGifts.stream;
+
+  /// Puts [stack] on [owner]'s bed (a place in the lobby). The caller has
+  /// taken it off their own side already; what does not go on comes back
+  /// in [bedGifts].
+  void putInBed(int owner, ItemStack stack) {
+    if (_stage != ClientSessionStage.waiting) return;
+    _send(SessionChannel.reliable, BedPutMessage(owner: owner, stack: stack));
+  }
+
+  /// Asks for the stack of [item] in [owner]'s bed slot [slot]; it comes in
+  /// [bedGifts], or why not. With [into] it goes straight onto that bed.
+  void takeFromBed(int owner, int slot, String item, {int? into}) {
+    if (_stage != ClientSessionStage.waiting) return;
+    _send(
+      SessionChannel.reliable,
+      BedTakeMessage(owner: owner, slot: slot, item: item, into: into),
+    );
+  }
+
+  /// Opens this guest's own bed to everyone, or locks it again.
+  void setBedOpen(bool open) {
+    if (_stage != ClientSessionStage.waiting) return;
+    _send(SessionChannel.reliable, BedLockMessage(open: open));
   }
 
   /// Collects events received from the host since the last call.
@@ -493,6 +535,7 @@ final class ClientSession {
         start: start,
         playerId: playerId,
         accountId: accountId,
+        bed: bed,
       ),
     );
   }
@@ -593,6 +636,13 @@ final class ClientSession {
           if (sim != null && memberIndex < sim.members.length) {
             sim.members[memberIndex].outcome = result.outcome;
           }
+        }
+      case BedsMessage(:final beds):
+        _beds = beds;
+        if (!_bedsController.isClosed) _bedsController.add(beds);
+      case BedGiveMessage(:final stack, :final refusal):
+        if (!_bedGifts.isClosed) {
+          _bedGifts.add((stack: stack, refusal: refusal));
         }
       case RunOverMessage():
         _setStage(ClientSessionStage.ended);
@@ -810,5 +860,7 @@ final class ClientSession {
     await _lobbyController.close();
     await _farmController.close();
     await _partyController.close();
+    await _bedsController.close();
+    await _bedGifts.close();
   }
 }

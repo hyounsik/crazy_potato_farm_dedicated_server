@@ -3,6 +3,7 @@ import 'dart:async';
 import 'package:potato_core/potato_core.dart';
 import 'package:potato_session/src/session_message.dart';
 import 'package:potato_session/src/transport.dart';
+import 'package:potato_session/src/truck_bed.dart';
 
 /// A guest who passed the version check and is in the host's party.
 final class HostedGuest {
@@ -13,6 +14,7 @@ final class HostedGuest {
     this.accountId = '',
     this.memberIndex,
     this.connected = true,
+    this.bed,
   });
 
   /// The guest's link now; a guest who comes back mid-run gets a new one.
@@ -39,6 +41,10 @@ final class HostedGuest {
 
   /// Where they walk on the host's farm, the latest heard (null: not yet).
   FarmWalk? walk;
+
+  /// Their truck bed while they are in the room (null on a dedicated
+  /// server, which has no farm).
+  final TruckBed? bed;
   int _lastMoveSeq = -1;
   int _lastWalkSeq = -1;
   bool _resultSent = false;
@@ -113,6 +119,8 @@ final class HostSession {
   final List<QuickChatLine> _chats = [];
   Map<String, dynamic>? _sharedFarm;
   int _walkSeq = 0;
+  TruckBed? _hostBed;
+  final _bedsChanged = StreamController<void>.broadcast();
 
   /// Quick messages kept for the host's screen until [takeChats]; a dedicated
   /// server never takes them, so only the latest few are kept.
@@ -431,6 +439,151 @@ final class HostSession {
     );
   }
 
+  /// Brings the host's own truck bed into the room, locked, from the host's
+  /// save (2026-10-28). Until then there are no beds to share.
+  void setHostBed(List<ItemStack?> slots) {
+    if (!hostPlays || _closed) return;
+    _hostBed = TruckBed(catalog, slots);
+    _broadcastBeds();
+  }
+
+  /// Every truck bed in the room by place in the lobby, the host's first;
+  /// empty before [setHostBed].
+  List<TruckBedView> get beds {
+    final host = _hostBed;
+    if (host == null) return const [];
+    return [
+      host.view,
+      for (final g in _guestOrder)
+        g.bed?.view ?? (slots: const <ItemStack?>[], open: false),
+    ];
+  }
+
+  /// The host's own bed slots as they are now, to keep in the host's save.
+  List<ItemStack?> get hostBedSlots => _hostBed?.slots ?? const [];
+
+  /// Fires whenever a bed's contents or lock change, or beds come and go.
+  Stream<void> get bedsChanged => _bedsChanged.stream;
+
+  /// The host player puts [stack] on the bed at [owner] (a place in the
+  /// lobby). Lowers `stack.count` by what went on; why not all of it did.
+  BedRefusal? putInBed(int owner, ItemStack stack) => _put(0, owner, stack);
+
+  /// The host player takes the stack of [item] in [owner]'s bed slot [slot].
+  ({ItemStack? stack, BedRefusal? refusal}) takeFromBed(
+    int owner,
+    int slot,
+    String item,
+  ) => _take(0, owner, slot, item);
+
+  /// The host player moves the stack of [item] in [owner]'s bed slot [slot]
+  /// onto bed [into]; what does not go on stays where it was.
+  BedRefusal? moveInBeds(int owner, int slot, String item, int into) =>
+      _move(0, owner, slot, item, into);
+
+  BedRefusal? _move(int from, int owner, int slot, String item, int into) {
+    if (into == owner) return null;
+    final target = _bedsOpen ? _bedAt(into) : null;
+    if (target == null) return BedRefusal.gone;
+    if (into != from && !target.open) return BedRefusal.locked;
+    final taken = _take(from, owner, slot, item);
+    final stack = taken.stack;
+    if (stack == null) return taken.refusal;
+    final refusal = _put(from, into, stack);
+    if (stack.count > 0) _bedAt(owner)!.put(stack, byOwner: true);
+    _broadcastBeds();
+    return refusal;
+  }
+
+  /// The host opens their own bed to everyone, or locks it again.
+  void setBedOpen(bool open) => _lock(0, open);
+
+  TruckBed? _bedAt(int place) {
+    if (place == 0) return _hostBed;
+    final index = place - 1;
+    if (index < 0 || index >= _guestOrder.length) return null;
+    return _guestOrder[index].bed;
+  }
+
+  bool get _bedsOpen => hostPlays && _run == null && !_closed;
+
+  BedRefusal? _put(int from, int owner, ItemStack stack) {
+    final bed = _bedsOpen ? _bedAt(owner) : null;
+    if (bed == null) return BedRefusal.gone;
+    final before = stack.count;
+    final refusal = bed.put(stack, byOwner: from == owner);
+    if (stack.count != before) _broadcastBeds();
+    return refusal;
+  }
+
+  ({ItemStack? stack, BedRefusal? refusal}) _take(
+    int from,
+    int owner,
+    int slot,
+    String item,
+  ) {
+    final bed = _bedsOpen ? _bedAt(owner) : null;
+    if (bed == null) return (stack: null, refusal: BedRefusal.gone);
+    final taken = bed.take(slot, item, byOwner: from == owner);
+    if (taken.stack != null) _broadcastBeds();
+    return taken;
+  }
+
+  void _lock(int place, bool open) {
+    final bed = _bedsOpen ? _bedAt(place) : null;
+    if (bed == null || bed.open == open) return;
+    bed.open = open;
+    _broadcastBeds();
+  }
+
+  void _broadcastBeds() {
+    if (!_bedsOpen || _hostBed == null) return;
+    _broadcast(SessionChannel.reliable, BedsMessage(beds));
+    if (!_bedsChanged.isClosed) _bedsChanged.add(null);
+  }
+
+  void _onBedPut(String peerId, int owner, ItemStack stack) {
+    final from = _placeOf(peerId);
+    if (from == null) return;
+    final refusal = _put(from, owner, stack);
+    if (refusal == null && stack.count == 0) return;
+    _send(
+      peerId,
+      SessionChannel.reliable,
+      BedGiveMessage(stack: stack.count > 0 ? stack : null, refusal: refusal),
+    );
+  }
+
+  void _onBedTake(String peerId, int owner, int slot, String item, int? into) {
+    final from = _placeOf(peerId);
+    if (from == null) return;
+    if (into != null) {
+      final refusal = _move(from, owner, slot, item, into);
+      if (refusal != null) {
+        _send(
+          peerId,
+          SessionChannel.reliable,
+          BedGiveMessage(refusal: refusal),
+        );
+      }
+      return;
+    }
+    final taken = _take(from, owner, slot, item);
+    _send(
+      peerId,
+      SessionChannel.reliable,
+      BedGiveMessage(stack: taken.stack, refusal: taken.refusal),
+    );
+  }
+
+  /// A guest's place in the lobby, or null when they are not in the room.
+  int? _placeOf(String peerId) {
+    final guest = _guests[peerId];
+    if (guest == null) return null;
+    final index = _guestOrder.indexOf(guest);
+    return index < 0 ? null : _lobbySlot(index);
+  }
+
   /// Where the guests walk on the host's farm, by their place in the lobby
   /// (their party colour).
   Map<int, FarmWalk> get walkers => {
@@ -482,6 +635,12 @@ final class HostSession {
         if (index != null) _relayChat(index, chat, text);
       case FarmWalkMessage(:final walk, :final seq):
         _onWalk(packet.peerId, walk, seq);
+      case BedPutMessage(:final owner, :final stack):
+        _onBedPut(packet.peerId, owner, stack);
+      case BedTakeMessage(:final owner, :final slot, :final item, :final into):
+        _onBedTake(packet.peerId, owner, slot, item, into);
+      case BedLockMessage(:final open):
+        if (_placeOf(packet.peerId) case final place?) _lock(place, open);
       default:
         break;
     }
@@ -541,6 +700,7 @@ final class HostSession {
       start: msg.start,
       playerId: msg.playerId,
       accountId: msg.accountId,
+      bed: hostPlays ? TruckBed(catalog, msg.bed) : null,
     );
     _guests[peerId] = guest;
     final existing = _guestOrder.indexWhere((g) => g.peerId == peerId);
@@ -699,6 +859,8 @@ final class HostSession {
         )),
       );
     }
+    // Places move when someone comes or goes; so do their beds.
+    _broadcastBeds();
   }
 
   void _send(String peerId, SessionChannel channel, SessionMessage message) {
@@ -716,5 +878,6 @@ final class HostSession {
     await _disconnectSub.cancel();
     await _guestsChanged.close();
     await _startRequests.close();
+    await _bedsChanged.close();
   }
 }

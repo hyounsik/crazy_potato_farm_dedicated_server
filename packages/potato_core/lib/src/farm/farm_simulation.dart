@@ -15,6 +15,8 @@ import 'package:potato_core/src/farm/farm_event.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
 import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/catalog/item_data.dart';
+import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/items/gear_stats.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
@@ -62,7 +64,13 @@ final class FarmSimulation {
     Map<String, int> storyDone = const {},
     this.storySkipped = false,
     Iterable<Seed> returnedSeeds = const [],
+    List<ItemStack?> bed = const [],
+    List<ItemStack?> bag = const [],
   }) : _gear = List.of(gear),
+       bed = Bag.restore([
+         ...bed,
+         for (var i = bed.length; i < catalog.rules.storage.bedSlots; i++) null,
+       ], catalog.stackOf),
        _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
        totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
@@ -91,6 +99,10 @@ final class FarmSimulation {
       _adopt(away.potato);
     }
     _graves.forEach(_adopt);
+    _bag = Bag.restore([
+      ...bag,
+      for (var i = bag.length; i < _gearStats.bagSlots(equipped.bag); i++) null,
+    ], catalog.stackOf);
     _settleBuildings();
     _unlockDone();
     // Seeds from old saves with nowhere left to wait (compost yards).
@@ -222,6 +234,22 @@ final class FarmSimulation {
   /// [gearSlots] when a run brings more home; nothing more fits then.
   final List<Gear> _gear;
   List<Gear> get gear => List.unmodifiable(_gear);
+
+  /// The truck bed: the player's own, carried to friends' farms and shared
+  /// there while open (`multiplayer.md`, 2026-10-28).
+  final Bag bed;
+
+  /// What came back from a run, to sort at home or carry on to the next run
+  /// at a friend's farm (2026-10-28, 사용자). Empty when nothing is left to
+  /// sort.
+  Bag get bag => _bag;
+  late Bag _bag;
+
+  /// Copies of the stacks in [bag], to take along on a run.
+  List<ItemStack> get bagItems => [
+    for (final s in _bag.slots)
+      if (s != null) s.copyWithCount(s.count),
+  ];
 
   /// What the player wears (and takes on runs).
   Equipped equipped;
@@ -615,6 +643,7 @@ final class FarmSimulation {
       :final gear,
       :final equipped,
       :final zone,
+      :final bag,
     ) =>
       _returnHome(
         food,
@@ -626,7 +655,13 @@ final class FarmSimulation {
         gear,
         equipped,
         zone,
+        bag,
       ),
+    LoadBed(:final item, :final count, :final seed, :final gearIndex) =>
+      _loadBed(item, count, seed, gearIndex),
+    UnloadBed(:final slot) => _unload(bed, slot),
+    UnloadBag(:final slot) => _unload(_bag, slot),
+    UnpackBag() => _unpackBag(),
   };
 
   /// Advances the farm by one fixed step (`rules.farm.step_millis`).
@@ -1772,6 +1807,7 @@ final class FarmSimulation {
     List<Gear> gear,
     Equipped? equipped,
     String? zone,
+    List<ItemStack>? bag,
   ) {
     this.food += food;
     if (score != null && zone != null) {
@@ -1779,6 +1815,13 @@ final class FarmSimulation {
     }
     _gear.addAll(gear);
     if (equipped != null) this.equipped = equipped;
+    if (bag != null) {
+      final slots = _gearStats.bagSlots(this.equipped.bag);
+      _bag = Bag(math.max(slots, bag.length), catalog.stackOf);
+      for (final stack in bag) {
+        _bag.addFrom(stack.copyWithCount(stack.count));
+      }
+    }
     if (score != null && score > progress) progress = score;
     final lost = [
       for (final id in lostPotatoIds)
@@ -1815,6 +1858,102 @@ final class FarmSimulation {
         lost: lost,
       ),
     );
+    return null;
+  }
+
+  /// Takes [count] of [item] out of storage as one stack: baby potatoes,
+  /// [seed] from the pouch, a material, or box piece [gearIndex]. Null, and
+  /// nothing taken, when storage does not have it all.
+  ItemStack? takeStored(
+    String item, {
+    int count = 1,
+    Seed? seed,
+    int? gearIndex,
+  }) {
+    if (count <= 0) return null;
+    switch (catalog.items[item]?.kind) {
+      case ItemKind.food:
+        if (count > food) return null;
+        food -= count;
+        return ItemStack(item, count);
+      case ItemKind.seed:
+        if (seed == null || _seeds.count(seed) < count) return null;
+        if (catalog.seedItemOf(seed.type, seed.grade) != item) return null;
+        for (var i = 0; i < count; i++) {
+          _seeds.take(seed);
+        }
+        return ItemStack(item, count, seed: seed);
+      case ItemKind.material:
+        final have = _materials[item] ?? 0;
+        if (count > have) return null;
+        if (have == count) {
+          _materials.remove(item);
+        } else {
+          _materials[item] = have - count;
+        }
+        return ItemStack(item, count);
+      case ItemKind.gear:
+        if (gearIndex == null || gearIndex < 0 || gearIndex >= _gear.length) {
+          return null;
+        }
+        final piece = _gear[gearIndex];
+        if (count != 1 || catalog.gearItemOf(piece) != item) return null;
+        _gear.removeAt(gearIndex);
+        return ItemStack.ofGear(item, piece);
+      case null:
+        return null;
+    }
+  }
+
+  /// Puts [stack] into storage. Seeds that do not fit the pouch wait like
+  /// any others; items storage has no place for are dropped.
+  void store(ItemStack stack) {
+    if (stack.count <= 0) return;
+    switch (catalog.items[stack.item]?.kind) {
+      case ItemKind.food:
+        food += stack.count;
+      case ItemKind.seed:
+        if (stack.seed case final seed?) {
+          for (var i = 0; i < stack.count; i++) {
+            _gainSeed(seed);
+          }
+        }
+      case ItemKind.material:
+        _materials[stack.item] = (_materials[stack.item] ?? 0) + stack.count;
+      case ItemKind.gear:
+        if (stack.gear case final piece?) _gear.add(piece);
+      case null:
+        break;
+    }
+  }
+
+  FarmRejection? _loadBed(String item, int count, Seed? seed, int? gearIndex) {
+    final stack = takeStored(
+      item,
+      count: count,
+      seed: seed,
+      gearIndex: gearIndex,
+    );
+    if (stack == null) return FarmRejection.notStored;
+    final moved = bed.addFrom(stack);
+    store(stack);
+    return moved == 0 ? FarmRejection.bedFull : null;
+  }
+
+  FarmRejection? _unload(Bag from, int slot) {
+    if (slot < 0 || slot >= from.capacity) return FarmRejection.emptySlot;
+    final stack = from.replace(slot, null);
+    if (stack == null) return FarmRejection.emptySlot;
+    store(stack);
+    return null;
+  }
+
+  FarmRejection? _unpackBag() {
+    for (var i = 0; i < _bag.capacity; i++) {
+      if (_bag.replace(i, null) case final stack?) store(stack);
+    }
+    final slots = _gearStats.bagSlots(equipped.bag);
+    if (_bag.capacity != slots) _bag = Bag(slots, catalog.stackOf);
     return null;
   }
 

@@ -99,6 +99,32 @@ typedef SessionLobby = ({
   List<String> accounts,
 });
 
+/// Why the host turned down a truck bed move (2026-10-28).
+enum BedRefusal {
+  /// The bed is locked and not the player's own.
+  locked,
+
+  /// Someone else took it first: "이미 가져갔어요".
+  gone,
+
+  /// The bed has no room for it.
+  full,
+}
+
+/// One truck bed in the host's room as everyone sees it: its slots and
+/// whether anyone may put in and take out (2026-10-28, 사용자: locked at
+/// first, then only its owner).
+typedef TruckBedView = ({List<ItemStack?> slots, bool open});
+
+List<ItemStack?> _slotsFromJson(Object? json) => [
+  for (final s in json as List<Object?>? ?? const [])
+    s == null ? null : ItemStack.fromJson(s as Map<String, dynamic>),
+];
+
+List<Map<String, dynamic>?> _slotsToJson(List<ItemStack?> slots) => [
+  for (final s in slots) s?.toJson(),
+];
+
 /// Deterministic fingerprint of [catalog] so host and guest can check they run
 /// on the same game data before starting (`realtime-session.md`).
 String computeCatalogHash(Catalog catalog) {
@@ -223,6 +249,7 @@ sealed class SessionMessage {
       start: RaidMemberStart.fromJson(json['start'] as Map<String, dynamic>),
       playerId: json['player_id'] as String? ?? '',
       accountId: json['account_id'] as String? ?? '',
+      bed: _slotsFromJson(json['bed']),
     ),
     'party_state' => PartyStateMessage(
       json['zone'] as String?,
@@ -297,6 +324,32 @@ sealed class SessionMessage {
       memberIndex: json['member_index'] as int,
       result: RaidResult.fromJson(json['result'] as Map<String, dynamic>),
     ),
+    'beds' => BedsMessage([
+      for (final b
+          in (json['beds'] as List<Object?>).cast<Map<String, dynamic>>())
+        (slots: _slotsFromJson(b['slots']), open: b['open'] as bool? ?? false),
+    ]),
+    'bed_put' => BedPutMessage(
+      owner: json['owner'] as int,
+      stack: ItemStack.fromJson(json['stack'] as Map<String, dynamic>),
+    ),
+    'bed_take' => BedTakeMessage(
+      owner: json['owner'] as int,
+      slot: json['slot'] as int,
+      item: json['item'] as String,
+      into: json['into'] as int?,
+    ),
+    'bed_lock' => BedLockMessage(open: json['open'] as bool),
+    'bed_give' => BedGiveMessage(
+      stack: switch (json['stack']) {
+        final Map<String, dynamic> s => ItemStack.fromJson(s),
+        _ => null,
+      },
+      refusal: switch (json['refusal']) {
+        final String r => BedRefusal.values.byName(r),
+        _ => null,
+      },
+    ),
     final other => throw FormatException('Unknown SessionMessage $other'),
   };
 
@@ -307,6 +360,7 @@ sealed class SessionMessage {
       :final start,
       :final playerId,
       :final accountId,
+      :final bed,
     ) =>
       {
         'type': 'hello',
@@ -315,6 +369,7 @@ sealed class SessionMessage {
         'start': start.toJson(),
         if (playerId.isNotEmpty) 'player_id': playerId,
         if (accountId.isNotEmpty) 'account_id': accountId,
+        if (bed.any((s) => s != null)) 'bed': _slotsToJson(bed),
       },
     PartyStateMessage(:final zone, :final left) => {
       'type': 'party_state',
@@ -388,6 +443,31 @@ sealed class SessionMessage {
       'member_index': memberIndex,
       'result': result.toJson(),
     },
+    BedsMessage(:final beds) => {
+      'type': 'beds',
+      'beds': [
+        for (final b in beds)
+          {'slots': _slotsToJson(b.slots), if (b.open) 'open': true},
+      ],
+    },
+    BedPutMessage(:final owner, :final stack) => {
+      'type': 'bed_put',
+      'owner': owner,
+      'stack': stack.toJson(),
+    },
+    BedTakeMessage(:final owner, :final slot, :final item, :final into) => {
+      'type': 'bed_take',
+      'owner': owner,
+      'slot': slot,
+      'item': item,
+      'into': ?into,
+    },
+    BedLockMessage(:final open) => {'type': 'bed_lock', 'open': open},
+    BedGiveMessage(:final stack, :final refusal) => {
+      'type': 'bed_give',
+      if (stack != null) 'stack': stack.toJson(),
+      if (refusal != null) 'refusal': refusal.name,
+    },
   };
 }
 
@@ -399,6 +479,7 @@ final class HelloMessage extends SessionMessage {
     required this.start,
     this.playerId = '',
     this.accountId = '',
+    this.bed = const [],
   });
 
   final int buildNumber;
@@ -413,6 +494,10 @@ final class HelloMessage extends SessionMessage {
   /// the same player from another with the same nickname ([start] carries
   /// the nickname). Empty in host mode.
   final String playerId;
+
+  /// The guest's truck bed as they bring it, empty slots as null
+  /// (2026-10-28). The host keeps it while they are in the room.
+  final List<ItemStack?> bed;
 }
 
 /// Host → guest on reliable: the [zone] the host picked to set out for
@@ -574,6 +659,61 @@ final class MemberResultMessage extends SessionMessage {
 
   final int memberIndex;
   final RaidResult result;
+}
+
+/// Host → everyone on reliable while at the host's farm: every truck bed in
+/// the room, by place in the lobby (the host is 0), sent whenever one
+/// changes and when someone comes or goes (2026-10-28, 사용자). Each player
+/// keeps their own bed in their save as it is here.
+final class BedsMessage extends SessionMessage {
+  const BedsMessage(this.beds);
+
+  final List<TruckBedView> beds;
+}
+
+/// Guest → host on reliable: put [stack] on [owner]'s bed. The guest has
+/// already taken it out of their own side; whatever does not go on comes
+/// back in [BedGiveMessage] with the refusal.
+final class BedPutMessage extends SessionMessage {
+  const BedPutMessage({required this.owner, required this.stack});
+
+  final int owner;
+  final ItemStack stack;
+}
+
+/// Guest → host on reliable: take the stack of [item] in [owner]'s bed slot
+/// [slot]. The host gives it in [BedGiveMessage], or says why not. With
+/// [into] the host moves it straight onto that bed instead, and what does
+/// not go on stays where it was.
+final class BedTakeMessage extends SessionMessage {
+  const BedTakeMessage({
+    required this.owner,
+    required this.slot,
+    required this.item,
+    this.into,
+  });
+
+  final int owner;
+  final int slot;
+  final String item;
+  final int? into;
+}
+
+/// Guest → host on reliable: open the guest's own bed to everyone, or lock
+/// it again.
+final class BedLockMessage extends SessionMessage {
+  const BedLockMessage({required this.open});
+
+  final bool open;
+}
+
+/// Host → guest on reliable: a stack for the guest's side, taken from a
+/// bed or not let on one, and why not ([refusal]) when a move failed.
+final class BedGiveMessage extends SessionMessage {
+  const BedGiveMessage({this.stack, this.refusal});
+
+  final ItemStack? stack;
+  final BedRefusal? refusal;
 }
 
 /// Turns [SessionMessage]s into bytes and back, kept separate from the

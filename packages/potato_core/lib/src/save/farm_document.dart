@@ -12,6 +12,7 @@ import 'package:potato_core/src/farm/pest.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
+import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/save/migration.dart';
 
@@ -79,6 +80,12 @@ abstract class FarmDocument with _$FarmDocument {
     /// Starting building kinds a farm saved before they existed should get
     /// when it is read (set by migrations, never written).
     @Default(<String>[]) List<String> missingBuildings,
+
+    /// The truck bed's slots, empty ones as null (2026-10-28).
+    @Default(<ItemStack?>[]) List<ItemStack?> bed,
+
+    /// The bag's slots: what came back from a run and is not sorted yet.
+    @Default(<ItemStack?>[]) List<ItemStack?> bag,
   }) = _FarmDocument;
 
   const FarmDocument._();
@@ -182,7 +189,18 @@ abstract class FarmDocument with _$FarmDocument {
     totals: farm.totals.toJson(),
     storyDone: Map.of(farm.storyDone),
     storySkipped: farm.storySkipped,
+    bed: _slots(farm.bed),
+    bag: _slots(farm.bag),
   );
+
+  /// [bag]'s slots as saved: copies, with trailing empty slots left out.
+  static List<ItemStack?> _slots(Bag bag) {
+    final slots = [for (final s in bag.slots) s?.copyWithCount(s.count)];
+    while (slots.isNotEmpty && slots.last == null) {
+      slots.removeLast();
+    }
+    return slots;
+  }
 
   /// Builds the running farm, using [catalog] for its rules.
   ///
@@ -284,6 +302,8 @@ abstract class FarmDocument with _$FarmDocument {
       storyDone: storyDone,
       storySkipped: storySkipped,
       returnedSeeds: returnedSeeds,
+      bed: [for (final s in bed) s?.copyWithCount(s.count)],
+      bag: [for (final s in bag) s?.copyWithCount(s.count)],
     );
     return farm..addMissingStartBuildings(also: missingBuildings);
   }

@@ -218,6 +218,7 @@ final class RaidSimulation {
     Equipped equipped = const Equipped(),
     int progress = 0,
     List<CompanionStart> companions = const [],
+    List<ItemStack> bag = const [],
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
@@ -229,6 +230,7 @@ final class RaidSimulation {
         equipped: equipped,
         progress: progress,
         companions: companions,
+        bag: bag,
       ),
     ],
   );
@@ -285,6 +287,9 @@ final class RaidSimulation {
       );
       final bag = Bag(gear.bagSlots(m.equipped.bag), catalog.stackOf);
       if (m.food > 0) bag.addFrom(ItemStack(rules.food.item, m.food));
+      for (final stack in m.bag) {
+        bag.addFrom(stack.copyWithCount(stack.count));
+      }
       team.add(
         RaidMember(
           player: player,

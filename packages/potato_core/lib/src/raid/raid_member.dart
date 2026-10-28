@@ -14,6 +14,7 @@ final class RaidMemberStart {
     this.equipped = const Equipped(),
     this.progress = 0,
     this.companions = const [],
+    this.bag = const [],
   });
 
   factory RaidMemberStart.fromJson(Map<String, dynamic> json) =>
@@ -29,6 +30,10 @@ final class RaidMemberStart {
           for (final c in json['companions'] as List<Object?>? ?? const [])
             CompanionStart.fromJson(c! as Map<String, dynamic>),
         ],
+        bag: [
+          for (final s in json['bag'] as List<Object?>? ?? const [])
+            ItemStack.fromJson(s! as Map<String, dynamic>),
+        ],
       );
 
   final String name;
@@ -37,12 +42,18 @@ final class RaidMemberStart {
   final int progress;
   final List<CompanionStart> companions;
 
+  /// What is already in the bag besides [food]: at a friend's farm, what
+  /// came back from the last run there and what was taken from truck beds
+  /// (2026-10-28, 사용자).
+  final List<ItemStack> bag;
+
   Map<String, dynamic> toJson() => {
     if (name.isNotEmpty) 'name': name,
     'food': food,
     'equipped': equipped.toJson(),
     'progress': progress,
     'companions': [for (final c in companions) c.toJson()],
+    if (bag.isNotEmpty) 'bag': [for (final s in bag) s.toJson()],
   };
 }
 

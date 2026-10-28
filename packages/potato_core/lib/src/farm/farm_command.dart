@@ -2,6 +2,7 @@ import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
+import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
 
 part 'farm_command.freezed.dart';
@@ -186,7 +187,32 @@ sealed class FarmCommand with _$FarmCommand {
     /// The zone the run went to, counted for story goals when [score] is
     /// set (the run succeeded).
     String? zone,
+
+    /// What comes back in the bag, to sort at home or carry on to the next
+    /// run (2026-10-28, 사용자). Null puts [food], [seeds], [materials] and
+    /// [gear] straight into storage; a list takes the bag's place instead.
+    List<ItemStack>? bag,
   }) = ReturnHome;
+
+  /// Moves [count] of [item] from storage onto the truck bed: baby
+  /// potatoes, a [seed] from the pouch, a material, or box piece
+  /// [gearIndex]. What does not fit stays in storage.
+  const factory FarmCommand.loadBed({
+    required String item,
+    @Default(1) int count,
+    Seed? seed,
+    int? gearIndex,
+  }) = LoadBed;
+
+  /// Moves the stack on bed slot [slot] into storage.
+  const factory FarmCommand.unloadBed({required int slot}) = UnloadBed;
+
+  /// Moves the stack in bag slot [slot] into storage.
+  const factory FarmCommand.unloadBag({required int slot}) = UnloadBag;
+
+  /// Moves everything left in the bag into storage: closing the sorting
+  /// window at home (2026-10-28, 사용자).
+  const factory FarmCommand.unpackBag() = UnpackBag;
 
   factory FarmCommand.fromJson(Map<String, dynamic> json) =>
       _$FarmCommandFromJson(json);
@@ -296,4 +322,13 @@ enum FarmRejection {
 
   /// The gear's level is past the farm's progress plus the margin.
   cannotWear,
+
+  /// Storage does not have that much of the item.
+  notStored,
+
+  /// The truck bed has no room for it.
+  bedFull,
+
+  /// Nothing in that bed or bag slot.
+  emptySlot,
 }

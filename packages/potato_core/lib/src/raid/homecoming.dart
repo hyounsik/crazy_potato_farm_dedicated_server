@@ -22,6 +22,7 @@ RaidMemberStart memberStartFor(
   equipped: farm.equipped,
   progress: farm.progress,
   companions: companionsFor(farm, potatoIds, modes: modes),
+  bag: farm.bagItems,
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes
@@ -41,6 +42,7 @@ RaidSimulation startRun(
   equipped: farm.equipped,
   progress: farm.progress,
   companions: companionsFor(farm, potatoIds, modes: modes),
+  bag: farm.bagItems,
 );
 
 /// The farm potatoes [potatoIds] as companions for a run, in that order,
@@ -74,12 +76,33 @@ extension RaidHomecoming on RaidResult {
   /// (their seed came home in the bag instead, if picked up). Gear in the
   /// bag goes to the box, and the farm wears what the run ended wearing
   /// (after a lost run, only the pieces not lost).
-  FarmCommand homecoming(Catalog catalog) {
+  ///
+  /// With [toBag] the items stay in the bag instead, to sort at home or carry
+  /// on to the next run (2026-10-28, 사용자); a lost run empties it.
+  FarmCommand homecoming(Catalog catalog, {bool toBag = false}) {
     if (lost) {
       return FarmCommand.returnHome(
         food: 0,
         lostPotatoIds: [for (final c in companions) c.potatoId],
         equipped: equipped,
+        bag: toBag ? const [] : null,
+      );
+    }
+    if (toBag) {
+      return FarmCommand.returnHome(
+        food: 0,
+        potatoIds: [
+          for (final c in companions)
+            if (!c.gone) c.potatoId,
+        ],
+        lostPotatoIds: [
+          for (final c in companions)
+            if (c.gone) c.potatoId,
+        ],
+        score: outcome.succeeded ? score : null,
+        zone: zone,
+        equipped: equipped,
+        bag: [for (final s in items) s.copyWithCount(s.count)],
       );
     }
     var food = 0;

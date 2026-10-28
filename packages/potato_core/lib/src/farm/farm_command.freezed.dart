@@ -152,6 +152,22 @@ FarmCommand _$FarmCommandFromJson(
           return ReturnHome.fromJson(
             json
           );
+                case 'loadBed':
+          return LoadBed.fromJson(
+            json
+          );
+                case 'unloadBed':
+          return UnloadBed.fromJson(
+            json
+          );
+                case 'unloadBag':
+          return UnloadBag.fromJson(
+            json
+          );
+                case 'unpackBag':
+          return UnpackBag.fromJson(
+            json
+          );
         
           default:
             throw CheckedFromJsonException(
@@ -210,7 +226,7 @@ extension FarmCommandPatterns on FarmCommand {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( EnhanceGear value)?  enhanceGear,TResult Function( EquipGear value)?  equipGear,TResult Function( UnequipGear value)?  unequipGear,TResult Function( DisassembleGear value)?  disassembleGear,TResult Function( LightTotem value)?  lightTotem,TResult Function( RaiseTotemLimit value)?  raiseTotemLimit,TResult Function( WidenPouch value)?  widenPouch,TResult Function( WidenGearBox value)?  widenGearBox,TResult Function( SellSeed value)?  sellSeed,TResult Function( TakeOverflow value)?  takeOverflow,TResult Function( SellOverflow value)?  sellOverflow,TResult Function( ReadMail value)?  readMail,TResult Function( ClaimMail value)?  claimMail,TResult Function( OpenBlock value)?  openBlock,TResult Function( MakeField value)?  makeField,TResult Function( ResizeField value)?  resizeField,TResult Function( MoveField value)?  moveField,TResult Function( RemoveField value)?  removeField,TResult Function( MoveBuilding value)?  moveBuilding,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Revive value)?  revive,TResult Function( Depart value)?  depart,TResult Function( UnlockAll value)?  unlockAll,TResult Function( ReturnHome value)?  returnHome,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PlantSeed value)?  plant,TResult Function( HarvestPotato value)?  harvest,TResult Function( HarvestField value)?  harvestField,TResult Function( EnhanceGear value)?  enhanceGear,TResult Function( EquipGear value)?  equipGear,TResult Function( UnequipGear value)?  unequipGear,TResult Function( DisassembleGear value)?  disassembleGear,TResult Function( LightTotem value)?  lightTotem,TResult Function( RaiseTotemLimit value)?  raiseTotemLimit,TResult Function( WidenPouch value)?  widenPouch,TResult Function( WidenGearBox value)?  widenGearBox,TResult Function( SellSeed value)?  sellSeed,TResult Function( TakeOverflow value)?  takeOverflow,TResult Function( SellOverflow value)?  sellOverflow,TResult Function( ReadMail value)?  readMail,TResult Function( ClaimMail value)?  claimMail,TResult Function( OpenBlock value)?  openBlock,TResult Function( MakeField value)?  makeField,TResult Function( ResizeField value)?  resizeField,TResult Function( MoveField value)?  moveField,TResult Function( RemoveField value)?  removeField,TResult Function( MoveBuilding value)?  moveBuilding,TResult Function( BuildBuilding value)?  build,TResult Function( UpgradeBuilding value)?  upgrade,TResult Function( DemolishBuilding value)?  demolish,TResult Function( TrainSeed value)?  train,TResult Function( ClearPest value)?  clearPest,TResult Function( Uproot value)?  uproot,TResult Function( Replant value)?  replant,TResult Function( Retrain value)?  retrain,TResult Function( Revive value)?  revive,TResult Function( Depart value)?  depart,TResult Function( UnlockAll value)?  unlockAll,TResult Function( ReturnHome value)?  returnHome,TResult Function( LoadBed value)?  loadBed,TResult Function( UnloadBed value)?  unloadBed,TResult Function( UnloadBag value)?  unloadBag,TResult Function( UnpackBag value)?  unpackBag,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
@@ -247,7 +263,11 @@ return retrain(_that);case Revive() when revive != null:
 return revive(_that);case Depart() when depart != null:
 return depart(_that);case UnlockAll() when unlockAll != null:
 return unlockAll(_that);case ReturnHome() when returnHome != null:
-return returnHome(_that);case _:
+return returnHome(_that);case LoadBed() when loadBed != null:
+return loadBed(_that);case UnloadBed() when unloadBed != null:
+return unloadBed(_that);case UnloadBag() when unloadBag != null:
+return unloadBag(_that);case UnpackBag() when unpackBag != null:
+return unpackBag(_that);case _:
   return orElse();
 
 }
@@ -265,7 +285,7 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( EnhanceGear value)  enhanceGear,required TResult Function( EquipGear value)  equipGear,required TResult Function( UnequipGear value)  unequipGear,required TResult Function( DisassembleGear value)  disassembleGear,required TResult Function( LightTotem value)  lightTotem,required TResult Function( RaiseTotemLimit value)  raiseTotemLimit,required TResult Function( WidenPouch value)  widenPouch,required TResult Function( WidenGearBox value)  widenGearBox,required TResult Function( SellSeed value)  sellSeed,required TResult Function( TakeOverflow value)  takeOverflow,required TResult Function( SellOverflow value)  sellOverflow,required TResult Function( ReadMail value)  readMail,required TResult Function( ClaimMail value)  claimMail,required TResult Function( OpenBlock value)  openBlock,required TResult Function( MakeField value)  makeField,required TResult Function( ResizeField value)  resizeField,required TResult Function( MoveField value)  moveField,required TResult Function( RemoveField value)  removeField,required TResult Function( MoveBuilding value)  moveBuilding,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Revive value)  revive,required TResult Function( Depart value)  depart,required TResult Function( UnlockAll value)  unlockAll,required TResult Function( ReturnHome value)  returnHome,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PlantSeed value)  plant,required TResult Function( HarvestPotato value)  harvest,required TResult Function( HarvestField value)  harvestField,required TResult Function( EnhanceGear value)  enhanceGear,required TResult Function( EquipGear value)  equipGear,required TResult Function( UnequipGear value)  unequipGear,required TResult Function( DisassembleGear value)  disassembleGear,required TResult Function( LightTotem value)  lightTotem,required TResult Function( RaiseTotemLimit value)  raiseTotemLimit,required TResult Function( WidenPouch value)  widenPouch,required TResult Function( WidenGearBox value)  widenGearBox,required TResult Function( SellSeed value)  sellSeed,required TResult Function( TakeOverflow value)  takeOverflow,required TResult Function( SellOverflow value)  sellOverflow,required TResult Function( ReadMail value)  readMail,required TResult Function( ClaimMail value)  claimMail,required TResult Function( OpenBlock value)  openBlock,required TResult Function( MakeField value)  makeField,required TResult Function( ResizeField value)  resizeField,required TResult Function( MoveField value)  moveField,required TResult Function( RemoveField value)  removeField,required TResult Function( MoveBuilding value)  moveBuilding,required TResult Function( BuildBuilding value)  build,required TResult Function( UpgradeBuilding value)  upgrade,required TResult Function( DemolishBuilding value)  demolish,required TResult Function( TrainSeed value)  train,required TResult Function( ClearPest value)  clearPest,required TResult Function( Uproot value)  uproot,required TResult Function( Replant value)  replant,required TResult Function( Retrain value)  retrain,required TResult Function( Revive value)  revive,required TResult Function( Depart value)  depart,required TResult Function( UnlockAll value)  unlockAll,required TResult Function( ReturnHome value)  returnHome,required TResult Function( LoadBed value)  loadBed,required TResult Function( UnloadBed value)  unloadBed,required TResult Function( UnloadBag value)  unloadBag,required TResult Function( UnpackBag value)  unpackBag,}){
 final _that = this;
 switch (_that) {
 case PlantSeed():
@@ -302,7 +322,11 @@ return retrain(_that);case Revive():
 return revive(_that);case Depart():
 return depart(_that);case UnlockAll():
 return unlockAll(_that);case ReturnHome():
-return returnHome(_that);}
+return returnHome(_that);case LoadBed():
+return loadBed(_that);case UnloadBed():
+return unloadBed(_that);case UnloadBag():
+return unloadBag(_that);case UnpackBag():
+return unpackBag(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
 ///
@@ -316,7 +340,7 @@ return returnHome(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( EnhanceGear value)?  enhanceGear,TResult? Function( EquipGear value)?  equipGear,TResult? Function( UnequipGear value)?  unequipGear,TResult? Function( DisassembleGear value)?  disassembleGear,TResult? Function( LightTotem value)?  lightTotem,TResult? Function( RaiseTotemLimit value)?  raiseTotemLimit,TResult? Function( WidenPouch value)?  widenPouch,TResult? Function( WidenGearBox value)?  widenGearBox,TResult? Function( SellSeed value)?  sellSeed,TResult? Function( TakeOverflow value)?  takeOverflow,TResult? Function( SellOverflow value)?  sellOverflow,TResult? Function( ReadMail value)?  readMail,TResult? Function( ClaimMail value)?  claimMail,TResult? Function( OpenBlock value)?  openBlock,TResult? Function( MakeField value)?  makeField,TResult? Function( ResizeField value)?  resizeField,TResult? Function( MoveField value)?  moveField,TResult? Function( RemoveField value)?  removeField,TResult? Function( MoveBuilding value)?  moveBuilding,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Revive value)?  revive,TResult? Function( Depart value)?  depart,TResult? Function( UnlockAll value)?  unlockAll,TResult? Function( ReturnHome value)?  returnHome,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PlantSeed value)?  plant,TResult? Function( HarvestPotato value)?  harvest,TResult? Function( HarvestField value)?  harvestField,TResult? Function( EnhanceGear value)?  enhanceGear,TResult? Function( EquipGear value)?  equipGear,TResult? Function( UnequipGear value)?  unequipGear,TResult? Function( DisassembleGear value)?  disassembleGear,TResult? Function( LightTotem value)?  lightTotem,TResult? Function( RaiseTotemLimit value)?  raiseTotemLimit,TResult? Function( WidenPouch value)?  widenPouch,TResult? Function( WidenGearBox value)?  widenGearBox,TResult? Function( SellSeed value)?  sellSeed,TResult? Function( TakeOverflow value)?  takeOverflow,TResult? Function( SellOverflow value)?  sellOverflow,TResult? Function( ReadMail value)?  readMail,TResult? Function( ClaimMail value)?  claimMail,TResult? Function( OpenBlock value)?  openBlock,TResult? Function( MakeField value)?  makeField,TResult? Function( ResizeField value)?  resizeField,TResult? Function( MoveField value)?  moveField,TResult? Function( RemoveField value)?  removeField,TResult? Function( MoveBuilding value)?  moveBuilding,TResult? Function( BuildBuilding value)?  build,TResult? Function( UpgradeBuilding value)?  upgrade,TResult? Function( DemolishBuilding value)?  demolish,TResult? Function( TrainSeed value)?  train,TResult? Function( ClearPest value)?  clearPest,TResult? Function( Uproot value)?  uproot,TResult? Function( Replant value)?  replant,TResult? Function( Retrain value)?  retrain,TResult? Function( Revive value)?  revive,TResult? Function( Depart value)?  depart,TResult? Function( UnlockAll value)?  unlockAll,TResult? Function( ReturnHome value)?  returnHome,TResult? Function( LoadBed value)?  loadBed,TResult? Function( UnloadBed value)?  unloadBed,TResult? Function( UnloadBag value)?  unloadBag,TResult? Function( UnpackBag value)?  unpackBag,}){
 final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
@@ -353,7 +377,11 @@ return retrain(_that);case Revive() when revive != null:
 return revive(_that);case Depart() when depart != null:
 return depart(_that);case UnlockAll() when unlockAll != null:
 return unlockAll(_that);case ReturnHome() when returnHome != null:
-return returnHome(_that);case _:
+return returnHome(_that);case LoadBed() when loadBed != null:
+return loadBed(_that);case UnloadBed() when unloadBed != null:
+return unloadBed(_that);case UnloadBag() when unloadBag != null:
+return unloadBag(_that);case UnpackBag() when unpackBag != null:
+return unpackBag(_that);case _:
   return null;
 
 }
@@ -370,7 +398,7 @@ return returnHome(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( GearKind? worn,  int? index)?  enhanceGear,TResult Function( int index)?  equipGear,TResult Function( GearKind kind)?  unequipGear,TResult Function( int index)?  disassembleGear,TResult Function( int buildingId)?  lightTotem,TResult Function()?  raiseTotemLimit,TResult Function()?  widenPouch,TResult Function()?  widenGearBox,TResult Function( Seed seed)?  sellSeed,TResult Function( Seed seed)?  takeOverflow,TResult Function()?  sellOverflow,TResult Function( int mailId)?  readMail,TResult Function( int mailId)?  claimMail,TResult Function( TilePos block)?  openBlock,TResult Function( TileRect rect)?  makeField,TResult Function( int fieldId,  TileRect rect)?  resizeField,TResult Function( int fieldId,  TilePos origin)?  moveField,TResult Function( int fieldId)?  removeField,TResult Function( int buildingId,  TilePos origin)?  moveBuilding,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int potatoId)?  revive,TResult Function( String zone,  int food,  List<int> potatoIds)?  depart,TResult Function()?  unlockAll,TResult Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone)?  returnHome,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult Function( int fieldId,  TilePos tile)?  harvest,TResult Function( int fieldId)?  harvestField,TResult Function( GearKind? worn,  int? index)?  enhanceGear,TResult Function( int index)?  equipGear,TResult Function( GearKind kind)?  unequipGear,TResult Function( int index)?  disassembleGear,TResult Function( int buildingId)?  lightTotem,TResult Function()?  raiseTotemLimit,TResult Function()?  widenPouch,TResult Function()?  widenGearBox,TResult Function( Seed seed)?  sellSeed,TResult Function( Seed seed)?  takeOverflow,TResult Function()?  sellOverflow,TResult Function( int mailId)?  readMail,TResult Function( int mailId)?  claimMail,TResult Function( TilePos block)?  openBlock,TResult Function( TileRect rect)?  makeField,TResult Function( int fieldId,  TileRect rect)?  resizeField,TResult Function( int fieldId,  TilePos origin)?  moveField,TResult Function( int fieldId)?  removeField,TResult Function( int buildingId,  TilePos origin)?  moveBuilding,TResult Function( String kind,  TilePos origin)?  build,TResult Function( int buildingId)?  upgrade,TResult Function( int buildingId)?  demolish,TResult Function( int buildingId,  Seed seed)?  train,TResult Function( int fieldId)?  clearPest,TResult Function( int potatoId)?  uproot,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult Function( int potatoId,  int buildingId)?  retrain,TResult Function( int potatoId)?  revive,TResult Function( String zone,  int food,  List<int> potatoIds)?  depart,TResult Function()?  unlockAll,TResult Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone,  List<ItemStack>? bag)?  returnHome,TResult Function( String item,  int count,  Seed? seed,  int? gearIndex)?  loadBed,TResult Function( int slot)?  unloadBed,TResult Function( int slot)?  unloadBag,TResult Function()?  unpackBag,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
@@ -406,7 +434,11 @@ return retrain(_that.potatoId,_that.buildingId);case Revive() when revive != nul
 return revive(_that.potatoId);case Depart() when depart != null:
 return depart(_that.zone,_that.food,_that.potatoIds);case UnlockAll() when unlockAll != null:
 return unlockAll();case ReturnHome() when returnHome != null:
-return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone);case _:
+return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone,_that.bag);case LoadBed() when loadBed != null:
+return loadBed(_that.item,_that.count,_that.seed,_that.gearIndex);case UnloadBed() when unloadBed != null:
+return unloadBed(_that.slot);case UnloadBag() when unloadBag != null:
+return unloadBag(_that.slot);case UnpackBag() when unpackBag != null:
+return unpackBag();case _:
   return orElse();
 
 }
@@ -424,7 +456,7 @@ return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( GearKind? worn,  int? index)  enhanceGear,required TResult Function( int index)  equipGear,required TResult Function( GearKind kind)  unequipGear,required TResult Function( int index)  disassembleGear,required TResult Function( int buildingId)  lightTotem,required TResult Function()  raiseTotemLimit,required TResult Function()  widenPouch,required TResult Function()  widenGearBox,required TResult Function( Seed seed)  sellSeed,required TResult Function( Seed seed)  takeOverflow,required TResult Function()  sellOverflow,required TResult Function( int mailId)  readMail,required TResult Function( int mailId)  claimMail,required TResult Function( TilePos block)  openBlock,required TResult Function( TileRect rect)  makeField,required TResult Function( int fieldId,  TileRect rect)  resizeField,required TResult Function( int fieldId,  TilePos origin)  moveField,required TResult Function( int fieldId)  removeField,required TResult Function( int buildingId,  TilePos origin)  moveBuilding,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int potatoId)  revive,required TResult Function( String zone,  int food,  List<int> potatoIds)  depart,required TResult Function()  unlockAll,required TResult Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone)  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  Seed seed)  plant,required TResult Function( int fieldId,  TilePos tile)  harvest,required TResult Function( int fieldId)  harvestField,required TResult Function( GearKind? worn,  int? index)  enhanceGear,required TResult Function( int index)  equipGear,required TResult Function( GearKind kind)  unequipGear,required TResult Function( int index)  disassembleGear,required TResult Function( int buildingId)  lightTotem,required TResult Function()  raiseTotemLimit,required TResult Function()  widenPouch,required TResult Function()  widenGearBox,required TResult Function( Seed seed)  sellSeed,required TResult Function( Seed seed)  takeOverflow,required TResult Function()  sellOverflow,required TResult Function( int mailId)  readMail,required TResult Function( int mailId)  claimMail,required TResult Function( TilePos block)  openBlock,required TResult Function( TileRect rect)  makeField,required TResult Function( int fieldId,  TileRect rect)  resizeField,required TResult Function( int fieldId,  TilePos origin)  moveField,required TResult Function( int fieldId)  removeField,required TResult Function( int buildingId,  TilePos origin)  moveBuilding,required TResult Function( String kind,  TilePos origin)  build,required TResult Function( int buildingId)  upgrade,required TResult Function( int buildingId)  demolish,required TResult Function( int buildingId,  Seed seed)  train,required TResult Function( int fieldId)  clearPest,required TResult Function( int potatoId)  uproot,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  replant,required TResult Function( int potatoId,  int buildingId)  retrain,required TResult Function( int potatoId)  revive,required TResult Function( String zone,  int food,  List<int> potatoIds)  depart,required TResult Function()  unlockAll,required TResult Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone,  List<ItemStack>? bag)  returnHome,required TResult Function( String item,  int count,  Seed? seed,  int? gearIndex)  loadBed,required TResult Function( int slot)  unloadBed,required TResult Function( int slot)  unloadBag,required TResult Function()  unpackBag,}) {final _that = this;
 switch (_that) {
 case PlantSeed():
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato():
@@ -460,7 +492,11 @@ return retrain(_that.potatoId,_that.buildingId);case Revive():
 return revive(_that.potatoId);case Depart():
 return depart(_that.zone,_that.food,_that.potatoIds);case UnlockAll():
 return unlockAll();case ReturnHome():
-return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone);}
+return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone,_that.bag);case LoadBed():
+return loadBed(_that.item,_that.count,_that.seed,_that.gearIndex);case UnloadBed():
+return unloadBed(_that.slot);case UnloadBag():
+return unloadBag(_that.slot);case UnpackBag():
+return unpackBag();}
 }
 /// A variant of `when` that fallback to returning `null`
 ///
@@ -474,7 +510,7 @@ return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.l
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( GearKind? worn,  int? index)?  enhanceGear,TResult? Function( int index)?  equipGear,TResult? Function( GearKind kind)?  unequipGear,TResult? Function( int index)?  disassembleGear,TResult? Function( int buildingId)?  lightTotem,TResult? Function()?  raiseTotemLimit,TResult? Function()?  widenPouch,TResult? Function()?  widenGearBox,TResult? Function( Seed seed)?  sellSeed,TResult? Function( Seed seed)?  takeOverflow,TResult? Function()?  sellOverflow,TResult? Function( int mailId)?  readMail,TResult? Function( int mailId)?  claimMail,TResult? Function( TilePos block)?  openBlock,TResult? Function( TileRect rect)?  makeField,TResult? Function( int fieldId,  TileRect rect)?  resizeField,TResult? Function( int fieldId,  TilePos origin)?  moveField,TResult? Function( int fieldId)?  removeField,TResult? Function( int buildingId,  TilePos origin)?  moveBuilding,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int potatoId)?  revive,TResult? Function( String zone,  int food,  List<int> potatoIds)?  depart,TResult? Function()?  unlockAll,TResult? Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone)?  returnHome,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  Seed seed)?  plant,TResult? Function( int fieldId,  TilePos tile)?  harvest,TResult? Function( int fieldId)?  harvestField,TResult? Function( GearKind? worn,  int? index)?  enhanceGear,TResult? Function( int index)?  equipGear,TResult? Function( GearKind kind)?  unequipGear,TResult? Function( int index)?  disassembleGear,TResult? Function( int buildingId)?  lightTotem,TResult? Function()?  raiseTotemLimit,TResult? Function()?  widenPouch,TResult? Function()?  widenGearBox,TResult? Function( Seed seed)?  sellSeed,TResult? Function( Seed seed)?  takeOverflow,TResult? Function()?  sellOverflow,TResult? Function( int mailId)?  readMail,TResult? Function( int mailId)?  claimMail,TResult? Function( TilePos block)?  openBlock,TResult? Function( TileRect rect)?  makeField,TResult? Function( int fieldId,  TileRect rect)?  resizeField,TResult? Function( int fieldId,  TilePos origin)?  moveField,TResult? Function( int fieldId)?  removeField,TResult? Function( int buildingId,  TilePos origin)?  moveBuilding,TResult? Function( String kind,  TilePos origin)?  build,TResult? Function( int buildingId)?  upgrade,TResult? Function( int buildingId)?  demolish,TResult? Function( int buildingId,  Seed seed)?  train,TResult? Function( int fieldId)?  clearPest,TResult? Function( int potatoId)?  uproot,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  replant,TResult? Function( int potatoId,  int buildingId)?  retrain,TResult? Function( int potatoId)?  revive,TResult? Function( String zone,  int food,  List<int> potatoIds)?  depart,TResult? Function()?  unlockAll,TResult? Function( int food,  List<SeedCount> seeds,  Map<String, int> materials,  List<int> potatoIds,  List<int> lostPotatoIds,  int? score,  List<Gear> gear,  Equipped? equipped,  String? zone,  List<ItemStack>? bag)?  returnHome,TResult? Function( String item,  int count,  Seed? seed,  int? gearIndex)?  loadBed,TResult? Function( int slot)?  unloadBed,TResult? Function( int slot)?  unloadBag,TResult? Function()?  unpackBag,}) {final _that = this;
 switch (_that) {
 case PlantSeed() when plant != null:
 return plant(_that.fieldId,_that.tile,_that.seed);case HarvestPotato() when harvest != null:
@@ -510,7 +546,11 @@ return retrain(_that.potatoId,_that.buildingId);case Revive() when revive != nul
 return revive(_that.potatoId);case Depart() when depart != null:
 return depart(_that.zone,_that.food,_that.potatoIds);case UnlockAll() when unlockAll != null:
 return unlockAll();case ReturnHome() when returnHome != null:
-return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone);case _:
+return returnHome(_that.food,_that.seeds,_that.materials,_that.potatoIds,_that.lostPotatoIds,_that.score,_that.gear,_that.equipped,_that.zone,_that.bag);case LoadBed() when loadBed != null:
+return loadBed(_that.item,_that.count,_that.seed,_that.gearIndex);case UnloadBed() when unloadBed != null:
+return unloadBed(_that.slot);case UnloadBag() when unloadBag != null:
+return unloadBag(_that.slot);case UnpackBag() when unpackBag != null:
+return unpackBag();case _:
   return null;
 
 }
@@ -2968,7 +3008,7 @@ String toString() {
 @JsonSerializable()
 
 class ReturnHome implements FarmCommand {
-  const ReturnHome({required this.food,  List<SeedCount> seeds = const <SeedCount>[],  Map<String, int> materials = const <String, int>{},  List<int> potatoIds = const <int>[],  List<int> lostPotatoIds = const <int>[], this.score,  List<Gear> gear = const <Gear>[], this.equipped, this.zone,  String? $type}): _seeds = seeds,_materials = materials,_potatoIds = potatoIds,_lostPotatoIds = lostPotatoIds,_gear = gear,$type = $type ?? 'returnHome';
+  const ReturnHome({required this.food,  List<SeedCount> seeds = const <SeedCount>[],  Map<String, int> materials = const <String, int>{},  List<int> potatoIds = const <int>[],  List<int> lostPotatoIds = const <int>[], this.score,  List<Gear> gear = const <Gear>[], this.equipped, this.zone,  List<ItemStack>? bag,  String? $type}): _seeds = seeds,_materials = materials,_potatoIds = potatoIds,_lostPotatoIds = lostPotatoIds,_gear = gear,_bag = bag,$type = $type ?? 'returnHome';
   factory ReturnHome.fromJson(Map<String, dynamic> json) => _$ReturnHomeFromJson(json);
 
  final  int food;
@@ -3017,6 +3057,21 @@ class ReturnHome implements FarmCommand {
 /// The zone the run went to, counted for story goals when [score] is
 /// set (the run succeeded).
  final  String? zone;
+/// What comes back in the bag, to sort at home or carry on to the next
+/// run (2026-10-28, 사용자). Null puts [food], [seeds], [materials] and
+/// [gear] straight into storage; a list takes the bag's place instead.
+ final  List<ItemStack>? _bag;
+/// What comes back in the bag, to sort at home or carry on to the next
+/// run (2026-10-28, 사용자). Null puts [food], [seeds], [materials] and
+/// [gear] straight into storage; a list takes the bag's place instead.
+ List<ItemStack>? get bag {
+  final value = _bag;
+  if (value == null) return null;
+  if (_bag is EqualUnmodifiableListView) return _bag;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(value);
+}
+
 
 @JsonKey(name: 'runtimeType')
 final String $type;
@@ -3035,18 +3090,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is ReturnHome&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&const DeepCollectionEquality().equals(other.materials, _materials)&&const DeepCollectionEquality().equals(other.potatoIds, _potatoIds)&&const DeepCollectionEquality().equals(other.lostPotatoIds, _lostPotatoIds)&&(identical(other.score, score) || other.score == score)&&const DeepCollectionEquality().equals(other.gear, _gear)&&(identical(other.equipped, equipped) || other.equipped == equipped)&&(identical(other.zone, zone) || other.zone == zone));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is ReturnHome&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&const DeepCollectionEquality().equals(other.materials, _materials)&&const DeepCollectionEquality().equals(other.potatoIds, _potatoIds)&&const DeepCollectionEquality().equals(other.lostPotatoIds, _lostPotatoIds)&&(identical(other.score, score) || other.score == score)&&const DeepCollectionEquality().equals(other.gear, _gear)&&(identical(other.equipped, equipped) || other.equipped == equipped)&&(identical(other.zone, zone) || other.zone == zone)&&const DeepCollectionEquality().equals(other.bag, _bag));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,food,const DeepCollectionEquality().hash(_seeds),const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_potatoIds),const DeepCollectionEquality().hash(_lostPotatoIds),score,const DeepCollectionEquality().hash(_gear),equipped,zone);
+    return Object.hash(runtimeType,food,const DeepCollectionEquality().hash(_seeds),const DeepCollectionEquality().hash(_materials),const DeepCollectionEquality().hash(_potatoIds),const DeepCollectionEquality().hash(_lostPotatoIds),score,const DeepCollectionEquality().hash(_gear),equipped,zone,const DeepCollectionEquality().hash(_bag));
 }
 
 @override
 String toString() {
-    return 'FarmCommand.returnHome(food: $food, seeds: $seeds, materials: $materials, potatoIds: $potatoIds, lostPotatoIds: $lostPotatoIds, score: $score, gear: $gear, equipped: $equipped, zone: $zone)';
+    return 'FarmCommand.returnHome(food: $food, seeds: $seeds, materials: $materials, potatoIds: $potatoIds, lostPotatoIds: $lostPotatoIds, score: $score, gear: $gear, equipped: $equipped, zone: $zone, bag: $bag)';
 }
 
 
@@ -3057,7 +3112,7 @@ abstract mixin class $ReturnHomeCopyWith<$Res> implements $FarmCommandCopyWith<$
   factory $ReturnHomeCopyWith(ReturnHome value, $Res Function(ReturnHome) _then) = _$ReturnHomeCopyWithImpl;
 @useResult
 $Res call({
- int food, List<SeedCount> seeds, Map<String, int> materials, List<int> potatoIds, List<int> lostPotatoIds, int? score, List<Gear> gear, Equipped? equipped, String? zone
+ int food, List<SeedCount> seeds, Map<String, int> materials, List<int> potatoIds, List<int> lostPotatoIds, int? score, List<Gear> gear, Equipped? equipped, String? zone, List<ItemStack>? bag
 });
 
 
@@ -3074,7 +3129,7 @@ class _$ReturnHomeCopyWithImpl<$Res>
 
 /// Create a copy of FarmCommand
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? food = null,Object? seeds = null,Object? materials = null,Object? potatoIds = null,Object? lostPotatoIds = null,Object? score = freezed,Object? gear = null,Object? equipped = freezed,Object? zone = freezed,}) {
+@pragma('vm:prefer-inline') $Res call({Object? food = null,Object? seeds = null,Object? materials = null,Object? potatoIds = null,Object? lostPotatoIds = null,Object? score = freezed,Object? gear = null,Object? equipped = freezed,Object? zone = freezed,Object? bag = freezed,}) {
   return _then(ReturnHome(
 food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,seeds: null == seeds ? _self._seeds : seeds // ignore: cast_nullable_to_non_nullable
@@ -3085,7 +3140,8 @@ as List<int>,score: freezed == score ? _self.score : score // ignore: cast_nulla
 as int?,gear: null == gear ? _self._gear : gear // ignore: cast_nullable_to_non_nullable
 as List<Gear>,equipped: freezed == equipped ? _self.equipped : equipped // ignore: cast_nullable_to_non_nullable
 as Equipped?,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
-as String?,
+as String?,bag: freezed == bag ? _self._bag : bag // ignore: cast_nullable_to_non_nullable
+as List<ItemStack>?,
   ));
 }
 
@@ -3103,5 +3159,287 @@ $EquippedCopyWith<$Res>? get equipped {
   });
 }
 }
+
+/// @nodoc
+@JsonSerializable()
+
+class LoadBed implements FarmCommand {
+  const LoadBed({required this.item, this.count = 1, this.seed, this.gearIndex,  String? $type}): $type = $type ?? 'loadBed';
+  factory LoadBed.fromJson(Map<String, dynamic> json) => _$LoadBedFromJson(json);
+
+ final  String item;
+@JsonKey() final  int count;
+ final  Seed? seed;
+ final  int? gearIndex;
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$LoadBedCopyWith<LoadBed> get copyWith => _$LoadBedCopyWithImpl<LoadBed>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$LoadBedToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is LoadBed&&(identical(other.item, item) || other.item == item)&&(identical(other.count, count) || other.count == count)&&(identical(other.seed, seed) || other.seed == seed)&&(identical(other.gearIndex, gearIndex) || other.gearIndex == gearIndex));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,item,count,seed,gearIndex);
+}
+
+@override
+String toString() {
+    return 'FarmCommand.loadBed(item: $item, count: $count, seed: $seed, gearIndex: $gearIndex)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $LoadBedCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $LoadBedCopyWith(LoadBed value, $Res Function(LoadBed) _then) = _$LoadBedCopyWithImpl;
+@useResult
+$Res call({
+ String item, int count, Seed? seed, int? gearIndex
+});
+
+
+$SeedCopyWith<$Res>? get seed;
+
+}
+/// @nodoc
+class _$LoadBedCopyWithImpl<$Res>
+    implements $LoadBedCopyWith<$Res> {
+  _$LoadBedCopyWithImpl(this._self, this._then);
+
+  final LoadBed _self;
+  final $Res Function(LoadBed) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? item = null,Object? count = null,Object? seed = freezed,Object? gearIndex = freezed,}) {
+  return _then(LoadBed(
+item: null == item ? _self.item : item // ignore: cast_nullable_to_non_nullable
+as String,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,seed: freezed == seed ? _self.seed : seed // ignore: cast_nullable_to_non_nullable
+as Seed?,gearIndex: freezed == gearIndex ? _self.gearIndex : gearIndex // ignore: cast_nullable_to_non_nullable
+as int?,
+  ));
+}
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SeedCopyWith<$Res>? get seed {
+    if (_self.seed == null) {
+    return null;
+  }
+
+  return $SeedCopyWith<$Res>(_self.seed!, (value) {
+    return _then(_self.copyWith(seed: value));
+  });
+}
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class UnloadBed implements FarmCommand {
+  const UnloadBed({required this.slot,  String? $type}): $type = $type ?? 'unloadBed';
+  factory UnloadBed.fromJson(Map<String, dynamic> json) => _$UnloadBedFromJson(json);
+
+ final  int slot;
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UnloadBedCopyWith<UnloadBed> get copyWith => _$UnloadBedCopyWithImpl<UnloadBed>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UnloadBedToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is UnloadBed&&(identical(other.slot, slot) || other.slot == slot));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,slot);
+}
+
+@override
+String toString() {
+    return 'FarmCommand.unloadBed(slot: $slot)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UnloadBedCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $UnloadBedCopyWith(UnloadBed value, $Res Function(UnloadBed) _then) = _$UnloadBedCopyWithImpl;
+@useResult
+$Res call({
+ int slot
+});
+
+
+
+
+}
+/// @nodoc
+class _$UnloadBedCopyWithImpl<$Res>
+    implements $UnloadBedCopyWith<$Res> {
+  _$UnloadBedCopyWithImpl(this._self, this._then);
+
+  final UnloadBed _self;
+  final $Res Function(UnloadBed) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? slot = null,}) {
+  return _then(UnloadBed(
+slot: null == slot ? _self.slot : slot // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class UnloadBag implements FarmCommand {
+  const UnloadBag({required this.slot,  String? $type}): $type = $type ?? 'unloadBag';
+  factory UnloadBag.fromJson(Map<String, dynamic> json) => _$UnloadBagFromJson(json);
+
+ final  int slot;
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$UnloadBagCopyWith<UnloadBag> get copyWith => _$UnloadBagCopyWithImpl<UnloadBag>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UnloadBagToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is UnloadBag&&(identical(other.slot, slot) || other.slot == slot));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,slot);
+}
+
+@override
+String toString() {
+    return 'FarmCommand.unloadBag(slot: $slot)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $UnloadBagCopyWith<$Res> implements $FarmCommandCopyWith<$Res> {
+  factory $UnloadBagCopyWith(UnloadBag value, $Res Function(UnloadBag) _then) = _$UnloadBagCopyWithImpl;
+@useResult
+$Res call({
+ int slot
+});
+
+
+
+
+}
+/// @nodoc
+class _$UnloadBagCopyWithImpl<$Res>
+    implements $UnloadBagCopyWith<$Res> {
+  _$UnloadBagCopyWithImpl(this._self, this._then);
+
+  final UnloadBag _self;
+  final $Res Function(UnloadBag) _then;
+
+/// Create a copy of FarmCommand
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? slot = null,}) {
+  return _then(UnloadBag(
+slot: null == slot ? _self.slot : slot // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class UnpackBag implements FarmCommand {
+  const UnpackBag({ String? $type}): $type = $type ?? 'unpackBag';
+  factory UnpackBag.fromJson(Map<String, dynamic> json) => _$UnpackBagFromJson(json);
+
+
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+
+@override
+Map<String, dynamic> toJson() {
+  return _$UnpackBagToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is UnpackBag);
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode => runtimeType.hashCode;
+
+@override
+String toString() {
+    return 'FarmCommand.unpackBag()';
+}
+
+
+}
+
+
+
 
 // dart format on

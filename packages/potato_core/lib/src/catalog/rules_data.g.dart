@@ -505,6 +505,10 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
                   MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
             ),
           ),
+          bedSlots: $checkedConvert(
+            'bed_slots',
+            (v) => (v as num?)?.toInt() ?? 8,
+          ),
         );
         return val;
       },
@@ -519,6 +523,7 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
         'gearMax': 'gear_max',
         'overflowSeconds': 'overflow_seconds',
         'seedFood': 'seed_food',
+        'bedSlots': 'bed_slots',
       },
     );
 
@@ -535,6 +540,7 @@ Map<String, dynamic> _$StorageRulesDataToJson(
   'gear_max': instance.gearMax,
   'overflow_seconds': instance.overflowSeconds,
   'seed_food': instance.seedFood.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
+  'bed_slots': instance.bedSlots,
 };
 
 _WorkbenchRulesData _$WorkbenchRulesDataFromJson(

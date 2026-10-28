@@ -160,6 +160,30 @@ _FarmDocument _$FarmDocumentFromJson(
             (v as List<dynamic>?)?.map((e) => e as String).toList() ??
             const <String>[],
       ),
+      bed: $checkedConvert(
+        'bed',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => e == null
+                      ? null
+                      : ItemStack.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <ItemStack?>[],
+      ),
+      bag: $checkedConvert(
+        'bag',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => e == null
+                      ? null
+                      : ItemStack.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <ItemStack?>[],
+      ),
     );
     return val;
   },
@@ -209,6 +233,8 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'story_done': instance.storyDone,
       'story_skipped': instance.storySkipped,
       'missing_buildings': instance.missingBuildings,
+      'bed': instance.bed.map((e) => e?.toJson()).toList(),
+      'bag': instance.bag.map((e) => e?.toJson()).toList(),
     };
 
 _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>

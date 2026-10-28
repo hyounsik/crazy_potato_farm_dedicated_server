@@ -632,6 +632,12 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
         (v) => v == null ? null : Equipped.fromJson(v as Map<String, dynamic>),
       ),
       zone: $checkedConvert('zone', (v) => v as String?),
+      bag: $checkedConvert(
+        'bag',
+        (v) => (v as List<dynamic>?)
+            ?.map((e) => ItemStack.fromJson(e as Map<String, dynamic>))
+            .toList(),
+      ),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -654,5 +660,69 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
       'gear': instance.gear.map((e) => e.toJson()).toList(),
       'equipped': instance.equipped?.toJson(),
       'zone': instance.zone,
+      'bag': instance.bag?.map((e) => e.toJson()).toList(),
       'runtimeType': instance.$type,
     };
+
+LoadBed _$LoadBedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('LoadBed', json, ($checkedConvert) {
+      final val = LoadBed(
+        item: $checkedConvert('item', (v) => v as String),
+        count: $checkedConvert('count', (v) => (v as num?)?.toInt() ?? 1),
+        seed: $checkedConvert(
+          'seed',
+          (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        gearIndex: $checkedConvert('gear_index', (v) => (v as num?)?.toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'gearIndex': 'gear_index', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$LoadBedToJson(LoadBed instance) => <String, dynamic>{
+  'item': instance.item,
+  'count': instance.count,
+  'seed': instance.seed?.toJson(),
+  'gear_index': instance.gearIndex,
+  'runtimeType': instance.$type,
+};
+
+UnloadBed _$UnloadBedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('UnloadBed', json, ($checkedConvert) {
+      final val = UnloadBed(
+        slot: $checkedConvert('slot', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$UnloadBedToJson(UnloadBed instance) => <String, dynamic>{
+  'slot': instance.slot,
+  'runtimeType': instance.$type,
+};
+
+UnloadBag _$UnloadBagFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('UnloadBag', json, ($checkedConvert) {
+      final val = UnloadBag(
+        slot: $checkedConvert('slot', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$UnloadBagToJson(UnloadBag instance) => <String, dynamic>{
+  'slot': instance.slot,
+  'runtimeType': instance.$type,
+};
+
+UnpackBag _$UnpackBagFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('UnpackBag', json, ($checkedConvert) {
+      final val = UnpackBag(
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$UnpackBagToJson(UnpackBag instance) => <String, dynamic>{
+  'runtimeType': instance.$type,
+};

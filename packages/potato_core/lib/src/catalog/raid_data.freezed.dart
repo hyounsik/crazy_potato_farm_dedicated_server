@@ -1287,7 +1287,9 @@ mixin _$CompanionRulesData {
 
  double get maxHp; double get radius;/// Speed share of the player's.
  double get speedMultiplier; double get followDistance;/// Farther than this from the player, a companion runs to catch up.
- double get catchUpDistance; double get regenDelaySeconds;/// Share of max health refilled per second.
+ double get catchUpDistance;/// Farther than this from the player, a companion appears beside them
+/// (2026-10-28, user: potatoes stuck behind rocks).
+ double get teleportDistance; double get regenDelaySeconds;/// Share of max health refilled per second.
  double get regenPercentPerSecond;/// Food eaten per second by each companion while it heals.
  double get regenFoodPerSecond;/// Food a food potato makes per second.
  double get producePerSecond;/// How far from the player combat potatoes take on enemies: in attack
@@ -1311,20 +1313,20 @@ $CompanionRulesDataCopyWith<CompanionRulesData> get copyWith => _$CompanionRules
 @override
 bool operator ==(Object other) {
   final _this = this as CompanionRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompanionRulesData&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.followDistance, _this.followDistance) || other.followDistance == _this.followDistance)&&(identical(other.catchUpDistance, _this.catchUpDistance) || other.catchUpDistance == _this.catchUpDistance)&&(identical(other.regenDelaySeconds, _this.regenDelaySeconds) || other.regenDelaySeconds == _this.regenDelaySeconds)&&(identical(other.regenPercentPerSecond, _this.regenPercentPerSecond) || other.regenPercentPerSecond == _this.regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, _this.regenFoodPerSecond) || other.regenFoodPerSecond == _this.regenFoodPerSecond)&&(identical(other.producePerSecond, _this.producePerSecond) || other.producePerSecond == _this.producePerSecond)&&(identical(other.attackRange, _this.attackRange) || other.attackRange == _this.attackRange)&&(identical(other.defenseRange, _this.defenseRange) || other.defenseRange == _this.defenseRange)&&const DeepCollectionEquality().equals(other.styles, _this.styles)&&(identical(other.levelHpPermille, _this.levelHpPermille) || other.levelHpPermille == _this.levelHpPermille)&&(identical(other.levelAttackPermille, _this.levelAttackPermille) || other.levelAttackPermille == _this.levelAttackPermille)&&(identical(other.aggroPulseRange, _this.aggroPulseRange) || other.aggroPulseRange == _this.aggroPulseRange));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompanionRulesData&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.followDistance, _this.followDistance) || other.followDistance == _this.followDistance)&&(identical(other.catchUpDistance, _this.catchUpDistance) || other.catchUpDistance == _this.catchUpDistance)&&(identical(other.teleportDistance, _this.teleportDistance) || other.teleportDistance == _this.teleportDistance)&&(identical(other.regenDelaySeconds, _this.regenDelaySeconds) || other.regenDelaySeconds == _this.regenDelaySeconds)&&(identical(other.regenPercentPerSecond, _this.regenPercentPerSecond) || other.regenPercentPerSecond == _this.regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, _this.regenFoodPerSecond) || other.regenFoodPerSecond == _this.regenFoodPerSecond)&&(identical(other.producePerSecond, _this.producePerSecond) || other.producePerSecond == _this.producePerSecond)&&(identical(other.attackRange, _this.attackRange) || other.attackRange == _this.attackRange)&&(identical(other.defenseRange, _this.defenseRange) || other.defenseRange == _this.defenseRange)&&const DeepCollectionEquality().equals(other.styles, _this.styles)&&(identical(other.levelHpPermille, _this.levelHpPermille) || other.levelHpPermille == _this.levelHpPermille)&&(identical(other.levelAttackPermille, _this.levelAttackPermille) || other.levelAttackPermille == _this.levelAttackPermille)&&(identical(other.aggroPulseRange, _this.aggroPulseRange) || other.aggroPulseRange == _this.aggroPulseRange));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CompanionRulesData;
-  return Object.hash(runtimeType,_this.maxHp,_this.radius,_this.speedMultiplier,_this.followDistance,_this.catchUpDistance,_this.regenDelaySeconds,_this.regenPercentPerSecond,_this.regenFoodPerSecond,_this.producePerSecond,_this.attackRange,_this.defenseRange,const DeepCollectionEquality().hash(_this.styles),_this.levelHpPermille,_this.levelAttackPermille,_this.aggroPulseRange);
+  return Object.hash(runtimeType,_this.maxHp,_this.radius,_this.speedMultiplier,_this.followDistance,_this.catchUpDistance,_this.teleportDistance,_this.regenDelaySeconds,_this.regenPercentPerSecond,_this.regenFoodPerSecond,_this.producePerSecond,_this.attackRange,_this.defenseRange,const DeepCollectionEquality().hash(_this.styles),_this.levelHpPermille,_this.levelAttackPermille,_this.aggroPulseRange);
 }
 
 @override
 String toString() {
   final _this = this as CompanionRulesData;
-  return 'CompanionRulesData(maxHp: ${_this.maxHp}, radius: ${_this.radius}, speedMultiplier: ${_this.speedMultiplier}, followDistance: ${_this.followDistance}, catchUpDistance: ${_this.catchUpDistance}, regenDelaySeconds: ${_this.regenDelaySeconds}, regenPercentPerSecond: ${_this.regenPercentPerSecond}, regenFoodPerSecond: ${_this.regenFoodPerSecond}, producePerSecond: ${_this.producePerSecond}, attackRange: ${_this.attackRange}, defenseRange: ${_this.defenseRange}, styles: ${_this.styles}, levelHpPermille: ${_this.levelHpPermille}, levelAttackPermille: ${_this.levelAttackPermille}, aggroPulseRange: ${_this.aggroPulseRange})';
+  return 'CompanionRulesData(maxHp: ${_this.maxHp}, radius: ${_this.radius}, speedMultiplier: ${_this.speedMultiplier}, followDistance: ${_this.followDistance}, catchUpDistance: ${_this.catchUpDistance}, teleportDistance: ${_this.teleportDistance}, regenDelaySeconds: ${_this.regenDelaySeconds}, regenPercentPerSecond: ${_this.regenPercentPerSecond}, regenFoodPerSecond: ${_this.regenFoodPerSecond}, producePerSecond: ${_this.producePerSecond}, attackRange: ${_this.attackRange}, defenseRange: ${_this.defenseRange}, styles: ${_this.styles}, levelHpPermille: ${_this.levelHpPermille}, levelAttackPermille: ${_this.levelAttackPermille}, aggroPulseRange: ${_this.aggroPulseRange})';
 }
 
 
@@ -1335,7 +1337,7 @@ abstract mixin class $CompanionRulesDataCopyWith<$Res>  {
   factory $CompanionRulesDataCopyWith(CompanionRulesData value, $Res Function(CompanionRulesData) _then) = _$CompanionRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
+ double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
 });
 
 
@@ -1352,13 +1354,14 @@ class _$CompanionRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
   return _then(CompanionRulesData(
 maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
 as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
 as double,followDistance: null == followDistance ? _self.followDistance : followDistance // ignore: cast_nullable_to_non_nullable
 as double,catchUpDistance: null == catchUpDistance ? _self.catchUpDistance : catchUpDistance // ignore: cast_nullable_to_non_nullable
+as double,teleportDistance: null == teleportDistance ? _self.teleportDistance : teleportDistance // ignore: cast_nullable_to_non_nullable
 as double,regenDelaySeconds: null == regenDelaySeconds ? _self.regenDelaySeconds : regenDelaySeconds // ignore: cast_nullable_to_non_nullable
 as double,regenPercentPerSecond: null == regenPercentPerSecond ? _self.regenPercentPerSecond : regenPercentPerSecond // ignore: cast_nullable_to_non_nullable
 as double,regenFoodPerSecond: null == regenFoodPerSecond ? _self.regenFoodPerSecond : regenFoodPerSecond // ignore: cast_nullable_to_non_nullable
@@ -1454,10 +1457,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CompanionRulesData() when $default != null:
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
   return orElse();
 
 }
@@ -1475,10 +1478,10 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)  $default,) {final _that = this;
 switch (_that) {
 case _CompanionRulesData():
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1495,10 +1498,10 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,) {final _that = this;
 switch (_that) {
 case _CompanionRulesData() when $default != null:
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
   return null;
 
 }
@@ -1510,7 +1513,7 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 @JsonSerializable()
 
 class _CompanionRulesData implements CompanionRulesData {
-  const _CompanionRulesData({required this.maxHp, required this.radius, required this.speedMultiplier, required this.followDistance, required this.catchUpDistance, required this.regenDelaySeconds, required this.regenPercentPerSecond, required this.regenFoodPerSecond, required this.producePerSecond, required this.attackRange, required this.defenseRange, required  Map<CombatStyle, CompanionStyleData> styles, required this.levelHpPermille, required this.levelAttackPermille, required this.aggroPulseRange}): _styles = styles;
+  const _CompanionRulesData({required this.maxHp, required this.radius, required this.speedMultiplier, required this.followDistance, required this.catchUpDistance, required this.teleportDistance, required this.regenDelaySeconds, required this.regenPercentPerSecond, required this.regenFoodPerSecond, required this.producePerSecond, required this.attackRange, required this.defenseRange, required  Map<CombatStyle, CompanionStyleData> styles, required this.levelHpPermille, required this.levelAttackPermille, required this.aggroPulseRange}): _styles = styles;
   factory _CompanionRulesData.fromJson(Map<String, dynamic> json) => _$CompanionRulesDataFromJson(json);
 
 @override final  double maxHp;
@@ -1520,6 +1523,9 @@ class _CompanionRulesData implements CompanionRulesData {
 @override final  double followDistance;
 /// Farther than this from the player, a companion runs to catch up.
 @override final  double catchUpDistance;
+/// Farther than this from the player, a companion appears beside them
+/// (2026-10-28, user: potatoes stuck behind rocks).
+@override final  double teleportDistance;
 @override final  double regenDelaySeconds;
 /// Share of max health refilled per second.
 @override final  double regenPercentPerSecond;
@@ -1562,18 +1568,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompanionRulesData&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.followDistance, followDistance) || other.followDistance == followDistance)&&(identical(other.catchUpDistance, catchUpDistance) || other.catchUpDistance == catchUpDistance)&&(identical(other.regenDelaySeconds, regenDelaySeconds) || other.regenDelaySeconds == regenDelaySeconds)&&(identical(other.regenPercentPerSecond, regenPercentPerSecond) || other.regenPercentPerSecond == regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, regenFoodPerSecond) || other.regenFoodPerSecond == regenFoodPerSecond)&&(identical(other.producePerSecond, producePerSecond) || other.producePerSecond == producePerSecond)&&(identical(other.attackRange, attackRange) || other.attackRange == attackRange)&&(identical(other.defenseRange, defenseRange) || other.defenseRange == defenseRange)&&const DeepCollectionEquality().equals(other.styles, _styles)&&(identical(other.levelHpPermille, levelHpPermille) || other.levelHpPermille == levelHpPermille)&&(identical(other.levelAttackPermille, levelAttackPermille) || other.levelAttackPermille == levelAttackPermille)&&(identical(other.aggroPulseRange, aggroPulseRange) || other.aggroPulseRange == aggroPulseRange));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompanionRulesData&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.followDistance, followDistance) || other.followDistance == followDistance)&&(identical(other.catchUpDistance, catchUpDistance) || other.catchUpDistance == catchUpDistance)&&(identical(other.teleportDistance, teleportDistance) || other.teleportDistance == teleportDistance)&&(identical(other.regenDelaySeconds, regenDelaySeconds) || other.regenDelaySeconds == regenDelaySeconds)&&(identical(other.regenPercentPerSecond, regenPercentPerSecond) || other.regenPercentPerSecond == regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, regenFoodPerSecond) || other.regenFoodPerSecond == regenFoodPerSecond)&&(identical(other.producePerSecond, producePerSecond) || other.producePerSecond == producePerSecond)&&(identical(other.attackRange, attackRange) || other.attackRange == attackRange)&&(identical(other.defenseRange, defenseRange) || other.defenseRange == defenseRange)&&const DeepCollectionEquality().equals(other.styles, _styles)&&(identical(other.levelHpPermille, levelHpPermille) || other.levelHpPermille == levelHpPermille)&&(identical(other.levelAttackPermille, levelAttackPermille) || other.levelAttackPermille == levelAttackPermille)&&(identical(other.aggroPulseRange, aggroPulseRange) || other.aggroPulseRange == aggroPulseRange));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,maxHp,radius,speedMultiplier,followDistance,catchUpDistance,regenDelaySeconds,regenPercentPerSecond,regenFoodPerSecond,producePerSecond,attackRange,defenseRange,const DeepCollectionEquality().hash(_styles),levelHpPermille,levelAttackPermille,aggroPulseRange);
+    return Object.hash(runtimeType,maxHp,radius,speedMultiplier,followDistance,catchUpDistance,teleportDistance,regenDelaySeconds,regenPercentPerSecond,regenFoodPerSecond,producePerSecond,attackRange,defenseRange,const DeepCollectionEquality().hash(_styles),levelHpPermille,levelAttackPermille,aggroPulseRange);
 }
 
 @override
 String toString() {
-    return 'CompanionRulesData(maxHp: $maxHp, radius: $radius, speedMultiplier: $speedMultiplier, followDistance: $followDistance, catchUpDistance: $catchUpDistance, regenDelaySeconds: $regenDelaySeconds, regenPercentPerSecond: $regenPercentPerSecond, regenFoodPerSecond: $regenFoodPerSecond, producePerSecond: $producePerSecond, attackRange: $attackRange, defenseRange: $defenseRange, styles: $styles, levelHpPermille: $levelHpPermille, levelAttackPermille: $levelAttackPermille, aggroPulseRange: $aggroPulseRange)';
+    return 'CompanionRulesData(maxHp: $maxHp, radius: $radius, speedMultiplier: $speedMultiplier, followDistance: $followDistance, catchUpDistance: $catchUpDistance, teleportDistance: $teleportDistance, regenDelaySeconds: $regenDelaySeconds, regenPercentPerSecond: $regenPercentPerSecond, regenFoodPerSecond: $regenFoodPerSecond, producePerSecond: $producePerSecond, attackRange: $attackRange, defenseRange: $defenseRange, styles: $styles, levelHpPermille: $levelHpPermille, levelAttackPermille: $levelAttackPermille, aggroPulseRange: $aggroPulseRange)';
 }
 
 
@@ -1584,7 +1590,7 @@ abstract mixin class _$CompanionRulesDataCopyWith<$Res> implements $CompanionRul
   factory _$CompanionRulesDataCopyWith(_CompanionRulesData value, $Res Function(_CompanionRulesData) _then) = __$CompanionRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
+ double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
 });
 
 
@@ -1601,13 +1607,14 @@ class __$CompanionRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
   return _then(_CompanionRulesData(
 maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
 as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
 as double,followDistance: null == followDistance ? _self.followDistance : followDistance // ignore: cast_nullable_to_non_nullable
 as double,catchUpDistance: null == catchUpDistance ? _self.catchUpDistance : catchUpDistance // ignore: cast_nullable_to_non_nullable
+as double,teleportDistance: null == teleportDistance ? _self.teleportDistance : teleportDistance // ignore: cast_nullable_to_non_nullable
 as double,regenDelaySeconds: null == regenDelaySeconds ? _self.regenDelaySeconds : regenDelaySeconds // ignore: cast_nullable_to_non_nullable
 as double,regenPercentPerSecond: null == regenPercentPerSecond ? _self.regenPercentPerSecond : regenPercentPerSecond // ignore: cast_nullable_to_non_nullable
 as double,regenFoodPerSecond: null == regenFoodPerSecond ? _self.regenFoodPerSecond : regenFoodPerSecond // ignore: cast_nullable_to_non_nullable

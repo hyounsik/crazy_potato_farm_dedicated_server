@@ -566,6 +566,11 @@ final class RaidCompanion extends RaidBody {
   /// How much stronger its belt slot makes it at its job (0.1 is +10%).
   final double beltBoost;
 
+  /// Waypoints back to its owner while catching up. Not saved: it plans
+  /// again after a load.
+  List<Vec2> path = [];
+  double repath = 0;
+
   /// [playerTeam], or the id of the clone it follows.
   @override
   final int team;

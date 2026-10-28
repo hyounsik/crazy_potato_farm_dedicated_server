@@ -231,6 +231,10 @@ _CompanionRulesData _$CompanionRulesDataFromJson(Map<String, dynamic> json) =>
             'catch_up_distance',
             (v) => (v as num).toDouble(),
           ),
+          teleportDistance: $checkedConvert(
+            'teleport_distance',
+            (v) => (v as num).toDouble(),
+          ),
           regenDelaySeconds: $checkedConvert(
             'regen_delay_seconds',
             (v) => (v as num).toDouble(),
@@ -284,6 +288,7 @@ _CompanionRulesData _$CompanionRulesDataFromJson(Map<String, dynamic> json) =>
         'speedMultiplier': 'speed_multiplier',
         'followDistance': 'follow_distance',
         'catchUpDistance': 'catch_up_distance',
+        'teleportDistance': 'teleport_distance',
         'regenDelaySeconds': 'regen_delay_seconds',
         'regenPercentPerSecond': 'regen_percent_per_second',
         'regenFoodPerSecond': 'regen_food_per_second',
@@ -303,6 +308,7 @@ Map<String, dynamic> _$CompanionRulesDataToJson(_CompanionRulesData instance) =>
       'speed_multiplier': instance.speedMultiplier,
       'follow_distance': instance.followDistance,
       'catch_up_distance': instance.catchUpDistance,
+      'teleport_distance': instance.teleportDistance,
       'regen_delay_seconds': instance.regenDelaySeconds,
       'regen_percent_per_second': instance.regenPercentPerSecond,
       'regen_food_per_second': instance.regenFoodPerSecond,

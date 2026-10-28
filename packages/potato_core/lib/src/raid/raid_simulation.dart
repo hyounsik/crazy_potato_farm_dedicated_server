@@ -1374,15 +1374,64 @@ final class RaidSimulation {
     final goal = owner.position + _followOffset(companion.slot);
     final away = goal - companion.position;
     final distance = away.length;
+    companion.repath -= dt;
     if (distance < 0.1) return;
-    final far =
-        companion.position.distanceTo(owner.position) > spec.catchUpDistance;
+    final fromOwner = companion.position.distanceTo(owner.position);
+    if (fromOwner > spec.teleportDistance) {
+      companion
+        ..position = map.move(
+          owner.position,
+          _followOffset(companion.slot),
+          companion.radius,
+        )
+        ..path.clear();
+      return;
+    }
+    final far = fromOwner > spec.catchUpDistance;
     final speed = companionSpeed(companion) * (far ? 1.5 : 1);
-    companion.position = map.move(
-      companion.position,
-      away.scaledTo(math.min(speed * dt, distance)),
-      companion.radius,
-    );
+    // Far behind, a rock may stand in the straight line: walk a path round.
+    if (far && _catchUp(companion, owner.position, speed, dt)) return;
+    companion
+      ..path.clear()
+      ..position = map.move(
+        companion.position,
+        away.scaledTo(math.min(speed * dt, distance)),
+        companion.radius,
+      );
+  }
+
+  /// Steps [companion] along a tile path to [goal], planning again every
+  /// second. False when there is no way.
+  bool _catchUp(RaidCompanion companion, Vec2 goal, double speed, double dt) {
+    if (companion.repath <= 0 || companion.path.isEmpty) {
+      companion
+        ..path = map.findPath(companion.position, goal)
+        ..repath = 1;
+    }
+    if (companion.path.isEmpty) return false;
+    _stepAlong(companion, companion.path, speed * dt);
+    return true;
+  }
+
+  /// Moves [body] [step] tiles along [path], dropping the waypoints it
+  /// reaches.
+  void _stepAlong(RaidBody body, List<Vec2> path, double step) {
+    while (step > 0 && path.isNotEmpty) {
+      final delta = path.first - body.position;
+      final distance = delta.length;
+      if (distance <= step) {
+        body.position = map.move(body.position, delta, body.radius);
+        step -= distance;
+        path.removeAt(0);
+      } else {
+        body.position = map.move(
+          body.position,
+          delta.scaledTo(step),
+          body.radius,
+        );
+        step = 0;
+      }
+    }
   }
 
   /// Attack mode: the opponent nearest its owner within the attack range.
@@ -2535,23 +2584,7 @@ final class RaidSimulation {
       if (clone.path.isEmpty) return false;
     }
     if (clone.path.isEmpty) return false;
-    var step = speed * dt;
-    while (step > 0 && clone.path.isNotEmpty) {
-      final delta = clone.path.first - clone.position;
-      final distance = delta.length;
-      if (distance <= step) {
-        clone.position = map.move(clone.position, delta, clone.radius);
-        step -= distance;
-        clone.path.removeAt(0);
-      } else {
-        clone.position = map.move(
-          clone.position,
-          delta.scaledTo(step),
-          clone.radius,
-        );
-        step = 0;
-      }
-    }
+    _stepAlong(clone, clone.path, speed * dt);
     if (clone.path.isNotEmpty) {
       final ahead = clone.path.first - clone.position;
       if (!ahead.isZero) clone.facing = ahead.normalized();

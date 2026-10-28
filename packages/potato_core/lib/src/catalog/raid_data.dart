@@ -116,6 +116,10 @@ abstract class CompanionRulesData with _$CompanionRulesData {
 
     /// Farther than this from the player, a companion runs to catch up.
     required double catchUpDistance,
+
+    /// Farther than this from the player, a companion appears beside them
+    /// (2026-10-28, user: potatoes stuck behind rocks).
+    required double teleportDistance,
     required double regenDelaySeconds,
 
     /// Share of max health refilled per second.

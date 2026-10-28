@@ -159,6 +159,7 @@
       "speed_multiplier": 1.0,
       "follow_distance": 0.9,
       "catch_up_distance": 3,
+      "teleport_distance": 8,
       "regen_delay_seconds": 4,
       "regen_percent_per_second": 0.05,
       "regen_food_per_second": 0.75,

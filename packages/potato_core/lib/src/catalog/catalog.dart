@@ -552,6 +552,10 @@ final class Catalog {
       'raid.companion.catch_up_distance',
       companion.catchUpDistance,
     );
+    check.positiveNumber(
+      'raid.companion.teleport_distance',
+      companion.teleportDistance,
+    );
     check.positiveNumber('raid.companion.attack_range', companion.attackRange);
     check.positiveNumber(
       'raid.companion.defense_range',

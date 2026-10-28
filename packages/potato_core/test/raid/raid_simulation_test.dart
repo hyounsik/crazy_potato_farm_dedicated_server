@@ -669,6 +669,33 @@ void main() {
       return run;
     }
 
+    test('too far from its owner, it appears beside them', () {
+      final run = unarmed([fighter(CombatStyle.melee)]);
+      final companion = run.companions.single;
+      final rules = catalog.rules.raid.companion;
+      companion.position =
+          run.player.position + Vec2(rules.teleportDistance + 1, 0);
+      runFor(run, 0.05);
+      expect(
+        companion.position.distanceTo(run.player.position),
+        lessThan(rules.catchUpDistance),
+      );
+    });
+
+    test('far behind a cliff, it walks round by the ramp', () {
+      final run = unarmed([fighter(CombatStyle.melee)], zone: 'hill_open');
+      final companion = run.companions.single;
+      final top = run.map.findPath(run.player.position, const Vec2(14.5, 10.5));
+      expect(top, isNotEmpty);
+      run.player.position = const Vec2(14.5, 10.5);
+      companion.position = const Vec2(8.5, 10.5);
+      runFor(run, 12);
+      expect(
+        companion.position.distanceTo(run.player.position),
+        lessThan(catalog.rules.raid.companion.catchUpDistance),
+      );
+    });
+
     test('a combat potato gets its style\'s health, raised by level', () {
       final style = catalog.rules.raid.companion.styles[CombatStyle.melee]!;
       final low = unarmed([fighter(CombatStyle.melee)]).companions.single;
@@ -1189,7 +1216,11 @@ void main() {
       final clone = run.clones.first;
       clone.position = boss.position + const Vec2(1, 0);
       runFor(run, 1);
-      expect(boss.target, clone.id);
+      // Its potatoes, left far behind, appear beside it and may be the one.
+      expect([
+        clone.id,
+        for (final c in clone.companions) c.id,
+      ], contains(boss.target));
       expect(boss.hp, lessThan(boss.maxHp));
     });
   });

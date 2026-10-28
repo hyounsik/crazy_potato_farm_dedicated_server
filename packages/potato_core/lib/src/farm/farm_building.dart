@@ -45,6 +45,9 @@ final class FarmBuilding {
   /// Potatoes this building keeps in the fridge now.
   int get stores => data.levels[level - 1].stores;
 
+  /// Field tiles this building looks after now.
+  int get fieldTiles => data.levels[level - 1].fieldTiles;
+
   /// The cost of the next level, or null at the top.
   int? get upgradeCost =>
       level < data.levels.length ? data.levels[level].cost : null;

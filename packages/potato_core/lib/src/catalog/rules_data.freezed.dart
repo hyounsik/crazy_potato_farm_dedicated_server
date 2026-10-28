@@ -541,14 +541,23 @@ mixin _$FarmRulesData {
 /// treated as paused.
  int get offlineCapMinutes;/// Tiles along one side of the square farm.
  int get size;/// Tiles along the longer side of the largest field.
- int get fieldMaxSize;/// Baby potatoes a new 1x1 field costs.
+ int get fieldMaxSize;/// Field tiles every farm looks after to begin with (2026-10-28, user:
+/// 36). Each field office adds its own (`BuildingLevelData.fieldTiles`).
+/// Data from before it reads as 36.
+ int get fieldTiles;/// Baby potatoes a new 1x1 field costs.
  int get fieldFood;/// Baby potatoes each tile past the first adds to a new field's cost.
  int get fieldTileFood;/// The land open at the start, in whole blocks. The rest is locked and
 /// opened a block at a time.
  TileRect get openArea;/// Tiles along one side of a block, the unit locked land opens in.
  int get blockSize;/// Baby potatoes the first block opened costs.
- int get blockFood;/// What each block opened before adds to the next one's cost.
- int get blockStepFood;
+ int get blockFood;/// What each block opened before adds to the next one's cost, when
+/// [blockSteps] is empty.
+ int get blockStepFood;/// What each block adds to the next one's cost, by group of
+/// [blockStepEvery] blocks (2026-10-28, user: 40, 80, 200, 480 for
+/// four groups of 8; to be tuned after playing). The last step holds
+/// past the list's end. Empty uses [blockStepFood] for every block.
+ List<int> get blockSteps;/// Blocks in each group of [blockSteps].
+ int get blockStepEvery;
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -562,20 +571,20 @@ $FarmRulesDataCopyWith<FarmRulesData> get copyWith => _$FarmRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as FarmRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize)&&(identical(other.fieldFood, _this.fieldFood) || other.fieldFood == _this.fieldFood)&&(identical(other.fieldTileFood, _this.fieldTileFood) || other.fieldTileFood == _this.fieldTileFood)&&(identical(other.openArea, _this.openArea) || other.openArea == _this.openArea)&&(identical(other.blockSize, _this.blockSize) || other.blockSize == _this.blockSize)&&(identical(other.blockFood, _this.blockFood) || other.blockFood == _this.blockFood)&&(identical(other.blockStepFood, _this.blockStepFood) || other.blockStepFood == _this.blockStepFood));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is FarmRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.offlineCapMinutes, _this.offlineCapMinutes) || other.offlineCapMinutes == _this.offlineCapMinutes)&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.fieldMaxSize, _this.fieldMaxSize) || other.fieldMaxSize == _this.fieldMaxSize)&&(identical(other.fieldTiles, _this.fieldTiles) || other.fieldTiles == _this.fieldTiles)&&(identical(other.fieldFood, _this.fieldFood) || other.fieldFood == _this.fieldFood)&&(identical(other.fieldTileFood, _this.fieldTileFood) || other.fieldTileFood == _this.fieldTileFood)&&(identical(other.openArea, _this.openArea) || other.openArea == _this.openArea)&&(identical(other.blockSize, _this.blockSize) || other.blockSize == _this.blockSize)&&(identical(other.blockFood, _this.blockFood) || other.blockFood == _this.blockFood)&&(identical(other.blockStepFood, _this.blockStepFood) || other.blockStepFood == _this.blockStepFood)&&const DeepCollectionEquality().equals(other.blockSteps, _this.blockSteps)&&(identical(other.blockStepEvery, _this.blockStepEvery) || other.blockStepEvery == _this.blockStepEvery));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as FarmRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize,_this.fieldFood,_this.fieldTileFood,_this.openArea,_this.blockSize,_this.blockFood,_this.blockStepFood);
+  return Object.hash(runtimeType,_this.stepMillis,_this.offlineCapMinutes,_this.size,_this.fieldMaxSize,_this.fieldTiles,_this.fieldFood,_this.fieldTileFood,_this.openArea,_this.blockSize,_this.blockFood,_this.blockStepFood,const DeepCollectionEquality().hash(_this.blockSteps),_this.blockStepEvery);
 }
 
 @override
 String toString() {
   final _this = this as FarmRulesData;
-  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize}, fieldFood: ${_this.fieldFood}, fieldTileFood: ${_this.fieldTileFood}, openArea: ${_this.openArea}, blockSize: ${_this.blockSize}, blockFood: ${_this.blockFood}, blockStepFood: ${_this.blockStepFood})';
+  return 'FarmRulesData(stepMillis: ${_this.stepMillis}, offlineCapMinutes: ${_this.offlineCapMinutes}, size: ${_this.size}, fieldMaxSize: ${_this.fieldMaxSize}, fieldTiles: ${_this.fieldTiles}, fieldFood: ${_this.fieldFood}, fieldTileFood: ${_this.fieldTileFood}, openArea: ${_this.openArea}, blockSize: ${_this.blockSize}, blockFood: ${_this.blockFood}, blockStepFood: ${_this.blockStepFood}, blockSteps: ${_this.blockSteps}, blockStepEvery: ${_this.blockStepEvery})';
 }
 
 
@@ -586,7 +595,7 @@ abstract mixin class $FarmRulesDataCopyWith<$Res>  {
   factory $FarmRulesDataCopyWith(FarmRulesData value, $Res Function(FarmRulesData) _then) = _$FarmRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldFood, int fieldTileFood, TileRect openArea, int blockSize, int blockFood, int blockStepFood
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldTiles, int fieldFood, int fieldTileFood, TileRect openArea, int blockSize, int blockFood, int blockStepFood, List<int> blockSteps, int blockStepEvery
 });
 
 
@@ -603,18 +612,21 @@ class _$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,Object? blockSize = null,Object? blockFood = null,Object? blockStepFood = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldTiles = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,Object? blockSize = null,Object? blockFood = null,Object? blockStepFood = null,Object? blockSteps = null,Object? blockStepEvery = null,}) {
   return _then(FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
+as int,fieldTiles: null == fieldTiles ? _self.fieldTiles : fieldTiles // ignore: cast_nullable_to_non_nullable
 as int,fieldFood: null == fieldFood ? _self.fieldFood : fieldFood // ignore: cast_nullable_to_non_nullable
 as int,fieldTileFood: null == fieldTileFood ? _self.fieldTileFood : fieldTileFood // ignore: cast_nullable_to_non_nullable
 as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
 as TileRect,blockSize: null == blockSize ? _self.blockSize : blockSize // ignore: cast_nullable_to_non_nullable
 as int,blockFood: null == blockFood ? _self.blockFood : blockFood // ignore: cast_nullable_to_non_nullable
 as int,blockStepFood: null == blockStepFood ? _self.blockStepFood : blockStepFood // ignore: cast_nullable_to_non_nullable
+as int,blockSteps: null == blockSteps ? _self.blockSteps : blockSteps // ignore: cast_nullable_to_non_nullable
+as List<int>,blockStepEvery: null == blockStepEvery ? _self.blockStepEvery : blockStepEvery // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }
@@ -709,10 +721,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldTiles,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood,  List<int> blockSteps,  int blockStepEvery)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldTiles,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood,_that.blockSteps,_that.blockStepEvery);case _:
   return orElse();
 
 }
@@ -730,10 +742,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldTiles,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood,  List<int> blockSteps,  int blockStepEvery)  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData():
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldTiles,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood,_that.blockSteps,_that.blockStepEvery);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -750,10 +762,10 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  int offlineCapMinutes,  int size,  int fieldMaxSize,  int fieldTiles,  int fieldFood,  int fieldTileFood,  TileRect openArea,  int blockSize,  int blockFood,  int blockStepFood,  List<int> blockSteps,  int blockStepEvery)?  $default,) {final _that = this;
 switch (_that) {
 case _FarmRulesData() when $default != null:
-return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood);case _:
+return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldMaxSize,_that.fieldTiles,_that.fieldFood,_that.fieldTileFood,_that.openArea,_that.blockSize,_that.blockFood,_that.blockStepFood,_that.blockSteps,_that.blockStepEvery);case _:
   return null;
 
 }
@@ -765,7 +777,7 @@ return $default(_that.stepMillis,_that.offlineCapMinutes,_that.size,_that.fieldM
 @JsonSerializable()
 
 class _FarmRulesData extends FarmRulesData {
-  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize, required this.fieldFood, required this.fieldTileFood, required this.openArea, required this.blockSize, required this.blockFood, required this.blockStepFood}): super._();
+  const _FarmRulesData({required this.stepMillis, required this.offlineCapMinutes, required this.size, required this.fieldMaxSize, this.fieldTiles = 36, required this.fieldFood, required this.fieldTileFood, required this.openArea, required this.blockSize, required this.blockFood, required this.blockStepFood,  List<int> blockSteps = const <int>[], this.blockStepEvery = 8}): _blockSteps = blockSteps,super._();
   factory _FarmRulesData.fromJson(Map<String, dynamic> json) => _$FarmRulesDataFromJson(json);
 
 /// Game time one farm `step` covers, both while the app runs and when
@@ -778,6 +790,10 @@ class _FarmRulesData extends FarmRulesData {
 @override final  int size;
 /// Tiles along the longer side of the largest field.
 @override final  int fieldMaxSize;
+/// Field tiles every farm looks after to begin with (2026-10-28, user:
+/// 36). Each field office adds its own (`BuildingLevelData.fieldTiles`).
+/// Data from before it reads as 36.
+@override@JsonKey() final  int fieldTiles;
 /// Baby potatoes a new 1x1 field costs.
 @override final  int fieldFood;
 /// Baby potatoes each tile past the first adds to a new field's cost.
@@ -789,8 +805,26 @@ class _FarmRulesData extends FarmRulesData {
 @override final  int blockSize;
 /// Baby potatoes the first block opened costs.
 @override final  int blockFood;
-/// What each block opened before adds to the next one's cost.
+/// What each block opened before adds to the next one's cost, when
+/// [blockSteps] is empty.
 @override final  int blockStepFood;
+/// What each block adds to the next one's cost, by group of
+/// [blockStepEvery] blocks (2026-10-28, user: 40, 80, 200, 480 for
+/// four groups of 8; to be tuned after playing). The last step holds
+/// past the list's end. Empty uses [blockStepFood] for every block.
+ final  List<int> _blockSteps;
+/// What each block adds to the next one's cost, by group of
+/// [blockStepEvery] blocks (2026-10-28, user: 40, 80, 200, 480 for
+/// four groups of 8; to be tuned after playing). The last step holds
+/// past the list's end. Empty uses [blockStepFood] for every block.
+@override@JsonKey() List<int> get blockSteps {
+  if (_blockSteps is EqualUnmodifiableListView) return _blockSteps;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_blockSteps);
+}
+
+/// Blocks in each group of [blockSteps].
+@override@JsonKey() final  int blockStepEvery;
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -805,18 +839,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize)&&(identical(other.fieldFood, fieldFood) || other.fieldFood == fieldFood)&&(identical(other.fieldTileFood, fieldTileFood) || other.fieldTileFood == fieldTileFood)&&(identical(other.openArea, openArea) || other.openArea == openArea)&&(identical(other.blockSize, blockSize) || other.blockSize == blockSize)&&(identical(other.blockFood, blockFood) || other.blockFood == blockFood)&&(identical(other.blockStepFood, blockStepFood) || other.blockStepFood == blockStepFood));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _FarmRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.offlineCapMinutes, offlineCapMinutes) || other.offlineCapMinutes == offlineCapMinutes)&&(identical(other.size, size) || other.size == size)&&(identical(other.fieldMaxSize, fieldMaxSize) || other.fieldMaxSize == fieldMaxSize)&&(identical(other.fieldTiles, fieldTiles) || other.fieldTiles == fieldTiles)&&(identical(other.fieldFood, fieldFood) || other.fieldFood == fieldFood)&&(identical(other.fieldTileFood, fieldTileFood) || other.fieldTileFood == fieldTileFood)&&(identical(other.openArea, openArea) || other.openArea == openArea)&&(identical(other.blockSize, blockSize) || other.blockSize == blockSize)&&(identical(other.blockFood, blockFood) || other.blockFood == blockFood)&&(identical(other.blockStepFood, blockStepFood) || other.blockStepFood == blockStepFood)&&const DeepCollectionEquality().equals(other.blockSteps, _blockSteps)&&(identical(other.blockStepEvery, blockStepEvery) || other.blockStepEvery == blockStepEvery));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize,fieldFood,fieldTileFood,openArea,blockSize,blockFood,blockStepFood);
+    return Object.hash(runtimeType,stepMillis,offlineCapMinutes,size,fieldMaxSize,fieldTiles,fieldFood,fieldTileFood,openArea,blockSize,blockFood,blockStepFood,const DeepCollectionEquality().hash(_blockSteps),blockStepEvery);
 }
 
 @override
 String toString() {
-    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize, fieldFood: $fieldFood, fieldTileFood: $fieldTileFood, openArea: $openArea, blockSize: $blockSize, blockFood: $blockFood, blockStepFood: $blockStepFood)';
+    return 'FarmRulesData(stepMillis: $stepMillis, offlineCapMinutes: $offlineCapMinutes, size: $size, fieldMaxSize: $fieldMaxSize, fieldTiles: $fieldTiles, fieldFood: $fieldFood, fieldTileFood: $fieldTileFood, openArea: $openArea, blockSize: $blockSize, blockFood: $blockFood, blockStepFood: $blockStepFood, blockSteps: $blockSteps, blockStepEvery: $blockStepEvery)';
 }
 
 
@@ -827,7 +861,7 @@ abstract mixin class _$FarmRulesDataCopyWith<$Res> implements $FarmRulesDataCopy
   factory _$FarmRulesDataCopyWith(_FarmRulesData value, $Res Function(_FarmRulesData) _then) = __$FarmRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldFood, int fieldTileFood, TileRect openArea, int blockSize, int blockFood, int blockStepFood
+ int stepMillis, int offlineCapMinutes, int size, int fieldMaxSize, int fieldTiles, int fieldFood, int fieldTileFood, TileRect openArea, int blockSize, int blockFood, int blockStepFood, List<int> blockSteps, int blockStepEvery
 });
 
 
@@ -844,18 +878,21 @@ class __$FarmRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of FarmRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,Object? blockSize = null,Object? blockFood = null,Object? blockStepFood = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? offlineCapMinutes = null,Object? size = null,Object? fieldMaxSize = null,Object? fieldTiles = null,Object? fieldFood = null,Object? fieldTileFood = null,Object? openArea = null,Object? blockSize = null,Object? blockFood = null,Object? blockStepFood = null,Object? blockSteps = null,Object? blockStepEvery = null,}) {
   return _then(_FarmRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,offlineCapMinutes: null == offlineCapMinutes ? _self.offlineCapMinutes : offlineCapMinutes // ignore: cast_nullable_to_non_nullable
 as int,size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,fieldMaxSize: null == fieldMaxSize ? _self.fieldMaxSize : fieldMaxSize // ignore: cast_nullable_to_non_nullable
+as int,fieldTiles: null == fieldTiles ? _self.fieldTiles : fieldTiles // ignore: cast_nullable_to_non_nullable
 as int,fieldFood: null == fieldFood ? _self.fieldFood : fieldFood // ignore: cast_nullable_to_non_nullable
 as int,fieldTileFood: null == fieldTileFood ? _self.fieldTileFood : fieldTileFood // ignore: cast_nullable_to_non_nullable
 as int,openArea: null == openArea ? _self.openArea : openArea // ignore: cast_nullable_to_non_nullable
 as TileRect,blockSize: null == blockSize ? _self.blockSize : blockSize // ignore: cast_nullable_to_non_nullable
 as int,blockFood: null == blockFood ? _self.blockFood : blockFood // ignore: cast_nullable_to_non_nullable
 as int,blockStepFood: null == blockStepFood ? _self.blockStepFood : blockStepFood // ignore: cast_nullable_to_non_nullable
+as int,blockSteps: null == blockSteps ? _self._blockSteps : blockSteps // ignore: cast_nullable_to_non_nullable
+as List<int>,blockStepEvery: null == blockStepEvery ? _self.blockStepEvery : blockStepEvery // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

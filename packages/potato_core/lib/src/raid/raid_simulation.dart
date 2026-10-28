@@ -296,7 +296,7 @@ final class RaidSimulation {
                 id: nextId++,
                 position: map.move(
                   at,
-                  _followOffset(slot),
+                  _followOffset(slot, player.facing),
                   rules.companion.radius,
                 ),
                 radius: rules.companion.radius,
@@ -1308,8 +1308,18 @@ final class RaidSimulation {
 
   // Companions ---------------------------------------------------------------
 
-  static Vec2 _followOffset(int slot) =>
-      const [Vec2(-0.7, 0.15), Vec2(0.15, -0.7), Vec2(-0.55, -0.55)][slot % 3];
+  /// Where companion [slot] keeps from its owner walking toward [facing]
+  /// (2026-10-28, user: behind them as they go, not always on their left):
+  /// the first straight behind, the next two further back to either side.
+  static Vec2 _followOffset(int slot, Vec2 facing) {
+    final (back, side) = const [
+      (0.7, 0.0),
+      (0.95, 0.5),
+      (0.95, -0.5),
+    ][slot % 3];
+    final across = Vec2(-facing.y, facing.x);
+    return facing * -back + across * side;
+  }
 
   /// [owner] is who it follows: a party member (`[member] != null`) or a
   /// clone. Only party potatoes make food and heal, into and from their own
@@ -1372,7 +1382,8 @@ final class RaidSimulation {
 
   void _follow(RaidCompanion companion, RaidShooter owner, double dt) {
     final spec = rules.companion;
-    final goal = owner.position + _followOffset(companion.slot);
+    final offset = _followOffset(companion.slot, owner.facing);
+    final goal = owner.position + offset;
     final away = goal - companion.position;
     final distance = away.length;
     companion.repath -= dt;
@@ -1380,11 +1391,7 @@ final class RaidSimulation {
     final fromOwner = companion.position.distanceTo(owner.position);
     if (fromOwner > spec.teleportDistance) {
       companion
-        ..position = map.move(
-          owner.position,
-          _followOffset(companion.slot),
-          companion.radius,
-        )
+        ..position = map.move(owner.position, offset, companion.radius)
         ..path.clear();
       return;
     }
@@ -2348,7 +2355,11 @@ final class RaidSimulation {
       clone.companions.add(
         RaidCompanion(
           id: _newId(),
-          position: map.move(at, _followOffset(slot), rules.companion.radius),
+          position: map.move(
+            at,
+            _followOffset(slot, clone.facing),
+            rules.companion.radius,
+          ),
           radius: rules.companion.radius,
           maxHp: _startHp(catalog, start, _effects.own(start.traits), party),
           potatoId: 0,

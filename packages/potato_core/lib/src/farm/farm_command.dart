@@ -224,6 +224,14 @@ enum FarmRejection {
   /// A field cannot shrink past its potatoes, nor be removed with any.
   fieldNotEmpty,
 
+  /// The fields would cover more tiles than the house and the field
+  /// offices look after (2026-10-28).
+  noFieldRoom,
+
+  /// Without this field office the fields would cover more tiles than the
+  /// rest look after.
+  fieldsNeedIt,
+
   /// The building comes with the farm and stays (the house).
   cannotRemove,
 

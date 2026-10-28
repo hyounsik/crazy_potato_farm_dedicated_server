@@ -15,6 +15,17 @@
       ]
     },
     {
+      "id": "field_office",
+      "width": 2,
+      "height": 2,
+      "levels": [
+        {
+          "cost": 100,
+          "field_tiles": 24
+        }
+      ]
+    },
+    {
       "id": "potato_cellar",
       "width": 1,
       "height": 1,

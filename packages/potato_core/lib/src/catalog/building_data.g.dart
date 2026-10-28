@@ -61,9 +61,13 @@ _BuildingLevelData _$BuildingLevelDataFromJson(Map<String, dynamic> json) =>
         capacity: $checkedConvert('capacity', (v) => (v as num?)?.toInt() ?? 0),
         graves: $checkedConvert('graves', (v) => (v as num?)?.toInt() ?? 0),
         stores: $checkedConvert('stores', (v) => (v as num?)?.toInt() ?? 0),
+        fieldTiles: $checkedConvert(
+          'field_tiles',
+          (v) => (v as num?)?.toInt() ?? 0,
+        ),
       );
       return val;
-    });
+    }, fieldKeyMap: const {'fieldTiles': 'field_tiles'});
 
 Map<String, dynamic> _$BuildingLevelDataToJson(_BuildingLevelData instance) =>
     <String, dynamic>{
@@ -71,6 +75,7 @@ Map<String, dynamic> _$BuildingLevelDataToJson(_BuildingLevelData instance) =>
       'capacity': instance.capacity,
       'graves': instance.graves,
       'stores': instance.stores,
+      'field_tiles': instance.fieldTiles,
     };
 
 _TotemData _$TotemDataFromJson(Map<String, dynamic> json) =>

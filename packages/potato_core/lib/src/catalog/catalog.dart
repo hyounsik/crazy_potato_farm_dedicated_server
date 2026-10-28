@@ -339,6 +339,10 @@ final class Catalog {
     }
     check.atLeast('farm.block_food', farm.blockFood, 0);
     check.atLeast('farm.block_step_food', farm.blockStepFood, 0);
+    check.atLeast('farm.block_step_every', farm.blockStepEvery, 1);
+    for (final step in farm.blockSteps) {
+      check.atLeast('farm.block_steps', step, 0);
+    }
 
     final potatoes = rules.potatoes;
     check.probability('potatoes.grade_drop_chance', potatoes.gradeDropChance);

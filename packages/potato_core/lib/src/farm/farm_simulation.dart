@@ -333,6 +333,16 @@ final class FarmSimulation {
   /// coming home may go past it.
   int get fridgeSize => _buildings.values.fold(0, (n, b) => n + b.stores);
 
+  /// Tiles the fields cover together.
+  int get fieldTiles => _fields.values.fold(0, (n, f) => n + f.rect.area);
+
+  /// Field tiles the farm looks after (2026-10-28): 36 to begin with and
+  /// each field office's. Fields cannot be made or grown past it.
+  int get fieldRoom => _buildings.values.fold(
+    _rules.farm.fieldTiles,
+    (n, b) => n + b.fieldTiles,
+  );
+
   /// Dead potatoes waiting in the graveyards, oldest first.
   Iterable<Potato> get graves => _graves;
 
@@ -475,11 +485,18 @@ final class FarmSimulation {
     ].any((step) => _openBlocks.contains(block + step));
   }
 
-  /// Baby potatoes the next block costs: more for each one opened so far.
+  /// Baby potatoes the next block costs: more for each one opened so far,
+  /// by the step of the group each opened block was in.
   int get blockCost {
-    final opened = _openBlocks.length - _rules.farm.startBlocks.length;
-    return _rules.farm.blockFood +
-        math.max(0, opened) * _rules.farm.blockStepFood;
+    final rules = _rules.farm;
+    final opened = math.max(0, _openBlocks.length - rules.startBlocks.length);
+    final steps = rules.blockSteps;
+    if (steps.isEmpty) return rules.blockFood + opened * rules.blockStepFood;
+    var cost = rules.blockFood;
+    for (var n = 1; n <= opened; n++) {
+      cost += steps[math.min(n ~/ rules.blockStepEvery, steps.length - 1)];
+    }
+    return cost;
   }
 
   /// The farm's way in: the middle of the open land's bottom row, where the
@@ -1082,6 +1099,7 @@ final class FarmSimulation {
       return FarmRejection.badSize;
     }
     if (!canPlace(rect)) return FarmRejection.blocked;
+    if (fieldTiles + rect.area > fieldRoom) return FarmRejection.noFieldRoom;
     final cost = fieldCost(rect);
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
@@ -1105,6 +1123,10 @@ final class FarmSimulation {
       return FarmRejection.fieldNotEmpty;
     }
     if (!canPlace(rect, ignoring: fieldId)) return FarmRejection.blocked;
+    if (rect.area > field.rect.area &&
+        fieldTiles - field.rect.area + rect.area > fieldRoom) {
+      return FarmRejection.noFieldRoom;
+    }
     final cost = resizeCost(field, rect);
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
@@ -1522,6 +1544,10 @@ final class FarmSimulation {
     final stores = _buildings[buildingId]?.stores ?? 0;
     if (stores > 0 && _fridge.length > fridgeSize - stores) {
       return FarmRejection.cellarNotEmpty;
+    }
+    final tiles = _buildings[buildingId]?.fieldTiles ?? 0;
+    if (tiles > 0 && fieldTiles > fieldRoom - tiles) {
+      return FarmRejection.fieldsNeedIt;
     }
     final building = _buildings.remove(buildingId);
     if (building == null) return FarmRejection.noSuchBuilding;

@@ -6,6 +6,7 @@
     "offline_cap_minutes": 1440,
     "size": 24,
     "field_max_size": 3,
+    "field_tiles": 36,
     "field_food": 20,
     "field_tile_food": 5,
     "open_area": {

@@ -61,6 +61,32 @@ void main() {
       expect(farm.isOpen(const TilePos(-1, 8)), isFalse);
     });
 
+    test('block steps grow by group (2026-10-28)', () {
+      final catalog = sampleCatalogWith((files) {
+        final rules = rulesOf(files)['farm'] as Map<String, dynamic>;
+        rules['block_food'] = 100;
+        rules['block_steps'] = [40, 80, 200, 480];
+      });
+      final farm = FarmSimulation.newFarm(catalog, seed: 1)..food = 1000000;
+      final costs = <int>[];
+      while (true) {
+        final block = [
+          for (var y = 0; y < 6; y++)
+            for (var x = 0; x < 6; x++) TilePos(x, y),
+        ].where(farm.canOpen).firstOrNull;
+        if (block == null) break;
+        costs.add(farm.blockCost);
+        expect(farm.apply(FarmCommand.openBlock(block: block)), isNull);
+      }
+      expect(costs, hasLength(32));
+      expect([costs[0], costs[7], costs[8], costs[15]], [100, 380, 460, 1020]);
+      expect(
+        [costs[16], costs[23], costs[24], costs[31]],
+        [1220, 2620, 3100, 6460],
+      );
+      expect(costs.fold(0, (a, b) => a + b), 61440);
+    });
+
     test('opening a block next to open land costs more each time', () {
       farm.food = 1000;
       expect(farm.blockCost, 50);
@@ -195,6 +221,78 @@ void main() {
       );
       expect(farm.fields, hasLength(1));
       expect(farm.food, 44);
+    });
+  });
+
+  group('field room (2026-10-28)', () {
+    // The house looks after 6 tiles here; the starting field takes 4.
+    late FarmSimulation small;
+    setUp(() {
+      final catalog = sampleCatalogWith(
+        (files) => (rulesOf(files)['farm'] as Map)['field_tiles'] = 6,
+      );
+      small = FarmSimulation.newFarm(catalog, seed: 1)..food = 10000;
+    });
+    const one = TileRect(origin: TilePos(8, 13), width: 1, height: 1);
+    const two = TileRect(origin: TilePos(8, 13), width: 2, height: 1);
+    const office = TilePos(8, 8);
+
+    FarmRejection? build() => small.apply(
+      const FarmCommand.build(kind: 'field_office', origin: office),
+    );
+
+    test('fields cover no more tiles than the house looks after', () {
+      expect(small.fieldTiles, 4);
+      expect(small.fieldRoom, 6);
+      expect(
+        small.apply(
+          const FarmCommand.makeField(
+            rect: TileRect(origin: TilePos(8, 13), width: 3, height: 1),
+          ),
+        ),
+        FarmRejection.noFieldRoom,
+      );
+      expect(small.apply(const FarmCommand.makeField(rect: two)), isNull);
+      expect(small.fieldTiles, 6);
+    });
+
+    test('a field grows only into room, but may always shrink', () {
+      expect(small.apply(const FarmCommand.makeField(rect: one)), isNull);
+      final id = small.fields.last.id;
+      const three = TileRect(origin: TilePos(8, 13), width: 3, height: 1);
+      expect(
+        small.apply(FarmCommand.resizeField(fieldId: id, rect: three)),
+        FarmRejection.noFieldRoom,
+      );
+      expect(
+        small.apply(FarmCommand.resizeField(fieldId: id, rect: two)),
+        isNull,
+      );
+      expect(
+        small.apply(FarmCommand.resizeField(fieldId: id, rect: one)),
+        isNull,
+      );
+    });
+
+    test('each field office looks after more, and stays while needed', () {
+      expect(build(), isNull);
+      expect(small.fieldRoom, 6 + 24);
+      final officeId = small.buildings.last.id;
+      expect(
+        small.apply(
+          const FarmCommand.makeField(
+            rect: TileRect(origin: TilePos(8, 13), width: 3, height: 1),
+          ),
+        ),
+        isNull,
+      );
+      expect(
+        small.apply(FarmCommand.demolish(buildingId: officeId)),
+        FarmRejection.fieldsNeedIt,
+      );
+      small.apply(FarmCommand.removeField(fieldId: small.fields.last.id));
+      expect(small.apply(FarmCommand.demolish(buildingId: officeId)), isNull);
+      expect(small.fieldRoom, 6);
     });
   });
 

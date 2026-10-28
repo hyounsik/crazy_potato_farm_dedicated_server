@@ -55,6 +55,11 @@ abstract class BuildingLevelData with _$BuildingLevelData {
     /// Potatoes this building keeps out of the fields (the potato cellar,
     /// called the fridge in code).
     @Default(0) int stores,
+
+    /// Field tiles this building adds to the house's share (2026-10-28,
+    /// field offices). Fields may cover no more tiles than the farm looks
+    /// after (`FarmRulesData.fieldTiles` and these together).
+    @Default(0) int fieldTiles,
   }) = _BuildingLevelData;
 
   factory BuildingLevelData.fromJson(Map<String, dynamic> json) =>

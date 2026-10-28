@@ -48,6 +48,11 @@ abstract class FarmRulesData with _$FarmRulesData {
     /// Tiles along the longer side of the largest field.
     required int fieldMaxSize,
 
+    /// Field tiles every farm looks after to begin with (2026-10-28, user:
+    /// 36). Each field office adds its own (`BuildingLevelData.fieldTiles`).
+    /// Data from before it reads as 36.
+    @Default(36) int fieldTiles,
+
     /// Baby potatoes a new 1x1 field costs.
     required int fieldFood,
 
@@ -64,8 +69,18 @@ abstract class FarmRulesData with _$FarmRulesData {
     /// Baby potatoes the first block opened costs.
     required int blockFood,
 
-    /// What each block opened before adds to the next one's cost.
+    /// What each block opened before adds to the next one's cost, when
+    /// [blockSteps] is empty.
     required int blockStepFood,
+
+    /// What each block adds to the next one's cost, by group of
+    /// [blockStepEvery] blocks (2026-10-28, user: 40, 80, 200, 480 for
+    /// four groups of 8; to be tuned after playing). The last step holds
+    /// past the list's end. Empty uses [blockStepFood] for every block.
+    @Default(<int>[]) List<int> blockSteps,
+
+    /// Blocks in each group of [blockSteps].
+    @Default(8) int blockStepEvery,
   }) = _FarmRulesData;
 
   const FarmRulesData._();

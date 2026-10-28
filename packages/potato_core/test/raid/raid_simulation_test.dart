@@ -702,6 +702,21 @@ void main() {
       return run;
     }
 
+    test('it keeps behind its owner the way they last walked (2026-10-28)', () {
+      final run = unarmed([fighter(CombatStyle.melee)]);
+      final companion = run.companions.single;
+      run.player.facing = const Vec2(0, -1);
+      runFor(run, 2);
+      expect(companion.position.y, greaterThan(run.player.position.y + 0.4));
+      expect(
+        (companion.position.x - run.player.position.x).abs(),
+        lessThan(0.2),
+      );
+      run.player.facing = const Vec2(-1, 0);
+      runFor(run, 2);
+      expect(companion.position.x, greaterThan(run.player.position.x + 0.4));
+    });
+
     test('too far from its owner, it appears beside them', () {
       final run = unarmed([fighter(CombatStyle.melee)]);
       final companion = run.companions.single;

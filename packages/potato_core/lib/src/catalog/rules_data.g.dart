@@ -97,6 +97,10 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
             'field_max_size',
             (v) => (v as num).toInt(),
           ),
+          fieldTiles: $checkedConvert(
+            'field_tiles',
+            (v) => (v as num?)?.toInt() ?? 36,
+          ),
           fieldFood: $checkedConvert('field_food', (v) => (v as num).toInt()),
           fieldTileFood: $checkedConvert(
             'field_tile_food',
@@ -112,6 +116,18 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
             'block_step_food',
             (v) => (v as num).toInt(),
           ),
+          blockSteps: $checkedConvert(
+            'block_steps',
+            (v) =>
+                (v as List<dynamic>?)
+                    ?.map((e) => (e as num).toInt())
+                    .toList() ??
+                const <int>[],
+          ),
+          blockStepEvery: $checkedConvert(
+            'block_step_every',
+            (v) => (v as num?)?.toInt() ?? 8,
+          ),
         );
         return val;
       },
@@ -119,12 +135,15 @@ _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
         'stepMillis': 'step_millis',
         'offlineCapMinutes': 'offline_cap_minutes',
         'fieldMaxSize': 'field_max_size',
+        'fieldTiles': 'field_tiles',
         'fieldFood': 'field_food',
         'fieldTileFood': 'field_tile_food',
         'openArea': 'open_area',
         'blockSize': 'block_size',
         'blockFood': 'block_food',
         'blockStepFood': 'block_step_food',
+        'blockSteps': 'block_steps',
+        'blockStepEvery': 'block_step_every',
       },
     );
 
@@ -134,12 +153,15 @@ Map<String, dynamic> _$FarmRulesDataToJson(_FarmRulesData instance) =>
       'offline_cap_minutes': instance.offlineCapMinutes,
       'size': instance.size,
       'field_max_size': instance.fieldMaxSize,
+      'field_tiles': instance.fieldTiles,
       'field_food': instance.fieldFood,
       'field_tile_food': instance.fieldTileFood,
       'open_area': instance.openArea.toJson(),
       'block_size': instance.blockSize,
       'block_food': instance.blockFood,
       'block_step_food': instance.blockStepFood,
+      'block_steps': instance.blockSteps,
+      'block_step_every': instance.blockStepEvery,
     };
 
 _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>

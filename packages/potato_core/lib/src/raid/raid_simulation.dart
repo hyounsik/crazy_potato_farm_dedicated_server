@@ -1225,17 +1225,18 @@ final class RaidSimulation {
   }
 
   /// [shooter] fires at [target] (null holds fire). Charging weapons must
-  /// stay on one target for a while first.
+  /// stay on one target for a while first, and start only once the gun is
+  /// ready again, so a shot takes the interval and the aim one after the
+  /// other (2026-10-28, user: the sniper has the lowest DPS).
   void _fire(RaidShooter shooter, RaidBody? target, double damage, double dt) {
     final gun = catalog.weapons[shooter.weapon]!;
     shooter.fireCooldown -= dt;
     if (gun.aimSeconds > 0) {
       if (target?.id != shooter.aimTarget) shooter.aimProgress = 0;
       shooter.aimTarget = target?.id;
-      if (target == null) return;
+      if (target == null || shooter.fireCooldown > 0) return;
       shooter.aimProgress = math.min(gun.aimSeconds, shooter.aimProgress + dt);
-      final charged = shooter.aimProgress >= gun.aimSeconds;
-      if (shooter.fireCooldown > 0 || !charged) return;
+      if (shooter.aimProgress < gun.aimSeconds) return;
       shooter.aimProgress = 0;
     } else {
       shooter.aimTarget = null;

@@ -382,6 +382,39 @@ void main() {
     expect(run.apply(const Dash()), isNull);
   });
 
+  test('a charging gun aims only once it is ready: interval, then aim', () {
+    final run = RaidSimulation.start(
+      catalog: catalog,
+      zone: 'open',
+      seed: 1,
+      food: 100,
+    );
+    run.player.weapon = 'charge';
+    final gun = catalog.weapons['charge']!;
+    final target = addEnemy(
+      run,
+      'brute',
+      run.player.position + const Vec2(2, 0),
+    )..hp = 1e9;
+    final shots = <double>[];
+    final seen = <int>{};
+    var time = 0.0;
+    final dt = catalog.rules.raid.stepMillis / 1000;
+    while (shots.length < 3 && time < 10) {
+      run.step();
+      time += dt;
+      target.position = run.player.position + const Vec2(2, 0);
+      for (final bullet in run.bullets) {
+        if (bullet.owner == run.player.id && seen.add(bullet.id)) {
+          shots.add(time);
+        }
+      }
+    }
+    expect(shots, hasLength(3));
+    expect(shots.first, closeTo(gun.aimSeconds, 0.1));
+    expect(shots[2] - shots[1], closeTo(gun.interval + gun.aimSeconds, 0.1));
+  });
+
   group('loot', () {
     RaidPile addPile(RaidSimulation run, Vec2 at, List<ItemStack> items) {
       final pile = RaidPile(

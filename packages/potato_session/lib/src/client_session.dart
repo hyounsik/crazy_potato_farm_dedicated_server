@@ -39,7 +39,56 @@ enum ClientSessionStage {
   aborted,
 }
 
-typedef _TimedSnapshot = ({Duration at, RaidSnapshot snapshot});
+typedef _TimedSnapshot = ({Duration at, RaidSnapshot snapshot, _Read read});
+
+/// A snapshot's bodies, read once when it arrives (2026-10-28): the screen
+/// interpolates between two snapshots every frame, and reading them again
+/// each frame made a guest's phone parse every enemy some 120 times a
+/// second. Positions are kept apart because interpolation writes the
+/// bodies' own.
+final class _Read {
+  _Read(RaidSnapshot snapshot, Catalog catalog)
+    : members = [
+        for (final m in snapshot.members) RaidMember.fromJson(m, catalog),
+      ],
+      enemies = [for (final e in snapshot.enemies) RaidEnemy.fromJson(e)],
+      clones = [
+        for (final c in snapshot.clones) RaidClone.fromJson(c, catalog.stackOf),
+      ],
+      clouds = [for (final c in snapshot.clouds) RaidCloud.fromJson(c)],
+      bullets = [for (final b in snapshot.bullets) RaidBullet.fromJson(b)] {
+    for (final m in members) {
+      memberAt.add(m.player.position);
+      for (final c in m.companions) {
+        companionAt[c.id] = c.position;
+      }
+    }
+    for (final e in enemies) {
+      enemyAt[e.id] = e.position;
+    }
+    for (final c in clones) {
+      cloneAt[c.id] = c.position;
+      for (final cc in c.companions) {
+        cloneCompanionAt[cc.id] = cc.position;
+      }
+    }
+    for (final b in bullets) {
+      bulletAt[b.id] = b.position;
+    }
+  }
+
+  final List<RaidMember> members;
+  final List<RaidEnemy> enemies;
+  final List<RaidClone> clones;
+  final List<RaidCloud> clouds;
+  final List<RaidBullet> bullets;
+  final List<Vec2> memberAt = [];
+  final Map<int, Vec2> companionAt = {};
+  final Map<int, Vec2> enemyAt = {};
+  final Map<int, Vec2> cloneAt = {};
+  final Map<int, Vec2> cloneCompanionAt = {};
+  final Map<int, Vec2> bulletAt = {};
+}
 
 /// Drives a guest's view of a party run hosted by [HostSession].
 ///
@@ -495,9 +544,14 @@ final class ClientSession {
         _run = sim;
         _clock = FixedStepClock(Duration(milliseconds: sim.rules.stepMillis));
         _clientClock = Duration.zero;
+        final first = RaidSnapshot.fromRun(sim);
         _snapshots
           ..clear()
-          ..add((at: Duration.zero, snapshot: RaidSnapshot.fromRun(sim)));
+          ..add((
+            at: Duration.zero,
+            snapshot: first,
+            read: _Read(first, catalog),
+          ));
         _setStage(ClientSessionStage.playing);
       case SnapshotMessage(:final snapshot):
         if (_stage == ClientSessionStage.hostDisconnected && !_resuming) {
@@ -553,7 +607,11 @@ final class ClientSession {
         snapshot.tick <= _snapshots.last.snapshot.tick) {
       return;
     }
-    _snapshots.add((at: _clientClock, snapshot: snapshot));
+    _snapshots.add((
+      at: _clientClock,
+      snapshot: snapshot,
+      read: _Read(snapshot, catalog),
+    ));
     while (_snapshots.length > 12) {
       _snapshots.removeAt(0);
     }
@@ -632,15 +690,13 @@ final class ClientSession {
         ? 1.0
         : ((targetTime - before.at).inMicroseconds / span).clamp(0.0, 1.0);
 
-    final snapA = before.snapshot;
-    final snapB = after.snapshot;
+    final a = before.read;
+    final b = after.read;
+    Vec2 lerp(Vec2? from, Vec2 to) => from == null ? to : _lerpVec(from, to, t);
 
     // Other party members and every member's companions.
-    for (var i = 0; i < snapB.members.length && i < sim.members.length; i++) {
-      final memberB = RaidMember.fromJson(snapB.members[i], catalog);
-      final memberA = i < snapA.members.length
-          ? RaidMember.fromJson(snapA.members[i], catalog)
-          : memberB;
+    for (var i = 0; i < b.members.length && i < sim.members.length; i++) {
+      final memberB = b.members[i];
       final dest = sim.members[i];
       if (i != _memberIndex) {
         dest
@@ -653,91 +709,53 @@ final class ClientSession {
           ..player.facing = memberB.player.facing
           ..player.weapon = memberB.player.weapon
           ..player.equipped = memberB.player.equipped
-          ..player.position = _lerpVec(
-            memberA.player.position,
-            memberB.player.position,
-            t,
+          ..player.position = lerp(
+            i < a.memberAt.length ? a.memberAt[i] : null,
+            b.memberAt[i],
           );
       }
-      final prevById = {for (final c in memberA.companions) c.id: c};
+      for (final c in memberB.companions) {
+        c.position = lerp(a.companionAt[c.id], b.companionAt[c.id]!);
+      }
       dest.companions
         ..clear()
-        ..addAll([
-          for (final c in memberB.companions)
-            c
-              ..position = _lerpVec(
-                prevById[c.id]?.position ?? c.position,
-                c.position,
-                t,
-              ),
-        ]);
+        ..addAll(memberB.companions);
     }
 
     // Enemies.
-    final enemyA = {
-      for (final e in snapA.enemies) (e['id'] as int): RaidEnemy.fromJson(e),
-    };
+    for (final e in b.enemies) {
+      e.position = lerp(a.enemyAt[e.id], b.enemyAt[e.id]!);
+    }
     sim.enemies
       ..clear()
-      ..addAll([
-        for (final e in snapB.enemies)
-          () {
-            final cur = RaidEnemy.fromJson(e);
-            final prev = enemyA[cur.id];
-            if (prev != null) {
-              cur.position = _lerpVec(prev.position, cur.position, t);
-            }
-            return cur;
-          }(),
-      ]);
+      ..addAll(b.enemies);
 
     // Clones and their companions.
-    final cloneA = {
-      for (final c in snapA.clones)
-        (c['id'] as int): RaidClone.fromJson(c, catalog.stackOf),
-    };
+    for (final c in b.clones) {
+      c.position = lerp(a.cloneAt[c.id], b.cloneAt[c.id]!);
+      for (final cc in c.companions) {
+        cc.position = lerp(
+          a.cloneCompanionAt[cc.id],
+          b.cloneCompanionAt[cc.id]!,
+        );
+      }
+    }
     sim.clones
       ..clear()
-      ..addAll([
-        for (final c in snapB.clones)
-          () {
-            final cur = RaidClone.fromJson(c, catalog.stackOf);
-            final prev = cloneA[cur.id];
-            if (prev != null) {
-              cur.position = _lerpVec(prev.position, cur.position, t);
-              final compA = {for (final cc in prev.companions) cc.id: cc};
-              for (final cc in cur.companions) {
-                if (compA[cc.id] case final prevComp?) {
-                  cc.position = _lerpVec(prevComp.position, cc.position, t);
-                }
-              }
-            }
-            return cur;
-          }(),
-      ]);
+      ..addAll(b.clones);
 
     // Boss clouds stay put: the latest as they are.
     sim.clouds
       ..clear()
-      ..addAll([for (final c in snapB.clouds) RaidCloud.fromJson(c)]);
+      ..addAll(b.clouds);
 
     // Bullets.
-    final bulletA = {
-      for (final b in snapA.bullets) (b['id'] as int): RaidBullet.fromJson(b),
-    };
+    for (final bullet in b.bullets) {
+      bullet.position = lerp(a.bulletAt[bullet.id], b.bulletAt[bullet.id]!);
+    }
     sim.bullets
       ..clear()
-      ..addAll([
-        for (final b in snapB.bullets)
-          () {
-            final cur = RaidBullet.fromJson(b);
-            final prev = bulletA[cur.id];
-            if (prev != null) {
-              cur.position = _lerpVec(prev.position, cur.position, t);
-            }
-            return cur;
-          }(),
-      ]);
+      ..addAll(b.bullets);
   }
 
   static Vec2 _lerpVec(Vec2 a, Vec2 b, double t) =>

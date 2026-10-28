@@ -179,6 +179,27 @@ void main() {
     await closeAll(host, [a, b]);
   });
 
+  test('part of a stack can be taken or moved (2026-10-28)', () async {
+    final (host, [a]) = await room(['a'], hostBed: [ItemStack('material', 10)]);
+    host.setBedOpen(true);
+    await _pumpMicrotasks();
+    final got = <({ItemStack? stack, BedRefusal? refusal})>[];
+    a.bedGifts.listen(got.add);
+    a.takeFromBed(0, 0, 'material', count: 3);
+    await _pumpMicrotasks();
+    expect(got.single.stack?.count, 3);
+    expect(host.hostBedSlots.first?.count, 7);
+
+    a.takeFromBed(0, 0, 'material', into: 1, count: 2);
+    await _pumpMicrotasks();
+    expect(host.hostBedSlots.first?.count, 5);
+    expect(a.beds[1].slots.first?.count, 2);
+
+    expect(host.takeFromBed(0, 0, 'material', count: 4).stack?.count, 4);
+    expect(host.hostBedSlots.first?.count, 1);
+    await closeAll(host, [a]);
+  });
+
   test('two reaching for the same stack: the first gets it', () async {
     final (host, [a, b]) = await room(
       ['a', 'b'],

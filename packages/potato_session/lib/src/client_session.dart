@@ -363,13 +363,20 @@ final class ClientSession {
     _send(SessionChannel.reliable, BedPutMessage(owner: owner, stack: stack));
   }
 
-  /// Asks for the stack of [item] in [owner]'s bed slot [slot]; it comes in
-  /// [bedGifts], or why not. With [into] it goes straight onto that bed.
-  void takeFromBed(int owner, int slot, String item, {int? into}) {
+  /// Asks for the stack of [item] in [owner]'s bed slot [slot], or only
+  /// [count] of it; it comes in [bedGifts], or why not. With [into] it goes
+  /// straight onto that bed.
+  void takeFromBed(int owner, int slot, String item, {int? into, int? count}) {
     if (_stage != ClientSessionStage.waiting) return;
     _send(
       SessionChannel.reliable,
-      BedTakeMessage(owner: owner, slot: slot, item: item, into: into),
+      BedTakeMessage(
+        owner: owner,
+        slot: slot,
+        item: item,
+        into: into,
+        count: count,
+      ),
     );
   }
 

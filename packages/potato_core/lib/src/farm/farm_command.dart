@@ -219,11 +219,15 @@ sealed class FarmCommand with _$FarmCommand {
     int? gearIndex,
   }) = LoadBag;
 
-  /// Moves the stack on bed slot [slot] into storage, as much as fits.
-  const factory FarmCommand.unloadBed({required int slot}) = UnloadBed;
+  /// Moves the stack on bed slot [slot] into storage, as much as fits, or
+  /// only [count] of it.
+  const factory FarmCommand.unloadBed({required int slot, int? count}) =
+      UnloadBed;
 
-  /// Moves the stack in bag slot [slot] into storage, as much as fits.
-  const factory FarmCommand.unloadBag({required int slot}) = UnloadBag;
+  /// Moves the stack in bag slot [slot] into storage, as much as fits, or
+  /// only [count] of it (2026-10-28, 사용자: a long press asks how many).
+  const factory FarmCommand.unloadBag({required int slot, int? count}) =
+      UnloadBag;
 
   /// Moves what fits of the bag into storage: closing the sorting window at
   /// home (2026-10-28, 사용자). Gear past a full box and seeds past a full

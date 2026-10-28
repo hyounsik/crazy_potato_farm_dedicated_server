@@ -40,12 +40,13 @@ final class TruckBed {
     return stack.count > 0 ? BedRefusal.full : null;
   }
 
-  /// Takes the stack of [item] in slot [slot] for its owner ([byOwner]) or
-  /// someone else.
+  /// Takes the stack of [item] in slot [slot], or only [count] of it, for
+  /// its owner ([byOwner]) or someone else.
   ({ItemStack? stack, BedRefusal? refusal}) take(
     int slot,
     String item, {
     required bool byOwner,
+    int? count,
   }) {
     if (!byOwner && !open) return (stack: null, refusal: BedRefusal.locked);
     if (slot < 0 || slot >= _bag.capacity) {
@@ -54,6 +55,11 @@ final class TruckBed {
     final there = _bag.slots[slot];
     if (there == null || there.item != item) {
       return (stack: null, refusal: BedRefusal.gone);
+    }
+    if (count != null && count < there.count) {
+      if (count <= 0) return (stack: null, refusal: BedRefusal.gone);
+      there.count -= count;
+      return (stack: there.copyWithCount(count), refusal: null);
     }
     return (stack: _bag.replace(slot, null), refusal: null);
   }

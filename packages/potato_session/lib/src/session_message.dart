@@ -338,6 +338,7 @@ sealed class SessionMessage {
       slot: json['slot'] as int,
       item: json['item'] as String,
       into: json['into'] as int?,
+      count: json['count'] as int?,
     ),
     'bed_lock' => BedLockMessage(open: json['open'] as bool),
     'bed_give' => BedGiveMessage(
@@ -455,13 +456,21 @@ sealed class SessionMessage {
       'owner': owner,
       'stack': stack.toJson(),
     },
-    BedTakeMessage(:final owner, :final slot, :final item, :final into) => {
-      'type': 'bed_take',
-      'owner': owner,
-      'slot': slot,
-      'item': item,
-      'into': ?into,
-    },
+    BedTakeMessage(
+      :final owner,
+      :final slot,
+      :final item,
+      :final into,
+      :final count,
+    ) =>
+      {
+        'type': 'bed_take',
+        'owner': owner,
+        'slot': slot,
+        'item': item,
+        'into': ?into,
+        'count': ?count,
+      },
     BedLockMessage(:final open) => {'type': 'bed_lock', 'open': open},
     BedGiveMessage(:final stack, :final refusal) => {
       'type': 'bed_give',
@@ -691,12 +700,16 @@ final class BedTakeMessage extends SessionMessage {
     required this.slot,
     required this.item,
     this.into,
+    this.count,
   });
 
   final int owner;
   final int slot;
   final String item;
   final int? into;
+
+  /// Only this many of the stack; null for all of it (2026-10-28, 사용자).
+  final int? count;
 }
 
 /// Guest → host on reliable: open the guest's own bed to everyone, or lock

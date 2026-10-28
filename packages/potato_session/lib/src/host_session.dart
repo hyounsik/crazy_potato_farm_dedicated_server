@@ -469,24 +469,39 @@ final class HostSession {
   /// lobby). Lowers `stack.count` by what went on; why not all of it did.
   BedRefusal? putInBed(int owner, ItemStack stack) => _put(0, owner, stack);
 
-  /// The host player takes the stack of [item] in [owner]'s bed slot [slot].
+  /// The host player takes the stack of [item] in [owner]'s bed slot [slot],
+  /// or only [count] of it.
   ({ItemStack? stack, BedRefusal? refusal}) takeFromBed(
     int owner,
     int slot,
+    String item, {
+    int? count,
+  }) => _take(0, owner, slot, item, count);
+
+  /// The host player moves the stack of [item] in [owner]'s bed slot [slot],
+  /// or only [count] of it, onto bed [into]; what does not go on stays
+  /// where it was.
+  BedRefusal? moveInBeds(
+    int owner,
+    int slot,
     String item,
-  ) => _take(0, owner, slot, item);
+    int into, {
+    int? count,
+  }) => _move(0, owner, slot, item, into, count);
 
-  /// The host player moves the stack of [item] in [owner]'s bed slot [slot]
-  /// onto bed [into]; what does not go on stays where it was.
-  BedRefusal? moveInBeds(int owner, int slot, String item, int into) =>
-      _move(0, owner, slot, item, into);
-
-  BedRefusal? _move(int from, int owner, int slot, String item, int into) {
+  BedRefusal? _move(
+    int from,
+    int owner,
+    int slot,
+    String item,
+    int into, [
+    int? count,
+  ]) {
     if (into == owner) return null;
     final target = _bedsOpen ? _bedAt(into) : null;
     if (target == null) return BedRefusal.gone;
     if (into != from && !target.open) return BedRefusal.locked;
-    final taken = _take(from, owner, slot, item);
+    final taken = _take(from, owner, slot, item, count);
     final stack = taken.stack;
     if (stack == null) return taken.refusal;
     final refusal = _put(from, into, stack);
@@ -520,11 +535,12 @@ final class HostSession {
     int from,
     int owner,
     int slot,
-    String item,
-  ) {
+    String item, [
+    int? count,
+  ]) {
     final bed = _bedsOpen ? _bedAt(owner) : null;
     if (bed == null) return (stack: null, refusal: BedRefusal.gone);
-    final taken = bed.take(slot, item, byOwner: from == owner);
+    final taken = bed.take(slot, item, byOwner: from == owner, count: count);
     if (taken.stack != null) _broadcastBeds();
     return taken;
   }
@@ -554,11 +570,18 @@ final class HostSession {
     );
   }
 
-  void _onBedTake(String peerId, int owner, int slot, String item, int? into) {
+  void _onBedTake(
+    String peerId,
+    int owner,
+    int slot,
+    String item,
+    int? into,
+    int? count,
+  ) {
     final from = _placeOf(peerId);
     if (from == null) return;
     if (into != null) {
-      final refusal = _move(from, owner, slot, item, into);
+      final refusal = _move(from, owner, slot, item, into, count);
       if (refusal != null) {
         _send(
           peerId,
@@ -568,7 +591,7 @@ final class HostSession {
       }
       return;
     }
-    final taken = _take(from, owner, slot, item);
+    final taken = _take(from, owner, slot, item, count);
     _send(
       peerId,
       SessionChannel.reliable,
@@ -637,8 +660,14 @@ final class HostSession {
         _onWalk(packet.peerId, walk, seq);
       case BedPutMessage(:final owner, :final stack):
         _onBedPut(packet.peerId, owner, stack);
-      case BedTakeMessage(:final owner, :final slot, :final item, :final into):
-        _onBedTake(packet.peerId, owner, slot, item, into);
+      case BedTakeMessage(
+        :final owner,
+        :final slot,
+        :final item,
+        :final into,
+        :final count,
+      ):
+        _onBedTake(packet.peerId, owner, slot, item, into, count);
       case BedLockMessage(:final open):
         if (_placeOf(packet.peerId) case final place?) _lock(place, open);
       default:

@@ -672,8 +672,8 @@ final class FarmSimulation {
       seed,
       gearIndex,
     ),
-    UnloadBed(:final slot) => _unload(bed, slot),
-    UnloadBag(:final slot) => _unload(_bag, slot),
+    UnloadBed(:final slot, :final count) => _unload(bed, slot, count),
+    UnloadBag(:final slot, :final count) => _unload(_bag, slot, count),
     UnpackBag() => _unpackBag(),
   };
 
@@ -1993,12 +1993,19 @@ final class FarmSimulation {
     return identical(into, bed) ? FarmRejection.bedFull : FarmRejection.bagFull;
   }
 
-  FarmRejection? _unload(Bag from, int slot) {
+  FarmRejection? _unload(Bag from, int slot, [int? count]) {
     if (slot < 0 || slot >= from.capacity) return FarmRejection.emptySlot;
     final stack = from.slots[slot];
     if (stack == null) return FarmRejection.emptySlot;
     final before = stack.count;
-    store(stack);
+    final part = count == null || count >= before
+        ? stack
+        : stack.copyWithCount(math.max(0, count));
+    if (part.count == 0) return null;
+    store(part);
+    if (!identical(part, stack)) {
+      stack.count -= count! - part.count;
+    }
     if (stack.count == 0) from.replace(slot, null);
     if (stack.count < before) return null;
     return catalog.items[stack.item]?.kind == ItemKind.gear

@@ -726,6 +726,7 @@ UnloadBed _$UnloadBedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('UnloadBed', json, ($checkedConvert) {
       final val = UnloadBed(
         slot: $checkedConvert('slot', (v) => (v as num).toInt()),
+        count: $checkedConvert('count', (v) => (v as num?)?.toInt()),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -733,6 +734,7 @@ UnloadBed _$UnloadBedFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UnloadBedToJson(UnloadBed instance) => <String, dynamic>{
   'slot': instance.slot,
+  'count': instance.count,
   'runtimeType': instance.$type,
 };
 
@@ -740,6 +742,7 @@ UnloadBag _$UnloadBagFromJson(Map<String, dynamic> json) =>
     $checkedCreate('UnloadBag', json, ($checkedConvert) {
       final val = UnloadBag(
         slot: $checkedConvert('slot', (v) => (v as num).toInt()),
+        count: $checkedConvert('count', (v) => (v as num?)?.toInt()),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -747,6 +750,7 @@ UnloadBag _$UnloadBagFromJson(Map<String, dynamic> json) =>
 
 Map<String, dynamic> _$UnloadBagToJson(UnloadBag instance) => <String, dynamic>{
   'slot': instance.slot,
+  'count': instance.count,
   'runtimeType': instance.$type,
 };
 

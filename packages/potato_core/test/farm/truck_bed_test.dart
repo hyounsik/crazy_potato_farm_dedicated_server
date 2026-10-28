@@ -271,4 +271,11 @@ void main() {
       FarmRejection.bagTooSmall,
     );
   });
+
+  test('part of a bag stack goes into storage', () {
+    farm.apply(FarmCommand.returnHome(food: 0, bag: [ItemStack('food', 30)]));
+    expect(farm.apply(const FarmCommand.unloadBag(slot: 0, count: 12)), null);
+    expect(farm.food, 112);
+    expect(farm.bag.countOf('food'), 18);
+  });
 }

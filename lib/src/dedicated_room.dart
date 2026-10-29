@@ -30,9 +30,9 @@ enum KitMoveRefusal {
 /// with nobody playing on the server and replays the waiting hellos into it.
 /// Later guests must match that build number and catalog hash.
 ///
-/// The first guest leads: when they ask to set out, the room starts the run
-/// with a fresh seed and steps it on a timer. When every connected member is
-/// out, the room opens a new waiting room on the same catalog. When nobody is
+/// Anyone may ask to set out: the room then starts the run with a fresh
+/// seed and steps it on a timer. When every connected member is out, the
+/// room opens a new waiting room on the same catalog. When nobody is
 /// connected any more, it forgets the catalog so an updated app can bring
 /// its own.
 ///
@@ -40,7 +40,11 @@ enum KitMoveRefusal {
 /// (2026-10-28, 사용자): the game data stays with the world, so a guest on
 /// the same data comes in without sending it again; guests' farm commands
 /// go to the world, each acting with their own kit; and the farm and each
-/// guest's kit are sent out as they change. A run over goes back to the
+/// guest's kit are sent out as they change. Setting out works as at a
+/// friend's farm (2026-10-29, 사용자): whoever asks opens the party for
+/// everyone on the farm with a [partyCountdown], and those ready go when
+/// all are or when it ends; the rest stay on the farm and keep at it,
+/// and newcomers come to the farm meanwhile. A run over goes back to the
 /// farm in the same room instead of a new one.
 final class DedicatedRoom {
   DedicatedRoom({
@@ -51,6 +55,7 @@ final class DedicatedRoom {
     this.log,
     this.world,
     this.shareEvery = const Duration(milliseconds: 500),
+    this.partyCountdown = const Duration(seconds: 60),
     Random? random,
   }) : _random = random ?? Random() {
     _packetSub = transport.packets.listen(_onPacket);
@@ -76,6 +81,12 @@ final class DedicatedRoom {
 
   /// How often at most the farm is sent out while it keeps changing.
   final Duration shareEvery;
+
+  /// How long a party opened on the farm waits for everyone to get ready
+  /// (as a host's, 2026-10-22, 사용자: 60 s).
+  final Duration partyCountdown;
+  Timer? _departTimer;
+  StreamSubscription<List<HostedGuest>>? _readySub;
 
   final List<StreamSubscription<void>> _worldSubs = [];
   Timer? _shareTimer;
@@ -111,9 +122,9 @@ final class DedicatedRoom {
     if (_closed) return;
     final relay = _relay;
     if (relay != null) {
-      // Farm commands are the world's, between runs; the rest is the
-      // session's.
-      if (world != null && _session?.run == null) {
+      // Farm commands are the world's, from those on the farm; the rest is
+      // the session's.
+      if (world != null && !_outOnRun(packet.peerId)) {
         if (_decode(packet) case final FarmCommandMessage msg) {
           return _onFarmCommand(packet.peerId, msg.command);
         }
@@ -198,15 +209,24 @@ final class DedicatedRoom {
       buildNumber: _buildNumber,
       codec: codec,
       hostPlays: false,
+      kitOf: world == null
+          ? null
+          : (player) {
+              final kit = world!.room?.kitOf(player);
+              return kit == null ? null : (bed: kit.bed, bag: kit.bag);
+            },
     );
     _relay = relay;
     _session = session;
-    _startSub = session.startRequests.listen(_startRun);
+    _startSub = session.startRequests.listen(_openParty);
+    _readySub = session.guestsChanged.listen((_) => _departIfAllReady());
     if (world case final world?) {
       _worldSubs
         ..add(world.changes.listen((_) => _shareSoon()))
         ..add(session.guestsChanged.listen((_) => _shareSoon()))
-        ..add(session.memberResults.listen(_bringHome));
+        ..add(session.memberResults.listen(_bringHome))
+        // Trades move what is on the kits themselves: keep and show them.
+        ..add(session.bedsChanged.listen((_) => world.touch()));
       _shareFarm();
     }
   }
@@ -259,7 +279,14 @@ final class DedicatedRoom {
       peerId,
       FarmReplyMessage(refused: reply.refused, rejection: reply.rejection),
     );
-    _sendKit(peerId, player!);
+    if (reply.refused || reply.rejection != null) return;
+    // What a player did shows to everyone at once (2026-10-29, 사용자: the
+    // others saw planting late); only time passing waits for [shareEvery].
+    _shareTimer?.cancel();
+    _shareTimer = null;
+    _shareFarm();
+    // Loading or unloading a truck bed changes what others see on it.
+    _session?.refreshBeds();
   }
 
   void _sendKit(String peerId, String player) {
@@ -333,19 +360,71 @@ final class DedicatedRoom {
     });
   }
 
-  /// Shows the shared farm to everyone here, and each their own kit.
+  /// Shows the shared farm to everyone on it, and each their own kit.
   void _shareFarm() {
     final session = _session;
     final room = world?.room;
-    if (session == null || room == null || session.run != null) return;
+    if (session == null || room == null) return;
     session.shareFarm(FarmDocument.of(room.farm).toJson());
     for (final g in session.guests) {
-      if (!g.connected) continue;
+      if (!g.connected || session.isOut(g)) continue;
       _sendKit(g.peerId, g.playerId.isEmpty ? g.peerId : g.playerId);
     }
   }
 
-  void _startRun(String zone) {
+  /// Whether the guest on link [peerId] is out on the run (or not here).
+  bool _outOnRun(String peerId) {
+    final session = _session;
+    if (session == null || session.run == null) return false;
+    final guest = session.guests.where((g) => g.peerId == peerId).firstOrNull;
+    return guest == null || session.isOut(guest);
+  }
+
+  /// A guest asked to set out to [zone]. With a farm, everyone on it is
+  /// called to get ready; without one (exploring only), everyone goes now.
+  void _openParty(String zone) {
+    final session = _session;
+    if (session == null || session.run != null) return;
+    if (world == null) return _startRun(zone);
+    if (session.partyZone != null) return;
+    session.openParty(zone, countdown: partyCountdown);
+    log?.call('Party for $zone');
+    _departTimer?.cancel();
+    _departTimer = Timer(partyCountdown, _depart);
+  }
+
+  /// Sets out at once when everyone here got ready.
+  void _departIfAllReady() {
+    final session = _session;
+    if (session == null || session.run != null || session.partyZone == null) {
+      return;
+    }
+    final here = [
+      for (final g in session.guests)
+        if (g.connected) g,
+    ];
+    if (here.isNotEmpty && here.every((g) => g.ready)) _depart();
+  }
+
+  /// The party sets out with those ready; with nobody ready it is off.
+  void _depart() {
+    _departTimer?.cancel();
+    _departTimer = null;
+    final session = _session;
+    final zone = session?.partyZone;
+    if (session == null || zone == null || session.run != null) return;
+    final goers = [
+      for (final g in session.guests)
+        if (g.ready && g.connected) g,
+    ];
+    if (goers.isEmpty) {
+      log?.call('Nobody got ready for $zone');
+      return session.closeParty();
+    }
+    _startRun(zone, goers);
+  }
+
+  void _startRun(String zone, [List<HostedGuest>? goers]) {
     final session = _session;
     if (session == null || session.run != null) return;
     final seed = _random.nextInt(1 << 32);
@@ -356,8 +435,12 @@ final class DedicatedRoom {
       startOf: farmRoom == null
           ? null
           : (g) => _startFromKit(farmRoom, g, zone),
+      goers: goers,
     );
-    log?.call('Run to $zone with ${session.guests.length} (seed $seed)');
+    log?.call(
+      'Run to $zone with ${goers?.length ?? session.guests.length} '
+      '(seed $seed)',
+    );
     _sinceTick
       ..reset()
       ..start();
@@ -428,6 +511,10 @@ final class DedicatedRoom {
   Future<void> _closeSession() async {
     _ticker?.cancel();
     _ticker = null;
+    _departTimer?.cancel();
+    _departTimer = null;
+    await _readySub?.cancel();
+    _readySub = null;
     _shareTimer?.cancel();
     _shareTimer = null;
     for (final sub in _worldSubs) {

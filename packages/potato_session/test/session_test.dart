@@ -429,15 +429,12 @@ void main() {
       expect(leader.lobby?.you, 0);
       expect(other.lobby?.names, ['Lead', 'Other']);
       expect(other.lobby?.you, 1);
-      expect(leader.isLeader, isTrue);
-      expect(other.isLeader, isFalse);
-
-      other.requestStart('open');
+      // Anyone may ask (2026-10-29, 사용자: no leader), for a known zone.
       leader.requestStart('no_such_zone');
       await _pumpMicrotasks();
       expect(requests, isEmpty);
 
-      leader.requestStart('open');
+      other.requestStart('open');
       await _pumpMicrotasks();
       expect(requests, ['open']);
 
@@ -573,7 +570,6 @@ void main() {
       expect(a.sharedFarm, {'v': 1});
       expect(a.lobby?.names, ['Host', 'A']);
       expect(a.lobby?.you, 1);
-      expect(a.isLeader, isFalse);
 
       host.shareFarm({'v': 2});
       final b = ClientSession(

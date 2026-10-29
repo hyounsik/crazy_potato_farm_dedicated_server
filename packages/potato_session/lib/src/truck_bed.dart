@@ -10,15 +10,30 @@ import 'package:potato_session/src/session_message.dart';
 /// reaching for the same stack cannot both get it.
 final class TruckBed {
   TruckBed(Catalog catalog, List<ItemStack?> slots)
-    : _bag = Bag.restore([
-        for (final s in slots) s?.copyWithCount(s.count),
-        for (var i = slots.length; i < catalog.rules.storage.bedSlots; i++)
-          null,
-      ], catalog.stackOf),
+    : this.over(
+        catalog,
+        _filled(
+          Bag.restore([
+            for (final s in slots) s?.copyWithCount(s.count),
+            for (var i = slots.length; i < catalog.rules.storage.bedSlots; i++)
+              null,
+          ], catalog.stackOf),
+        ),
+      );
+
+  /// A bed that is the owner's own truck bed, found again each time
+  /// (a dedicated server's kit, 2026-10-29, 사용자): what moves here moves
+  /// there, with no copy to fall out of step.
+  TruckBed.over(Catalog catalog, Bag Function() bed)
+    : _bed = bed,
       _catalog = catalog;
 
+  static Bag Function() _filled(Bag bag) =>
+      () => bag;
+
   final Catalog _catalog;
-  final Bag _bag;
+  final Bag Function() _bed;
+  Bag get _bag => _bed();
 
   /// Whether anyone may put in and take out, not only the owner.
   bool open = false;

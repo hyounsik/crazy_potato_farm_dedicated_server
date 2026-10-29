@@ -122,6 +122,10 @@ final class DedicatedWorld {
     return true;
   }
 
+  /// Something on a kit changed outside farm commands (truck beds traded
+  /// in the room): saved soon and sent out like any change.
+  void touch() => _changed();
+
   /// Saves the farm and the kits now.
   Future<void> save() async {
     _saveSoon?.cancel();

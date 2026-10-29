@@ -5,6 +5,9 @@ import 'package:potato_session/src/session_message.dart';
 import 'package:potato_session/src/transport.dart';
 import 'package:potato_session/src/truck_bed.dart';
 
+/// A player's truck bed and bag where a dedicated server keeps them.
+typedef KitBags = ({Bag bed, Bag bag});
+
 /// A guest who passed the version check and is in the host's party.
 final class HostedGuest {
   HostedGuest({
@@ -42,9 +45,13 @@ final class HostedGuest {
   /// Where they walk on the host's farm, the latest heard (null: not yet).
   FarmWalk? walk;
 
-  /// Their truck bed while they are in the room (null on a dedicated
-  /// server, which has no farm).
+  /// Their truck bed while they are in the room: brought from their farm,
+  /// or their kit's on a dedicated server with a farm (null without one).
   final TruckBed? bed;
+
+  /// Their kit's bed on a dedicated server, made the first time the kit is
+  /// there (the farm may still be on its way when they come in).
+  TruckBed? _kitBed;
   int _lastMoveSeq = -1;
   int _lastWalkSeq = -1;
   bool _resultSent = false;
@@ -62,8 +69,13 @@ final class HostedGuest {
 ///
 /// With [hostPlays] false (a dedicated server) nobody plays on the host:
 /// guests are members 0..N, each guest gets [LobbyMessage] when the waiting
-/// room changes, and the first guest (the leader) asks to set out with
-/// [StartRunMessage], which arrives on [startRequests].
+/// room changes, and any guest may ask to set out with [StartRunMessage],
+/// which arrives on [startRequests] (2026-10-29, 사용자: no leader).
+///
+/// A run may take only some of the guests ([startRun]'s `goers`); the rest
+/// stay on the farm, and a dedicated server takes newcomers there while
+/// the run goes on. Run messages go to those out on it, farm messages
+/// (the farm, walks, the lobby, the party) to those on the farm.
 final class HostSession {
   HostSession({
     required this.catalog,
@@ -75,6 +87,7 @@ final class HostSession {
     this.hostName = '',
     this.hostAccountId = '',
     int? maxGuests,
+    this.kitOf,
   }) : catalogHash = computeCatalogHash(catalog),
        maxGuests = maxGuests ?? (hostPlays ? 3 : 4) {
     _packetSub = transport.packets.listen(_onPacket);
@@ -96,6 +109,11 @@ final class HostSession {
   /// [hostPlays] (2026-10-23).
   final String hostAccountId;
 
+  /// On a dedicated server with a farm, the truck bed and bag a player
+  /// keeps there (their kit, by installation id, 2026-10-29, 사용자). Beds
+  /// trade from and into these, never trusting what an app says it has.
+  final KitBags? Function(String player)? kitOf;
+
   /// The zone the host picked to set out for, or null while friends only
   /// gather at the farm ([openParty]).
   String? get partyZone => _partyZone;
@@ -114,7 +132,8 @@ final class HostSession {
   final Map<String, HostedGuest> _guests = {};
   final List<HostedGuest> _guestOrder = [];
   final _guestsChanged = StreamController<List<HostedGuest>>.broadcast();
-  final _startRequests = StreamController<String>.broadcast();
+  // Sync, so a [ReadyMessage] right after the request finds the party open.
+  final _startRequests = StreamController<String>.broadcast(sync: true);
   final _memberResults =
       StreamController<({HostedGuest guest, RaidResult result})>.broadcast(
         sync: true,
@@ -135,9 +154,11 @@ final class HostSession {
   Duration _sinceSnapshot = Duration.zero;
   bool _closed = false;
 
-  /// Guests currently in the room (at the farm or in the run). All of them
-  /// set out together.
+  /// Guests currently in the room (at the farm or in the run).
   List<HostedGuest> get guests => List.unmodifiable(_guestOrder);
+
+  /// Whether [guest] is out on the run now, not on the farm.
+  bool isOut(HostedGuest guest) => _run != null && guest.memberIndex != null;
 
   /// Whether every guest is ready to set out (2026-10-22, 사용자).
   bool get allReady => _guestOrder.every((g) => g.ready);
@@ -145,9 +166,9 @@ final class HostSession {
   /// Fires whenever the guest list or a guest's connection changes.
   Stream<List<HostedGuest>> get guestsChanged => _guestsChanged.stream;
 
-  /// Zones the leader asked to set out to (only when not [hostPlays]). The
-  /// zone is known to [catalog]; the owner picks the seed and calls
-  /// [startRun].
+  /// Zones a guest asked to set out to while no party is open and no run
+  /// is going (only when not [hostPlays]). The zone is known to [catalog];
+  /// the owner opens the party ([openParty]) and later calls [startRun].
   Stream<String> get startRequests => _startRequests.stream;
 
   /// Each guest's run result as it is sent to them, for whoever keeps the
@@ -162,6 +183,8 @@ final class HostSession {
   /// the room as members 1..N (nobody stays behind, 2026-10-22, 사용자), and
   /// sends [RunStartedMessage] to each guest.
   /// Without [hostPlays], [hostStart] is left out and guests are 0..N-1.
+  /// With [goers], only those guests set out, in room order; the others
+  /// stay on the farm (a dedicated server, 2026-10-29, 사용자).
   /// Each guest sets out with what they sent, or with what [startOf] gives
   /// for them (a dedicated server builds it from the guest's kit on its
   /// shared farm instead of trusting the app, 2026-10-28).
@@ -171,6 +194,7 @@ final class HostSession {
     RaidMemberStart? hostStart,
     Map<String, MapChunk> chunks = const {},
     RaidMemberStart Function(HostedGuest guest)? startOf,
+    Iterable<HostedGuest>? goers,
   }) {
     if (_run != null) throw StateError('Run already started');
     if (hostPlays != (hostStart != null)) {
@@ -179,11 +203,17 @@ final class HostSession {
     _guestOrder
       ..clear()
       ..addAll(_guests.values);
+    final going = goers == null
+        ? _guestOrder
+        : [
+            for (final g in _guestOrder)
+              if (goers.contains(g)) g,
+          ];
     // The farm's greetings stay on the farm.
     _chats.clear();
     final starts = <RaidMemberStart>[
       ?hostStart,
-      for (final g in _guestOrder) startOf?.call(g) ?? g.start,
+      for (final g in going) startOf?.call(g) ?? g.start,
     ];
     final sim = RaidSimulation.party(
       catalog: catalog,
@@ -199,8 +229,8 @@ final class HostSession {
     _overSent = false;
 
     final initialJson = sim.toJson();
-    for (var i = 0; i < _guestOrder.length; i++) {
-      final guest = _guestOrder[i];
+    for (var i = 0; i < going.length; i++) {
+      final guest = going[i];
       final memberIndex = hostPlays ? i + 1 : i;
       guest.memberIndex = memberIndex;
       _send(
@@ -208,6 +238,15 @@ final class HostSession {
         SessionChannel.reliable,
         RunStartedMessage(memberIndex: memberIndex, runJson: initialJson),
       );
+    }
+    // Those staying behind are on the farm with the party called off.
+    if (going.length < _guestOrder.length) {
+      _partyZone = null;
+      for (final g in _guestOrder) {
+        g.ready = false;
+      }
+      _toFarm(SessionChannel.reliable, const PartyStateMessage(null));
+      _notifyGuests();
     }
     return sim;
   }
@@ -301,7 +340,7 @@ final class HostSession {
     _flushResults(sim);
     if (sim.isOver && !_overSent) {
       _overSent = true;
-      _broadcast(SessionChannel.reliable, const RunOverMessage());
+      _toRun(SessionChannel.reliable, const RunOverMessage());
     }
   }
 
@@ -309,7 +348,7 @@ final class HostSession {
     final events = sim.takeEvents();
     if (events.isNotEmpty) {
       _hostEvents.addAll(events);
-      _broadcast(
+      _toRun(
         SessionChannel.reliable,
         EventsMessage(tick: sim.tick, events: events),
       );
@@ -338,7 +377,7 @@ final class HostSession {
   void broadcastSnapshot() {
     final sim = _run;
     if (sim == null || _closed) return;
-    _broadcast(
+    _toRun(
       SessionChannel.unreliable,
       SnapshotMessage(RaidSnapshot.fromRun(sim)),
     );
@@ -387,6 +426,8 @@ final class HostSession {
   /// whose link dropped in the run leave the room.
   void returnToFarm() {
     if (_run == null || _closed) return;
+    // Only those out on it come back; the others never left the farm.
+    _toRun(SessionChannel.reliable, const BackToFarmMessage());
     _run = null;
     _clock = null;
     _partyZone = null;
@@ -407,7 +448,6 @@ final class HostSession {
         .._lastMoveSeq = -1
         .._lastWalkSeq = -1;
     }
-    _broadcast(SessionChannel.reliable, const BackToFarmMessage());
     if (_sharedFarm case final farm?) {
       _broadcast(SessionChannel.reliable, FarmViewMessage(farm));
     }
@@ -416,7 +456,7 @@ final class HostSession {
 
   /// Takes the pick back: nobody is getting ready.
   void closeParty() {
-    if (_run != null || _closed || !hostPlays) return;
+    if (_run != null || _closed) return;
     _partyZone = null;
     _departsAt = null;
     _setAllReady(false);
@@ -430,12 +470,12 @@ final class HostSession {
     }
   }
 
-  /// Shows the host's farm document [farm] to the guests gathering in the
-  /// waiting room; a guest who joins later gets the latest one.
+  /// Shows the host's farm document [farm] to the guests on the farm (not
+  /// out on a run); a guest who joins later gets the latest one.
   void shareFarm(Map<String, dynamic> farm) {
-    if (_run != null || _closed) return;
+    if (_closed || (hostPlays && _run != null)) return;
     _sharedFarm = farm;
-    _broadcast(SessionChannel.reliable, FarmViewMessage(farm));
+    _toFarm(SessionChannel.reliable, FarmViewMessage(farm));
   }
 
   /// The host player (member 0, first in the lobby) sends [chat] to the
@@ -464,16 +504,31 @@ final class HostSession {
   }
 
   /// Every truck bed in the room by place in the lobby, the host's first;
-  /// empty before [setHostBed].
+  /// empty before [setHostBed] (and on a dedicated server without a farm).
   List<TruckBedView> get beds {
     final host = _hostBed;
-    if (host == null) return const [];
+    if (hostPlays && host == null) return const [];
+    if (!hostPlays && kitOf == null) return const [];
     return [
-      host.view,
+      ?host?.view,
       for (final g in _guestOrder)
-        g.bed?.view ?? (slots: const <ItemStack?>[], open: false),
+        _bedOf(g)?.view ?? (slots: const <ItemStack?>[], open: false),
     ];
   }
+
+  /// A guest's truck bed: brought along, or their kit's on a dedicated
+  /// server, whose bag is looked up on every move.
+  TruckBed? _bedOf(HostedGuest guest) {
+    if (guest.bed case final bed?) return bed;
+    final kitOf = this.kitOf;
+    final player = guest.playerId.isEmpty ? guest.peerId : guest.playerId;
+    if (kitOf == null || kitOf(player) == null) return null;
+    return guest._kitBed ??= TruckBed.over(catalog, () => kitOf(player)!.bed);
+  }
+
+  /// Says the beds again after something else moved what is on them (a
+  /// dedicated server's farm commands on a kit's bed).
+  void refreshBeds() => _broadcastBeds();
 
   /// The host's own bed slots as they are now, to keep in the host's save.
   List<ItemStack?> get hostBedSlots => _hostBed?.slots ?? const [];
@@ -530,13 +585,15 @@ final class HostSession {
   void setBedOpen(bool open) => _lock(0, open);
 
   TruckBed? _bedAt(int place) {
-    if (place == 0) return _hostBed;
-    final index = place - 1;
+    if (hostPlays && place == 0) return _hostBed;
+    final index = place - (hostPlays ? 1 : 0);
     if (index < 0 || index >= _guestOrder.length) return null;
-    return _guestOrder[index].bed;
+    return _bedOf(_guestOrder[index]);
   }
 
-  bool get _bedsOpen => hostPlays && _run == null && !_closed;
+  /// Beds trade at a host's farm while nobody is out, and on a dedicated
+  /// server's farm among those on it.
+  bool get _bedsOpen => !_closed && (hostPlays ? _run == null : kitOf != null);
 
   BedRefusal? _put(int from, int owner, ItemStack stack) {
     final bed = _bedsOpen ? _bedAt(owner) : null;
@@ -569,14 +626,21 @@ final class HostSession {
   }
 
   void _broadcastBeds() {
-    if (!_bedsOpen || _hostBed == null) return;
-    _broadcast(SessionChannel.reliable, BedsMessage(beds));
+    if (!_bedsOpen || (hostPlays && _hostBed == null)) return;
+    _toFarm(SessionChannel.reliable, BedsMessage(beds));
     if (!_bedsChanged.isClosed) _bedsChanged.add(null);
   }
 
   void _onBedPut(String peerId, int owner, ItemStack stack) {
     final from = _placeOf(peerId);
     if (from == null) return;
+    if (_kitBagOf(peerId) case final bag?) {
+      return _send(
+        peerId,
+        SessionChannel.reliable,
+        BedGiveMessage(refusal: _putFromKit(from, owner, bag, stack)),
+      );
+    }
     final refusal = _put(from, owner, stack);
     if (refusal == null && stack.count == 0) return;
     _send(
@@ -608,6 +672,26 @@ final class HostSession {
       return;
     }
     final taken = _take(from, owner, slot, item, count);
+    if (_kitBagOf(peerId) case final bag?) {
+      // Into the kit's bag; what does not fit goes back where it was.
+      var refusal = taken.refusal;
+      if (taken.stack case final stack?) {
+        bag.addFrom(stack);
+        if (stack.count > 0) {
+          _bedAt(owner)?.put(stack, byOwner: true);
+          refusal ??= BedRefusal.full;
+        }
+        _broadcastBeds();
+      }
+      if (refusal != null) {
+        _send(
+          peerId,
+          SessionChannel.reliable,
+          BedGiveMessage(refusal: refusal),
+        );
+      }
+      return;
+    }
     _send(
       peerId,
       SessionChannel.reliable,
@@ -615,10 +699,38 @@ final class HostSession {
     );
   }
 
-  /// A guest's place in the lobby, or null when they are not in the room.
+  /// The kit bag of the guest on [peerId] on a dedicated server, or null.
+  Bag? _kitBagOf(String peerId) {
+    final guest = _guests[peerId];
+    final kitOf = this.kitOf;
+    if (guest == null || kitOf == null) return null;
+    return kitOf(guest.playerId.isEmpty ? peerId : guest.playerId)?.bag;
+  }
+
+  /// Puts what [bag] really has of [stack] on bed [owner], taken out of
+  /// [bag]; what does not go on goes back into it.
+  BedRefusal? _putFromKit(int from, int owner, Bag bag, ItemStack stack) {
+    final slots = bag.slots;
+    final at = slots.indexWhere((s) => s != null && s.sameAs(stack));
+    if (at < 0 || stack.count <= 0) return BedRefusal.gone;
+    final there = slots[at]!;
+    final ItemStack moving;
+    if (stack.count < there.count) {
+      there.count -= stack.count;
+      moving = there.copyWithCount(stack.count);
+    } else {
+      moving = bag.replace(at, null)!;
+    }
+    final refusal = _put(from, owner, moving);
+    if (moving.count > 0) bag.addFrom(moving);
+    return refusal;
+  }
+
+  /// A guest's place in the lobby, or null when they are not in the room
+  /// (or out on a run).
   int? _placeOf(String peerId) {
     final guest = _guests[peerId];
-    if (guest == null) return null;
+    if (guest == null || isOut(guest)) return null;
     final index = _guestOrder.indexOf(guest);
     return index < 0 ? null : _lobbySlot(index);
   }
@@ -634,15 +746,17 @@ final class HostSession {
 
   /// The host words a typed message the same for everyone: one line, cut
   /// to [quickChatTextMax], or nothing when empty.
-  void _relayChat(int from, QuickChat chat, [String? text]) {
+  /// [onFarm]: said on the farm or out on the run, when some are on each.
+  void _relayChat(int from, QuickChat chat, [String? text, bool? onFarm]) {
     final words = chat == QuickChat.custom ? quickChatText(text) : null;
     if (chat == QuickChat.custom && words == null) return;
     _chats.add((from: from, chat: chat, text: words));
     if (_chats.length > _keptChats) _chats.removeAt(0);
-    _broadcast(
-      SessionChannel.reliable,
-      QuickChatMessage(chat, from: from, text: words),
-    );
+    final message = QuickChatMessage(chat, from: from, text: words);
+    if (onFarm == null) return _broadcast(SessionChannel.reliable, message);
+    onFarm
+        ? _toFarm(SessionChannel.reliable, message)
+        : _toRun(SessionChannel.reliable, message);
   }
 
   void _onPacket(SessionPacket packet) {
@@ -668,10 +782,13 @@ final class HostSession {
         final guest = _guests[packet.peerId];
         if (guest == null) break;
         // In a run by member index; on the farm by place in the lobby.
-        final index = _run != null
+        final out = isOut(guest);
+        final index = out
             ? guest.memberIndex
             : _lobbySlot(_guestOrder.indexOf(guest));
-        if (index != null) _relayChat(index, chat, text);
+        if (index != null) {
+          _relayChat(index, chat, text, _run == null ? null : !out);
+        }
       case FarmWalkMessage(:final walk, :final seq):
         _onWalk(packet.peerId, walk, seq);
       case BedPutMessage(:final owner, :final stack):
@@ -716,11 +833,14 @@ final class HostSession {
           .firstOrNull;
       if (back != null) return _rejoin(back, peerId);
     }
-    // The same installation again in the waiting room: it replaces the
-    // stale connection it left behind.
-    if (_run == null && msg.playerId.isNotEmpty) {
+    // The same installation again on the farm: it replaces the stale
+    // connection it left behind.
+    if (msg.playerId.isNotEmpty) {
       final stale = _guestOrder
-          .where((g) => g.peerId != peerId && g.playerId == msg.playerId)
+          .where(
+            (g) =>
+                g.peerId != peerId && g.playerId == msg.playerId && !isOut(g),
+          )
           .map((g) => g.peerId)
           .toList();
       for (final id in stale) {
@@ -728,7 +848,9 @@ final class HostSession {
         _guestOrder.removeWhere((g) => g.peerId == id);
       }
     }
-    if (_run != null ||
+    // A host out on the run has no farm to come to; a dedicated server's
+    // farm stays open to newcomers while some are out.
+    if ((_run != null && hostPlays) ||
         (!_guests.containsKey(peerId) && _guests.length >= maxGuests)) {
       _send(
         peerId,
@@ -810,11 +932,12 @@ final class HostSession {
 
   void _onWalk(String peerId, FarmWalk walk, int seq) {
     final guest = _guests[peerId];
-    if (guest == null || _run != null || seq <= guest._lastWalkSeq) return;
+    if (guest == null || isOut(guest) || seq <= guest._lastWalkSeq) return;
+    if (hostPlays && _run != null) return;
     guest
       ..walk = walk
       .._lastWalkSeq = seq;
-    _broadcast(
+    _toFarm(
       SessionChannel.unreliable,
       FarmWalkMessage(
         walk,
@@ -849,8 +972,8 @@ final class HostSession {
   }
 
   void _onStartRun(String peerId, String zone) {
-    if (hostPlays || _run != null || _guestOrder.isEmpty) return;
-    if (_guestOrder.first.peerId != peerId) return;
+    if (hostPlays || _run != null || _partyZone != null) return;
+    if (!_guests.containsKey(peerId)) return;
     if (!catalog.zones.containsKey(zone)) return;
     _startRequests.add(zone);
   }
@@ -859,8 +982,8 @@ final class HostSession {
     final guest = _guests[peerId];
     if (guest == null) return;
     final sim = _run;
-    if (sim == null) {
-      // Still in the waiting room: remove them from the party.
+    if (sim == null || guest.memberIndex == null) {
+      // On the farm: remove them from the room.
       _guests.remove(peerId);
       _guestOrder.removeWhere((g) => g.peerId == peerId);
       _notifyGuests();
@@ -880,7 +1003,7 @@ final class HostSession {
     if (!_guestsChanged.isClosed) {
       _guestsChanged.add(List.unmodifiable(_guestOrder));
     }
-    if (_run != null) return;
+    if (hostPlays && _run != null) return;
     // With the host playing, they come first and guests follow.
     final first = hostPlays ? 1 : 0;
     final names = [
@@ -893,6 +1016,7 @@ final class HostSession {
       for (final g in _guestOrder) g.accountId,
     ];
     for (final (i, g) in _guestOrder.indexed) {
+      if (isOut(g)) continue;
       _send(
         g.peerId,
         SessionChannel.reliable,
@@ -914,6 +1038,26 @@ final class HostSession {
 
   void _broadcast(SessionChannel channel, SessionMessage message) {
     transport.broadcast(channel, codec.encode(message));
+  }
+
+  /// To everyone out on the run; everyone when it takes all of them.
+  void _toRun(SessionChannel channel, SessionMessage message) {
+    if (_guestOrder.every((g) => g.memberIndex != null)) {
+      return _broadcast(channel, message);
+    }
+    final bytes = codec.encode(message);
+    for (final g in _guestOrder) {
+      if (g.memberIndex != null) transport.send(g.peerId, channel, bytes);
+    }
+  }
+
+  /// To everyone on the farm, not out on a run.
+  void _toFarm(SessionChannel channel, SessionMessage message) {
+    if (_run == null) return _broadcast(channel, message);
+    final bytes = codec.encode(message);
+    for (final g in _guestOrder) {
+      if (!isOut(g)) transport.send(g.peerId, channel, bytes);
+    }
   }
 
   Future<void> close() async {

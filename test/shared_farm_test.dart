@@ -33,7 +33,9 @@ void main() {
   setUp(() => dir = Directory.systemTemp.createTempSync('shared_farm_test'));
   tearDown(() => dir.deleteSync(recursive: true));
 
-  Future<DedicatedServer> startServer() async {
+  Future<DedicatedServer> startServer({
+    Duration partyCountdown = const Duration(seconds: 60),
+  }) async {
     final world = DedicatedWorld(
       store: WorldStore(dir),
       saveAfter: const Duration(milliseconds: 20),
@@ -43,6 +45,7 @@ void main() {
       address: InternetAddress.loopbackIPv4,
       port: 0,
       world: world,
+      partyCountdown: partyCountdown,
     );
     addTearDown(server.stop);
     return server;
@@ -137,7 +140,9 @@ void main() {
       if (e is Returned) returned.add(e);
     });
 
-    a.requestStart(catalog.zones.keys.first);
+    a
+      ..requestStart(catalog.zones.keys.first)
+      ..setReady(true, start: const RaidMemberStart(name: 'A'));
     await until(() => a.stage == ClientSessionStage.playing);
     // The app sent no bag; the server packed the kit's.
     expect(a.run!.members[a.memberIndex].bag.countOf('food'), 10);
@@ -187,11 +192,108 @@ void main() {
     final server = await startServer();
     final a = await join(server, 'A', catalogFiles: files);
     await until(() => a.kit != null);
-    a.requestStart(catalog.zones.keys.first);
+    a
+      ..requestStart(catalog.zones.keys.first)
+      ..setReady(true, start: const RaidMemberStart(name: 'A'));
     await until(() => a.stage == ClientSessionStage.playing);
     expect(
       await server.room.moveKit('install-A', 'install-B'),
       KitMoveRefusal.runGoing,
     );
   });
+
+  test('anyone opens the party; those ready go when the countdown ends, '
+      'the rest keep at the farm and newcomers come to it', () async {
+    final server = await startServer(
+      partyCountdown: const Duration(milliseconds: 300),
+    );
+    final a = await join(server, 'A', catalogFiles: files);
+    await until(() => a.kit != null);
+    final b = await join(server, 'B');
+    await until(() => b.kit != null && a.lobby?.names.length == 2);
+
+    // B, not first in, opens it; only A gets ready.
+    b.requestStart(catalog.zones.keys.first);
+    await until(() => a.partyZone != null && a.departsAt != null);
+    a.setReady(true);
+    await until(() => a.stage == ClientSessionStage.playing);
+    expect(b.stage, ClientSessionStage.waiting);
+    expect(server.room.session!.run!.members, hasLength(1));
+    await until(() => b.partyZone == null);
+
+    // B keeps working the farm while A is out.
+    final replies = <FarmReplyMessage>[];
+    b.farmReplies.listen(replies.add);
+    b.sendFarmCommand(const FarmCommand.loadBag(item: 'food', count: 2));
+    await until(() => replies.isNotEmpty);
+    expect(replies.single.refused, isFalse);
+    expect(replies.single.rejection, isNull);
+
+    // Someone new comes to the farm meanwhile and sees B walk.
+    final c = await join(server, 'C');
+    await until(() => c.kit != null && c.lobby?.names.length == 3);
+    b.sendWalk(const FarmWalk(at: Vec2(3, 4), facing: Vec2(1, 0)));
+    await until(() => c.walkers.isNotEmpty);
+
+    // A comes home to the same room.
+    a.sendCommand(const GoHome());
+    await until(() => a.stage == ClientSessionStage.waiting);
+    expect(server.room.session!.run, isNull);
+  });
+
+  test('a party nobody got ready for is called off', () async {
+    final server = await startServer(
+      partyCountdown: const Duration(milliseconds: 200),
+    );
+    final a = await join(server, 'A', catalogFiles: files);
+    await until(() => a.kit != null);
+    a.requestStart(catalog.zones.keys.first);
+    await until(() => a.partyZone != null);
+    await until(() => a.partyZone == null);
+    expect(server.room.session!.run, isNull);
+    expect(a.stage, ClientSessionStage.waiting);
+  });
+
+  test(
+    'truck beds trade what the kits really hold, by the lock rules',
+    () async {
+      final server = await startServer();
+      final a = await join(server, 'A', catalogFiles: files);
+      await until(() => a.kit != null);
+      final b = await join(server, 'B');
+      await until(() => b.kit != null && b.beds.length == 2);
+      PlayerKit kitOf(String name) =>
+          server.world!.room!.kitOf('install-$name');
+      final gifts = <BedRefusal?>[];
+      b.bedGifts.listen((g) => gifts.add(g.refusal));
+
+      a.sendFarmCommand(const FarmCommand.loadBag(item: 'food', count: 5));
+      await until(() => kitOf('A').bag.countOf('food') == 5);
+
+      // A puts 3 of it on their own bed (locked: only A may).
+      a.putInBed(0, ItemStack('food', 3));
+      await until(() => b.beds[0].slots.any((s) => s?.item == 'food'));
+      expect(kitOf('A').bag.countOf('food'), 2);
+      expect(kitOf('A').bed.countOf('food'), 3);
+
+      // B cannot reach a locked bed, nor put what B does not have.
+      b.takeFromBed(0, 0, 'food');
+      b.putInBed(0, ItemStack('food', 9));
+      await until(() => gifts.length == 2);
+      expect(gifts, [BedRefusal.locked, BedRefusal.gone]);
+      expect(kitOf('B').bag.countOf('food'), 0);
+
+      // Opened, B takes it straight into B's kit.
+      a.setBedOpen(true);
+      await until(() => b.beds[0].open);
+      final slot = b.beds[0].slots.indexWhere((s) => s?.item == 'food');
+      b.takeFromBed(0, slot, 'food');
+      await until(() => kitOf('B').bag.countOf('food') == 3);
+      expect(kitOf('A').bed.countOf('food'), 0);
+      // Kept on disk with the kits, and B's app hears its kit.
+      await until(
+        () => PlayerKit.fromJson(catalog, b.kit!).bag.countOf('food') == 3,
+      );
+    },
+  );
 }

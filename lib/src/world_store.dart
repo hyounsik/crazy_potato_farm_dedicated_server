@@ -55,9 +55,18 @@ final class WorldStore {
     jsonEncode({'hash': hash, 'build': buildNumber, 'files': files}),
   );
 
+  /// Saves one at a time: two at once would move the same backups.
+  Future<void> _saving = Future.value();
+
   /// Keeps the shared farm and the kits, moving older saves down the
-  /// backups.
-  Future<void> saveRoom(Map<String, dynamic> room) async {
+  /// backups. A save asked for while one is being written waits for it.
+  Future<void> saveRoom(Map<String, dynamic> room) {
+    final next = _saving.then((_) => _saveRoom(room));
+    _saving = next.then<void>((_) {}, onError: (Object _) {});
+    return next;
+  }
+
+  Future<void> _saveRoom(Map<String, dynamic> room) async {
     await directory.create(recursive: true);
     if (await _worldFile.exists()) {
       for (var i = backups; i > 1; i--) {

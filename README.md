@@ -63,10 +63,16 @@ One shared farm (`DedicatedWorld`) and one exploration party at a time
   next player on the same data need not send it. When everyone has left, a
   player on a newer app can bring newer data, and the farm carries over onto
   it.
-- Nobody plays on the server. The first player in the waiting room leads and
-  picks where to go; the server picks the seed and runs the game at a fixed
-  step, sending snapshots to everyone. Up to four players.
-- When every player still connected is out of the run, a new waiting room opens.
+- Nobody plays on the server. Anyone on the farm may call everyone to set
+  out for a zone; those who get ready within a minute go (at once when
+  everyone is ready), and the rest stay on the farm, where newcomers can
+  still come in. The server picks the seed and runs the game at a fixed
+  step, sending snapshots to those out on it. Up to four players.
+- Truck beds trade as at a friend's farm: an open bed takes and gives to
+  anyone, a locked one only to its owner. A bed is its owner's kit bed, and
+  the server moves only what the kits really hold.
+- When everyone out on the run is done, they come back to the farm in the same
+  room.
 - Players are told apart by nickname plus an installation id; there are no
   accounts.
 

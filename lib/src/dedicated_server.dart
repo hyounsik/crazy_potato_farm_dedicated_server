@@ -13,8 +13,19 @@ import 'package:potato_session/potato_session.dart';
 /// refused with 401. On that transport it hosts one exploration party at a
 /// time ([room]), and with a [world] the server's one shared farm.
 class DedicatedServer {
-  DedicatedServer._(this._httpServer, this._password, this.log, this.world) {
-    room = DedicatedRoom(transport: transport, log: log, world: world);
+  DedicatedServer._(
+    this._httpServer,
+    this._password,
+    this.log,
+    this.world,
+    Duration partyCountdown,
+  ) {
+    room = DedicatedRoom(
+      transport: transport,
+      log: log,
+      world: world,
+      partyCountdown: partyCountdown,
+    );
     _httpServer.listen(_handleRequest);
   }
 
@@ -50,11 +61,13 @@ class DedicatedServer {
     String? password,
     void Function(String message)? log,
     DedicatedWorld? world,
+    Duration partyCountdown = const Duration(seconds: 60),
   }) async => DedicatedServer._(
     await HttpServer.bind(address, port),
     password == null || password.isEmpty ? null : password,
     log,
     world,
+    partyCountdown,
   );
 
   /// Stops accepting requests and closes open connections.

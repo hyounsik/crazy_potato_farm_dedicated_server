@@ -75,7 +75,7 @@ void main() {
     }
   }
 
-  test('the first guest brings the catalog and the leader sets out', () async {
+  test('the first guest brings the catalog and anyone sets out', () async {
     final leader = await join('Lead', catalogFiles: files);
     await until(() => leader.stage == ClientSessionStage.waiting);
     expect(server.room.catalog, isNotNull);
@@ -84,7 +84,6 @@ void main() {
     final other = await join('Other');
     await until(() => other.lobby?.names.length == 2);
     expect(leader.lobby?.names, ['Lead', 'Other']);
-    expect(leader.isLeader, isTrue);
 
     leader.requestStart(catalog.zones.keys.first);
     await until(

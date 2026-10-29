@@ -255,14 +255,12 @@ final class ClientSession {
   Map<String, dynamic>? get sharedFarm => _sharedFarm;
   Stream<Map<String, dynamic>> get sharedFarmStream => _farmController.stream;
 
-  /// Whether this guest leads a dedicated server's waiting room (first in
-  /// [lobby]) and so picks the zone and sets out.
-  bool get isLeader => _lobby?.you == 0;
-
-  /// Asks a dedicated server to set out to [zone]. Only the leader's request
-  /// counts; the run begins with [RunStartedMessage] as in host mode.
+  /// Asks a dedicated server to set out to [zone]: anyone may while no
+  /// party is open (2026-10-29, 사용자), and the server calls everyone on
+  /// the farm to get ready ([partyZone], [departsAt]). The run begins with
+  /// [RunStartedMessage] as in host mode, for those ready.
   void requestStart(String zone) {
-    if (_stage != ClientSessionStage.waiting || !isLeader) return;
+    if (_stage != ClientSessionStage.waiting || _partyZone != null) return;
     _send(SessionChannel.reliable, StartRunMessage(zone));
   }
 

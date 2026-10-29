@@ -40,7 +40,8 @@ enum KitMoveRefusal {
 /// (2026-10-28, 사용자): the game data stays with the world, so a guest on
 /// the same data comes in without sending it again; guests' farm commands
 /// go to the world, each acting with their own kit; and the farm and each
-/// guest's kit are sent out as they change.
+/// guest's kit are sent out as they change. A run over goes back to the
+/// farm in the same room instead of a new one.
 final class DedicatedRoom {
   DedicatedRoom({
     required this.transport,
@@ -390,12 +391,23 @@ final class DedicatedRoom {
       _emptyFor = Duration.zero;
       if (!run.isOver && !stillHere.every((m) => m.isOut)) return;
       log?.call('Run over');
+      // With a farm, everyone is back on it in the same room (2026-10-29,
+      // 사용자): saying hello again mid-run would put a guest back in it.
+      if (world != null) return _backToFarm(session);
     }
     unawaited(
       _closeSession().then((_) {
         if (!_closed && _catalog != null) _openWaitingRoom();
       }),
     );
+  }
+
+  void _backToFarm(HostSession session) {
+    _ticker?.cancel();
+    _ticker = null;
+    _sinceTick.stop();
+    session.returnToFarm();
+    _shareFarm();
   }
 
   void _onPeerDisconnected(String peerId) {

@@ -144,6 +144,14 @@ void main() {
 
     a.sendCommand(const GoHome());
     await until(() => returned.isNotEmpty);
+    // Back on the farm in the same room, without saying hello again.
+    await until(() => a.stage == ClientSessionStage.waiting);
+    expect(a.run, isNull);
+    final replies = <FarmReplyMessage>[];
+    a.farmReplies.listen(replies.add);
+    a.sendFarmCommand(const FarmCommand.loadBag(item: 'food', count: 1));
+    await until(() => replies.isNotEmpty);
+    expect(replies.single.refused, isFalse);
   });
 
   test('a kit moves to a new id only while neither is in the room', () async {

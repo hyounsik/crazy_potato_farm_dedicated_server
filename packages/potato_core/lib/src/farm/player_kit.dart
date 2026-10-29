@@ -5,7 +5,7 @@ import 'package:potato_core/src/items/gear_stats.dart';
 
 /// What one player carries, apart from the farm they stand on
 /// (`save-and-online.md`, 2026-10-28, 사용자): the gear they wear, their
-/// bag, and their truck bed (the trunk). A farm of one's own has one kit;
+/// bag, and their truck bed. A farm of one's own has one kit;
 /// a dedicated server's shared farm has one for each player there, so the
 /// farm's rules stay the same and only the number of kits differs.
 final class PlayerKit {

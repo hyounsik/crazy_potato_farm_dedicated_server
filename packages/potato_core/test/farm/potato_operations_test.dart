@@ -127,7 +127,8 @@ void main() {
       expect(at(10, 9), isNull, reason: 'one tile between');
       expect(at(9, 10), FarmRejection.blocked, reason: 'corner to statue');
       expect(at(7, 8), FarmRejection.blocked, reason: 'outside open land');
-      expect(at(15, 15), isNull, reason: 'the open edge needs no gap');
+      expect(at(15, 14), isNull, reason: 'the open edge needs no gap');
+      expect(at(13, 15), FarmRejection.blocked, reason: 'bottom on the fence');
       expect(
         farm.apply(FarmCommand.build(kind: 'castle', origin: TilePos(8, 8))),
         FarmRejection.noSuchBuilding,

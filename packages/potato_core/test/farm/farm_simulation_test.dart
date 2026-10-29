@@ -138,6 +138,19 @@ void main() {
       expect(farm.entrance.y, entrance.y + 4);
     });
 
+    test('a bottom side may not lie against the fence; other sides may', () {
+      // Open land is x 8..15, y 8..15; the starting field sits at (12, 9).
+      bool fits(int x, int y) =>
+          farm.canPlace(TileRect(origin: TilePos(x, y), width: 1, height: 1));
+      expect(fits(8, 15), isFalse);
+      expect(fits(8, 14), isTrue);
+      expect(fits(8, 8), isTrue);
+      expect(fits(15, 13), isTrue);
+      farm.food = 1000;
+      farm.apply(const FarmCommand.openBlock(block: TilePos(2, 4)));
+      expect(fits(8, 15), isTrue);
+    });
+
     test('every door is below the middle of the bottom side, the left '
         'middle on an even width', () {
       TilePos doorOf(int width, int height) => FarmBuilding(

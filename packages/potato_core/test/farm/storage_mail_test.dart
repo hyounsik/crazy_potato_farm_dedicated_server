@@ -161,7 +161,7 @@ void main() {
         farm.apply(
           FarmCommand.build(
             kind: 'statue',
-            origin: TilePos(8 + i % 4 * 2, 13 + i ~/ 4 * 2),
+            origin: TilePos(8 + i % 4 * 2, 12 + i ~/ 4 * 2),
           ),
         );
       }

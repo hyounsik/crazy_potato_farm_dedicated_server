@@ -543,11 +543,17 @@ final class FarmSimulation {
   /// [entrance], with one free tile (corners included) between it and every
   /// field and building. A [totem] may stand right next to other totems
   /// (2026-10-27, 사용자), though not on them.
+  /// Its bottom side may not lie against the fence (2026-10-29, 사용자;
+  /// its sides and top may): the row below holds its door ([doorBelow]),
+  /// where its path starts.
   /// [ignoring] is a building or field to leave out, e.g. one being moved
   /// (ids are shared, so one id names either).
   bool canPlace(TileRect rect, {int? ignoring, bool totem = false}) {
     if (!rect.tiles.every(isOpen)) return false;
     if (rect.contains(entrance)) return false;
+    for (var x = rect.left; x < rect.left + rect.width; x++) {
+      if (!isOpen(TilePos(x, rect.bottom))) return false;
+    }
     final others = [
       for (final field in _fields.values)
         if (field.id != ignoring) (rect: field.rect, totem: false),

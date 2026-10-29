@@ -115,6 +115,10 @@ final class HostSession {
   final List<HostedGuest> _guestOrder = [];
   final _guestsChanged = StreamController<List<HostedGuest>>.broadcast();
   final _startRequests = StreamController<String>.broadcast();
+  final _memberResults =
+      StreamController<({HostedGuest guest, RaidResult result})>.broadcast(
+        sync: true,
+      );
   final List<RaidEvent> _hostEvents = [];
   final List<QuickChatLine> _chats = [];
   Map<String, dynamic>? _sharedFarm;
@@ -146,6 +150,11 @@ final class HostSession {
   /// [startRun].
   Stream<String> get startRequests => _startRequests.stream;
 
+  /// Each guest's run result as it is sent to them, for whoever keeps the
+  /// guest's things (a dedicated server's shared farm, 2026-10-28).
+  Stream<({HostedGuest guest, RaidResult result})> get memberResults =>
+      _memberResults.stream;
+
   /// The authoritative run once [startRun] has been called.
   RaidSimulation? get run => _run;
 
@@ -153,11 +162,15 @@ final class HostSession {
   /// the room as members 1..N (nobody stays behind, 2026-10-22, 사용자), and
   /// sends [RunStartedMessage] to each guest.
   /// Without [hostPlays], [hostStart] is left out and guests are 0..N-1.
+  /// Each guest sets out with what they sent, or with what [startOf] gives
+  /// for them (a dedicated server builds it from the guest's kit on its
+  /// shared farm instead of trusting the app, 2026-10-28).
   RaidSimulation startRun({
     required String zone,
     required int seed,
     RaidMemberStart? hostStart,
     Map<String, MapChunk> chunks = const {},
+    RaidMemberStart Function(HostedGuest guest)? startOf,
   }) {
     if (_run != null) throw StateError('Run already started');
     if (hostPlays != (hostStart != null)) {
@@ -170,7 +183,7 @@ final class HostSession {
     _chats.clear();
     final starts = <RaidMemberStart>[
       ?hostStart,
-      for (final g in _guestOrder) g.start,
+      for (final g in _guestOrder) startOf?.call(g) ?? g.start,
     ];
     final sim = RaidSimulation.party(
       catalog: catalog,
@@ -314,6 +327,9 @@ final class HostSession {
         SessionChannel.reliable,
         MemberResultMessage(memberIndex: index, result: result),
       );
+      if (!_memberResults.isClosed) {
+        _memberResults.add((guest: guest, result: result));
+      }
     }
   }
 
@@ -907,6 +923,7 @@ final class HostSession {
     await _disconnectSub.cancel();
     await _guestsChanged.close();
     await _startRequests.close();
+    await _memberResults.close();
     await _bedsChanged.close();
   }
 }

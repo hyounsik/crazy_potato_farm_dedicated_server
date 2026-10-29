@@ -188,6 +188,9 @@ final class ClientSession {
   final _bedsController = StreamController<List<TruckBedView>>.broadcast();
   final _bedGifts =
       StreamController<({ItemStack? stack, BedRefusal? refusal})>.broadcast();
+  final _farmReplies = StreamController<FarmReplyMessage>.broadcast();
+  final _kitController = StreamController<Map<String, dynamic>>.broadcast();
+  Map<String, dynamic>? _kit;
 
   RaidSimulation? _run;
   int _memberIndex = 0;
@@ -385,6 +388,23 @@ final class ClientSession {
     if (_stage != ClientSessionStage.waiting) return;
     _send(SessionChannel.reliable, BedLockMessage(open: open));
   }
+
+  // The shared farm on a dedicated server (2026-10-28, 사용자).
+
+  /// Does [command] on the farm everyone shares, with this player's own
+  /// kit; the answer comes in [farmReplies].
+  void sendFarmCommand(FarmCommand command) {
+    if (_stage != ClientSessionStage.waiting) return;
+    _send(SessionChannel.reliable, FarmCommandMessage(command));
+  }
+
+  /// How each [sendFarmCommand] went.
+  Stream<FarmReplyMessage> get farmReplies => _farmReplies.stream;
+
+  /// This player's own kit on the shared farm (as `PlayerKit.toJson`), the
+  /// latest the host sent; null until one came.
+  Map<String, dynamic>? get kit => _kit;
+  Stream<Map<String, dynamic>> get kitStream => _kitController.stream;
 
   /// Collects events received from the host since the last call.
   List<RaidEvent> takeEvents() {
@@ -585,6 +605,11 @@ final class ClientSession {
       case FarmViewMessage(:final farm):
         _sharedFarm = farm;
         if (!_farmController.isClosed) _farmController.add(farm);
+      case FarmReplyMessage():
+        if (!_farmReplies.isClosed) _farmReplies.add(msg);
+      case KitMessage(:final kit):
+        _kit = kit;
+        if (!_kitController.isClosed) _kitController.add(kit);
       case LobbyMessage(:final lobby):
         _lobby = lobby;
         _walkers.clear();
@@ -869,5 +894,7 @@ final class ClientSession {
     await _partyController.close();
     await _bedsController.close();
     await _bedGifts.close();
+    await _farmReplies.close();
+    await _kitController.close();
   }
 }

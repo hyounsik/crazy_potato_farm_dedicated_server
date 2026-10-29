@@ -15,6 +15,7 @@ import 'package:potato_core/src/farm/farm_event.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
 import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/farm/player_kit.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
@@ -57,7 +58,7 @@ final class FarmSimulation {
     Map<String, int> materials = const {},
     Iterable<Mail> mail = const [],
     Iterable<Gear> gear = const [],
-    this.equipped = const Equipped(),
+    Equipped equipped = const Equipped(),
     this.progress = 0,
     int? totemLimit,
     FarmTotals? totals,
@@ -67,10 +68,7 @@ final class FarmSimulation {
     List<ItemStack?> bed = const [],
     List<ItemStack?> bag = const [],
   }) : _gear = List.of(gear),
-       bed = Bag.restore([
-         ...bed,
-         for (var i = bed.length; i < catalog.rules.storage.bedSlots; i++) null,
-       ], catalog.stackOf),
+       kit = PlayerKit(catalog, equipped: equipped, bed: bed, bag: bag),
        _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
        totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
@@ -99,10 +97,6 @@ final class FarmSimulation {
       _adopt(away.potato);
     }
     _graves.forEach(_adopt);
-    _bag = Bag.restore([
-      ...bag,
-      for (var i = bag.length; i < _gearStats.bagSlots(equipped.bag); i++) null,
-    ], catalog.stackOf);
     _settleBuildings();
     _unlockDone();
     // Seeds from old saves with nowhere left to wait (compost yards).
@@ -235,24 +229,26 @@ final class FarmSimulation {
   final List<Gear> _gear;
   List<Gear> get gear => List.unmodifiable(_gear);
 
-  /// The truck bed: the player's own, carried to friends' farms and shared
-  /// there while open (`multiplayer.md`, 2026-10-28).
-  final Bag bed;
+  /// What the farm's own player carries: worn gear, bag and truck bed
+  /// (2026-10-28, 사용자: kept apart from the farm, so a shared farm can
+  /// have one for each player and the rules stay the same).
+  final PlayerKit kit;
 
-  /// What came back from a run, to sort at home or carry on to the next run
-  /// at a friend's farm (2026-10-28, 사용자). Empty when nothing is left to
-  /// sort.
-  Bag get bag => _bag;
-  late Bag _bag;
+  /// The kit of whoever [apply] acts for: [kit] unless another is given.
+  late PlayerKit _actor = kit;
+
+  /// What the farm's own player wears (and takes on runs).
+  Equipped get equipped => kit.equipped;
+  set equipped(Equipped value) => kit.equipped = value;
+
+  /// The farm's own player's truck bed.
+  Bag get bed => kit.bed;
+
+  /// The farm's own player's bag.
+  Bag get bag => kit.bag;
 
   /// Copies of the stacks in [bag], to take along on a run.
-  List<ItemStack> get bagItems => [
-    for (final s in _bag.slots)
-      if (s != null) s.copyWithCount(s.count),
-  ];
-
-  /// What the player wears (and takes on runs).
-  Equipped equipped;
+  List<ItemStack> get bagItems => kit.bagItems;
 
   late final GearStats _gearStats = GearStats(catalog);
 
@@ -575,10 +571,15 @@ final class FarmSimulation {
   }
 
   /// Runs a player command. Returns null when it worked, or why not.
-  FarmRejection? apply(FarmCommand command) {
-    final rejection = _dispatch(command);
-    if (rejection == null) _advanceStory();
-    return rejection;
+  FarmRejection? apply(FarmCommand command, {PlayerKit? by}) {
+    _actor = by ?? kit;
+    try {
+      final rejection = _dispatch(command);
+      if (rejection == null) _advanceStory();
+      return rejection;
+    } finally {
+      _actor = kit;
+    }
   }
 
   FarmRejection? _dispatch(FarmCommand command) => switch (command) {
@@ -659,21 +660,21 @@ final class FarmSimulation {
         bag,
       ),
     LoadBed(:final item, :final count, :final seed, :final gearIndex) => _load(
-      bed,
+      _actor.bed,
       item,
       count,
       seed,
       gearIndex,
     ),
     LoadBag(:final item, :final count, :final seed, :final gearIndex) => _load(
-      _bag,
+      _actor.bag,
       item,
       count,
       seed,
       gearIndex,
     ),
-    UnloadBed(:final slot, :final count) => _unload(bed, slot, count),
-    UnloadBag(:final slot, :final count) => _unload(_bag, slot, count),
+    UnloadBed(:final slot, :final count) => _unload(_actor.bed, slot, count),
+    UnloadBag(:final slot, :final count) => _unload(_actor.bag, slot, count),
     UnpackBag() => _unpackBag(),
   };
 
@@ -1384,7 +1385,7 @@ final class FarmSimulation {
 
   /// The worn piece of [worn], or box piece [index].
   Gear? _gearAt(GearKind? worn, int? index) {
-    if (worn != null) return equipped.of(worn);
+    if (worn != null) return _actor.equipped.of(worn);
     if (index != null && index >= 0 && index < _gear.length) {
       return _gear[index];
     }
@@ -1410,7 +1411,7 @@ final class FarmSimulation {
     if (worked) {
       final better = piece.copyWith(enhance: piece.enhance + 1);
       if (worn != null) {
-        equipped = equipped.wearing(worn, better);
+        _actor.equipped = _actor.equipped.wearing(worn, better);
       } else {
         _gear[index!] = better;
       }
@@ -1430,36 +1431,35 @@ final class FarmSimulation {
     if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
     final piece = _gear[index];
     if (!_gearStats.canWear(piece, progress)) return FarmRejection.cannotWear;
-    if (piece.kind == GearKind.bag && !_bagFits(piece)) {
+    final wearer = _actor;
+    if (piece.kind == GearKind.bag && !wearer.bagFits(piece)) {
       return FarmRejection.bagTooSmall;
     }
-    final old = equipped.of(piece.kind);
-    equipped = equipped.wearing(piece.kind, piece);
+    final old = wearer.equipped.of(piece.kind);
+    wearer.equipped = wearer.equipped.wearing(piece.kind, piece);
     if (old == null) {
       _gear.removeAt(index);
     } else {
       _gear[index] = old;
     }
-    if (piece.kind == GearKind.bag) _fitBag();
+    if (piece.kind == GearKind.bag) wearer.fitBag();
     return null;
   }
 
   /// Takes off the worn piece of [kind] into the box (bare hands then).
   FarmRejection? _unequipGear(GearKind kind) {
-    final piece = equipped.of(kind);
+    final wearer = _actor;
+    final piece = wearer.equipped.of(kind);
     if (piece == null) return FarmRejection.noSuchGear;
     if (_gear.length >= gearSlots) return FarmRejection.boxFull;
-    if (kind == GearKind.bag && !_bagFits(null)) {
+    if (kind == GearKind.bag && !wearer.bagFits(null)) {
       return FarmRejection.bagTooSmall;
     }
     _gear.add(piece);
-    equipped = equipped.wearing(kind, null);
-    if (kind == GearKind.bag) _fitBag();
+    wearer.equipped = wearer.equipped.wearing(kind, null);
+    if (kind == GearKind.bag) wearer.fitBag();
     return null;
   }
-
-  /// Whether what is in the bag fits [bag] (null for none worn).
-  bool _bagFits(Gear? bag) => bagItems.length <= _gearStats.bagSlots(bag);
 
   /// Breaks box piece [index] into materials.
   FarmRejection? _disassembleGear(int index) {
@@ -1469,9 +1469,10 @@ final class FarmSimulation {
   }
 
   FarmRejection? _disassembleBagGear(int slot) {
-    if (slot < 0 || slot >= _bag.capacity) return FarmRejection.emptySlot;
-    if (_bag.slots[slot]?.gear == null) return FarmRejection.noSuchGear;
-    _breakUp(_bag.replace(slot, null)!.gear!);
+    final bag = _actor.bag;
+    if (slot < 0 || slot >= bag.capacity) return FarmRejection.emptySlot;
+    if (bag.slots[slot]?.gear == null) return FarmRejection.noSuchGear;
+    _breakUp(bag.replace(slot, null)!.gear!);
     return null;
   }
 
@@ -1808,7 +1809,7 @@ final class FarmSimulation {
         ),
       );
     }
-    final fit = _gearStats.fitBelt(equipped.belt, [
+    final fit = _gearStats.fitBelt(_actor.equipped.belt, [
       for (final a in going) a.potato.type,
     ]);
     if (fit == null) return FarmRejection.beltTooSmall;
@@ -1848,14 +1849,8 @@ final class FarmSimulation {
       totals.escapes.update(zone, (n) => n + 1, ifAbsent: () => 1);
     }
     _gear.addAll(gear);
-    if (equipped != null) this.equipped = equipped;
-    if (bag != null) {
-      final slots = _gearStats.bagSlots(this.equipped.bag);
-      _bag = Bag(math.max(slots, bag.length), catalog.stackOf);
-      for (final stack in bag) {
-        _bag.addFrom(stack.copyWithCount(stack.count));
-      }
-    }
+    if (equipped != null) _actor.equipped = equipped;
+    if (bag != null) _actor.refillBag(bag);
     if (score != null && score > progress) progress = score;
     final lost = [
       for (final id in lostPotatoIds)
@@ -1990,7 +1985,9 @@ final class FarmSimulation {
     final moved = into.addFrom(stack);
     store(stack, force: true);
     if (moved > 0) return null;
-    return identical(into, bed) ? FarmRejection.bedFull : FarmRejection.bagFull;
+    return identical(into, _actor.bed)
+        ? FarmRejection.bedFull
+        : FarmRejection.bagFull;
   }
 
   FarmRejection? _unload(Bag from, int slot, [int? count]) {
@@ -2014,26 +2011,15 @@ final class FarmSimulation {
   }
 
   FarmRejection? _unpackBag() {
-    for (var i = 0; i < _bag.capacity; i++) {
-      if (_bag.slots[i] case final stack?) {
+    final bag = _actor.bag;
+    for (var i = 0; i < bag.capacity; i++) {
+      if (bag.slots[i] case final stack?) {
         store(stack);
-        if (stack.count == 0) _bag.replace(i, null);
+        if (stack.count == 0) bag.replace(i, null);
       }
     }
-    _fitBag();
+    _actor.fitBag();
     return null;
-  }
-
-  /// The bag takes the size of the worn one once what is in it fits.
-  void _fitBag() {
-    final slots = _gearStats.bagSlots(equipped.bag);
-    if (_bag.capacity == slots) return;
-    final items = bagItems;
-    if (items.length > slots) return;
-    _bag = Bag(slots, catalog.stackOf);
-    for (final stack in items) {
-      _bag.addFrom(stack);
-    }
   }
 
   /// Puts a returning companion back where it came from, if that place is

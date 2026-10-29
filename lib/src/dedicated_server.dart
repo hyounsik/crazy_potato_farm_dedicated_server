@@ -1,6 +1,7 @@
 import 'dart:io';
 
 import 'package:potato_dedicated_server/src/dedicated_room.dart';
+import 'package:potato_dedicated_server/src/dedicated_world.dart';
 import 'package:potato_dedicated_server/src/websocket_host_transport.dart';
 import 'package:potato_session/potato_session.dart';
 
@@ -10,15 +11,24 @@ import 'package:potato_session/potato_session.dart';
 /// [WebSocketFrame.path] into [transport]. When started with a [password],
 /// a connection must send it in [WebSocketFrame.passwordHeader] or is
 /// refused with 401. On that transport it hosts one exploration party at a
-/// time ([room]).
+/// time ([room]), and with a [world] the server's one shared farm.
 class DedicatedServer {
-  DedicatedServer._(this._httpServer, this._password, this.log) {
-    room = DedicatedRoom(transport: transport, log: log);
+  DedicatedServer._(this._httpServer, this._password, this.log, this.world) {
+    room = DedicatedRoom(transport: transport, log: log, world: world);
     _httpServer.listen(_handleRequest);
   }
 
   final HttpServer _httpServer;
-  final String? _password;
+  String? _password;
+
+  /// The password guests must send, or null for none. The admin page may
+  /// change it while the server runs (2026-10-28, 사용자).
+  String? get password => _password;
+  set password(String? value) =>
+      _password = value == null || value.isEmpty ? null : value;
+
+  /// The server's shared farm, when it keeps one.
+  final DedicatedWorld? world;
 
   /// Guests connected over WebSocket.
   final WebSocketHostTransport transport = WebSocketHostTransport();
@@ -39,15 +49,18 @@ class DedicatedServer {
     required int port,
     String? password,
     void Function(String message)? log,
+    DedicatedWorld? world,
   }) async => DedicatedServer._(
     await HttpServer.bind(address, port),
     password == null || password.isEmpty ? null : password,
     log,
+    world,
   );
 
   /// Stops accepting requests and closes open connections.
   Future<void> stop() async {
     await room.close();
+    await world?.close();
     await transport.close();
     await _httpServer.close(force: true);
   }

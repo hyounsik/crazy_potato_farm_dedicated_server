@@ -21,6 +21,8 @@ Dart [pub workspace](https://dart.dev/tools/pub/workspaces)다. 루트에서 `da
 | `packages/potato_session` | 세션 호스팅. 클라이언트의 호스트 모드와 전용 서버가 함께 쓴다 | Flutter 금지. `potato_core`를 re-export한다 |
 | 루트 (`bin/`, `lib/`) | 전용 서버 실행 파일 (`potato_dedicated_server`) | 서버에서만 쓰는 코드는 여기에 둔다 |
 
+- **공용 패키지에 "전용 서버인가" 분기를 두지 않는다** (2026-10-28). `potato_core`·`potato_session`은 클라이언트와 서버가 함께 쓰므로, 다른 점은 밖에서 넣어 주는 정책(예: `FarmRoom`의 `FarmCommandPolicy`, 누가 어떤 명령을 보낼 수 있나)이나 개수(예: 사람마다 하나인 `PlayerKit`)로 나타낸다. 디스크 저장, 빈 서버의 시간 흐름, 관리 페이지처럼 서버에만 있는 것은 루트 패키지에만 둔다.
+
 ## 클라이언트가 이 저장소를 쓰는 방식
 
 클라이언트는 `potato_session` **하나만** git 의존성으로 가져온다. `potato_core`는 `potato_session`을 통해 함께 들어온다.

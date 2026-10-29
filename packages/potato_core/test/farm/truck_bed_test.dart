@@ -278,4 +278,37 @@ void main() {
     expect(farm.food, 112);
     expect(farm.bag.countOf('food'), 18);
   });
+
+  test('two players on one farm each carry their own kit', () {
+    final other = PlayerKit(catalog);
+    farm.apply(FarmCommand.returnHome(food: 0, gear: const [rapid]));
+    final index = farm.gear.indexOf(rapid);
+
+    expect(farm.apply(FarmCommand.equipGear(index: index), by: other), null);
+    expect(other.equipped.weapon, rapid, reason: 'from the shared box');
+    expect(farm.equipped.weapon, isNot(rapid), reason: 'the owner unchanged');
+
+    expect(
+      farm.apply(const FarmCommand.loadBag(item: 'food', count: 20), by: other),
+      null,
+    );
+    expect(other.bag.countOf('food'), 20);
+    expect(farm.bag.countOf('food'), 0);
+    expect(farm.food, 80, reason: 'storage is shared');
+
+    final start = memberStartFor(farm, food: 0, kit: other);
+    expect(start.equipped.weapon, rapid);
+    expect(start.bag.single.count, 20);
+  });
+
+  test('a kit is saved on its own', () {
+    final kit = PlayerKit(catalog, equipped: const Equipped(weapon: rapid));
+    kit.bag.addFrom(ItemStack('material', 3));
+    kit.bed.addFrom(ItemStack('food', 7));
+    final back = PlayerKit.fromJson(catalog, kit.toJson());
+    expect(back.equipped.weapon, rapid);
+    expect(back.bag.countOf('material'), 3);
+    expect(back.bed.countOf('food'), 7);
+    expect(back.bed.capacity, catalog.rules.storage.bedSlots);
+  });
 }

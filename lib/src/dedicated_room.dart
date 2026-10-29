@@ -2,6 +2,7 @@ import 'dart:async';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:potato_dedicated_server/src/dedicated_world.dart';
 import 'package:potato_session/potato_session.dart';
 import 'package:potato_session/zlib_codec.dart';
 
@@ -19,6 +20,12 @@ import 'package:potato_session/zlib_codec.dart';
 /// out, the room opens a new waiting room on the same catalog. When nobody is
 /// connected any more, it forgets the catalog so an updated app can bring
 /// its own.
+///
+/// With a [world] the room also keeps the server's one shared farm
+/// (2026-10-28, 사용자): the game data stays with the world, so a guest on
+/// the same data comes in without sending it again; guests' farm commands
+/// go to the world, each acting with their own kit; and the farm and each
+/// guest's kit are sent out as they change.
 final class DedicatedRoom {
   DedicatedRoom({
     required this.transport,
@@ -26,6 +33,8 @@ final class DedicatedRoom {
     this.tickEvery = const Duration(milliseconds: 16),
     this.emptyRunGrace = const Duration(minutes: 2),
     this.log,
+    this.world,
+    this.shareEvery = const Duration(milliseconds: 500),
     Random? random,
   }) : _random = random ?? Random() {
     _packetSub = transport.packets.listen(_onPacket);
@@ -45,6 +54,15 @@ final class DedicatedRoom {
 
   /// Where the room reports what happens (catalog in, run started, reset).
   final void Function(String message)? log;
+
+  /// The server's shared farm, when it keeps one.
+  final DedicatedWorld? world;
+
+  /// How often at most the farm is sent out while it keeps changing.
+  final Duration shareEvery;
+
+  final List<StreamSubscription<void>> _worldSubs = [];
+  Timer? _shareTimer;
 
   final Random _random;
 
@@ -77,16 +95,26 @@ final class DedicatedRoom {
     if (_closed) return;
     final relay = _relay;
     if (relay != null) {
+      // Farm commands are the world's, between runs; the rest is the
+      // session's.
+      if (world != null && _session?.run == null) {
+        if (_decode(packet) case final FarmCommandMessage msg) {
+          return _onFarmCommand(packet.peerId, msg.command);
+        }
+      }
       relay.deliver(packet);
       return;
     }
-    final SessionMessage msg;
-    try {
-      msg = codec.decode(packet.bytes);
-    } on Object {
-      return;
-    }
+    final msg = _decode(packet);
     switch (msg) {
+      case HelloMessage(:final catalogHash, :final buildNumber)
+          when world?.catalog != null && world?.catalogHash == catalogHash:
+        // The world already has this game data.
+        _catalog = world!.catalog;
+        _buildNumber = buildNumber;
+        log?.call('Game data $catalogHash from the world');
+        _openWaitingRoom();
+        _relay!.deliver(packet);
       case HelloMessage():
         _pendingHellos[packet.peerId] = packet;
         _send(packet.peerId, const CatalogRequestMessage());
@@ -113,6 +141,16 @@ final class DedicatedRoom {
     }
     _catalog = catalog;
     _buildNumber = hello.buildNumber;
+    if (world case final world?) {
+      unawaited(
+        world.adoptCatalog(
+          catalog: catalog,
+          files: files,
+          hash: hello.catalogHash,
+          buildNumber: hello.buildNumber,
+        ),
+      );
+    }
     log?.call(
       'Catalog ${hello.catalogHash} (build ${hello.buildNumber}) '
       'from $peerId',
@@ -148,13 +186,138 @@ final class DedicatedRoom {
     _relay = relay;
     _session = session;
     _startSub = session.startRequests.listen(_startRun);
+    if (world case final world?) {
+      _worldSubs
+        ..add(world.changes.listen((_) => _shareSoon()))
+        ..add(session.guestsChanged.listen((_) => _shareSoon()))
+        ..add(session.memberResults.listen(_bringHome));
+      _shareFarm();
+    }
+  }
+
+  SessionMessage? _decode(SessionPacket packet) {
+    try {
+      return codec.decode(packet.bytes);
+    } on Object {
+      return null;
+    }
+  }
+
+  /// The player id of the guest on link [peerId]: their installation id,
+  /// or the link itself without one.
+  String? _playerOf(String peerId) {
+    for (final g in _session?.guests ?? const <HostedGuest>[]) {
+      if (g.peerId == peerId) return g.playerId.isEmpty ? peerId : g.playerId;
+    }
+    return null;
+  }
+
+  void _onFarmCommand(String peerId, FarmCommand command) {
+    final player = _playerOf(peerId);
+    final reply = player == null ? null : world?.apply(player, command);
+    if (reply == null) return;
+    _send(
+      peerId,
+      FarmReplyMessage(refused: reply.refused, rejection: reply.rejection),
+    );
+    _sendKit(peerId, player!);
+  }
+
+  void _sendKit(String peerId, String player) {
+    final room = world?.room;
+    if (room == null) return;
+    _send(peerId, KitMessage(room.kitOf(player).toJson()));
+  }
+
+  /// What guest [guest] sets out with from the shared farm: their own
+  /// kit's gear and bag, and the farm's potatoes they asked for, which
+  /// leave the farm until they come back (2026-10-28, 사용자: each goes with
+  /// their own bag and gear). The app's own idea of its gear and bag is not
+  /// trusted. Potatoes that cannot go stay home.
+  RaidMemberStart _startFromKit(FarmRoom room, HostedGuest guest, String zone) {
+    final player = guest.playerId.isEmpty ? guest.peerId : guest.playerId;
+    final kit = room.kitOf(player);
+    final asked = [for (final c in guest.start.companions) c.potatoId];
+    final modes = {for (final c in guest.start.companions) c.potatoId: c.mode};
+    var going = asked;
+    var start = memberStartFor(
+      room.farm,
+      name: guest.start.name,
+      food: 0,
+      potatoIds: going,
+      modes: modes,
+      kit: kit,
+    );
+    final departed = room.apply(
+      player,
+      FarmCommand.depart(zone: zone, food: 0, potatoIds: going),
+    );
+    if (departed.rejection != null && going.isNotEmpty) {
+      log?.call('${guest.start.name}: companions stay (${departed.rejection})');
+      going = const [];
+      start = memberStartFor(
+        room.farm,
+        name: guest.start.name,
+        food: 0,
+        kit: kit,
+      );
+      room.apply(player, FarmCommand.depart(zone: zone, food: 0));
+    }
+    return start;
+  }
+
+  /// A guest's run is over: what they bring goes into their own bag, and
+  /// the farm's potatoes come back to it (or are lost in a failed danger
+  /// run).
+  void _bringHome(({HostedGuest guest, RaidResult result}) done) {
+    final room = world?.room;
+    final catalog = world?.catalog;
+    if (room == null || catalog == null) return;
+    final guest = done.guest;
+    final player = guest.playerId.isEmpty ? guest.peerId : guest.playerId;
+    final reply = room.apply(
+      player,
+      done.result.homecoming(catalog, toBag: true),
+    );
+    if (reply.rejection != null) {
+      log?.call(
+        '${guest.start.name}: could not come home (${reply.rejection})',
+      );
+    }
+  }
+
+  /// Sends the farm out soon, once however often it changes meanwhile.
+  void _shareSoon() {
+    _shareTimer ??= Timer(shareEvery, () {
+      _shareTimer = null;
+      _shareFarm();
+    });
+  }
+
+  /// Shows the shared farm to everyone here, and each their own kit.
+  void _shareFarm() {
+    final session = _session;
+    final room = world?.room;
+    if (session == null || room == null || session.run != null) return;
+    session.shareFarm(FarmDocument.of(room.farm).toJson());
+    for (final g in session.guests) {
+      if (!g.connected) continue;
+      _sendKit(g.peerId, g.playerId.isEmpty ? g.peerId : g.playerId);
+    }
   }
 
   void _startRun(String zone) {
     final session = _session;
     if (session == null || session.run != null) return;
     final seed = _random.nextInt(1 << 32);
-    session.startRun(zone: zone, seed: seed);
+    final farmRoom = world?.room;
+    session.startRun(
+      zone: zone,
+      seed: seed,
+      startOf: farmRoom == null
+          ? null
+          : (g) => _startFromKit(farmRoom, g, zone),
+    );
     log?.call('Run to $zone with ${session.guests.length} (seed $seed)');
     _sinceTick
       ..reset()
@@ -215,6 +378,12 @@ final class DedicatedRoom {
   Future<void> _closeSession() async {
     _ticker?.cancel();
     _ticker = null;
+    _shareTimer?.cancel();
+    _shareTimer = null;
+    for (final sub in _worldSubs) {
+      await sub.cancel();
+    }
+    _worldSubs.clear();
     _sinceTick.stop();
     final session = _session;
     final relay = _relay;

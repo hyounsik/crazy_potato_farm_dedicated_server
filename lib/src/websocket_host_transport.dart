@@ -57,6 +57,15 @@ final class WebSocketHostTransport implements HostTransport {
     return peerId;
   }
 
+  /// Closes guest [peerId]'s connection (the admin page's kick,
+  /// 2026-10-28, 사용자). They may connect again.
+  Future<void> kick(String peerId) async {
+    final socket = _sockets[peerId];
+    if (socket == null) return;
+    _drop(peerId);
+    await socket.close(WebSocketStatus.policyViolation, 'kicked');
+  }
+
   void _drop(String peerId) {
     if (_sockets.remove(peerId) == null || _closed) return;
     _peerDisconnected.add(peerId);

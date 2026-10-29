@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -25,6 +27,7 @@ abstract class RulesData with _$RulesData {
     required BreedingRulesData breeding,
     required GearRulesData gear,
     required CombatPowerRulesData combatPower,
+    @Default(ZoneScalingRulesData()) ZoneScalingRulesData zoneScaling,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -369,8 +372,9 @@ abstract class GearRulesData with _$GearRulesData {
     required int bareBagSlots,
     required int bareBeltSlots,
 
-    /// Weapons: damage share by grade, and what each level adds in
-    /// thousandths. The workbench adds `workbench.damage_percent` a level.
+    /// Weapons: damage share by grade, and how much each level multiplies
+    /// it by, in thousandths over 1 (compounding, see [levelGrowth]). The
+    /// workbench adds `workbench.damage_percent` a level.
     required Map<Grade, double> gradeDamage,
     required int levelDamagePermille,
 
@@ -421,9 +425,12 @@ abstract class CombatPowerRulesData with _$CombatPowerRulesData {
     /// Flat points for each food or buff potato along.
     required double helper,
 
-    /// What a zone calls for: this plus so much a score point.
+    /// What a zone calls for: this plus so much a score point, multiplied
+    /// by [recommendedGrowthPermille] a score point (compounding, so it
+    /// keeps up with gear and enemies growing by level).
     required double recommendedBase,
     required double recommendedPerScore,
+    @Default(0) int recommendedGrowthPermille,
 
     /// Power over recommended at or above [easyRatio] is easy; at or above
     /// [fairRatio], fair; under it, risky.
@@ -434,6 +441,53 @@ abstract class CombatPowerRulesData with _$CombatPowerRulesData {
   factory CombatPowerRulesData.fromJson(Map<String, dynamic> json) =>
       _$CombatPowerRulesDataFromJson(json);
 }
+
+/// What a zone's score does besides the level of what it gives
+/// (2026-10-29, user: higher zones are harder and give more and better
+/// loot). All 0 leaves scores out of it.
+@freezed
+abstract class ZoneScalingRulesData with _$ZoneScalingRulesData {
+  const factory ZoneScalingRulesData({
+    /// Enemy health and damage each score point multiplies by, in
+    /// thousandths over 1 (compounding, see [levelGrowth]).
+    @Default(0) int enemyHpPermille,
+    @Default(0) int enemyDamagePermille,
+
+    /// What each score point adds to the amount of plain loot (baby
+    /// potatoes, materials), in thousandths.
+    @Default(0) int lootAmountPermille,
+
+    /// What each score point adds to the weight of rare and legendary
+    /// seeds and gear in loot tables, in thousandths.
+    @Default(0) int rareWeightPermille,
+    @Default(0) int legendaryWeightPermille,
+  }) = _ZoneScalingRulesData;
+
+  const ZoneScalingRulesData._();
+
+  factory ZoneScalingRulesData.fromJson(Map<String, dynamic> json) =>
+      _$ZoneScalingRulesDataFromJson(json);
+
+  double enemyHp(int score) => levelGrowth(enemyHpPermille, score);
+
+  double enemyDamage(int score) => levelGrowth(enemyDamagePermille, score);
+
+  double lootAmount(int score) => 1 + score * lootAmountPermille / 1000;
+
+  /// How much heavier an entry of [grade] weighs at [score].
+  double gradeWeight(Grade grade, int score) => switch (grade) {
+    Grade.normal => 1,
+    Grade.rare => 1 + score * rareWeightPermille / 1000,
+    Grade.legendary => 1 + score * legendaryWeightPermille / 1000,
+  };
+}
+
+/// What [level] levels multiply a value by when each one multiplies it by
+/// 1 + [permille] / 1000. Levels compound so ten levels count the same at
+/// any height (2026-10-29: gear grows by level first, and ten workbench
+/// levels come to about what the next zone's ten levels give).
+double levelGrowth(int permille, int level) =>
+    math.pow(1 + permille / 1000, level).toDouble();
 
 /// Breeding potatoes making seeds in fields (2026-10-26, user; before, in
 /// compost yards). Values are placeholders until the balance phase.

@@ -16,7 +16,7 @@ T _$identity<T>(T value) => value;
 /// @nodoc
 mixin _$RulesData {
 
- FarmRulesData get farm; PotatoRulesData get potatoes; PestRulesData get pests; NewFarmData get newFarm; RaidRulesData get raid; StorageRulesData get storage; MailRulesData get mail; WorkbenchRulesData get workbench; TotemRulesData get totems; BreedingRulesData get breeding; GearRulesData get gear; CombatPowerRulesData get combatPower;
+ FarmRulesData get farm; PotatoRulesData get potatoes; PestRulesData get pests; NewFarmData get newFarm; RaidRulesData get raid; StorageRulesData get storage; MailRulesData get mail; WorkbenchRulesData get workbench; TotemRulesData get totems; BreedingRulesData get breeding; GearRulesData get gear; CombatPowerRulesData get combatPower; ZoneScalingRulesData get zoneScaling;
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -30,20 +30,20 @@ $RulesDataCopyWith<RulesData> get copyWith => _$RulesDataCopyWithImpl<RulesData>
 @override
 bool operator ==(Object other) {
   final _this = this as RulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.pests, _this.pests) || other.pests == _this.pests)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid)&&(identical(other.storage, _this.storage) || other.storage == _this.storage)&&(identical(other.mail, _this.mail) || other.mail == _this.mail)&&(identical(other.workbench, _this.workbench) || other.workbench == _this.workbench)&&(identical(other.totems, _this.totems) || other.totems == _this.totems)&&(identical(other.breeding, _this.breeding) || other.breeding == _this.breeding)&&(identical(other.gear, _this.gear) || other.gear == _this.gear)&&(identical(other.combatPower, _this.combatPower) || other.combatPower == _this.combatPower));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RulesData&&(identical(other.farm, _this.farm) || other.farm == _this.farm)&&(identical(other.potatoes, _this.potatoes) || other.potatoes == _this.potatoes)&&(identical(other.pests, _this.pests) || other.pests == _this.pests)&&(identical(other.newFarm, _this.newFarm) || other.newFarm == _this.newFarm)&&(identical(other.raid, _this.raid) || other.raid == _this.raid)&&(identical(other.storage, _this.storage) || other.storage == _this.storage)&&(identical(other.mail, _this.mail) || other.mail == _this.mail)&&(identical(other.workbench, _this.workbench) || other.workbench == _this.workbench)&&(identical(other.totems, _this.totems) || other.totems == _this.totems)&&(identical(other.breeding, _this.breeding) || other.breeding == _this.breeding)&&(identical(other.gear, _this.gear) || other.gear == _this.gear)&&(identical(other.combatPower, _this.combatPower) || other.combatPower == _this.combatPower)&&(identical(other.zoneScaling, _this.zoneScaling) || other.zoneScaling == _this.zoneScaling));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RulesData;
-  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.pests,_this.newFarm,_this.raid,_this.storage,_this.mail,_this.workbench,_this.totems,_this.breeding,_this.gear,_this.combatPower);
+  return Object.hash(runtimeType,_this.farm,_this.potatoes,_this.pests,_this.newFarm,_this.raid,_this.storage,_this.mail,_this.workbench,_this.totems,_this.breeding,_this.gear,_this.combatPower,_this.zoneScaling);
 }
 
 @override
 String toString() {
   final _this = this as RulesData;
-  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, pests: ${_this.pests}, newFarm: ${_this.newFarm}, raid: ${_this.raid}, storage: ${_this.storage}, mail: ${_this.mail}, workbench: ${_this.workbench}, totems: ${_this.totems}, breeding: ${_this.breeding}, gear: ${_this.gear}, combatPower: ${_this.combatPower})';
+  return 'RulesData(farm: ${_this.farm}, potatoes: ${_this.potatoes}, pests: ${_this.pests}, newFarm: ${_this.newFarm}, raid: ${_this.raid}, storage: ${_this.storage}, mail: ${_this.mail}, workbench: ${_this.workbench}, totems: ${_this.totems}, breeding: ${_this.breeding}, gear: ${_this.gear}, combatPower: ${_this.combatPower}, zoneScaling: ${_this.zoneScaling})';
 }
 
 
@@ -54,11 +54,11 @@ abstract mixin class $RulesDataCopyWith<$Res>  {
   factory $RulesDataCopyWith(RulesData value, $Res Function(RulesData) _then) = _$RulesDataCopyWithImpl;
 @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower, ZoneScalingRulesData zoneScaling
 });
 
 
-$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$PestRulesDataCopyWith<$Res> get pests;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;$StorageRulesDataCopyWith<$Res> get storage;$MailRulesDataCopyWith<$Res> get mail;$WorkbenchRulesDataCopyWith<$Res> get workbench;$TotemRulesDataCopyWith<$Res> get totems;$BreedingRulesDataCopyWith<$Res> get breeding;$GearRulesDataCopyWith<$Res> get gear;$CombatPowerRulesDataCopyWith<$Res> get combatPower;
+$FarmRulesDataCopyWith<$Res> get farm;$PotatoRulesDataCopyWith<$Res> get potatoes;$PestRulesDataCopyWith<$Res> get pests;$NewFarmDataCopyWith<$Res> get newFarm;$RaidRulesDataCopyWith<$Res> get raid;$StorageRulesDataCopyWith<$Res> get storage;$MailRulesDataCopyWith<$Res> get mail;$WorkbenchRulesDataCopyWith<$Res> get workbench;$TotemRulesDataCopyWith<$Res> get totems;$BreedingRulesDataCopyWith<$Res> get breeding;$GearRulesDataCopyWith<$Res> get gear;$CombatPowerRulesDataCopyWith<$Res> get combatPower;$ZoneScalingRulesDataCopyWith<$Res> get zoneScaling;
 
 }
 /// @nodoc
@@ -71,7 +71,7 @@ class _$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,Object? zoneScaling = null,}) {
   return _then(RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
@@ -85,7 +85,8 @@ as WorkbenchRulesData,totems: null == totems ? _self.totems : totems // ignore: 
 as TotemRulesData,breeding: null == breeding ? _self.breeding : breeding // ignore: cast_nullable_to_non_nullable
 as BreedingRulesData,gear: null == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
 as GearRulesData,combatPower: null == combatPower ? _self.combatPower : combatPower // ignore: cast_nullable_to_non_nullable
-as CombatPowerRulesData,
+as CombatPowerRulesData,zoneScaling: null == zoneScaling ? _self.zoneScaling : zoneScaling // ignore: cast_nullable_to_non_nullable
+as ZoneScalingRulesData,
   ));
 }
 /// Create a copy of RulesData
@@ -195,6 +196,15 @@ $CombatPowerRulesDataCopyWith<$Res> get combatPower {
   
   return $CombatPowerRulesDataCopyWith<$Res>(_self.combatPower, (value) {
     return _then(_self.copyWith(combatPower: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneScalingRulesDataCopyWith<$Res> get zoneScaling {
+  
+  return $ZoneScalingRulesDataCopyWith<$Res>(_self.zoneScaling, (value) {
+    return _then(_self.copyWith(zoneScaling: value));
   });
 }
 }
@@ -278,10 +288,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower,  ZoneScalingRulesData zoneScaling)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower,_that.zoneScaling);case _:
   return orElse();
 
 }
@@ -299,10 +309,10 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower,  ZoneScalingRulesData zoneScaling)  $default,) {final _that = this;
 switch (_that) {
 case _RulesData():
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower,_that.zoneScaling);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -319,10 +329,10 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( FarmRulesData farm,  PotatoRulesData potatoes,  PestRulesData pests,  NewFarmData newFarm,  RaidRulesData raid,  StorageRulesData storage,  MailRulesData mail,  WorkbenchRulesData workbench,  TotemRulesData totems,  BreedingRulesData breeding,  GearRulesData gear,  CombatPowerRulesData combatPower,  ZoneScalingRulesData zoneScaling)?  $default,) {final _that = this;
 switch (_that) {
 case _RulesData() when $default != null:
-return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower);case _:
+return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_that.storage,_that.mail,_that.workbench,_that.totems,_that.breeding,_that.gear,_that.combatPower,_that.zoneScaling);case _:
   return null;
 
 }
@@ -334,7 +344,7 @@ return $default(_that.farm,_that.potatoes,_that.pests,_that.newFarm,_that.raid,_
 @JsonSerializable()
 
 class _RulesData implements RulesData {
-  const _RulesData({required this.farm, required this.potatoes, required this.pests, required this.newFarm, required this.raid, required this.storage, required this.mail, required this.workbench, required this.totems, required this.breeding, required this.gear, required this.combatPower});
+  const _RulesData({required this.farm, required this.potatoes, required this.pests, required this.newFarm, required this.raid, required this.storage, required this.mail, required this.workbench, required this.totems, required this.breeding, required this.gear, required this.combatPower, this.zoneScaling = const ZoneScalingRulesData()});
   factory _RulesData.fromJson(Map<String, dynamic> json) => _$RulesDataFromJson(json);
 
 @override final  FarmRulesData farm;
@@ -349,6 +359,7 @@ class _RulesData implements RulesData {
 @override final  BreedingRulesData breeding;
 @override final  GearRulesData gear;
 @override final  CombatPowerRulesData combatPower;
+@override@JsonKey() final  ZoneScalingRulesData zoneScaling;
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -363,18 +374,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.pests, pests) || other.pests == pests)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid)&&(identical(other.storage, storage) || other.storage == storage)&&(identical(other.mail, mail) || other.mail == mail)&&(identical(other.workbench, workbench) || other.workbench == workbench)&&(identical(other.totems, totems) || other.totems == totems)&&(identical(other.breeding, breeding) || other.breeding == breeding)&&(identical(other.gear, gear) || other.gear == gear)&&(identical(other.combatPower, combatPower) || other.combatPower == combatPower));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RulesData&&(identical(other.farm, farm) || other.farm == farm)&&(identical(other.potatoes, potatoes) || other.potatoes == potatoes)&&(identical(other.pests, pests) || other.pests == pests)&&(identical(other.newFarm, newFarm) || other.newFarm == newFarm)&&(identical(other.raid, raid) || other.raid == raid)&&(identical(other.storage, storage) || other.storage == storage)&&(identical(other.mail, mail) || other.mail == mail)&&(identical(other.workbench, workbench) || other.workbench == workbench)&&(identical(other.totems, totems) || other.totems == totems)&&(identical(other.breeding, breeding) || other.breeding == breeding)&&(identical(other.gear, gear) || other.gear == gear)&&(identical(other.combatPower, combatPower) || other.combatPower == combatPower)&&(identical(other.zoneScaling, zoneScaling) || other.zoneScaling == zoneScaling));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,farm,potatoes,pests,newFarm,raid,storage,mail,workbench,totems,breeding,gear,combatPower);
+    return Object.hash(runtimeType,farm,potatoes,pests,newFarm,raid,storage,mail,workbench,totems,breeding,gear,combatPower,zoneScaling);
 }
 
 @override
 String toString() {
-    return 'RulesData(farm: $farm, potatoes: $potatoes, pests: $pests, newFarm: $newFarm, raid: $raid, storage: $storage, mail: $mail, workbench: $workbench, totems: $totems, breeding: $breeding, gear: $gear, combatPower: $combatPower)';
+    return 'RulesData(farm: $farm, potatoes: $potatoes, pests: $pests, newFarm: $newFarm, raid: $raid, storage: $storage, mail: $mail, workbench: $workbench, totems: $totems, breeding: $breeding, gear: $gear, combatPower: $combatPower, zoneScaling: $zoneScaling)';
 }
 
 
@@ -385,11 +396,11 @@ abstract mixin class _$RulesDataCopyWith<$Res> implements $RulesDataCopyWith<$Re
   factory _$RulesDataCopyWith(_RulesData value, $Res Function(_RulesData) _then) = __$RulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower
+ FarmRulesData farm, PotatoRulesData potatoes, PestRulesData pests, NewFarmData newFarm, RaidRulesData raid, StorageRulesData storage, MailRulesData mail, WorkbenchRulesData workbench, TotemRulesData totems, BreedingRulesData breeding, GearRulesData gear, CombatPowerRulesData combatPower, ZoneScalingRulesData zoneScaling
 });
 
 
-@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $PestRulesDataCopyWith<$Res> get pests;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;@override $StorageRulesDataCopyWith<$Res> get storage;@override $MailRulesDataCopyWith<$Res> get mail;@override $WorkbenchRulesDataCopyWith<$Res> get workbench;@override $TotemRulesDataCopyWith<$Res> get totems;@override $BreedingRulesDataCopyWith<$Res> get breeding;@override $GearRulesDataCopyWith<$Res> get gear;@override $CombatPowerRulesDataCopyWith<$Res> get combatPower;
+@override $FarmRulesDataCopyWith<$Res> get farm;@override $PotatoRulesDataCopyWith<$Res> get potatoes;@override $PestRulesDataCopyWith<$Res> get pests;@override $NewFarmDataCopyWith<$Res> get newFarm;@override $RaidRulesDataCopyWith<$Res> get raid;@override $StorageRulesDataCopyWith<$Res> get storage;@override $MailRulesDataCopyWith<$Res> get mail;@override $WorkbenchRulesDataCopyWith<$Res> get workbench;@override $TotemRulesDataCopyWith<$Res> get totems;@override $BreedingRulesDataCopyWith<$Res> get breeding;@override $GearRulesDataCopyWith<$Res> get gear;@override $CombatPowerRulesDataCopyWith<$Res> get combatPower;@override $ZoneScalingRulesDataCopyWith<$Res> get zoneScaling;
 
 }
 /// @nodoc
@@ -402,7 +413,7 @@ class __$RulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? farm = null,Object? potatoes = null,Object? pests = null,Object? newFarm = null,Object? raid = null,Object? storage = null,Object? mail = null,Object? workbench = null,Object? totems = null,Object? breeding = null,Object? gear = null,Object? combatPower = null,Object? zoneScaling = null,}) {
   return _then(_RulesData(
 farm: null == farm ? _self.farm : farm // ignore: cast_nullable_to_non_nullable
 as FarmRulesData,potatoes: null == potatoes ? _self.potatoes : potatoes // ignore: cast_nullable_to_non_nullable
@@ -416,7 +427,8 @@ as WorkbenchRulesData,totems: null == totems ? _self.totems : totems // ignore: 
 as TotemRulesData,breeding: null == breeding ? _self.breeding : breeding // ignore: cast_nullable_to_non_nullable
 as BreedingRulesData,gear: null == gear ? _self.gear : gear // ignore: cast_nullable_to_non_nullable
 as GearRulesData,combatPower: null == combatPower ? _self.combatPower : combatPower // ignore: cast_nullable_to_non_nullable
-as CombatPowerRulesData,
+as CombatPowerRulesData,zoneScaling: null == zoneScaling ? _self.zoneScaling : zoneScaling // ignore: cast_nullable_to_non_nullable
+as ZoneScalingRulesData,
   ));
 }
 
@@ -527,6 +539,15 @@ $CombatPowerRulesDataCopyWith<$Res> get combatPower {
   
   return $CombatPowerRulesDataCopyWith<$Res>(_self.combatPower, (value) {
     return _then(_self.copyWith(combatPower: value));
+  });
+}/// Create a copy of RulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$ZoneScalingRulesDataCopyWith<$Res> get zoneScaling {
+  
+  return $ZoneScalingRulesDataCopyWith<$Res>(_self.zoneScaling, (value) {
+    return _then(_self.copyWith(zoneScaling: value));
   });
 }
 }
@@ -4232,8 +4253,9 @@ mixin _$GearRulesData {
 
 /// Bare hands: the weapon used with none, the bag slots, and belt slots
 /// that take any potato.
- String get bareWeapon; int get bareBagSlots; int get bareBeltSlots;/// Weapons: damage share by grade, and what each level adds in
-/// thousandths. The workbench adds `workbench.damage_percent` a level.
+ String get bareWeapon; int get bareBagSlots; int get bareBeltSlots;/// Weapons: damage share by grade, and how much each level multiplies
+/// it by, in thousandths over 1 (compounding, see [levelGrowth]). The
+/// workbench adds `workbench.damage_percent` a level.
  Map<Grade, double> get gradeDamage; int get levelDamagePermille;/// Bags: slots by grade, and slots each workbench level adds.
  Map<Grade, int> get bagSlots; int get bagEnhanceSlots;/// Belts: slots by grade, and how much stronger a potato in a slot
 /// gets at its job, in percent by grade, per ten levels, and per
@@ -4474,11 +4496,13 @@ class _GearRulesData implements GearRulesData {
 @override final  String bareWeapon;
 @override final  int bareBagSlots;
 @override final  int bareBeltSlots;
-/// Weapons: damage share by grade, and what each level adds in
-/// thousandths. The workbench adds `workbench.damage_percent` a level.
+/// Weapons: damage share by grade, and how much each level multiplies
+/// it by, in thousandths over 1 (compounding, see [levelGrowth]). The
+/// workbench adds `workbench.damage_percent` a level.
  final  Map<Grade, double> _gradeDamage;
-/// Weapons: damage share by grade, and what each level adds in
-/// thousandths. The workbench adds `workbench.damage_percent` a level.
+/// Weapons: damage share by grade, and how much each level multiplies
+/// it by, in thousandths over 1 (compounding, see [levelGrowth]). The
+/// workbench adds `workbench.damage_percent` a level.
 @override Map<Grade, double> get gradeDamage {
   if (_gradeDamage is EqualUnmodifiableMapView) return _gradeDamage;
   // ignore: implicit_dynamic_type
@@ -4631,8 +4655,10 @@ mixin _$CombatPowerRulesData {
  double get weaponDps;/// Points per point of a combat potato's health, and of its damage
 /// per second.
  double get potatoHp; double get potatoDps;/// Flat points for each food or buff potato along.
- double get helper;/// What a zone calls for: this plus so much a score point.
- double get recommendedBase; double get recommendedPerScore;/// Power over recommended at or above [easyRatio] is easy; at or above
+ double get helper;/// What a zone calls for: this plus so much a score point, multiplied
+/// by [recommendedGrowthPermille] a score point (compounding, so it
+/// keeps up with gear and enemies growing by level).
+ double get recommendedBase; double get recommendedPerScore; int get recommendedGrowthPermille;/// Power over recommended at or above [easyRatio] is easy; at or above
 /// [fairRatio], fair; under it, risky.
  double get easyRatio; double get fairRatio;
 /// Create a copy of CombatPowerRulesData
@@ -4648,20 +4674,20 @@ $CombatPowerRulesDataCopyWith<CombatPowerRulesData> get copyWith => _$CombatPowe
 @override
 bool operator ==(Object other) {
   final _this = this as CombatPowerRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CombatPowerRulesData&&(identical(other.weaponDps, _this.weaponDps) || other.weaponDps == _this.weaponDps)&&(identical(other.potatoHp, _this.potatoHp) || other.potatoHp == _this.potatoHp)&&(identical(other.potatoDps, _this.potatoDps) || other.potatoDps == _this.potatoDps)&&(identical(other.helper, _this.helper) || other.helper == _this.helper)&&(identical(other.recommendedBase, _this.recommendedBase) || other.recommendedBase == _this.recommendedBase)&&(identical(other.recommendedPerScore, _this.recommendedPerScore) || other.recommendedPerScore == _this.recommendedPerScore)&&(identical(other.easyRatio, _this.easyRatio) || other.easyRatio == _this.easyRatio)&&(identical(other.fairRatio, _this.fairRatio) || other.fairRatio == _this.fairRatio));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CombatPowerRulesData&&(identical(other.weaponDps, _this.weaponDps) || other.weaponDps == _this.weaponDps)&&(identical(other.potatoHp, _this.potatoHp) || other.potatoHp == _this.potatoHp)&&(identical(other.potatoDps, _this.potatoDps) || other.potatoDps == _this.potatoDps)&&(identical(other.helper, _this.helper) || other.helper == _this.helper)&&(identical(other.recommendedBase, _this.recommendedBase) || other.recommendedBase == _this.recommendedBase)&&(identical(other.recommendedPerScore, _this.recommendedPerScore) || other.recommendedPerScore == _this.recommendedPerScore)&&(identical(other.recommendedGrowthPermille, _this.recommendedGrowthPermille) || other.recommendedGrowthPermille == _this.recommendedGrowthPermille)&&(identical(other.easyRatio, _this.easyRatio) || other.easyRatio == _this.easyRatio)&&(identical(other.fairRatio, _this.fairRatio) || other.fairRatio == _this.fairRatio));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CombatPowerRulesData;
-  return Object.hash(runtimeType,_this.weaponDps,_this.potatoHp,_this.potatoDps,_this.helper,_this.recommendedBase,_this.recommendedPerScore,_this.easyRatio,_this.fairRatio);
+  return Object.hash(runtimeType,_this.weaponDps,_this.potatoHp,_this.potatoDps,_this.helper,_this.recommendedBase,_this.recommendedPerScore,_this.recommendedGrowthPermille,_this.easyRatio,_this.fairRatio);
 }
 
 @override
 String toString() {
   final _this = this as CombatPowerRulesData;
-  return 'CombatPowerRulesData(weaponDps: ${_this.weaponDps}, potatoHp: ${_this.potatoHp}, potatoDps: ${_this.potatoDps}, helper: ${_this.helper}, recommendedBase: ${_this.recommendedBase}, recommendedPerScore: ${_this.recommendedPerScore}, easyRatio: ${_this.easyRatio}, fairRatio: ${_this.fairRatio})';
+  return 'CombatPowerRulesData(weaponDps: ${_this.weaponDps}, potatoHp: ${_this.potatoHp}, potatoDps: ${_this.potatoDps}, helper: ${_this.helper}, recommendedBase: ${_this.recommendedBase}, recommendedPerScore: ${_this.recommendedPerScore}, recommendedGrowthPermille: ${_this.recommendedGrowthPermille}, easyRatio: ${_this.easyRatio}, fairRatio: ${_this.fairRatio})';
 }
 
 
@@ -4672,7 +4698,7 @@ abstract mixin class $CombatPowerRulesDataCopyWith<$Res>  {
   factory $CombatPowerRulesDataCopyWith(CombatPowerRulesData value, $Res Function(CombatPowerRulesData) _then) = _$CombatPowerRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, double easyRatio, double fairRatio
+ double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, int recommendedGrowthPermille, double easyRatio, double fairRatio
 });
 
 
@@ -4689,7 +4715,7 @@ class _$CombatPowerRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CombatPowerRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? easyRatio = null,Object? fairRatio = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? recommendedGrowthPermille = null,Object? easyRatio = null,Object? fairRatio = null,}) {
   return _then(CombatPowerRulesData(
 weaponDps: null == weaponDps ? _self.weaponDps : weaponDps // ignore: cast_nullable_to_non_nullable
 as double,potatoHp: null == potatoHp ? _self.potatoHp : potatoHp // ignore: cast_nullable_to_non_nullable
@@ -4697,7 +4723,8 @@ as double,potatoDps: null == potatoDps ? _self.potatoDps : potatoDps // ignore: 
 as double,helper: null == helper ? _self.helper : helper // ignore: cast_nullable_to_non_nullable
 as double,recommendedBase: null == recommendedBase ? _self.recommendedBase : recommendedBase // ignore: cast_nullable_to_non_nullable
 as double,recommendedPerScore: null == recommendedPerScore ? _self.recommendedPerScore : recommendedPerScore // ignore: cast_nullable_to_non_nullable
-as double,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
+as double,recommendedGrowthPermille: null == recommendedGrowthPermille ? _self.recommendedGrowthPermille : recommendedGrowthPermille // ignore: cast_nullable_to_non_nullable
+as int,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
 as double,fairRatio: null == fairRatio ? _self.fairRatio : fairRatio // ignore: cast_nullable_to_non_nullable
 as double,
   ));
@@ -4784,10 +4811,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  int recommendedGrowthPermille,  double easyRatio,  double fairRatio)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CombatPowerRulesData() when $default != null:
-return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.recommendedGrowthPermille,_that.easyRatio,_that.fairRatio);case _:
   return orElse();
 
 }
@@ -4805,10 +4832,10 @@ return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  int recommendedGrowthPermille,  double easyRatio,  double fairRatio)  $default,) {final _that = this;
 switch (_that) {
 case _CombatPowerRulesData():
-return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.recommendedGrowthPermille,_that.easyRatio,_that.fairRatio);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4825,10 +4852,10 @@ return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  double easyRatio,  double fairRatio)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double weaponDps,  double potatoHp,  double potatoDps,  double helper,  double recommendedBase,  double recommendedPerScore,  int recommendedGrowthPermille,  double easyRatio,  double fairRatio)?  $default,) {final _that = this;
 switch (_that) {
 case _CombatPowerRulesData() when $default != null:
-return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.easyRatio,_that.fairRatio);case _:
+return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_that.recommendedBase,_that.recommendedPerScore,_that.recommendedGrowthPermille,_that.easyRatio,_that.fairRatio);case _:
   return null;
 
 }
@@ -4840,7 +4867,7 @@ return $default(_that.weaponDps,_that.potatoHp,_that.potatoDps,_that.helper,_tha
 @JsonSerializable()
 
 class _CombatPowerRulesData implements CombatPowerRulesData {
-  const _CombatPowerRulesData({required this.weaponDps, required this.potatoHp, required this.potatoDps, required this.helper, required this.recommendedBase, required this.recommendedPerScore, required this.easyRatio, required this.fairRatio});
+  const _CombatPowerRulesData({required this.weaponDps, required this.potatoHp, required this.potatoDps, required this.helper, required this.recommendedBase, required this.recommendedPerScore, this.recommendedGrowthPermille = 0, required this.easyRatio, required this.fairRatio});
   factory _CombatPowerRulesData.fromJson(Map<String, dynamic> json) => _$CombatPowerRulesDataFromJson(json);
 
 /// Points per point of weapon damage per second.
@@ -4851,9 +4878,12 @@ class _CombatPowerRulesData implements CombatPowerRulesData {
 @override final  double potatoDps;
 /// Flat points for each food or buff potato along.
 @override final  double helper;
-/// What a zone calls for: this plus so much a score point.
+/// What a zone calls for: this plus so much a score point, multiplied
+/// by [recommendedGrowthPermille] a score point (compounding, so it
+/// keeps up with gear and enemies growing by level).
 @override final  double recommendedBase;
 @override final  double recommendedPerScore;
+@override@JsonKey() final  int recommendedGrowthPermille;
 /// Power over recommended at or above [easyRatio] is easy; at or above
 /// [fairRatio], fair; under it, risky.
 @override final  double easyRatio;
@@ -4872,18 +4902,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CombatPowerRulesData&&(identical(other.weaponDps, weaponDps) || other.weaponDps == weaponDps)&&(identical(other.potatoHp, potatoHp) || other.potatoHp == potatoHp)&&(identical(other.potatoDps, potatoDps) || other.potatoDps == potatoDps)&&(identical(other.helper, helper) || other.helper == helper)&&(identical(other.recommendedBase, recommendedBase) || other.recommendedBase == recommendedBase)&&(identical(other.recommendedPerScore, recommendedPerScore) || other.recommendedPerScore == recommendedPerScore)&&(identical(other.easyRatio, easyRatio) || other.easyRatio == easyRatio)&&(identical(other.fairRatio, fairRatio) || other.fairRatio == fairRatio));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CombatPowerRulesData&&(identical(other.weaponDps, weaponDps) || other.weaponDps == weaponDps)&&(identical(other.potatoHp, potatoHp) || other.potatoHp == potatoHp)&&(identical(other.potatoDps, potatoDps) || other.potatoDps == potatoDps)&&(identical(other.helper, helper) || other.helper == helper)&&(identical(other.recommendedBase, recommendedBase) || other.recommendedBase == recommendedBase)&&(identical(other.recommendedPerScore, recommendedPerScore) || other.recommendedPerScore == recommendedPerScore)&&(identical(other.recommendedGrowthPermille, recommendedGrowthPermille) || other.recommendedGrowthPermille == recommendedGrowthPermille)&&(identical(other.easyRatio, easyRatio) || other.easyRatio == easyRatio)&&(identical(other.fairRatio, fairRatio) || other.fairRatio == fairRatio));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,weaponDps,potatoHp,potatoDps,helper,recommendedBase,recommendedPerScore,easyRatio,fairRatio);
+    return Object.hash(runtimeType,weaponDps,potatoHp,potatoDps,helper,recommendedBase,recommendedPerScore,recommendedGrowthPermille,easyRatio,fairRatio);
 }
 
 @override
 String toString() {
-    return 'CombatPowerRulesData(weaponDps: $weaponDps, potatoHp: $potatoHp, potatoDps: $potatoDps, helper: $helper, recommendedBase: $recommendedBase, recommendedPerScore: $recommendedPerScore, easyRatio: $easyRatio, fairRatio: $fairRatio)';
+    return 'CombatPowerRulesData(weaponDps: $weaponDps, potatoHp: $potatoHp, potatoDps: $potatoDps, helper: $helper, recommendedBase: $recommendedBase, recommendedPerScore: $recommendedPerScore, recommendedGrowthPermille: $recommendedGrowthPermille, easyRatio: $easyRatio, fairRatio: $fairRatio)';
 }
 
 
@@ -4894,7 +4924,7 @@ abstract mixin class _$CombatPowerRulesDataCopyWith<$Res> implements $CombatPowe
   factory _$CombatPowerRulesDataCopyWith(_CombatPowerRulesData value, $Res Function(_CombatPowerRulesData) _then) = __$CombatPowerRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, double easyRatio, double fairRatio
+ double weaponDps, double potatoHp, double potatoDps, double helper, double recommendedBase, double recommendedPerScore, int recommendedGrowthPermille, double easyRatio, double fairRatio
 });
 
 
@@ -4911,7 +4941,7 @@ class __$CombatPowerRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CombatPowerRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? easyRatio = null,Object? fairRatio = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? weaponDps = null,Object? potatoHp = null,Object? potatoDps = null,Object? helper = null,Object? recommendedBase = null,Object? recommendedPerScore = null,Object? recommendedGrowthPermille = null,Object? easyRatio = null,Object? fairRatio = null,}) {
   return _then(_CombatPowerRulesData(
 weaponDps: null == weaponDps ? _self.weaponDps : weaponDps // ignore: cast_nullable_to_non_nullable
 as double,potatoHp: null == potatoHp ? _self.potatoHp : potatoHp // ignore: cast_nullable_to_non_nullable
@@ -4919,9 +4949,304 @@ as double,potatoDps: null == potatoDps ? _self.potatoDps : potatoDps // ignore: 
 as double,helper: null == helper ? _self.helper : helper // ignore: cast_nullable_to_non_nullable
 as double,recommendedBase: null == recommendedBase ? _self.recommendedBase : recommendedBase // ignore: cast_nullable_to_non_nullable
 as double,recommendedPerScore: null == recommendedPerScore ? _self.recommendedPerScore : recommendedPerScore // ignore: cast_nullable_to_non_nullable
-as double,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
+as double,recommendedGrowthPermille: null == recommendedGrowthPermille ? _self.recommendedGrowthPermille : recommendedGrowthPermille // ignore: cast_nullable_to_non_nullable
+as int,easyRatio: null == easyRatio ? _self.easyRatio : easyRatio // ignore: cast_nullable_to_non_nullable
 as double,fairRatio: null == fairRatio ? _self.fairRatio : fairRatio // ignore: cast_nullable_to_non_nullable
 as double,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$ZoneScalingRulesData {
+
+/// Enemy health and damage each score point multiplies by, in
+/// thousandths over 1 (compounding, see [levelGrowth]).
+ int get enemyHpPermille; int get enemyDamagePermille;/// What each score point adds to the amount of plain loot (baby
+/// potatoes, materials), in thousandths.
+ int get lootAmountPermille;/// What each score point adds to the weight of rare and legendary
+/// seeds and gear in loot tables, in thousandths.
+ int get rareWeightPermille; int get legendaryWeightPermille;
+/// Create a copy of ZoneScalingRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ZoneScalingRulesDataCopyWith<ZoneScalingRulesData> get copyWith => _$ZoneScalingRulesDataCopyWithImpl<ZoneScalingRulesData>(this as ZoneScalingRulesData, _$identity);
+
+  /// Serializes this ZoneScalingRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ZoneScalingRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneScalingRulesData&&(identical(other.enemyHpPermille, _this.enemyHpPermille) || other.enemyHpPermille == _this.enemyHpPermille)&&(identical(other.enemyDamagePermille, _this.enemyDamagePermille) || other.enemyDamagePermille == _this.enemyDamagePermille)&&(identical(other.lootAmountPermille, _this.lootAmountPermille) || other.lootAmountPermille == _this.lootAmountPermille)&&(identical(other.rareWeightPermille, _this.rareWeightPermille) || other.rareWeightPermille == _this.rareWeightPermille)&&(identical(other.legendaryWeightPermille, _this.legendaryWeightPermille) || other.legendaryWeightPermille == _this.legendaryWeightPermille));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ZoneScalingRulesData;
+  return Object.hash(runtimeType,_this.enemyHpPermille,_this.enemyDamagePermille,_this.lootAmountPermille,_this.rareWeightPermille,_this.legendaryWeightPermille);
+}
+
+@override
+String toString() {
+  final _this = this as ZoneScalingRulesData;
+  return 'ZoneScalingRulesData(enemyHpPermille: ${_this.enemyHpPermille}, enemyDamagePermille: ${_this.enemyDamagePermille}, lootAmountPermille: ${_this.lootAmountPermille}, rareWeightPermille: ${_this.rareWeightPermille}, legendaryWeightPermille: ${_this.legendaryWeightPermille})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ZoneScalingRulesDataCopyWith<$Res>  {
+  factory $ZoneScalingRulesDataCopyWith(ZoneScalingRulesData value, $Res Function(ZoneScalingRulesData) _then) = _$ZoneScalingRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ int enemyHpPermille, int enemyDamagePermille, int lootAmountPermille, int rareWeightPermille, int legendaryWeightPermille
+});
+
+
+
+
+}
+/// @nodoc
+class _$ZoneScalingRulesDataCopyWithImpl<$Res>
+    implements $ZoneScalingRulesDataCopyWith<$Res> {
+  _$ZoneScalingRulesDataCopyWithImpl(this._self, this._then);
+
+  final ZoneScalingRulesData _self;
+  final $Res Function(ZoneScalingRulesData) _then;
+
+/// Create a copy of ZoneScalingRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? enemyHpPermille = null,Object? enemyDamagePermille = null,Object? lootAmountPermille = null,Object? rareWeightPermille = null,Object? legendaryWeightPermille = null,}) {
+  return _then(ZoneScalingRulesData(
+enemyHpPermille: null == enemyHpPermille ? _self.enemyHpPermille : enemyHpPermille // ignore: cast_nullable_to_non_nullable
+as int,enemyDamagePermille: null == enemyDamagePermille ? _self.enemyDamagePermille : enemyDamagePermille // ignore: cast_nullable_to_non_nullable
+as int,lootAmountPermille: null == lootAmountPermille ? _self.lootAmountPermille : lootAmountPermille // ignore: cast_nullable_to_non_nullable
+as int,rareWeightPermille: null == rareWeightPermille ? _self.rareWeightPermille : rareWeightPermille // ignore: cast_nullable_to_non_nullable
+as int,legendaryWeightPermille: null == legendaryWeightPermille ? _self.legendaryWeightPermille : legendaryWeightPermille // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ZoneScalingRulesData].
+extension ZoneScalingRulesDataPatterns on ZoneScalingRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ZoneScalingRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ZoneScalingRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ZoneScalingRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int enemyHpPermille,  int enemyDamagePermille,  int lootAmountPermille,  int rareWeightPermille,  int legendaryWeightPermille)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData() when $default != null:
+return $default(_that.enemyHpPermille,_that.enemyDamagePermille,_that.lootAmountPermille,_that.rareWeightPermille,_that.legendaryWeightPermille);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int enemyHpPermille,  int enemyDamagePermille,  int lootAmountPermille,  int rareWeightPermille,  int legendaryWeightPermille)  $default,) {final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData():
+return $default(_that.enemyHpPermille,_that.enemyDamagePermille,_that.lootAmountPermille,_that.rareWeightPermille,_that.legendaryWeightPermille);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int enemyHpPermille,  int enemyDamagePermille,  int lootAmountPermille,  int rareWeightPermille,  int legendaryWeightPermille)?  $default,) {final _that = this;
+switch (_that) {
+case _ZoneScalingRulesData() when $default != null:
+return $default(_that.enemyHpPermille,_that.enemyDamagePermille,_that.lootAmountPermille,_that.rareWeightPermille,_that.legendaryWeightPermille);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ZoneScalingRulesData extends ZoneScalingRulesData {
+  const _ZoneScalingRulesData({this.enemyHpPermille = 0, this.enemyDamagePermille = 0, this.lootAmountPermille = 0, this.rareWeightPermille = 0, this.legendaryWeightPermille = 0}): super._();
+  factory _ZoneScalingRulesData.fromJson(Map<String, dynamic> json) => _$ZoneScalingRulesDataFromJson(json);
+
+/// Enemy health and damage each score point multiplies by, in
+/// thousandths over 1 (compounding, see [levelGrowth]).
+@override@JsonKey() final  int enemyHpPermille;
+@override@JsonKey() final  int enemyDamagePermille;
+/// What each score point adds to the amount of plain loot (baby
+/// potatoes, materials), in thousandths.
+@override@JsonKey() final  int lootAmountPermille;
+/// What each score point adds to the weight of rare and legendary
+/// seeds and gear in loot tables, in thousandths.
+@override@JsonKey() final  int rareWeightPermille;
+@override@JsonKey() final  int legendaryWeightPermille;
+
+/// Create a copy of ZoneScalingRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ZoneScalingRulesDataCopyWith<_ZoneScalingRulesData> get copyWith => __$ZoneScalingRulesDataCopyWithImpl<_ZoneScalingRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ZoneScalingRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneScalingRulesData&&(identical(other.enemyHpPermille, enemyHpPermille) || other.enemyHpPermille == enemyHpPermille)&&(identical(other.enemyDamagePermille, enemyDamagePermille) || other.enemyDamagePermille == enemyDamagePermille)&&(identical(other.lootAmountPermille, lootAmountPermille) || other.lootAmountPermille == lootAmountPermille)&&(identical(other.rareWeightPermille, rareWeightPermille) || other.rareWeightPermille == rareWeightPermille)&&(identical(other.legendaryWeightPermille, legendaryWeightPermille) || other.legendaryWeightPermille == legendaryWeightPermille));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,enemyHpPermille,enemyDamagePermille,lootAmountPermille,rareWeightPermille,legendaryWeightPermille);
+}
+
+@override
+String toString() {
+    return 'ZoneScalingRulesData(enemyHpPermille: $enemyHpPermille, enemyDamagePermille: $enemyDamagePermille, lootAmountPermille: $lootAmountPermille, rareWeightPermille: $rareWeightPermille, legendaryWeightPermille: $legendaryWeightPermille)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ZoneScalingRulesDataCopyWith<$Res> implements $ZoneScalingRulesDataCopyWith<$Res> {
+  factory _$ZoneScalingRulesDataCopyWith(_ZoneScalingRulesData value, $Res Function(_ZoneScalingRulesData) _then) = __$ZoneScalingRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ int enemyHpPermille, int enemyDamagePermille, int lootAmountPermille, int rareWeightPermille, int legendaryWeightPermille
+});
+
+
+
+
+}
+/// @nodoc
+class __$ZoneScalingRulesDataCopyWithImpl<$Res>
+    implements _$ZoneScalingRulesDataCopyWith<$Res> {
+  __$ZoneScalingRulesDataCopyWithImpl(this._self, this._then);
+
+  final _ZoneScalingRulesData _self;
+  final $Res Function(_ZoneScalingRulesData) _then;
+
+/// Create a copy of ZoneScalingRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? enemyHpPermille = null,Object? enemyDamagePermille = null,Object? lootAmountPermille = null,Object? rareWeightPermille = null,Object? legendaryWeightPermille = null,}) {
+  return _then(_ZoneScalingRulesData(
+enemyHpPermille: null == enemyHpPermille ? _self.enemyHpPermille : enemyHpPermille // ignore: cast_nullable_to_non_nullable
+as int,enemyDamagePermille: null == enemyDamagePermille ? _self.enemyDamagePermille : enemyDamagePermille // ignore: cast_nullable_to_non_nullable
+as int,lootAmountPermille: null == lootAmountPermille ? _self.lootAmountPermille : lootAmountPermille // ignore: cast_nullable_to_non_nullable
+as int,rareWeightPermille: null == rareWeightPermille ? _self.rareWeightPermille : rareWeightPermille // ignore: cast_nullable_to_non_nullable
+as int,legendaryWeightPermille: null == legendaryWeightPermille ? _self.legendaryWeightPermille : legendaryWeightPermille // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

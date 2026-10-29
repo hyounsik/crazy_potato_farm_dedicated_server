@@ -461,6 +461,28 @@ final class Catalog {
     check.probability('workbench.chance', bench.chance);
     check.probability('workbench.min_chance', bench.minChance);
     check.atLeastNumber('workbench.damage_percent', bench.damagePercent, 0);
+    final scaling = rules.zoneScaling;
+    check.atLeast('zone_scaling.enemy_hp_permille', scaling.enemyHpPermille, 0);
+    check.atLeast(
+      'zone_scaling.enemy_damage_permille',
+      scaling.enemyDamagePermille,
+      0,
+    );
+    check.atLeast(
+      'zone_scaling.loot_amount_permille',
+      scaling.lootAmountPermille,
+      0,
+    );
+    check.atLeast(
+      'zone_scaling.rare_weight_permille',
+      scaling.rareWeightPermille,
+      0,
+    );
+    check.atLeast(
+      'zone_scaling.legendary_weight_permille',
+      scaling.legendaryWeightPermille,
+      0,
+    );
     final breeding = rules.breeding;
     check.positive('breeding.seed_every_seconds', breeding.seedEverySeconds);
     if (breeding.storeMax case final max?) {

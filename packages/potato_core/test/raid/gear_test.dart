@@ -61,7 +61,7 @@ void main() {
     expect(
       stats.damageScale(rareRapid),
       closeTo(
-        1.25 * (1 + 10 * catalog.rules.gear.levelDamagePermille / 1000),
+        1.25 * levelGrowth(catalog.rules.gear.levelDamagePermille, 10),
         1e-9,
       ),
     );

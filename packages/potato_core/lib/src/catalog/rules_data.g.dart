@@ -59,10 +59,20 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'combat_power',
         (v) => CombatPowerRulesData.fromJson(v as Map<String, dynamic>),
       ),
+      zoneScaling: $checkedConvert(
+        'zone_scaling',
+        (v) => v == null
+            ? const ZoneScalingRulesData()
+            : ZoneScalingRulesData.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
-  fieldKeyMap: const {'newFarm': 'new_farm', 'combatPower': 'combat_power'},
+  fieldKeyMap: const {
+    'newFarm': 'new_farm',
+    'combatPower': 'combat_power',
+    'zoneScaling': 'zone_scaling',
+  },
 );
 
 Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
@@ -79,6 +89,7 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'breeding': instance.breeding.toJson(),
       'gear': instance.gear.toJson(),
       'combat_power': instance.combatPower.toJson(),
+      'zone_scaling': instance.zoneScaling.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -739,6 +750,10 @@ _CombatPowerRulesData _$CombatPowerRulesDataFromJson(
         'recommended_per_score',
         (v) => (v as num).toDouble(),
       ),
+      recommendedGrowthPermille: $checkedConvert(
+        'recommended_growth_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
       easyRatio: $checkedConvert('easy_ratio', (v) => (v as num).toDouble()),
       fairRatio: $checkedConvert('fair_ratio', (v) => (v as num).toDouble()),
     );
@@ -750,6 +765,7 @@ _CombatPowerRulesData _$CombatPowerRulesDataFromJson(
     'potatoDps': 'potato_dps',
     'recommendedBase': 'recommended_base',
     'recommendedPerScore': 'recommended_per_score',
+    'recommendedGrowthPermille': 'recommended_growth_permille',
     'easyRatio': 'easy_ratio',
     'fairRatio': 'fair_ratio',
   },
@@ -764,8 +780,58 @@ Map<String, dynamic> _$CombatPowerRulesDataToJson(
   'helper': instance.helper,
   'recommended_base': instance.recommendedBase,
   'recommended_per_score': instance.recommendedPerScore,
+  'recommended_growth_permille': instance.recommendedGrowthPermille,
   'easy_ratio': instance.easyRatio,
   'fair_ratio': instance.fairRatio,
+};
+
+_ZoneScalingRulesData _$ZoneScalingRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_ZoneScalingRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _ZoneScalingRulesData(
+      enemyHpPermille: $checkedConvert(
+        'enemy_hp_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      enemyDamagePermille: $checkedConvert(
+        'enemy_damage_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      lootAmountPermille: $checkedConvert(
+        'loot_amount_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      rareWeightPermille: $checkedConvert(
+        'rare_weight_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      legendaryWeightPermille: $checkedConvert(
+        'legendary_weight_permille',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'enemyHpPermille': 'enemy_hp_permille',
+    'enemyDamagePermille': 'enemy_damage_permille',
+    'lootAmountPermille': 'loot_amount_permille',
+    'rareWeightPermille': 'rare_weight_permille',
+    'legendaryWeightPermille': 'legendary_weight_permille',
+  },
+);
+
+Map<String, dynamic> _$ZoneScalingRulesDataToJson(
+  _ZoneScalingRulesData instance,
+) => <String, dynamic>{
+  'enemy_hp_permille': instance.enemyHpPermille,
+  'enemy_damage_permille': instance.enemyDamagePermille,
+  'loot_amount_permille': instance.lootAmountPermille,
+  'rare_weight_permille': instance.rareWeightPermille,
+  'legendary_weight_permille': instance.legendaryWeightPermille,
 };
 
 _BreedingRulesData _$BreedingRulesDataFromJson(Map<String, dynamic> json) =>

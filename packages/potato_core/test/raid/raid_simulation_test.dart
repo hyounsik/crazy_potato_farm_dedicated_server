@@ -785,11 +785,11 @@ void main() {
           .single;
       // combat.plain: +5% health.
       expect(low.maxHp, closeTo(style.maxHp * 1.05, 1e-9));
-      final perLevel = catalog.rules.raid.companion.levelHpPermille / 1000;
-      expect(
-        high.maxHp,
-        closeTo(style.maxHp * (1 + 10 * perLevel) * 1.05, 1e-9),
+      final growth = levelGrowth(
+        catalog.rules.raid.companion.levelHpPermille,
+        10,
       );
+      expect(high.maxHp, closeTo(style.maxHp * growth * 1.05, 1e-9));
     });
 
     test('in attack mode a melee potato runs at a calm enemy and hits it', () {

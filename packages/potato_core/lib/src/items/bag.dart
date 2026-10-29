@@ -140,7 +140,8 @@ final class LootPile {
   /// Rolls [table] and merges the same items into as few stacks as fit.
   /// Seed items get a seed each from [makeSeed]. [weigh] may change an
   /// entry's weight (from its item id and table weight), such as luck
-  /// favouring better seeds.
+  /// favouring better seeds. Plain items (neither seed nor gear) come
+  /// [amount] times as many, rounded and at least one.
   factory LootPile.roll(
     LootTableData table,
     StackSize stackSize,
@@ -148,6 +149,7 @@ final class LootPile {
     SeedMaker? makeSeed,
     GearMaker? makeGear,
     int Function(String item, int weight)? weigh,
+    double amount = 1,
   }) {
     final pile = LootPile();
     int weightOf(LootEntryData e) => weigh?.call(e.item, e.weight) ?? e.weight;
@@ -173,7 +175,8 @@ final class LootPile {
       }
       final first = makeSeed?.call(entry.item);
       if (first == null) {
-        pile._merge(ItemStack(entry.item, count), stackSize);
+        final scaled = count == 0 ? 0 : math.max(1, (count * amount).round());
+        pile._merge(ItemStack(entry.item, scaled), stackSize);
         continue;
       }
       pile._merge(ItemStack(entry.item, 1, seed: first), stackSize);

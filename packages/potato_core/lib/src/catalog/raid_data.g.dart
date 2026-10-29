@@ -946,6 +946,13 @@ _ZoneData _$ZoneDataFromJson(
   final val = _ZoneData(
     id: $checkedConvert('id', (v) => v as String),
     score: $checkedConvert('score', (v) => (v as num).toInt()),
+    name: $checkedConvert(
+      'name',
+      (v) => _$JsonConverterFromJson<Object, LocalizedText>(
+        v,
+        const LocalizedTextConverter().fromJson,
+      ),
+    ),
     map: $checkedConvert(
       'map',
       (v) => MapRecipe.fromJson(v as Map<String, dynamic>),
@@ -980,6 +987,10 @@ _ZoneData _$ZoneDataFromJson(
 Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'id': instance.id,
   'score': instance.score,
+  'name': _$JsonConverterToJson<Object, LocalizedText>(
+    instance.name,
+    const LocalizedTextConverter().toJson,
+  ),
   'map': instance.map.toJson(),
   'enemies': instance.enemies.toJson(),
   'gathering': instance.gathering.toJson(),
@@ -988,6 +999,16 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'boss': instance.boss?.toJson(),
   'look': instance.look,
 };
+
+Value? _$JsonConverterFromJson<Json, Value>(
+  Object? json,
+  Value? Function(Json json) fromJson,
+) => json == null ? null : fromJson(json as Json);
+
+Json? _$JsonConverterToJson<Json, Value>(
+  Value? value,
+  Json? Function(Value value) toJson,
+) => value == null ? null : toJson(value);
 
 _ZoneEnemiesData _$ZoneEnemiesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate(

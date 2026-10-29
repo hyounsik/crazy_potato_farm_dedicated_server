@@ -140,8 +140,9 @@ abstract class CompanionRulesData with _$CompanionRulesData {
     /// [speedMultiplier] and do not fight.
     required Map<CombatStyle, CompanionStyleData> styles,
 
-    /// What each level adds to a companion's health and attack, in
-    /// thousandths: 30 means +3% per level.
+    /// How much each level multiplies a companion's health and attack by,
+    /// in thousandths over 1: 30 means ×1.03 per level, compounding (see
+    /// `levelGrowth`).
     required int levelHpPermille,
     required int levelAttackPermille,
 
@@ -446,8 +447,13 @@ abstract class ZoneData with _$ZoneData {
   const factory ZoneData({
     required String id,
 
-    /// The region score: the level of the seeds found here.
+    /// The region score: the level of the seeds and gear found here, and
+    /// how strong enemies and loot are (`rules.zone_scaling`).
     required int score,
+
+    /// The region's name, shown with safe or danger zone. Null for test
+    /// zones, which the app names itself.
+    @LocalizedTextConverter() LocalizedText? name,
     required MapRecipe map,
     required ZoneEnemiesData enemies,
     required ZoneGatheringData gathering,

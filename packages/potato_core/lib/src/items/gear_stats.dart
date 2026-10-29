@@ -23,7 +23,7 @@ final class GearStats {
   double damageScale(Gear? weapon) {
     if (weapon == null) return 1;
     return (rules.gradeDamage[weapon.grade] ?? 1) *
-        (1 + weapon.level * rules.levelDamagePermille / 1000) *
+        levelGrowth(rules.levelDamagePermille, weapon.level) *
         (1 + weapon.enhance * catalog.rules.workbench.damagePercent / 100);
   }
 
@@ -111,11 +111,11 @@ final class GearStats {
       }
       final hp =
           style.maxHp *
-          (1 + c.level * companion.levelHpPermille / 1000) *
+          levelGrowth(companion.levelHpPermille, c.level) *
           (1 + boost);
       final attack =
           style.damage *
-          (1 + c.level * companion.levelAttackPermille / 1000) *
+          levelGrowth(companion.levelAttackPermille, c.level) *
           (1 + boost);
       points += hp * power.potatoHp + attack / style.interval * power.potatoDps;
     }
@@ -125,7 +125,9 @@ final class GearStats {
   /// What a zone of [score] calls for.
   int recommendedPower(int score) {
     final power = catalog.rules.combatPower;
-    return (power.recommendedBase + power.recommendedPerScore * score).round();
+    return ((power.recommendedBase + power.recommendedPerScore * score) *
+            levelGrowth(power.recommendedGrowthPermille, score))
+        .round();
   }
 
   PowerVerdict verdict(int power, int recommended) {

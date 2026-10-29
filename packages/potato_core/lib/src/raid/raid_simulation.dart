@@ -5,6 +5,7 @@ import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
+import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/common/vec2.dart';
@@ -384,6 +385,11 @@ final class RaidSimulation {
 
   late final GearStats _gear = GearStats(catalog);
 
+  /// What enemies' hits do: the zone's multiplier, raised by its score.
+  late final double _enemyDamage =
+      zone.enemies.damageMultiplier *
+      catalog.rules.zoneScaling.enemyDamage(zone.score);
+
   /// A companion's max health at the start: its style's (or the plain
   /// companion's), raised by level for combat potatoes, then abilities.
   static double _startHp(
@@ -399,7 +405,7 @@ final class RaidSimulation {
     var hp = style?.maxHp ?? rules.maxHp;
     if (style != null) {
       hp *=
-          (1 + start.level * rules.levelHpPermille / 1000) *
+          levelGrowth(rules.levelHpPermille, start.level) *
           (1 + start.beltBoost);
     }
     final sums = <String, StatSum>{}
@@ -551,7 +557,7 @@ final class RaidSimulation {
     if (style == null) return 0;
     final base =
         style.damage *
-        (1 + companion.level * rules.companion.levelAttackPermille / 1000) *
+        levelGrowth(rules.companion.levelAttackPermille, companion.level) *
         (1 + companion.beltBoost);
     return statsOf(companion).apply(RaidStat.attack, base);
   }
@@ -1671,7 +1677,7 @@ final class RaidSimulation {
     for (final key in enemy.cooldowns.keys) {
       enemy.cooldowns[key] = enemy.cooldowns[key]! - dt;
     }
-    final damage = zone.enemies.damageMultiplier;
+    final damage = _enemyDamage;
 
     enemy.swingLeft = math.max(0, enemy.swingLeft - dt);
     if (enemy.isWindingUp) {
@@ -1981,7 +1987,7 @@ final class RaidSimulation {
         radius: cloud.radius,
         spreadSeconds: cloud.spreadSeconds,
         seconds: cloud.seconds,
-        damagePerSecond: cloud.damagePerSecond * zone.enemies.damageMultiplier,
+        damagePerSecond: cloud.damagePerSecond * _enemyDamage,
         owner: enemy.id,
         kind: enemy.kind,
         direction: facing,
@@ -2060,7 +2066,7 @@ final class RaidSimulation {
       case EnemyAttack.melee:
         if (d <= enemy.radius + target.radius + spec.reach) {
           if (enemy.attackCooldown <= 0) {
-            _hurt(target, spec.damage * zone.enemies.damageMultiplier, enemy);
+            _hurt(target, spec.damage * _enemyDamage, enemy);
             enemy.attackCooldown = spec.attackInterval;
           }
         } else {
@@ -2075,7 +2081,7 @@ final class RaidSimulation {
                 id: _newId(),
                 position: enemy.position + direction * enemy.radius,
                 velocity: direction * spec.bulletSpeed,
-                damage: spec.damage * zone.enemies.damageMultiplier,
+                damage: spec.damage * _enemyDamage,
                 owner: enemy.id,
                 side: RaidSide.wild,
                 team: wildTeam,
@@ -2237,7 +2243,12 @@ final class RaidSimulation {
             _random,
             makeSeed: _seedMaker(catalog, zone, _random),
             makeGear: _gearMaker(catalog, zone, _random),
-            weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
+            weigh: _luck(
+              catalog,
+              zone,
+              _party.apply(RaidStat.lootRareChance, 1),
+            ),
+            amount: catalog.rules.zoneScaling.lootAmount(zone.score),
           ),
         );
         return true;
@@ -2253,7 +2264,12 @@ final class RaidSimulation {
             _random,
             makeSeed: _seedMaker(catalog, zone, _random),
             makeGear: _gearMaker(catalog, zone, _random),
-            weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
+            weigh: _luck(
+              catalog,
+              zone,
+              _party.apply(RaidStat.lootRareChance, 1),
+            ),
+            amount: catalog.rules.zoneScaling.lootAmount(zone.score),
           ),
         );
       } else if (roll < drops.bundleChance + drops.itemChance) {
@@ -2263,7 +2279,8 @@ final class RaidSimulation {
           _random,
           makeSeed: _seedMaker(catalog, zone, _random),
           makeGear: _gearMaker(catalog, zone, _random),
-          weigh: _luck(catalog, _party.apply(RaidStat.lootRareChance, 1)),
+          weigh: _luck(catalog, zone, _party.apply(RaidStat.lootRareChance, 1)),
+          amount: catalog.rules.zoneScaling.lootAmount(zone.score),
         );
         for (final stack in loot.items) {
           floorItems.add(
@@ -2407,6 +2424,7 @@ final class RaidSimulation {
   ) => (_parties[clone.id] ?? const {}).apply(
     RaidStat.attack,
     catalog.weapons[clone.weapon]!.damage *
+        levelGrowth(catalog.rules.gear.levelDamagePermille, zone.score) *
         (1 + clone.weaponLevel * catalog.rules.workbench.damagePercent / 100),
   );
 
@@ -2643,6 +2661,8 @@ final class RaidSimulation {
   }) {
     final scale = _partyScale(partySize);
     final spec = zone.enemies;
+    final hp =
+        spec.hpMultiplier * catalog.rules.zoneScaling.enemyHp(zone.score);
     final placed = <RaidEnemy>[];
     final area = {...?map.markers[bossAreaMarker]};
     bool free(Vec2 at, double spacing) =>
@@ -2657,7 +2677,7 @@ final class RaidSimulation {
           id: newId(),
           position: at,
           radius: data.radius,
-          maxHp: data.maxHp * spec.hpMultiplier,
+          maxHp: data.maxHp * hp,
           kind: kind,
           home: at,
         ),
@@ -2717,7 +2737,7 @@ final class RaidSimulation {
           id: newId(),
           position: at,
           radius: data.radius,
-          maxHp: data.maxHp * spec.hpMultiplier * scale,
+          maxHp: data.maxHp * hp * scale,
           kind: boss.enemy,
           home: at,
           chargeCooldown: data.boss!.chargeEverySeconds / 2,
@@ -2802,13 +2822,28 @@ final class RaidSimulation {
     };
   }
 
-  /// Luck: rare and legendary seeds weigh [factor] times as much.
-  static int Function(String, int)? _luck(Catalog catalog, double factor) {
-    if (factor == 1) return null;
+  /// Luck: rare and legendary seeds weigh [factor] times as much, and
+  /// rare and legendary seeds and gear weigh more the higher [zone]'s score.
+  static int Function(String, int)? _luck(
+    Catalog catalog,
+    ZoneData zone,
+    double factor,
+  ) {
+    final scaling = catalog.rules.zoneScaling;
+    if (factor == 1 &&
+        scaling.gradeWeight(Grade.rare, zone.score) == 1 &&
+        scaling.gradeWeight(Grade.legendary, zone.score) == 1) {
+      return null;
+    }
     return (item, weight) {
-      final seed = catalog.items[item]?.seed;
-      if (seed == null || seed.grade == Grade.normal) return weight;
-      return math.max(1, (weight * factor).round());
+      final data = catalog.items[item];
+      final grade = data?.seed?.grade ?? data?.gear?.grade;
+      if (grade == null || grade == Grade.normal) return weight;
+      final luck = data?.seed != null ? factor : 1.0;
+      return math.max(
+        1,
+        (weight * luck * scaling.gradeWeight(grade, zone.score)).round(),
+      );
     };
   }
 
@@ -2841,7 +2876,8 @@ final class RaidSimulation {
             random,
             makeSeed: _seedMaker(catalog, zone, random),
             makeGear: _gearMaker(catalog, zone, random),
-            weigh: _luck(catalog, luck),
+            weigh: _luck(catalog, zone, luck),
+            amount: catalog.rules.zoneScaling.lootAmount(zone.score),
           ),
         ),
       );

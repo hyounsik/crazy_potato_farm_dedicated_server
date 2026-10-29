@@ -77,11 +77,19 @@ starting and ending).
 
 With `ADMIN_PASSWORD` set, `http://<host>:<ADMIN_PORT>/` shows what the server
 is doing (game data, farm, run, connections), who is here (with a kick
-button), the join password (set or remove it) and the last lines of the log.
-It manages the server, not the game. Every request but the page itself needs
-`Authorization: Bearer <ADMIN_PASSWORD>` (`/api/status`, `/api/log?lines=N`,
-`POST /api/kick {"peer"}`, `POST /api/password {"password"}`). It is plain
-HTTP: keep its port off the internet or put it behind TLS.
+button), the join password (set or remove it), everyone's kit and the last
+lines of the log. It manages the server, not the game. Every request but the
+page itself needs `Authorization: Bearer <ADMIN_PASSWORD>` (`/api/status`,
+`/api/log?lines=N`, `POST /api/kick {"peer"}`, `POST /api/password
+{"password"}`, `POST /api/kits/move {"from", "to"}`). It is plain HTTP: keep
+its port off the internet or put it behind TLS.
+
+A player who reinstalled the app comes back under a new installation id with
+a fresh kit. The page moves their old kit to the new id: it is a move, never
+a copy. The new id's own kit is replaced (the page shows it first), and the
+old id keeps an empty kit, so coming back under it hands out no starting
+gear again. It only works while no run is going and neither id is in the
+room (kick them first); otherwise it answers 409 with the reason.
 
 With Docker (first draft, not yet tested):
 

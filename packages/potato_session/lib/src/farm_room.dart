@@ -82,6 +82,20 @@ final class FarmRoom {
     () => PlayerKit(farm.catalog, equipped: farm.catalog.rules.gear.start),
   );
 
+  /// Hands player [from]'s kit to [to], the same person under a new id (a
+  /// reinstalled app): a move, never a copy (2026-10-29, 사용자). [to]'s own
+  /// kit, if any, is replaced, and [from] keeps an empty one so coming back
+  /// does not hand out the starting gear again. False when [from] has no
+  /// kit here or is [to].
+  bool moveKit(String from, String to) {
+    final kit = _kits[from];
+    if (kit == null || from == to) return false;
+    _kits[to] = kit;
+    _kits[from] = PlayerKit(farm.catalog);
+    _publish();
+    return true;
+  }
+
   /// Player [playerId] sends [command], acting with their own kit.
   FarmRoomReply apply(String playerId, FarmCommand command) {
     if (!_allow(playerId, command)) return (refused: true, rejection: null);

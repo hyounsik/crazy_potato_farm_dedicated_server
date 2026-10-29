@@ -6,6 +6,21 @@ import 'package:potato_dedicated_server/src/dedicated_world.dart';
 import 'package:potato_session/potato_session.dart';
 import 'package:potato_session/zlib_codec.dart';
 
+/// Why [DedicatedRoom.moveKit] did not move a kit.
+enum KitMoveRefusal {
+  /// The server keeps no farm yet.
+  noFarm,
+
+  /// The kit's player has none here, or it would go to the same id.
+  unknownPlayer,
+
+  /// A run is going: wait until everyone is home.
+  runGoing,
+
+  /// One of the two is in the waiting room or the run: kick them first.
+  inRoom,
+}
+
 /// The one exploration party a dedicated server hosts at a time.
 ///
 /// The server ships without game data (it is unreleased content, kept out of
@@ -201,6 +216,29 @@ final class DedicatedRoom {
     } on Object {
       return null;
     }
+  }
+
+  /// Hands player [from]'s kit to [to] for the admin page, when someone
+  /// came back under a new installation id (2026-10-29, 사용자). Only while
+  /// no run is going and neither is in the room: a run takes copies of the
+  /// bag along and puts what it brings back into whoever set out, so a move
+  /// meanwhile would copy the kit. Null when it moved.
+  Future<KitMoveRefusal?> moveKit(String from, String to) async {
+    final world = this.world;
+    final room = world?.room;
+    if (world == null || room == null) return KitMoveRefusal.noFarm;
+    if (from == to || !room.players.contains(from)) {
+      return KitMoveRefusal.unknownPlayer;
+    }
+    final session = _session;
+    if (session?.run != null) return KitMoveRefusal.runGoing;
+    for (final g in session?.guests ?? const <HostedGuest>[]) {
+      final player = g.playerId.isEmpty ? g.peerId : g.playerId;
+      if (player == from || player == to) return KitMoveRefusal.inRoom;
+    }
+    await world.moveKit(from, to);
+    log?.call('Kit of $from moved to $to');
+    return null;
   }
 
   /// The player id of the guest on link [peerId]: their installation id,

@@ -117,4 +117,19 @@ void main() {
       catalog.rules.gear.start,
     );
   });
+
+  test('a kit moves to a new id; the old id keeps nothing, starting gear '
+      'included', () {
+    room.apply('old', const FarmCommand.loadBag(item: 'food', count: 30));
+    room.kitOf('new'); // came back under a new id with the starting gear
+    expect(room.moveKit('old', 'new'), isTrue);
+    expect(room.kitOf('new').bag.countOf('food'), 30);
+    expect(room.kitOf('new').equipped, catalog.rules.gear.start);
+    expect(room.kitOf('old').bag.countOf('food'), 0);
+    expect(room.kitOf('old').equipped, const Equipped());
+    expect(room.farm.food, 70);
+
+    expect(room.moveKit('nobody', 'new'), isFalse);
+    expect(room.moveKit('new', 'new'), isFalse);
+  });
 }

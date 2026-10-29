@@ -113,6 +113,15 @@ final class DedicatedWorld {
   FarmRoomReply? apply(String playerId, FarmCommand command) =>
       _room?.apply(playerId, command);
 
+  /// Hands player [from]'s kit to [to] ([FarmRoom.moveKit]) and saves at
+  /// once. False when there is no farm or nothing moved.
+  Future<bool> moveKit(String from, String to) async {
+    final room = _room;
+    if (room == null || !room.moveKit(from, to)) return false;
+    await save();
+    return true;
+  }
+
   /// Saves the farm and the kits now.
   Future<void> save() async {
     _saveSoon?.cancel();

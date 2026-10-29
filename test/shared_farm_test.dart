@@ -145,4 +145,45 @@ void main() {
     a.sendCommand(const GoHome());
     await until(() => returned.isNotEmpty);
   });
+
+  test('a kit moves to a new id only while neither is in the room', () async {
+    final server = await startServer();
+    final a = await join(server, 'A', catalogFiles: files);
+    await until(() => a.kit != null);
+    a.sendFarmCommand(const FarmCommand.loadBag(item: 'food', count: 5));
+    await until(
+      () => PlayerKit.fromJson(catalog, a.kit!).bag.countOf('food') == 5,
+    );
+    expect(
+      await server.room.moveKit('install-A', 'install-B'),
+      KitMoveRefusal.inRoom,
+    );
+
+    for (final peer in server.transport.peers.toList()) {
+      await server.transport.kick(peer);
+    }
+    await until(() => server.room.session?.guests.isEmpty ?? true);
+    expect(await server.room.moveKit('install-A', 'install-B'), isNull);
+    expect(
+      await server.room.moveKit('install-A', 'install-A'),
+      KitMoveRefusal.unknownPlayer,
+    );
+
+    final b = await join(server, 'B');
+    await until(() => b.kit != null);
+    expect(PlayerKit.fromJson(catalog, b.kit!).bag.countOf('food'), 5);
+    expect(server.world!.room!.kitOf('install-A').bag.countOf('food'), 0);
+  });
+
+  test('no kit moves while a run is going', () async {
+    final server = await startServer();
+    final a = await join(server, 'A', catalogFiles: files);
+    await until(() => a.kit != null);
+    a.requestStart(catalog.zones.keys.first);
+    await until(() => a.stage == ClientSessionStage.playing);
+    expect(
+      await server.room.moveKit('install-A', 'install-B'),
+      KitMoveRefusal.runGoing,
+    );
+  });
 }

@@ -84,6 +84,25 @@ void main() {
     expect(server.password, isNull);
   });
 
+  test(
+    'kits are listed and moved; a server without a farm moves none',
+    () async {
+      final (_, status) = await call('GET', '/api/status');
+      expect((status! as Map)['kits'], isEmpty);
+      final (moveStatus, moved) = await call(
+        'POST',
+        '/api/kits/move',
+        body: {'from': 'old', 'to': 'new'},
+      );
+      expect(moveStatus, 409);
+      expect((moved! as Map)['reason'], 'noFarm');
+      expect(
+        (await call('POST', '/api/kits/move', body: {'from': 'old'})).$1,
+        400,
+      );
+    },
+  );
+
   test('an empty admin password is refused', () {
     expect(
       () => AdminServer.start(

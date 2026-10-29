@@ -2,6 +2,7 @@ import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/farm/farm_command.dart';
 import 'package:potato_core/src/farm/farm_simulation.dart';
+import 'package:potato_core/src/farm/player_kit.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
@@ -9,20 +10,22 @@ import 'package:potato_core/src/raid/raid_member.dart';
 import 'package:potato_core/src/raid/raid_simulation.dart';
 
 /// Builds a [RaidMemberStart] from [farm] for a party member setting out with
-/// [food] baby potatoes and [potatoIds] (combat ones in [modes]).
+/// [food] baby potatoes and [potatoIds] (combat ones in [modes]), wearing
+/// and carrying [kit] (the farm's own player's by default).
 RaidMemberStart memberStartFor(
   FarmSimulation farm, {
   String name = '',
   required int food,
   List<int> potatoIds = const [],
   Map<int, CompanionMode> modes = const {},
+  PlayerKit? kit,
 }) => RaidMemberStart(
   name: name,
   food: food,
-  equipped: farm.equipped,
+  equipped: (kit ?? farm.kit).equipped,
   progress: farm.progress,
   companions: companionsFor(farm, potatoIds, modes: modes),
-  bag: farm.bagItems,
+  bag: (kit ?? farm.kit).bagItems,
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes

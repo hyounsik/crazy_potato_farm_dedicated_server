@@ -22,7 +22,10 @@ COPY --from=build /runtime/ /
 COPY --from=build /app/server /app/server
 
 ENV PORT=8080
-EXPOSE 8080
+ENV ADMIN_PORT=8081
+ENV DATA_DIR=/data
+EXPOSE 8080 8081
+VOLUME /data
 # The server shuts down cleanly on SIGINT.
 STOPSIGNAL SIGINT
 ENTRYPOINT ["/app/server"]

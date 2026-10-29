@@ -279,6 +279,17 @@ sealed class SessionMessage {
     )),
     'start_run' => StartRunMessage(json['zone'] as String),
     'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
+    'farm_command' => FarmCommandMessage(
+      FarmCommand.fromJson(json['command'] as Map<String, dynamic>),
+    ),
+    'farm_reply' => FarmReplyMessage(
+      refused: json['refused'] as bool? ?? false,
+      rejection: switch (json['rejection']) {
+        final String r => FarmRejection.values.asNameMap()[r],
+        _ => null,
+      },
+    ),
+    'kit' => KitMessage(json['kit'] as Map<String, dynamic>),
     'farm_walk' => FarmWalkMessage(
       FarmWalk.fromJson(json['walk'] as Map<String, dynamic>),
       seq: json['seq'] as int? ?? 0,
@@ -395,6 +406,16 @@ sealed class SessionMessage {
     },
     StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
     FarmViewMessage(:final farm) => {'type': 'farm_view', 'farm': farm},
+    FarmCommandMessage(:final command) => {
+      'type': 'farm_command',
+      'command': command.toJson(),
+    },
+    FarmReplyMessage(:final refused, :final rejection) => {
+      'type': 'farm_reply',
+      if (refused) 'refused': true,
+      'rejection': ?rejection?.name,
+    },
+    KitMessage(:final kit) => {'type': 'kit', 'kit': kit},
     FarmWalkMessage(:final walk, :final seq, :final from) => {
       'type': 'farm_walk',
       'walk': walk.toJson(),
@@ -598,6 +619,34 @@ final class FarmViewMessage extends SessionMessage {
   const FarmViewMessage(this.farm);
 
   final Map<String, dynamic> farm;
+}
+
+/// Guest → host on reliable: do [command] on the farm everyone shares, with
+/// the guest's own kit (a dedicated server's world, 2026-10-28, 사용자).
+/// Answered with a [FarmReplyMessage].
+final class FarmCommandMessage extends SessionMessage {
+  const FarmCommandMessage(this.command);
+
+  final FarmCommand command;
+}
+
+/// Host → guest on reliable: how a [FarmCommandMessage] went: [refused] when
+/// the guest may not send it there, else the farm's [rejection] (null: it
+/// took).
+final class FarmReplyMessage extends SessionMessage {
+  const FarmReplyMessage({this.refused = false, this.rejection});
+
+  final bool refused;
+  final FarmRejection? rejection;
+}
+
+/// Host → guest on reliable: the guest's own kit on the shared farm (worn
+/// gear, bag, truck bed, as `PlayerKit.toJson`), sent when they come in and
+/// whenever it changes.
+final class KitMessage extends SessionMessage {
+  const KitMessage(this.kit);
+
+  final Map<String, dynamic> kit;
 }
 
 /// Leader guest → dedicated server on reliable: set out to [zone] now.

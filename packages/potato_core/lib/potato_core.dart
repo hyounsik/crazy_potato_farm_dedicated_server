@@ -25,6 +25,7 @@ export 'src/farm/farm_simulation.dart';
 export 'src/farm/farm_totals.dart';
 export 'src/farm/mail.dart';
 export 'src/farm/pest.dart';
+export 'src/farm/player_kit.dart';
 export 'src/items/bag.dart';
 export 'src/items/gear.dart';
 export 'src/items/gear_stats.dart';

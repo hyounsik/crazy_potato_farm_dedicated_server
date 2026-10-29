@@ -13,3 +13,6 @@ pubspec_overrides.yaml
 .idea/
 *.iml
 .DS_Store
+
+# The dedicated server's saves when run from here (bin/server.dart)
+/data/

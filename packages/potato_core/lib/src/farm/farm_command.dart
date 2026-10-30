@@ -327,6 +327,9 @@ enum FarmRejection {
   noPotato,
   nothingToHarvest,
 
+  /// A pest is on the field: clear it before harvesting.
+  pestInTheWay,
+
   /// Taking more baby potatoes than the farm has.
   notEnoughFood,
 

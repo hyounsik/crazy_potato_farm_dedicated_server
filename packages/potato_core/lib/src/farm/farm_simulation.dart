@@ -745,6 +745,11 @@ final class FarmSimulation {
     final pest = field.pest;
     if (pest != null) _harm(field, pest, millis);
     _settleBugs(field);
+    // Blight works on the potatoes: with none left it goes (2026-10-30,
+    // 사용자). Bugs stay while there is a pile to eat.
+    if (field.pest?.kind == PestKind.blight && field._potatoes.isEmpty) {
+      _pestLeaves(field);
+    }
     List<TilePos>? dead;
     final seedEvery = _rules.breeding.seedEverySeconds * 1000;
     for (final MapEntry(key: tile, value: potato) in field._potatoes.entries) {
@@ -875,7 +880,7 @@ final class FarmSimulation {
     if (fieldId == null) return _walkOn(guard);
     final field = _fields[fieldId];
     if (guard.harvesting) {
-      if (field != null) _bringIn(field, guard);
+      if (field != null && field.pest == null) _bringIn(field, guard);
       return guard.stop();
     }
     final pest = field?.pest;
@@ -1034,12 +1039,17 @@ final class FarmSimulation {
     if (pest == null && enough && _tick >= field.quietUntilTick) {
       _appear(field, PestKind.bug);
     } else if (pest?.kind == PestKind.bug && !enough) {
-      field.pest = null;
-      for (final guard in _guards.values) {
-        if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
-      }
-      _events.add(FarmEvent.fieldChanged(fieldId: field.id));
+      _pestLeaves(field);
     }
+  }
+
+  /// [field]'s pest goes by itself, with no reward.
+  void _pestLeaves(FarmField field) {
+    field.pest = null;
+    for (final guard in _guards.values) {
+      if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
+    }
+    _events.add(FarmEvent.fieldChanged(fieldId: field.id));
   }
 
   /// Takes upkeep from the farm's baby potatoes, oldest potato first. One
@@ -1119,6 +1129,9 @@ final class FarmSimulation {
   /// user: food and bred seeds come in together). A rare seed may turn up
   /// with the food.
   FarmRejection? _collect(FarmField field, Iterable<Potato> potatoes) {
+    // A pest has to be cleared before the field is harvested (2026-10-30,
+    // 사용자: harvesting used to send bugs off with the store).
+    if (field.pest != null) return FarmRejection.pestInTheWay;
     // What dead potatoes left comes in with any harvest of the field.
     var taken = field.leftover;
     field.leftover = 0;
@@ -2390,6 +2403,7 @@ final class FarmSimulation {
     FarmField? richest;
     var most = 0;
     for (final field in _fields.values) {
+      if (field.pest != null) continue;
       final stored = field.stored;
       if (stored > most) {
         most = stored;

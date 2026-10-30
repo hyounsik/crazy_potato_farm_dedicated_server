@@ -355,6 +355,18 @@ void main() {
       expect(farm.totals.lifeLostToBlightMillis, potato.livedMillis);
     });
 
+    test('blight goes once no potato is left (2026-10-30)', () {
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      farm.runSteps(checkSteps());
+      final field = farm.field(1)!;
+      expect(field.pest?.kind, PestKind.blight);
+      final food = catalog.potatoType(PotatoType.food);
+      farm.runSteps(food.growSeconds + food.lifespanSeconds);
+      expect(field.potatoAt(_a), isNull, reason: 'died');
+      farm.step();
+      expect(field.pest, isNull);
+    });
+
     group('bugs (2026-10-26: as many as the store feeds, no limit on it)', () {
       setUp(
         () => open(
@@ -395,12 +407,20 @@ void main() {
         expect(farm.totals.foodEatenByBugs, greaterThan(0));
       });
 
-      test('leave when the store falls short, and stay away a while once '
-          'cleared', () {
+      test('block harvesting until cleared (2026-10-30), leave when the '
+          'store falls short, and stay away a while once cleared', () {
         farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
         final field = farm.field(1)!;
         stepUntil(() => field.pest != null);
-        expect(farm.apply(const FarmCommand.harvestField(fieldId: 1)), isNull);
+        expect(
+          farm.apply(const FarmCommand.harvestField(fieldId: 1)),
+          FarmRejection.pestInTheWay,
+        );
+        expect(
+          farm.apply(const FarmCommand.harvest(fieldId: 1, tile: _a)),
+          FarmRejection.pestInTheWay,
+        );
+        field.potatoAt(_a)!.stored = 0;
         farm.step();
         expect(field.pest, isNull, reason: 'nothing left to eat');
 
@@ -427,6 +447,11 @@ void main() {
         farm.runSteps(catalog.rules.pests.bug.eatEverySeconds);
         expect(field.leftover, lessThan(left), reason: 'bugs eat the pile');
 
+        expect(
+          farm.apply(const FarmCommand.harvestField(fieldId: 1)),
+          FarmRejection.pestInTheWay,
+        );
+        expect(farm.apply(const FarmCommand.clearPest(fieldId: 1)), isNull);
         final before = farm.food;
         final pile = field.leftover;
         expect(farm.apply(const FarmCommand.harvestField(fieldId: 1)), isNull);

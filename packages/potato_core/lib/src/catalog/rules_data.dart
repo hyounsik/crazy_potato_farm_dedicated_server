@@ -183,8 +183,9 @@ abstract class GuardRulesData with _$GuardRulesData {
     /// Game time to walk one tile.
     required int walkMillisPerTile,
 
-    /// How much faster a guard clears pests for each of its levels, in
-    /// thousandths over 1, compounding (2026-10-30, 사용자: like attack).
+    /// How much faster a guard clears pests, and how much more a harvesting
+    /// one brings in, for each of its levels, in thousandths over 1,
+    /// compounding (2026-10-30, 사용자: like attack).
     @Default(30) int levelPermille,
   }) = _GuardRulesData;
 

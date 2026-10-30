@@ -244,6 +244,35 @@ void main() {
     expect(potatoes.map((p) => p.stored), everyElement(9));
   });
 
+  test('a harvesting guard brings in more the higher its level '
+      '(2026-10-30)', () {
+    build('training_ground', const TilePos(8, 8));
+    // 3 (stand-in) × 1.03^24 ≈ 6.1: six, now and then seven.
+    final seed = _seed(PotatoType.combat, 'combat.gatherer', level: 24);
+    farm.seeds.add(seed);
+    farm.apply(
+      FarmCommand.train(buildingId: farm.buildings.last.id, seed: seed),
+    );
+    final field = farm.field(1)!;
+    final potatoes = [
+      for (final tile in field.rect.tiles.take(3))
+        plant(plainSeed(PotatoType.food), tile),
+    ];
+    farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+    final guard = farm.guards.single;
+    for (final potato in potatoes) {
+      potato.stored = 10;
+    }
+    while (!guard.harvesting) {
+      farm.step();
+    }
+    final before = farm.totals.foodHarvestedByGuards;
+    while (guard.harvesting) {
+      farm.step();
+    }
+    expect(farm.totals.foodHarvestedByGuards - before, inInclusiveRange(6, 7));
+  });
+
   test('guards walk at their style pace', () {
     final potato = Potato(
       id: 99,

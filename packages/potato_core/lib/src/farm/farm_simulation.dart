@@ -2526,7 +2526,7 @@ final class FarmSimulation {
   /// taken from evenly.
   void _bringIn(FarmField field, Guard guard) {
     final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
-    final amount = effect?.valueInUse?.floor() ?? 0;
+    final amount = effect == null ? 0 : _harvestAmount(guard, effect);
     final potatoes = field._potatoes.values.toList();
     var taken = math.min(amount, field.leftover);
     field.leftover -= taken;
@@ -2542,6 +2542,22 @@ final class FarmSimulation {
     taken = _withHarvestBonus(taken);
     food += taken;
     totals.foodHarvestedByGuards += taken;
+  }
+
+  /// Baby potatoes [guard] brings in at a time: its ability's amount, more
+  /// for each of its levels as its pest work grows (2026-10-30, 사용자:
+  /// harvesting grows with level). A share over a whole number comes as one
+  /// more now and then, as often as the share, picked from the guard's id
+  /// and the time like patrols so it never changes what the farm rolls.
+  int _harvestAmount(Guard guard, AbilityEffectData effect) {
+    final value =
+        (effect.valueInUse ?? 0) *
+        levelGrowth(_rules.potatoes.guards.levelPermille, guard.potato.level);
+    final whole = value.floor();
+    final share = value - whole;
+    if (share <= 0) return whole;
+    final pick = ((guard.potato.id * 7919 + _tick) * 2654435761) & 0x7fffffff;
+    return whole + ((pick >> 8) % 1000 < share * 1000 ? 1 : 0);
   }
 
   /// [potato]'s effects and rates, from the cache while its field (if any)

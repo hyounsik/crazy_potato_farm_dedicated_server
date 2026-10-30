@@ -856,7 +856,7 @@ final class FarmSimulation {
     _sendIdleGuards();
     for (final field in _fields.values) {
       final pest = field.pest;
-      if (pest != null && pest.clearedMillis >= _clearMillis(pest.kind)) {
+      if (pest != null && pest.clearedMillis >= clearMillisOf(field)) {
         _clear(field, byTap: false);
       }
     }
@@ -891,7 +891,9 @@ final class FarmSimulation {
         PestKind.bug => FarmStat.bugClearSpeed,
         PestKind.blight => FarmStat.blightClearSpeed,
       };
-      final effort = _effort(guard.potato, millis);
+      final effort =
+          _effort(guard.potato, millis) *
+          levelGrowth(_rules.potatoes.guards.levelPermille, guard.potato.level);
       pest.clearedMillis += _work(guard.potato).sums
           .apply(speed, effort.toDouble())
           .floor();
@@ -2133,15 +2135,28 @@ final class FarmSimulation {
   int _effort(Potato potato, int millis) =>
       millis * _strengthPercent(potato) ~/ 100;
 
-  int _clearMillis(PestKind kind) =>
-      switch (kind) {
-        PestKind.bug => _rules.pests.bug.clearSeconds,
-        PestKind.blight => _rules.pests.blight.clearSeconds,
-      } *
-      1000;
+  /// Guard work [field]'s pest takes at level 0 strength: its kind's time,
+  /// longer the higher the field's potatoes are on average (2026-10-30,
+  /// 사용자). A guard of the field's level clears it in about its kind's
+  /// time, as guard work grows by level too.
+  int clearMillisOf(FarmField field) {
+    final pest = field.pest;
+    if (pest == null) return 0;
+    final seconds = switch (pest.kind) {
+      PestKind.bug => _rules.pests.bug.clearSeconds,
+      PestKind.blight => _rules.pests.blight.clearSeconds,
+    };
+    final potatoes = field._potatoes.values;
+    final level = potatoes.isEmpty
+        ? 0
+        : (potatoes.fold(0, (sum, p) => sum + p.level) / potatoes.length)
+              .round();
+    return (seconds * 1000 * levelGrowth(_rules.pests.levelPermille, level))
+        .round();
+  }
 
-  /// Removes a field's pest and pays the reward: a few baby potatoes and
-  /// sometimes a normal seed of the type most planted there.
+  /// Removes a field's pest. Clearing it gives nothing but the field back
+  /// (2026-10-30, 사용자: no reward).
   void _clear(FarmField field, {required bool byTap}) {
     final pest = field.pest!;
     field.pest = null;
@@ -2151,12 +2166,6 @@ final class FarmSimulation {
           _tick +
           _rules.pests.bug.quietSeconds * 1000 ~/ _rules.farm.stepMillis;
     }
-    final reward = _rules.pests.reward;
-    final gained =
-        reward.foodMin + _random.nextInt(reward.foodMax - reward.foodMin + 1);
-    final seed = _random.chance(reward.seedChance) ? _fieldSeed(field) : null;
-    food += gained;
-    if (seed != null) _gainSeed(seed);
     if (byTap) {
       totals.pestsClearedByTap++;
     } else {
@@ -2166,13 +2175,7 @@ final class FarmSimulation {
       if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
     }
     _events.add(
-      FarmEvent.pestCleared(
-        fieldId: field.id,
-        kind: pest.kind,
-        byTap: byTap,
-        food: gained,
-        seed: seed,
-      ),
+      FarmEvent.pestCleared(fieldId: field.id, kind: pest.kind, byTap: byTap),
     );
   }
 

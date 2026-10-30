@@ -182,6 +182,10 @@ abstract class GuardRulesData with _$GuardRulesData {
   const factory GuardRulesData({
     /// Game time to walk one tile.
     required int walkMillisPerTile,
+
+    /// How much faster a guard clears pests for each of its levels, in
+    /// thousandths over 1, compounding (2026-10-30, 사용자: like attack).
+    @Default(30) int levelPermille,
   }) = _GuardRulesData;
 
   factory GuardRulesData.fromJson(Map<String, dynamic> json) =>
@@ -215,8 +219,10 @@ abstract class PestRulesData with _$PestRulesData {
     /// Taps in a row that clear a pest by hand.
     required int taps,
 
-    /// What clearing a pest gives.
-    required PestRewardData reward,
+    /// How much longer guards take on a pest for each level of its field's
+    /// potatoes (their average), in thousandths over 1, compounding
+    /// (2026-10-30, 사용자: like enemies by zone score).
+    @Default(30) int levelPermille,
   }) = _PestRulesData;
 
   factory PestRulesData.fromJson(Map<String, dynamic> json) =>
@@ -267,20 +273,6 @@ abstract class BlightRulesData with _$BlightRulesData {
 
   factory BlightRulesData.fromJson(Map<String, dynamic> json) =>
       _$BlightRulesDataFromJson(json);
-}
-
-@freezed
-abstract class PestRewardData with _$PestRewardData {
-  const factory PestRewardData({
-    required int foodMin,
-    required int foodMax,
-
-    /// Chance of a normal seed of the type most planted in the field.
-    required double seedChance,
-  }) = _PestRewardData;
-
-  factory PestRewardData.fromJson(Map<String, dynamic> json) =>
-      _$PestRewardDataFromJson(json);
 }
 
 /// What a newly made farm starts with.

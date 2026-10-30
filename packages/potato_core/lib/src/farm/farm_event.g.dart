@@ -563,11 +563,6 @@ PestCleared _$PestClearedFromJson(Map<String, dynamic> json) => $checkedCreate(
       fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
       kind: $checkedConvert('kind', (v) => $enumDecode(_$PestKindEnumMap, v)),
       byTap: $checkedConvert('by_tap', (v) => v as bool),
-      food: $checkedConvert('food', (v) => (v as num).toInt()),
-      seed: $checkedConvert(
-        'seed',
-        (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
-      ),
       $type: $checkedConvert('runtimeType', (v) => v as String?),
     );
     return val;
@@ -584,8 +579,6 @@ Map<String, dynamic> _$PestClearedToJson(PestCleared instance) =>
       'field_id': instance.fieldId,
       'kind': _$PestKindEnumMap[instance.kind]!,
       'by_tap': instance.byTap,
-      'food': instance.food,
-      'seed': instance.seed?.toJson(),
       'runtimeType': instance.$type,
     };
 

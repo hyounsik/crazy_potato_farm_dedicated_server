@@ -143,14 +143,11 @@ sealed class FarmEvent with _$FarmEvent {
     required PestKind kind,
   }) = PestAppeared;
 
-  /// [food] baby potatoes and [seed], if any, went into the farm as the
-  /// reward.
+  /// A pest was cleared, by taps or by guards.
   const factory FarmEvent.pestCleared({
     required int fieldId,
     required PestKind kind,
     required bool byTap,
-    required int food,
-    Seed? seed,
   }) = PestCleared;
 
   /// These potatoes could not be paid for and work slower until they are.

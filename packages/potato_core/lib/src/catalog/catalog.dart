@@ -425,11 +425,6 @@ final class Catalog {
     );
     check.positive('pests.blight.clear_seconds', pests.blight.clearSeconds);
     check.positive('pests.taps', pests.taps);
-    check.atLeast('pests.reward.food_min', pests.reward.foodMin, 0);
-    if (pests.reward.foodMax < pests.reward.foodMin) {
-      check.issue('pests.reward.food_max', 'must be at least food_min');
-    }
-    check.probability('pests.reward.seed_chance', pests.reward.seedChance);
 
     final storage = rules.storage;
     for (final (name, value) in [

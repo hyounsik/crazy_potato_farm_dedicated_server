@@ -326,18 +326,33 @@ Map<String, dynamic> _$CombatStyleDataToJson(_CombatStyleData instance) =>
     <String, dynamic>{'walk_percent': instance.walkPercent};
 
 _GuardRulesData _$GuardRulesDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_GuardRulesData', json, ($checkedConvert) {
-      final val = _GuardRulesData(
-        walkMillisPerTile: $checkedConvert(
-          'walk_millis_per_tile',
-          (v) => (v as num).toInt(),
-        ),
-      );
-      return val;
-    }, fieldKeyMap: const {'walkMillisPerTile': 'walk_millis_per_tile'});
+    $checkedCreate(
+      '_GuardRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _GuardRulesData(
+          walkMillisPerTile: $checkedConvert(
+            'walk_millis_per_tile',
+            (v) => (v as num).toInt(),
+          ),
+          levelPermille: $checkedConvert(
+            'level_permille',
+            (v) => (v as num?)?.toInt() ?? 30,
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'walkMillisPerTile': 'walk_millis_per_tile',
+        'levelPermille': 'level_permille',
+      },
+    );
 
 Map<String, dynamic> _$GuardRulesDataToJson(_GuardRulesData instance) =>
-    <String, dynamic>{'walk_millis_per_tile': instance.walkMillisPerTile};
+    <String, dynamic>{
+      'walk_millis_per_tile': instance.walkMillisPerTile,
+      'level_permille': instance.levelPermille,
+    };
 
 _FridgeRulesData _$FridgeRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_FridgeRulesData', json, ($checkedConvert) {
@@ -354,28 +369,36 @@ Map<String, dynamic> _$FridgeRulesDataToJson(_FridgeRulesData instance) =>
     <String, dynamic>{'aging_percent': instance.agingPercent};
 
 _PestRulesData _$PestRulesDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('_PestRulesData', json, ($checkedConvert) {
-      final val = _PestRulesData(
-        checkEverySeconds: $checkedConvert(
-          'check_every_seconds',
-          (v) => (v as num).toInt(),
-        ),
-        bug: $checkedConvert(
-          'bug',
-          (v) => BugRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        blight: $checkedConvert(
-          'blight',
-          (v) => BlightRulesData.fromJson(v as Map<String, dynamic>),
-        ),
-        taps: $checkedConvert('taps', (v) => (v as num).toInt()),
-        reward: $checkedConvert(
-          'reward',
-          (v) => PestRewardData.fromJson(v as Map<String, dynamic>),
-        ),
-      );
-      return val;
-    }, fieldKeyMap: const {'checkEverySeconds': 'check_every_seconds'});
+    $checkedCreate(
+      '_PestRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _PestRulesData(
+          checkEverySeconds: $checkedConvert(
+            'check_every_seconds',
+            (v) => (v as num).toInt(),
+          ),
+          bug: $checkedConvert(
+            'bug',
+            (v) => BugRulesData.fromJson(v as Map<String, dynamic>),
+          ),
+          blight: $checkedConvert(
+            'blight',
+            (v) => BlightRulesData.fromJson(v as Map<String, dynamic>),
+          ),
+          taps: $checkedConvert('taps', (v) => (v as num).toInt()),
+          levelPermille: $checkedConvert(
+            'level_permille',
+            (v) => (v as num?)?.toInt() ?? 30,
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'checkEverySeconds': 'check_every_seconds',
+        'levelPermille': 'level_permille',
+      },
+    );
 
 Map<String, dynamic> _$PestRulesDataToJson(_PestRulesData instance) =>
     <String, dynamic>{
@@ -383,7 +406,7 @@ Map<String, dynamic> _$PestRulesDataToJson(_PestRulesData instance) =>
       'bug': instance.bug.toJson(),
       'blight': instance.blight.toJson(),
       'taps': instance.taps,
-      'reward': instance.reward.toJson(),
+      'level_permille': instance.levelPermille,
     };
 
 _BugRulesData _$BugRulesDataFromJson(
@@ -454,35 +477,6 @@ Map<String, dynamic> _$BlightRulesDataToJson(_BlightRulesData instance) =>
       'chance': instance.chance,
       'extra_aging_percent': instance.extraAgingPercent,
       'clear_seconds': instance.clearSeconds,
-    };
-
-_PestRewardData _$PestRewardDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      '_PestRewardData',
-      json,
-      ($checkedConvert) {
-        final val = _PestRewardData(
-          foodMin: $checkedConvert('food_min', (v) => (v as num).toInt()),
-          foodMax: $checkedConvert('food_max', (v) => (v as num).toInt()),
-          seedChance: $checkedConvert(
-            'seed_chance',
-            (v) => (v as num).toDouble(),
-          ),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'foodMin': 'food_min',
-        'foodMax': 'food_max',
-        'seedChance': 'seed_chance',
-      },
-    );
-
-Map<String, dynamic> _$PestRewardDataToJson(_PestRewardData instance) =>
-    <String, dynamic>{
-      'food_min': instance.foodMin,
-      'food_max': instance.foodMax,
-      'seed_chance': instance.seedChance,
     };
 
 _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>

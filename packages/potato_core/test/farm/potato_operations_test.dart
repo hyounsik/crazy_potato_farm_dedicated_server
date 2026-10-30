@@ -460,7 +460,7 @@ void main() {
       });
     });
 
-    test('tapping clears a pest and pays a reward', () {
+    test('tapping clears a pest, with no reward (2026-10-30)', () {
       farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
       farm.runSteps(checkSteps());
       farm.takeEvents();
@@ -470,8 +470,7 @@ void main() {
       expect(farm.field(1)!.pest, isNull);
       final cleared = farm.takeEvents().single as PestCleared;
       expect(cleared.byTap, isTrue);
-      expect(farm.food, before + cleared.food);
-      expect(cleared.food, inInclusiveRange(1, 3));
+      expect(farm.food, before);
       expect(
         farm.apply(FarmCommand.clearPest(fieldId: 1)),
         FarmRejection.noPest,
@@ -512,6 +511,21 @@ void main() {
       expect(farm.field(1)!.pest, isNull);
       expect(farm.totals.pestsClearedByGuards, 1);
       expect(guard.targetFieldId, isNull);
+    });
+
+    test('a field\'s pest is tougher by its potatoes\' average level '
+        '(2026-10-30)', () {
+      final high = plainSeed(PotatoType.food, Grade.normal).copyWith(level: 20);
+      farm.seeds.add(high);
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: high));
+      farm.runSteps(checkSteps());
+      final field = farm.field(1)!;
+      expect(field.pest?.kind, PestKind.blight);
+      final base = catalog.rules.pests.blight.clearSeconds * 1000;
+      expect(
+        farm.clearMillisOf(field),
+        (base * levelGrowth(catalog.rules.pests.levelPermille, 20)).round(),
+      );
     });
   });
 

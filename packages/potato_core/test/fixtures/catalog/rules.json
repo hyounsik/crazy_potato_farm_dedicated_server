@@ -70,12 +70,7 @@
       "extra_aging_percent": 100,
       "clear_seconds": 30
     },
-    "taps": 5,
-    "reward": {
-      "food_min": 1,
-      "food_max": 3,
-      "seed_chance": 0.1
-    }
+    "taps": 5
   },
   "new_farm": {
     "food": 200,

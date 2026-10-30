@@ -114,6 +114,7 @@ final class ClientSession {
     required ClientTransport transport,
     required this.start,
     this.buildNumber = 0,
+    this.protocol = sessionProtocol,
     this.playerId = '',
     this.accountId = '',
     this.catalogFiles,
@@ -136,6 +137,9 @@ final class ClientSession {
   ClientTransport _transport;
   final RaidMemberStart start;
   final int buildNumber;
+
+  /// The [sessionProtocol] this guest speaks; another only in tests.
+  final int protocol;
 
   /// The guest's truck bed as they bring it ([HelloMessage.bed]).
   final List<ItemStack?> bed;
@@ -555,6 +559,7 @@ final class ClientSession {
     _send(
       SessionChannel.reliable,
       HelloMessage(
+        protocol: protocol,
         buildNumber: buildNumber,
         catalogHash: catalogHash,
         start: start,

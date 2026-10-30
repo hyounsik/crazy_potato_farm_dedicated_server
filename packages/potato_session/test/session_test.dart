@@ -80,7 +80,8 @@ void main() {
   });
 
   group('Handshake & Version Check', () {
-    test('accepts matching build number and catalog hash', () async {
+    test('accepts another build number with the same protocol and game '
+        'data (2026-10-30)', () async {
       final net = InMemorySessionNetwork();
       final host = HostSession(
         catalog: catalog,
@@ -90,7 +91,7 @@ void main() {
       final client = ClientSession(
         catalog: catalog,
         transport: net.connectClient('guest_1'),
-        buildNumber: 42,
+        buildNumber: 43,
         start: const RaidMemberStart(name: 'Guest One'),
       );
 
@@ -105,7 +106,21 @@ void main() {
       await host.close();
     });
 
-    test('rejects mismatched build number or catalog hash', () async {
+    test('a hello from before the protocol reads as protocol 0', () {
+      final hello = SessionMessage.fromJson({
+        'type': 'hello',
+        'build': 10000117,
+        'catalog_hash': 'x',
+        'start': const RaidMemberStart(name: 'Old').toJson(),
+      });
+      expect((hello as HelloMessage).protocol, 0);
+      expect(
+        (SessionMessage.fromJson(hello.toJson()) as HelloMessage).protocol,
+        0,
+      );
+    });
+
+    test('rejects another protocol', () async {
       final net = InMemorySessionNetwork();
       final host = HostSession(
         catalog: catalog,
@@ -115,7 +130,8 @@ void main() {
       final client = ClientSession(
         catalog: catalog,
         transport: net.connectClient('guest_bad_ver'),
-        buildNumber: 11,
+        buildNumber: 10,
+        protocol: sessionProtocol + 1,
         start: const RaidMemberStart(name: 'Wrong Build'),
       );
 

@@ -809,7 +809,7 @@ final class HostSession {
   }
 
   void _onHello(String peerId, HelloMessage msg) {
-    if (msg.buildNumber != buildNumber || msg.catalogHash != catalogHash) {
+    if (msg.protocol != sessionProtocol || msg.catalogHash != catalogHash) {
       _send(
         peerId,
         SessionChannel.reliable,

@@ -3,9 +3,19 @@ import 'dart:typed_data';
 
 import 'package:potato_core/potato_core.dart';
 
+/// The version of what goes over the wire: session messages and the game
+/// state they carry. Builds that share it (and the game data, by its hash)
+/// play together, whatever their build numbers (2026-10-30, 사용자: builds
+/// that only changed screens kept turning friends away).
+///
+/// Bump it whenever a message, or the JSON of anything a message carries
+/// (runs, farms, items), changes. `test/protocol_test.dart` fails until it
+/// is bumped and its fingerprint updated.
+const int sessionProtocol = 1;
+
 /// Why a guest could not join a host's session.
 enum SessionJoinRejection {
-  /// App build number or catalog hash differs from the host's:
+  /// [sessionProtocol] or catalog hash differs from the host's:
   /// "업데이트가 필요합니다".
   versionMismatch,
 
@@ -244,6 +254,8 @@ sealed class SessionMessage {
     Map<String, dynamic> json,
   ) => switch (json['type'] as String) {
     'hello' => HelloMessage(
+      // Builds from before the protocol send none.
+      protocol: json['protocol'] as int? ?? 0,
       buildNumber: json['build'] as int,
       catalogHash: json['catalog_hash'] as String,
       start: RaidMemberStart.fromJson(json['start'] as Map<String, dynamic>),
@@ -367,6 +379,7 @@ sealed class SessionMessage {
 
   Map<String, dynamic> toJson() => switch (this) {
     HelloMessage(
+      :final protocol,
       :final buildNumber,
       :final catalogHash,
       :final start,
@@ -376,6 +389,7 @@ sealed class SessionMessage {
     ) =>
       {
         'type': 'hello',
+        'protocol': protocol,
         'build': buildNumber,
         'catalog_hash': catalogHash,
         'start': start.toJson(),
@@ -504,6 +518,7 @@ sealed class SessionMessage {
 /// Guest → host on reliable: version check and what the guest brings in.
 final class HelloMessage extends SessionMessage {
   const HelloMessage({
+    this.protocol = sessionProtocol,
     required this.buildNumber,
     required this.catalogHash,
     required this.start,
@@ -512,6 +527,10 @@ final class HelloMessage extends SessionMessage {
     this.bed = const [],
   });
 
+  /// The guest's [sessionProtocol]; what the host checks.
+  final int protocol;
+
+  /// The guest's app build, for the record.
   final int buildNumber;
   final String catalogHash;
   final RaidMemberStart start;

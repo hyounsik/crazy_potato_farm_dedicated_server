@@ -47,6 +47,7 @@ void main() {
     String name, {
     Map<String, Object?>? catalogFiles,
     int buildNumber = 7,
+    int protocol = sessionProtocol,
   }) async {
     final transport = await WebSocketClientTransport.connect(
       Uri.parse('ws://127.0.0.1:${server.port}'),
@@ -57,6 +58,7 @@ void main() {
       transport: transport,
       start: RaidMemberStart(name: name),
       buildNumber: buildNumber,
+      protocol: protocol,
       playerId: 'install-$name',
       catalogFiles: catalogFiles,
     );
@@ -102,10 +104,13 @@ void main() {
     });
   });
 
-  test('a guest on another build is turned away', () async {
+  test('a guest on another protocol is turned away, another build with '
+      'the same one comes in (2026-10-30)', () async {
     final leader = await join('Lead', catalogFiles: files);
     await until(() => leader.stage == ClientSessionStage.waiting);
-    final stale = await join('Stale', buildNumber: 6);
+    final newer = await join('Newer', buildNumber: 8);
+    await until(() => newer.stage == ClientSessionStage.waiting);
+    final stale = await join('Stale', protocol: sessionProtocol - 1);
     await until(() => stale.stage == ClientSessionStage.rejected);
     expect(stale.joinRejection, SessionJoinRejection.versionMismatch);
   });

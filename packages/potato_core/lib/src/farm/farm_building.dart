@@ -48,6 +48,9 @@ final class FarmBuilding {
   /// Field tiles this building looks after now.
   int get fieldTiles => data.levels[level - 1].fieldTiles;
 
+  /// Totems this building adds to the limit now.
+  int get totems => data.levels[level - 1].totems;
+
   /// The cost of the next level, or null at the top.
   int? get upgradeCost =>
       level < data.levels.length ? data.levels[level].cost : null;

@@ -163,17 +163,6 @@ Map<String, dynamic> _$LightTotemToJson(LightTotem instance) =>
       'runtimeType': instance.$type,
     };
 
-RaiseTotemLimit _$RaiseTotemLimitFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('RaiseTotemLimit', json, ($checkedConvert) {
-      final val = RaiseTotemLimit(
-        $type: $checkedConvert('runtimeType', (v) => v as String?),
-      );
-      return val;
-    }, fieldKeyMap: const {r'$type': 'runtimeType'});
-
-Map<String, dynamic> _$RaiseTotemLimitToJson(RaiseTotemLimit instance) =>
-    <String, dynamic>{'runtimeType': instance.$type};
-
 WidenPouch _$WidenPouchFromJson(Map<String, dynamic> json) =>
     $checkedCreate('WidenPouch', json, ($checkedConvert) {
       final val = WidenPouch(
@@ -546,6 +535,21 @@ Map<String, dynamic> _$RetrainToJson(Retrain instance) => <String, dynamic>{
   'building_id': instance.buildingId,
   'runtimeType': instance.$type,
 };
+
+ReleasePotato _$ReleasePotatoFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ReleasePotato', json, ($checkedConvert) {
+      final val = ReleasePotato(
+        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$ReleasePotatoToJson(ReleasePotato instance) =>
+    <String, dynamic>{
+      'potato_id': instance.potatoId,
+      'runtimeType': instance.$type,
+    };
 
 Revive _$ReviveFromJson(Map<String, dynamic> json) =>
     $checkedCreate('Revive', json, ($checkedConvert) {

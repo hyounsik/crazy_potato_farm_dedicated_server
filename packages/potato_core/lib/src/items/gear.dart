@@ -18,8 +18,10 @@ enum GearKind {
   belt,
 }
 
-/// One piece of equipment. Found in runs with the zone's score as its
-/// level; the workbench raises [enhance]. It never wears out.
+/// One piece of equipment. Found in runs with a level from the party's
+/// (`LootLevels`); the workbench raises [enhance]. Runs wear it out: once
+/// [wear] reaches `GearRulesData.durability` it is broken for good and only
+/// good for breaking up (2026-10-30, 사용자).
 @freezed
 abstract class Gear with _$Gear {
   const factory Gear({
@@ -30,6 +32,9 @@ abstract class Gear with _$Gear {
     required Grade grade,
     required int level,
     @Default(0) int enhance,
+
+    /// How worn it is; 0 is as new, so pieces saved before wear are too.
+    @Default(0) int wear,
 
     /// Belts: the potato type each slot takes.
     @Default(<PotatoType>[]) List<PotatoType> slots,

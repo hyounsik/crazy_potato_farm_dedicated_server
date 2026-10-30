@@ -106,18 +106,35 @@ void main() {
       return farm.buildings.last.id;
     }
 
-    test('only as many as the limit allows, raised for food', () {
-      putUp('totem_growth', const TilePos(8, 8));
-      putUp('totem_growth', const TilePos(10, 8));
-      expect(
-        farm.apply(
-          FarmCommand.build(kind: 'totem_growth', origin: const TilePos(8, 10)),
-        ),
-        FarmRejection.totemLimit,
-      );
-      expect(farm.apply(const FarmCommand.raiseTotemLimit()), isNull);
+    test('only as many as the limit allows, raised by giant totems '
+        '(2026-10-30)', () {
       expect(farm.totemLimit, 3);
-      putUp('totem_growth', const TilePos(8, 10));
+      putUp('totem_growth', const TilePos(8, 8));
+      putUp('totem_growth', const TilePos(9, 8));
+      putUp('totem_growth', const TilePos(10, 8));
+      Object? fourth() => farm.apply(
+        FarmCommand.build(kind: 'totem_growth', origin: const TilePos(9, 9)),
+      );
+      expect(fourth(), FarmRejection.totemLimit);
+      final spot =
+          [
+            for (var y = 0; y < 24; y++)
+              for (var x = 0; x < 24; x++) TilePos(x, y),
+          ].firstWhere(
+            (tile) =>
+                ((tile.x - 9).abs() > 3 || (tile.y - 9).abs() > 3) &&
+                farm.canPlace(TileRect(origin: tile, width: 2, height: 2)),
+          );
+      final giant = putUp('giant_totem', spot);
+      expect(farm.totemLimit, 5);
+      expect(fourth(), isNull);
+      expect(
+        farm.apply(FarmCommand.demolish(buildingId: giant)),
+        FarmRejection.totemsNeedIt,
+        reason: 'four totems stand, three without it',
+      );
+      final save = FarmDocument.of(farm).toJson();
+      expect(save.containsKey('totem_limit'), isFalse);
     });
 
     test('totems may stand right next to each other, not on one another '
@@ -126,14 +143,14 @@ void main() {
       putUp('totem_harvest', const TilePos(9, 8));
       final building = farm.buildings.last;
       expect(
-        farm.canPlace(building.rect, totem: true),
+        farm.canPlace(building.rect, snug: 'totem'),
         isFalse,
         reason: 'not on one',
       );
       expect(
         farm.canPlace(
           const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
-          totem: true,
+          snug: 'totem',
         ),
         isTrue,
         reason: 'corner to corner with a totem',
@@ -153,11 +170,22 @@ void main() {
             width: 1,
             height: 1,
           ),
-          totem: true,
+          snug: 'totem',
         ),
         isFalse,
         reason: 'a totem keeps its distance from a field',
       );
+    });
+
+    test('graveyards may stand next to each other too, but not next to a '
+        'totem (2026-10-30)', () {
+      expect(catalog.buildings['graveyard']!.snug, 'graveyard');
+      expect(catalog.buildings['totem_growth']!.snug, 'totem');
+      expect(catalog.buildings['house']!.snug, isNull);
+      putUp('totem_growth', const TilePos(8, 8));
+      const beside = TileRect(origin: TilePos(9, 8), width: 2, height: 2);
+      expect(farm.canPlace(beside, snug: 'totem'), isTrue);
+      expect(farm.canPlace(beside, snug: 'graveyard'), isFalse);
     });
 
     test('a lit growth totem speeds growth, then goes out and waits', () {

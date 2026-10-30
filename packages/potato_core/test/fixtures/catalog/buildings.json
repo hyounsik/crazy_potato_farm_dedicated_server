@@ -26,6 +26,17 @@
       ]
     },
     {
+      "id": "giant_totem",
+      "width": 2,
+      "height": 2,
+      "levels": [
+        {
+          "cost": 100,
+          "totems": 2
+        }
+      ]
+    },
+    {
       "id": "potato_cellar",
       "width": 1,
       "height": 1,

@@ -119,13 +119,8 @@ void main() {
     });
     final closed = FarmSimulation.newFarm(locked, seed: 1)..food = 10000;
     expect(closed.totemsOpen, isFalse);
-    expect(
-      closed.apply(const FarmCommand.raiseTotemLimit()),
-      FarmRejection.locked,
-    );
     closed.apply(const FarmCommand.unlockAll());
     expect(closed.totemsOpen, isTrue);
-    expect(closed.apply(const FarmCommand.raiseTotemLimit()), isNull);
   });
 
   test('meeting the goals finishes the event, opens it and sends a letter', () {

@@ -1,4 +1,5 @@
 import 'package:potato_core/src/catalog/catalog.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
@@ -15,26 +16,33 @@ final class RaidMemberStart {
     this.progress = 0,
     this.companions = const [],
     this.bag = const [],
+    this.seedLevels = const {},
   });
 
-  factory RaidMemberStart.fromJson(Map<String, dynamic> json) =>
-      RaidMemberStart(
-        name: json['name'] as String? ?? '',
-        food: json['food'] as int? ?? 0,
-        equipped: switch (json['equipped']) {
-          final Map<String, dynamic> e => Equipped.fromJson(e),
-          _ => const Equipped(),
-        },
-        progress: json['progress'] as int? ?? 0,
-        companions: [
-          for (final c in json['companions'] as List<Object?>? ?? const [])
-            CompanionStart.fromJson(c! as Map<String, dynamic>),
-        ],
-        bag: [
-          for (final s in json['bag'] as List<Object?>? ?? const [])
-            ItemStack.fromJson(s! as Map<String, dynamic>),
-        ],
-      );
+  factory RaidMemberStart.fromJson(
+    Map<String, dynamic> json,
+  ) => RaidMemberStart(
+    name: json['name'] as String? ?? '',
+    food: json['food'] as int? ?? 0,
+    equipped: switch (json['equipped']) {
+      final Map<String, dynamic> e => Equipped.fromJson(e),
+      _ => const Equipped(),
+    },
+    progress: json['progress'] as int? ?? 0,
+    companions: [
+      for (final c in json['companions'] as List<Object?>? ?? const [])
+        CompanionStart.fromJson(c! as Map<String, dynamic>),
+    ],
+    bag: [
+      for (final s in json['bag'] as List<Object?>? ?? const [])
+        ItemStack.fromJson(s! as Map<String, dynamic>),
+    ],
+    seedLevels: {
+      for (final MapEntry(:key, :value)
+          in (json['seed_levels'] as Map<String, dynamic>? ?? const {}).entries)
+        PotatoType.values.byName(key): value as int,
+    },
+  );
 
   final String name;
   final int food;
@@ -47,6 +55,10 @@ final class RaidMemberStart {
   /// (2026-10-28, 사용자).
   final List<ItemStack> bag;
 
+  /// The highest level of each potato type on the member's farm: seeds found
+  /// in the run grow from it (2026-10-30, 사용자). → [LootLevels]
+  final Map<PotatoType, int> seedLevels;
+
   Map<String, dynamic> toJson() => {
     if (name.isNotEmpty) 'name': name,
     'food': food,
@@ -54,6 +66,11 @@ final class RaidMemberStart {
     'progress': progress,
     'companions': [for (final c in companions) c.toJson()],
     if (bag.isNotEmpty) 'bag': [for (final s in bag) s.toJson()],
+    if (seedLevels.isNotEmpty)
+      'seed_levels': {
+        for (final MapEntry(:key, :value) in seedLevels.entries)
+          key.name: value,
+      },
   };
 }
 

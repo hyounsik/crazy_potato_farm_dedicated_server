@@ -242,9 +242,7 @@
     "damage_percent": 10
   },
   "totems": {
-    "start_limit": 2,
-    "limit_step_food": 100,
-    "max_limit": 4
+    "start_limit": 3
   },
   "breeding": {
     "seed_every_seconds": 60,
@@ -283,6 +281,7 @@
       "legendary": 15
     },
     "belt_percent_per_ten_levels": 2,
+    "bag_hp_percent_per_ten_levels": 2,
     "belt_enhance_percent": 2,
     "disassemble": {
       "normal": 3,

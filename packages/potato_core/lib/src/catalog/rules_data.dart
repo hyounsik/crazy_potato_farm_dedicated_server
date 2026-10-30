@@ -390,10 +390,25 @@ abstract class GearRulesData with _$GearRulesData {
     required double beltPercentPerTenLevels,
     required double beltEnhancePercent,
 
+    /// The wearer's max health a bag adds per ten levels, in percent
+    /// (2026-10-30, 사용자: a little health as bags level up).
+    @Default(0) double bagHpPercentPerTenLevels,
+
     /// Materials a piece breaks down into by grade, plus this share of what
     /// its workbench levels took.
     required Map<Grade, int> disassemble,
     required int enhanceRefundPercent,
+
+    /// Wear a piece takes before it breaks, how much a minute of a run adds
+    /// to each worn piece, and the most one run adds (2026-10-30, 사용자:
+    /// by time spent, with a cap).
+    @Default(100) int durability,
+    @Default(2) double wearPerMinute,
+    @Default(20) int wearPerRunMax,
+
+    /// A broken weapon's damage, as a share of a plain level 1 weapon of its
+    /// family (2026-10-30, 사용자: a quarter, still above bare hands).
+    @Default(0.25) double brokenDamage,
 
     /// Chance each worn piece is lost when a danger run fails.
     required double lossChance,
@@ -514,12 +529,8 @@ abstract class BreedingRulesData with _$BreedingRulesData {
 @freezed
 abstract class TotemRulesData with _$TotemRulesData {
   const factory TotemRulesData({
-    /// Totems a new farm may put up.
+    /// Totems a farm may put up without giant totems.
     required int startLimit,
-
-    /// Baby potatoes one more totem costs, and the most there can be.
-    required int limitStepFood,
-    required int maxLimit,
   }) = _TotemRulesData;
 
   factory TotemRulesData.fromJson(Map<String, dynamic> json) =>

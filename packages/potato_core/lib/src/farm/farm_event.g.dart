@@ -640,6 +640,21 @@ Map<String, dynamic> _$PotatoUprootedToJson(PotatoUprooted instance) =>
       'runtimeType': instance.$type,
     };
 
+PotatoReleased _$PotatoReleasedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('PotatoReleased', json, ($checkedConvert) {
+      final val = PotatoReleased(
+        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$PotatoReleasedToJson(PotatoReleased instance) =>
+    <String, dynamic>{
+      'potato_id': instance.potatoId,
+      'runtimeType': instance.$type,
+    };
+
 PotatoTakenOut _$PotatoTakenOutFromJson(Map<String, dynamic> json) =>
     $checkedCreate('PotatoTakenOut', json, ($checkedConvert) {
       final val = PotatoTakenOut(

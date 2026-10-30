@@ -2,6 +2,7 @@ import 'dart:collection';
 import 'dart:math' as math;
 
 import 'package:potato_core/src/catalog/ability_data.dart';
+import 'package:potato_core/src/catalog/building_data.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -60,7 +61,6 @@ final class FarmSimulation {
     Iterable<Gear> gear = const [],
     Equipped equipped = const Equipped(),
     this.progress = 0,
-    int? totemLimit,
     FarmTotals? totals,
     Map<String, int> storyDone = const {},
     this.storySkipped = false,
@@ -71,7 +71,6 @@ final class FarmSimulation {
        kit = PlayerKit(catalog, equipped: equipped, bed: bed, bag: bag),
        _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
-       totemLimit = totemLimit ?? catalog.rules.totems.startLimit,
        pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
        gearSlots = gearSlots ?? catalog.rules.storage.gearSlots,
        _overflow = List.of(overflow),
@@ -109,8 +108,8 @@ final class FarmSimulation {
   void _settleBuildings() {
     final size = _rules.farm.size;
     for (final building in _buildings.values) {
-      final totem = building.data.totem != null;
-      if (canPlace(building.rect, ignoring: building.id, totem: totem)) {
+      final snug = building.data.snug;
+      if (canPlace(building.rect, ignoring: building.id, snug: snug)) {
         continue;
       }
       final from = building.origin;
@@ -125,7 +124,7 @@ final class FarmSimulation {
             width: building.data.width,
             height: building.data.height,
           );
-          if (!canPlace(rect, ignoring: building.id, totem: totem)) continue;
+          if (!canPlace(rect, ignoring: building.id, snug: snug)) continue;
           best = TilePos(x, y);
           bestDistance = distance;
         }
@@ -256,8 +255,10 @@ final class FarmSimulation {
   /// this plus a margin may be used. Never goes down.
   int progress;
 
-  /// Totems that may stand on the farm.
-  int totemLimit;
+  /// Totems that may stand on the farm: a few to begin with and each giant
+  /// totem's (2026-10-30, 사용자), as fields grow with field offices.
+  int get totemLimit =>
+      _buildings.values.fold(_rules.totems.startLimit, (n, b) => n + b.totems);
 
   /// Bumped whenever a totem lights or goes out, so cached effects redo.
   int _totemVersion = 0;
@@ -378,6 +379,24 @@ final class FarmSimulation {
 
   /// Potatoes out exploring, with where each came from.
   Iterable<AwayPotato> get awayEntries => _away.values;
+
+  /// The highest level among the farm's potatoes of each type, wherever
+  /// they are: seeds found exploring grow from it (2026-10-30, 사용자).
+  Map<PotatoType, int> get bestLevels {
+    final best = <PotatoType, int>{};
+    void see(Potato p) => best[p.type] = math.max(best[p.type] ?? 0, p.level);
+    for (final field in _fields.values) {
+      field._potatoes.values.forEach(see);
+    }
+    for (final guard in _guards.values) {
+      see(guard.potato);
+    }
+    _fridge.values.forEach(see);
+    for (final away in _away.values) {
+      see(away.potato);
+    }
+    return best;
+  }
 
   /// The potato with [id], wherever it is: in a field, guarding, in the
   /// fridge, or away.
@@ -541,14 +560,15 @@ final class FarmSimulation {
 
   /// Whether a building could stand on [rect]: on open land, off the
   /// [entrance], with one free tile (corners included) between it and every
-  /// field and building. A [totem] may stand right next to other totems
-  /// (2026-10-27, 사용자), though not on them.
+  /// field and building. Buildings of one [snug] group (see
+  /// [BuildingSnug.snug]) may stand right next to each other, though not on
+  /// each other.
   /// Its bottom side may not lie against the fence (2026-10-29, 사용자;
   /// its sides and top may): the row below holds its door ([doorBelow]),
   /// where its path starts.
   /// [ignoring] is a building or field to leave out, e.g. one being moved
   /// (ids are shared, so one id names either).
-  bool canPlace(TileRect rect, {int? ignoring, bool totem = false}) {
+  bool canPlace(TileRect rect, {int? ignoring, String? snug}) {
     if (!rect.tiles.every(isOpen)) return false;
     if (rect.contains(entrance)) return false;
     for (var x = rect.left; x < rect.left + rect.width; x++) {
@@ -556,13 +576,13 @@ final class FarmSimulation {
     }
     final others = [
       for (final field in _fields.values)
-        if (field.id != ignoring) (rect: field.rect, totem: false),
+        if (field.id != ignoring) (rect: field.rect, snug: null),
       for (final building in _buildings.values)
         if (building.id != ignoring)
-          (rect: building.rect, totem: building.data.totem != null),
+          (rect: building.rect, snug: building.data.snug),
     ];
-    for (final (rect: other, totem: otherTotem) in others) {
-      if (totem && otherTotem) {
+    for (final (rect: other, snug: otherSnug) in others) {
+      if (snug != null && snug == otherSnug) {
         if (rect.overlaps(other)) return false;
         continue;
       }
@@ -602,7 +622,6 @@ final class FarmSimulation {
     DisassembleGear(:final index) => _disassembleGear(index),
     DisassembleBagGear(:final slot) => _disassembleBagGear(slot),
     LightTotem(:final buildingId) => _lightTotem(buildingId),
-    RaiseTotemLimit() => _raiseTotemLimit(),
     WidenPouch() => _widen(pouch: true),
     WidenGearBox() => _widen(pouch: false),
     SellSeed(:final seed) => _sellSeed(seed),
@@ -634,6 +653,7 @@ final class FarmSimulation {
       potatoId,
       buildingId,
     ),
+    ReleasePotato(:final potatoId) => _release(potatoId),
     Revive(:final potatoId) => _revive(potatoId),
     Depart(:final food, :final potatoIds, :final zone) => _depart(
       food,
@@ -1230,8 +1250,7 @@ final class FarmSimulation {
       width: building.data.width,
       height: building.data.height,
     );
-    final totem = building.data.totem != null;
-    if (!canPlace(rect, ignoring: buildingId, totem: totem)) {
+    if (!canPlace(rect, ignoring: buildingId, snug: building.data.snug)) {
       return FarmRejection.blocked;
     }
     building.origin = origin;
@@ -1260,7 +1279,7 @@ final class FarmSimulation {
       return FarmRejection.totemLimit;
     }
     final building = FarmBuilding(id: _nextId, data: data, origin: origin);
-    if (!canPlace(building.rect, totem: data.totem != null)) {
+    if (!canPlace(building.rect, snug: data.snug)) {
       return FarmRejection.blocked;
     }
     final cost = data.levels.first.cost;
@@ -1514,16 +1533,6 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _raiseTotemLimit() {
-    final rules = _rules.totems;
-    if (!totemsOpen) return FarmRejection.locked;
-    if (totemLimit >= rules.maxLimit) return FarmRejection.atMost;
-    if (food < rules.limitStepFood) return FarmRejection.notEnoughFood;
-    food -= rules.limitStepFood;
-    totemLimit++;
-    return null;
-  }
-
   /// Totems whose time is up go out.
   void _putOutTotems() {
     for (final building in _buildings.values) {
@@ -1595,7 +1604,7 @@ final class FarmSimulation {
       TilePos? spot;
       bool fits(TilePos origin) => canPlace(
         TileRect(origin: origin, width: data.width, height: data.height),
-        totem: data.totem != null,
+        snug: data.snug,
       );
       if (fits(start.origin)) {
         spot = start.origin;
@@ -1624,6 +1633,10 @@ final class FarmSimulation {
     final tiles = _buildings[buildingId]?.fieldTiles ?? 0;
     if (tiles > 0 && fieldTiles > fieldRoom - tiles) {
       return FarmRejection.fieldsNeedIt;
+    }
+    final totems = _buildings[buildingId]?.totems ?? 0;
+    if (totems > 0 && totemCount > totemLimit - totems) {
+      return FarmRejection.totemsNeedIt;
     }
     final building = _buildings.remove(buildingId);
     if (building == null) return FarmRejection.noSuchBuilding;
@@ -1775,6 +1788,12 @@ final class FarmSimulation {
     _fridge.remove(potatoId);
     _house(potato, building);
     _events.add(FarmEvent.takenOut(potatoId: potatoId));
+    return null;
+  }
+
+  FarmRejection? _release(int potatoId) {
+    if (_fridge.remove(potatoId) == null) return FarmRejection.notInFridge;
+    _events.add(FarmEvent.released(potatoId: potatoId));
     return null;
   }
 

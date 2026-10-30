@@ -60,10 +60,26 @@ abstract class BuildingLevelData with _$BuildingLevelData {
     /// field offices). Fields may cover no more tiles than the farm looks
     /// after (`FarmRulesData.fieldTiles` and these together).
     @Default(0) int fieldTiles,
+
+    /// Totems this building adds to the farm's limit (2026-10-30, 사용자:
+    /// the giant totem).
+    @Default(0) int totems,
   }) = _BuildingLevelData;
 
   factory BuildingLevelData.fromJson(Map<String, dynamic> json) =>
       _$BuildingLevelDataFromJson(json);
+}
+
+/// Which buildings may stand right next to each other.
+extension BuildingSnug on BuildingData {
+  /// Kinds sharing a group may touch (though not overlap): totems
+  /// (2026-10-27, 사용자) and graveyards (2026-10-30, 사용자). Null keeps
+  /// the one free tile around it.
+  String? get snug => totem != null
+      ? 'totem'
+      : levels.any((level) => level.graves > 0)
+      ? 'graveyard'
+      : null;
 }
 
 /// A totem's support while lit: farm stats raised (or lowered) by

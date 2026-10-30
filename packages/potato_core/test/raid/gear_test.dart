@@ -112,6 +112,62 @@ void main() {
     }
   });
 
+  test('a bag adds a little max health by its level (2026-10-30)', () {
+    final plain = run().player.maxHp;
+    const leveled = Gear(kind: GearKind.bag, grade: Grade.normal, level: 50);
+    final bonus = GearStats(catalog).bagHp(leveled);
+    expect(bonus, closeTo(0.1, 1e-9), reason: '+2% per ten levels');
+    expect(
+      run(equipped: const Equipped(bag: leveled)).player.maxHp,
+      closeTo(plain * 1.1, 1e-9),
+    );
+  });
+
+  group('found levels (2026-10-30)', () {
+    late final zone = catalog.zones['sample_zone']!.copyWith(
+      score: 15,
+      levelMin: 15,
+      levelMax: 24,
+    );
+    Gear weapon(int level) =>
+        Gear(kind: GearKind.weapon, grade: Grade.normal, level: level);
+    final random = GameRandom(7);
+
+    test('the party average plus 0 to 2, inside the zone range', () {
+      final levels = LootLevels(
+        zone,
+        worn: [
+          Equipped(weapon: weapon(18)),
+          Equipped(weapon: weapon(20)),
+        ],
+        seedLevels: [
+          {PotatoType.combat: 30},
+          {PotatoType.combat: 30},
+        ],
+      );
+      for (var i = 0; i < 50; i++) {
+        expect(levels.gear(GearKind.weapon, random), inInclusiveRange(19, 21));
+        expect(levels.seed(PotatoType.combat, random), 24, reason: 'top');
+      }
+    });
+
+    test('bare hands and missing types start at the bottom', () {
+      final levels = LootLevels(
+        zone,
+        worn: [
+          const Equipped(),
+          Equipped(weapon: weapon(3)),
+        ],
+        seedLevels: [const {}],
+      );
+      for (var i = 0; i < 50; i++) {
+        expect(levels.gear(GearKind.bag, random), inInclusiveRange(15, 17));
+        expect(levels.gear(GearKind.weapon, random), inInclusiveRange(15, 17));
+        expect(levels.seed(PotatoType.food, random), inInclusiveRange(15, 17));
+      }
+    });
+  });
+
   test(
     'wearing from the bag swaps; a smaller bag drops what no longer fits',
     () {
@@ -199,9 +255,50 @@ void main() {
     }
 
     expect(fail(losing(1)).equipped, const Equipped());
-    expect(fail(losing(0)).equipped, worn);
+    // Kept pieces come home a little worn (2026-10-30).
+    final kept = GearStats(catalog).afterRun(worn, 0.1);
+    expect(fail(losing(0)).equipped, kept);
     final home = fail(losing(0)).homecoming(catalog) as ReturnHome;
-    expect(home.equipped, worn);
+    expect(home.equipped, kept);
+  });
+
+  group('wear (2026-10-30)', () {
+    late final stats = GearStats(catalog);
+
+    test('a run wears what is worn by the time spent, up to a cap', () {
+      final rules = catalog.rules.gear;
+      Gear weapon(double seconds) =>
+          stats.afterRun(const Equipped(weapon: rareRapid), seconds).weapon!;
+      expect(weapon(0).wear, 0);
+      expect(weapon(60).wear, rules.wearPerMinute.ceil());
+      expect(weapon(3600).wear, rules.wearPerRunMax);
+    });
+
+    test('broken: a weapon keeps its family at a quarter of level 1; '
+        'a bag works as bare hands', () {
+      final broken = catalog.rules.gear.durability;
+      expect(stats.isBroken(rareRapid.copyWith(wear: broken)), isTrue);
+      expect(
+        stats.bagSlots(bigBag.copyWith(wear: broken)),
+        stats.bagSlots(null),
+      );
+      final weapon = rareRapid.copyWith(wear: broken);
+      expect(stats.weaponOf(weapon), 'rapid');
+      final plain = rareRapid.copyWith(grade: Grade.normal, level: 1);
+      expect(
+        stats.damageScale(weapon),
+        closeTo(stats.damageScale(plain) / 4, 1e-9),
+      );
+      expect(stats.weaponDps(weapon), greaterThan(stats.weaponDps(null)));
+      // Weaker than bare hands, it shoots as bare hands.
+      final weak = GearStats(
+        sampleCatalogWith((files) {
+          (rulesOf(files)['gear'] as Map)['broken_damage'] = 0.01;
+        }),
+      );
+      expect(weak.weaponOf(weapon), weak.weaponOf(null));
+      expect(weak.weaponDps(weapon), weak.weaponDps(null));
+    });
   });
 
   test('gear in the bag comes home to the box; the worn set too', () {

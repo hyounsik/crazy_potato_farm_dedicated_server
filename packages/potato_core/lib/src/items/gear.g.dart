@@ -14,6 +14,7 @@ _Gear _$GearFromJson(Map<String, dynamic> json) =>
         grade: $checkedConvert('grade', (v) => $enumDecode(_$GradeEnumMap, v)),
         level: $checkedConvert('level', (v) => (v as num).toInt()),
         enhance: $checkedConvert('enhance', (v) => (v as num?)?.toInt() ?? 0),
+        wear: $checkedConvert('wear', (v) => (v as num?)?.toInt() ?? 0),
         slots: $checkedConvert(
           'slots',
           (v) =>
@@ -32,6 +33,7 @@ Map<String, dynamic> _$GearToJson(_Gear instance) => <String, dynamic>{
   'grade': _$GradeEnumMap[instance.grade]!,
   'level': instance.level,
   'enhance': instance.enhance,
+  'wear': instance.wear,
   'slots': instance.slots.map((e) => _$PotatoTypeEnumMap[e]!).toList(),
 };
 

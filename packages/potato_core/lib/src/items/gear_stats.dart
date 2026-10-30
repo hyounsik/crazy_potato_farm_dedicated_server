@@ -1,4 +1,5 @@
 import 'package:potato_core/src/catalog/catalog.dart';
+import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/items/gear.dart';
@@ -16,30 +17,90 @@ final class GearStats {
   GearRulesData get rules => catalog.rules.gear;
 
   /// The weapon id that shoots: the piece's family, or bare hands'.
-  String weaponOf(Gear? weapon) => weapon?.family ?? rules.bareWeapon;
+  String weaponOf(Gear? weapon) => switch (weapon) {
+    null => rules.bareWeapon,
+    _ when _bareInstead(weapon) => rules.bareWeapon,
+    _ => weapon.family,
+  };
+
+  /// A broken weapon weaker than bare hands shoots as bare hands
+  /// (2026-10-30, 사용자: the stronger of the two).
+  bool _bareInstead(Gear weapon) {
+    if (!isBroken(weapon)) return false;
+    double dps(String id, double scale) {
+      final data = catalog.weapons[id];
+      if (data == null) return 0;
+      return data.damage *
+          scale *
+          data.pellets /
+          (data.interval + data.aimSeconds);
+    }
+
+    return dps(weapon.family, _brokenScale) < dps(rules.bareWeapon, 1);
+  }
+
+  /// A broken weapon's damage scale: a share of a plain level 1 one's.
+  double get _brokenScale =>
+      (rules.gradeDamage[Grade.normal] ?? 1) *
+      levelGrowth(rules.levelDamagePermille, 1) *
+      rules.brokenDamage;
+
+  /// Whether [gear] is worn out (2026-10-30, 사용자): a weapon keeps its
+  /// family at a share of a plain level 1 one's damage
+  /// ([GearRulesData.brokenDamage]), or shoots as bare hands if those are
+  /// stronger; a bag or belt works as bare hands.
+  bool isBroken(Gear gear) => gear.wear >= rules.durability;
+
+  /// How much use [gear] has left, from 1 (as new) to 0 (broken).
+  double durabilityLeft(Gear gear) =>
+      (1 - gear.wear / rules.durability).clamp(0, 1);
+
+  /// [equipped] after a run of [seconds]: each piece worn a little more.
+  Equipped afterRun(Equipped equipped, double seconds) {
+    final wear = (seconds / 60 * rules.wearPerMinute).ceil().clamp(
+      0,
+      rules.wearPerRunMax,
+    );
+    Gear? worn(Gear? gear) =>
+        gear?.copyWith(wear: (gear.wear + wear).clamp(0, rules.durability));
+    return Equipped(
+      weapon: worn(equipped.weapon),
+      bag: worn(equipped.bag),
+      belt: worn(equipped.belt),
+    );
+  }
 
   /// How much a weapon's base damage is multiplied: grade, level and
   /// workbench levels.
   double damageScale(Gear? weapon) {
     if (weapon == null) return 1;
+    if (_bareInstead(weapon)) return 1;
+    if (isBroken(weapon)) return _brokenScale;
     return (rules.gradeDamage[weapon.grade] ?? 1) *
         levelGrowth(rules.levelDamagePermille, weapon.level) *
         (1 + weapon.enhance * catalog.rules.workbench.damagePercent / 100);
   }
 
-  int bagSlots(Gear? bag) => bag == null
+  int bagSlots(Gear? bag) => bag == null || isBroken(bag)
       ? rules.bareBagSlots
       : (rules.bagSlots[bag.grade] ?? rules.bareBagSlots) +
             bag.enhance * rules.bagEnhanceSlots;
 
+  /// How much more max health [bag] gives its wearer, as a share (0.1 is
+  /// +10%): its level only (2026-10-30, 사용자).
+  double bagHp(Gear? bag) => bag == null || isBroken(bag)
+      ? 0
+      : bag.level / 10 * rules.bagHpPercentPerTenLevels / 100;
+
   /// Each belt slot's potato type; null takes any (bare hands).
-  List<PotatoType?> beltSlots(Gear? belt) =>
-      belt == null ? List.filled(rules.bareBeltSlots, null) : belt.slots;
+  List<PotatoType?> beltSlots(Gear? belt) => belt == null || isBroken(belt)
+      ? List.filled(rules.bareBeltSlots, null)
+      : belt.slots;
 
   /// How much stronger a potato in one of [belt]'s slots is at its job, as
   /// a share (0.1 is +10%).
   double beltBoost(Gear? belt) {
-    if (belt == null) return 0;
+    if (belt == null || isBroken(belt)) return 0;
     return ((rules.beltPercent[belt.grade] ?? 0) +
             belt.level / 10 * rules.beltPercentPerTenLevels +
             belt.enhance * rules.beltEnhancePercent) /

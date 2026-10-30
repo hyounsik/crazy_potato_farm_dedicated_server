@@ -863,6 +863,22 @@ void main() {
         FarmRejection.notInFridge,
       );
     });
+
+    test('a cellar potato can be let go: gone, no seed, no grave', () {
+      final ground = build('training_ground', const TilePos(8, 8));
+      final id = growGuard(ground);
+      expect(
+        farm.apply(FarmCommand.release(potatoId: id)),
+        FarmRejection.notInFridge,
+        reason: 'only from the cellar',
+      );
+      expect(farm.apply(FarmCommand.uproot(potatoId: id)), isNull);
+      final seeds = farm.seeds.total;
+      expect(farm.apply(FarmCommand.release(potatoId: id)), isNull);
+      expect(farm.fridge, isEmpty);
+      expect(farm.potatoById(id), isNull);
+      expect(farm.seeds.total, seeds);
+    });
   });
 
   test('guards can go exploring and come back to guard', () {

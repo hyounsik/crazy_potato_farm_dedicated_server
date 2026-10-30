@@ -51,9 +51,6 @@ sealed class FarmCommand with _$FarmCommand {
   /// Lights totem [buildingId] for baby potatoes.
   const factory FarmCommand.lightTotem({required int buildingId}) = LightTotem;
 
-  /// Lets one more totem stand on the farm, for baby potatoes.
-  const factory FarmCommand.raiseTotemLimit() = RaiseTotemLimit;
-
   /// Widens the seed pouch by one step, for baby potatoes.
   const factory FarmCommand.widenPouch() = WidenPouch;
 
@@ -149,6 +146,10 @@ sealed class FarmCommand with _$FarmCommand {
     required int potatoId,
     required int buildingId,
   }) = Retrain;
+
+  /// Lets cellar potato [potatoId] go for good: no seed, no grave
+  /// (2026-10-30, 사용자: "보내주기").
+  const factory FarmCommand.release({required int potatoId}) = ReleasePotato;
 
   /// Turns dead potato [potatoId] in a graveyard into its seed.
   const factory FarmCommand.revive({required int potatoId}) = Revive;
@@ -277,6 +278,9 @@ enum FarmRejection {
   /// Without this field office the fields would cover more tiles than the
   /// rest look after.
   fieldsNeedIt,
+
+  /// Without this giant totem more totems would stand than the limit.
+  totemsNeedIt,
 
   /// The building comes with the farm and stays (the house).
   cannotRemove,

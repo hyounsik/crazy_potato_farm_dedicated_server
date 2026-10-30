@@ -664,6 +664,10 @@ _GearRulesData _$GearRulesDataFromJson(
         'belt_enhance_percent',
         (v) => (v as num).toDouble(),
       ),
+      bagHpPercentPerTenLevels: $checkedConvert(
+        'bag_hp_percent_per_ten_levels',
+        (v) => (v as num?)?.toDouble() ?? 0,
+      ),
       disassemble: $checkedConvert(
         'disassemble',
         (v) => (v as Map<String, dynamic>).map(
@@ -674,6 +678,22 @@ _GearRulesData _$GearRulesDataFromJson(
       enhanceRefundPercent: $checkedConvert(
         'enhance_refund_percent',
         (v) => (v as num).toInt(),
+      ),
+      durability: $checkedConvert(
+        'durability',
+        (v) => (v as num?)?.toInt() ?? 100,
+      ),
+      wearPerMinute: $checkedConvert(
+        'wear_per_minute',
+        (v) => (v as num?)?.toDouble() ?? 2,
+      ),
+      wearPerRunMax: $checkedConvert(
+        'wear_per_run_max',
+        (v) => (v as num?)?.toInt() ?? 20,
+      ),
+      brokenDamage: $checkedConvert(
+        'broken_damage',
+        (v) => (v as num?)?.toDouble() ?? 0.25,
       ),
       lossChance: $checkedConvert('loss_chance', (v) => (v as num).toDouble()),
       useMargin: $checkedConvert('use_margin', (v) => (v as num).toInt()),
@@ -696,7 +716,11 @@ _GearRulesData _$GearRulesDataFromJson(
     'beltPercent': 'belt_percent',
     'beltPercentPerTenLevels': 'belt_percent_per_ten_levels',
     'beltEnhancePercent': 'belt_enhance_percent',
+    'bagHpPercentPerTenLevels': 'bag_hp_percent_per_ten_levels',
     'enhanceRefundPercent': 'enhance_refund_percent',
+    'wearPerMinute': 'wear_per_minute',
+    'wearPerRunMax': 'wear_per_run_max',
+    'brokenDamage': 'broken_damage',
     'lossChance': 'loss_chance',
     'useMargin': 'use_margin',
   },
@@ -722,10 +746,15 @@ Map<String, dynamic> _$GearRulesDataToJson(
   ),
   'belt_percent_per_ten_levels': instance.beltPercentPerTenLevels,
   'belt_enhance_percent': instance.beltEnhancePercent,
+  'bag_hp_percent_per_ten_levels': instance.bagHpPercentPerTenLevels,
   'disassemble': instance.disassemble.map(
     (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
   ),
   'enhance_refund_percent': instance.enhanceRefundPercent,
+  'durability': instance.durability,
+  'wear_per_minute': instance.wearPerMinute,
+  'wear_per_run_max': instance.wearPerRunMax,
+  'broken_damage': instance.brokenDamage,
   'loss_chance': instance.lossChance,
   'use_margin': instance.useMargin,
   'start': instance.start.toJson(),
@@ -881,33 +910,15 @@ const _$PotatoTypeEnumMap = {
 };
 
 _TotemRulesData _$TotemRulesDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      '_TotemRulesData',
-      json,
-      ($checkedConvert) {
-        final val = _TotemRulesData(
-          startLimit: $checkedConvert('start_limit', (v) => (v as num).toInt()),
-          limitStepFood: $checkedConvert(
-            'limit_step_food',
-            (v) => (v as num).toInt(),
-          ),
-          maxLimit: $checkedConvert('max_limit', (v) => (v as num).toInt()),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'startLimit': 'start_limit',
-        'limitStepFood': 'limit_step_food',
-        'maxLimit': 'max_limit',
-      },
-    );
+    $checkedCreate('_TotemRulesData', json, ($checkedConvert) {
+      final val = _TotemRulesData(
+        startLimit: $checkedConvert('start_limit', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'startLimit': 'start_limit'});
 
 Map<String, dynamic> _$TotemRulesDataToJson(_TotemRulesData instance) =>
-    <String, dynamic>{
-      'start_limit': instance.startLimit,
-      'limit_step_food': instance.limitStepFood,
-      'max_limit': instance.maxLimit,
-    };
+    <String, dynamic>{'start_limit': instance.startLimit};
 
 _MailRulesData _$MailRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_MailRulesData', json, ($checkedConvert) {

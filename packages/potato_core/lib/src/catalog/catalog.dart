@@ -493,8 +493,6 @@ final class Catalog {
     }
     final totems = rules.totems;
     check.atLeast('totems.start_limit', totems.startLimit, 0);
-    check.atLeast('totems.max_limit', totems.maxLimit, totems.startLimit);
-    check.atLeast('totems.limit_step_food', totems.limitStepFood, 0);
     check.atLeast('mail.building_seed_level', rules.mail.buildingSeedLevel, 0);
 
     final newFarm = rules.newFarm;

@@ -23,6 +23,7 @@ import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
 import 'package:potato_core/src/raid/raid_command.dart';
 import 'package:potato_core/src/raid/raid_effects.dart';
+import 'package:potato_core/src/raid/loot_levels.dart';
 import 'package:potato_core/src/raid/raid_member.dart';
 
 /// A farm potato taken along on a run.
@@ -201,6 +202,7 @@ final class RaidSimulation {
     required this.clones,
     required this._nextId,
     required this._tick,
+    this.seedLevels = const [],
     List<RaidCloud>? clouds,
     this._revealed = false,
     this._clonesIn = 0,
@@ -220,6 +222,7 @@ final class RaidSimulation {
     int progress = 0,
     List<CompanionStart> companions = const [],
     List<ItemStack> bag = const [],
+    Map<PotatoType, int> seedLevels = const {},
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
@@ -232,6 +235,7 @@ final class RaidSimulation {
         progress: progress,
         companions: companions,
         bag: bag,
+        seedLevels: seedLevels,
       ),
     ],
   );
@@ -282,7 +286,10 @@ final class RaidSimulation {
         name: m.name,
         position: at,
         radius: rules.player.radius,
-        maxHp: party.apply(RaidStat.hp, rules.player.maxHp),
+        maxHp: party.apply(
+          RaidStat.hp,
+          rules.player.maxHp * (1 + gear.bagHp(m.equipped.bag)),
+        ),
         weapon: gear.weaponOf(m.equipped.weapon),
         equipped: m.equipped,
       );
@@ -337,6 +344,7 @@ final class RaidSimulation {
       () => nextId++,
       partySize: members.length,
     );
+    final seedLevels = [for (final m in members) m.seedLevels];
     final piles = _placeSpots(
       catalog,
       zoneData,
@@ -345,6 +353,11 @@ final class RaidSimulation {
       random,
       () => nextId++,
       party.apply(RaidStat.lootRareChance, 1),
+      LootLevels(
+        zoneData,
+        worn: [for (final m in members) m.equipped],
+        seedLevels: seedLevels,
+      ),
       partySize: members.length,
     );
     final exits = _openExits(zoneData, map, random, () => nextId++);
@@ -363,6 +376,7 @@ final class RaidSimulation {
       clones: [],
       nextId: nextId,
       tick: 0,
+      seedLevels: seedLevels,
     );
     run._nextCloneAt = zoneData.danger?.cloneEverySeconds ?? 0;
     return run;
@@ -447,17 +461,37 @@ final class RaidSimulation {
       revealed: json['revealed'] as bool,
       nextId: json['next_id'] as int,
       tick: json['tick'] as int,
+      seedLevels: [
+        for (final levels in json['seed_levels'] as List<Object?>)
+          {
+            for (final MapEntry(:key, :value)
+                in (levels! as Map<String, dynamic>).entries)
+              PotatoType.values.byName(key): value as int,
+          },
+      ],
     );
   }
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 10;
+  static const int formatVersion = 11;
 
   final Catalog catalog;
   final ZoneData zone;
   final MapData map;
   final GameRandom _random;
+
+  /// Each member's best potato level per type, as they set out: seeds found
+  /// grow from it.
+  final List<Map<PotatoType, int>> seedLevels;
+
+  /// Levels for what is found now: gear follows what the party wears at
+  /// the moment.
+  LootLevels get _lootLevels => LootLevels(
+    zone,
+    worn: [for (final m in members) m.player.equipped],
+    seedLevels: seedLevels,
+  );
 
   /// Everyone in the run, in the order they went in. Party members stay
   /// here after they are out, with how it ended.
@@ -1139,6 +1173,12 @@ final class RaidSimulation {
         ];
         if (dropped.isNotEmpty) _drop(member, dropped);
       }
+    }
+    // What was worn wears for the time spent (2026-10-30, 사용자).
+    final seconds = _tick * stepSeconds;
+    member.player.equipped = _gear.afterRun(member.player.equipped, seconds);
+    if (member.kept case final kept?) {
+      member.kept = _gear.afterRun(kept, seconds);
     }
     member
       ..outcome = outcome
@@ -2241,8 +2281,8 @@ final class RaidSimulation {
             catalog.lootTables[boss.loot]!,
             catalog.stackOf,
             _random,
-            makeSeed: _seedMaker(catalog, zone, _random),
-            makeGear: _gearMaker(catalog, zone, _random),
+            makeSeed: _seedMaker(catalog, _lootLevels, _random),
+            makeGear: _gearMaker(catalog, _lootLevels, _random),
             weigh: _luck(
               catalog,
               zone,
@@ -2262,8 +2302,8 @@ final class RaidSimulation {
             catalog.lootTables[drops.bundle]!,
             catalog.stackOf,
             _random,
-            makeSeed: _seedMaker(catalog, zone, _random),
-            makeGear: _gearMaker(catalog, zone, _random),
+            makeSeed: _seedMaker(catalog, _lootLevels, _random),
+            makeGear: _gearMaker(catalog, _lootLevels, _random),
             weigh: _luck(
               catalog,
               zone,
@@ -2277,8 +2317,8 @@ final class RaidSimulation {
           catalog.lootTables[drops.item]!,
           catalog.stackOf,
           _random,
-          makeSeed: _seedMaker(catalog, zone, _random),
-          makeGear: _gearMaker(catalog, zone, _random),
+          makeSeed: _seedMaker(catalog, _lootLevels, _random),
+          makeGear: _gearMaker(catalog, _lootLevels, _random),
           weigh: _luck(catalog, zone, _party.apply(RaidStat.lootRareChance, 1)),
           amount: catalog.rules.zoneScaling.lootAmount(zone.score),
         );
@@ -2772,11 +2812,11 @@ final class RaidSimulation {
   }
 
   /// Gathering spots on free tiles, spaced apart, each with loot rolled now.
-  /// Seeds found in [zone] get its score as their level, and an ability
-  /// (and style) of their own.
+  /// Seeds found get a level from [levels], and an ability (and style) of
+  /// their own.
   static SeedMaker _seedMaker(
     Catalog catalog,
-    ZoneData zone,
+    LootLevels levels,
     GameRandom random,
   ) {
     final roller = AbilityRoller(catalog);
@@ -2784,18 +2824,18 @@ final class RaidSimulation {
       final kind? => roller.seed(
         type: kind.type,
         grade: kind.grade,
-        level: zone.score,
+        level: levels.seed(kind.type, random),
         random: random,
       ),
       null => null,
     };
   }
 
-  /// Gear found in [zone] gets its score as its level; belts roll the type
-  /// of each slot (as many as the grade gives).
+  /// Gear found gets a level from [levels]; belts roll the type of each
+  /// slot (as many as the grade gives).
   static GearMaker _gearMaker(
     Catalog catalog,
-    ZoneData zone,
+    LootLevels levels,
     GameRandom random,
   ) {
     const types = [PotatoType.food, PotatoType.combat, PotatoType.buff];
@@ -2816,7 +2856,7 @@ final class RaidSimulation {
         kind: kind.kind,
         family: kind.family,
         grade: kind.grade,
-        level: zone.score,
+        level: levels.gear(kind.kind, random),
         slots: slots,
       );
     };
@@ -2854,7 +2894,8 @@ final class RaidSimulation {
     Vec2 entry,
     GameRandom random,
     int Function() newId,
-    double luck, {
+    double luck,
+    LootLevels levels, {
     int partySize = 1,
   }) {
     final spec = zone.gathering;
@@ -2874,8 +2915,8 @@ final class RaidSimulation {
             table,
             catalog.stackOf,
             random,
-            makeSeed: _seedMaker(catalog, zone, random),
-            makeGear: _gearMaker(catalog, zone, random),
+            makeSeed: _seedMaker(catalog, levels, random),
+            makeGear: _gearMaker(catalog, levels, random),
             weigh: _luck(catalog, zone, luck),
             amount: catalog.rules.zoneScaling.lootAmount(zone.score),
           ),
@@ -2903,5 +2944,9 @@ final class RaidSimulation {
     'clones_in': _clonesIn,
     'next_clone_at': _nextCloneAt,
     'revealed': _revealed,
+    'seed_levels': [
+      for (final levels in seedLevels)
+        {for (final MapEntry(:key, :value) in levels.entries) key.name: value},
+    ],
   };
 }

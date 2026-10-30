@@ -67,7 +67,6 @@ abstract class FarmDocument with _$FarmDocument {
     @Default(<Gear>[]) List<Gear> gear,
     Equipped? equipped,
     @Default(0) int progress,
-    int? totemLimit,
     @Default(<String, dynamic>{}) Map<String, dynamic> totals,
 
     /// Story events done, by id, with the step each was done on.
@@ -185,7 +184,6 @@ abstract class FarmDocument with _$FarmDocument {
     gear: farm.gear,
     equipped: farm.equipped,
     progress: farm.progress,
-    totemLimit: farm.totemLimit,
     totals: farm.totals.toJson(),
     storyDone: Map.of(farm.storyDone),
     storySkipped: farm.storySkipped,
@@ -297,7 +295,6 @@ abstract class FarmDocument with _$FarmDocument {
       gear: gear,
       equipped: equipped ?? _startGear(catalog),
       progress: progress,
-      totemLimit: totemLimit,
       totals: FarmTotals.fromJson(totals),
       storyDone: storyDone,
       storySkipped: storySkipped,

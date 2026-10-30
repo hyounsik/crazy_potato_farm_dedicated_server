@@ -41,6 +41,7 @@ export 'src/potatoes/potato_effects.dart';
 export 'src/raid/homecoming.dart';
 export 'src/raid/raid_bodies.dart';
 export 'src/raid/raid_command.dart';
+export 'src/raid/loot_levels.dart';
 export 'src/raid/raid_member.dart';
 export 'src/raid/raid_simulation.dart';
 export 'src/potatoes/seed.dart';

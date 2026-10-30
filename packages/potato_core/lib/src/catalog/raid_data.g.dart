@@ -946,6 +946,8 @@ _ZoneData _$ZoneDataFromJson(
   final val = _ZoneData(
     id: $checkedConvert('id', (v) => v as String),
     score: $checkedConvert('score', (v) => (v as num).toInt()),
+    levelMin: $checkedConvert('level_min', (v) => (v as num?)?.toInt()),
+    levelMax: $checkedConvert('level_max', (v) => (v as num?)?.toInt()),
     name: $checkedConvert(
       'name',
       (v) => _$JsonConverterFromJson<Object, LocalizedText>(
@@ -982,11 +984,13 @@ _ZoneData _$ZoneDataFromJson(
     look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
   );
   return val;
-});
+}, fieldKeyMap: const {'levelMin': 'level_min', 'levelMax': 'level_max'});
 
 Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'id': instance.id,
   'score': instance.score,
+  'level_min': instance.levelMin,
+  'level_max': instance.levelMax,
   'name': _$JsonConverterToJson<Object, LocalizedText>(
     instance.name,
     const LocalizedTextConverter().toJson,

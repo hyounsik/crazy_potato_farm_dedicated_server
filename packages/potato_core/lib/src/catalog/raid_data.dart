@@ -447,9 +447,14 @@ abstract class ZoneData with _$ZoneData {
   const factory ZoneData({
     required String id,
 
-    /// The region score: the level of the seeds and gear found here, and
-    /// how strong enemies and loot are (`rules.zone_scaling`).
+    /// The region score: how strong enemies and loot are
+    /// (`rules.zone_scaling`).
     required int score,
+
+    /// The levels seeds and gear found here may have, both ends included
+    /// (2026-10-30, 사용자); the score when left out. → [LootLevels]
+    int? levelMin,
+    int? levelMax,
 
     /// The region's name, shown with safe or danger zone. Null for test
     /// zones, which the app names itself.

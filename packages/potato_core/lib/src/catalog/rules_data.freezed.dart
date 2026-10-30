@@ -1876,8 +1876,9 @@ as int,
 mixin _$GuardRulesData {
 
 /// Game time to walk one tile.
- int get walkMillisPerTile;/// How much faster a guard clears pests for each of its levels, in
-/// thousandths over 1, compounding (2026-10-30, 사용자: like attack).
+ int get walkMillisPerTile;/// How much faster a guard clears pests, and how much more a harvesting
+/// one brings in, for each of its levels, in thousandths over 1,
+/// compounding (2026-10-30, 사용자: like attack).
  int get levelPermille;
 /// Create a copy of GuardRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -2083,8 +2084,9 @@ class _GuardRulesData implements GuardRulesData {
 
 /// Game time to walk one tile.
 @override final  int walkMillisPerTile;
-/// How much faster a guard clears pests for each of its levels, in
-/// thousandths over 1, compounding (2026-10-30, 사용자: like attack).
+/// How much faster a guard clears pests, and how much more a harvesting
+/// one brings in, for each of its levels, in thousandths over 1,
+/// compounding (2026-10-30, 사용자: like attack).
 @override@JsonKey() final  int levelPermille;
 
 /// Create a copy of GuardRulesData

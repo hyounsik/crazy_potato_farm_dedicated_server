@@ -109,8 +109,8 @@ final class FarmSimulation {
   void _settleBuildings() {
     final size = _rules.farm.size;
     for (final building in _buildings.values) {
-      final snug = building.data.snug;
-      if (canPlace(building.rect, ignoring: building.id, snug: snug)) {
+      final data = building.data;
+      if (canPlace(building.rect, ignoring: building.id, building: data)) {
         continue;
       }
       final from = building.origin;
@@ -125,7 +125,7 @@ final class FarmSimulation {
             width: building.data.width,
             height: building.data.height,
           );
-          if (!canPlace(rect, ignoring: building.id, snug: snug)) continue;
+          if (!canPlace(rect, ignoring: building.id, building: data)) continue;
           best = TilePos(x, y);
           bestDistance = distance;
         }
@@ -433,20 +433,23 @@ final class FarmSimulation {
 
   /// Baby potatoes the grown food potatoes in the fields make in an hour at
   /// their rates now (2026-10-27, for the top bar).
-  double get foodPerHour {
+  double get foodPerHour =>
+      _fields.values.fold(0.0, (sum, field) => sum + foodPerHourOf(field));
+
+  /// Baby potatoes [field]'s grown potatoes make an hour now, with what
+  /// reaches each of them.
+  double foodPerHourOf(FarmField field) {
     var total = 0.0;
-    for (final field in _fields.values) {
-      for (final potato in field._potatoes.values) {
-        final data = catalog.potatoType(potato.type);
-        final production = data.production;
-        if (production == null || !potato.isGrown(data)) continue;
-        final amount = production.amount[potato.grade] ?? 0;
-        total +=
-            amount *
-            _work(potato, field).rates.foodYield *
-            3600 /
-            production.everySeconds;
-      }
+    for (final potato in field._potatoes.values) {
+      final data = catalog.potatoType(potato.type);
+      final production = data.production;
+      if (production == null || !potato.isGrown(data)) continue;
+      final amount = production.amount[potato.grade] ?? 0;
+      total +=
+          amount *
+          _work(potato, field).rates.foodYield *
+          3600 /
+          production.everySeconds;
     }
     return total;
   }
@@ -564,40 +567,47 @@ final class FarmSimulation {
     return TilePos((left + right) ~/ 2, row.first.bottom - 1);
   }
 
-  /// Whether a building could stand on [rect]: on open land, off the
-  /// [entrance], with one free tile (corners included) between it and every
-  /// field and building. Buildings of one [snug] group (see
-  /// [BuildingSnug.snug]) may stand right next to each other, though not on
-  /// each other.
+  /// Whether a building of kind [building] (null for a field) could stand
+  /// on [rect]: on open land, off the [entrance], with one free tile
+  /// (corners included) between it and every field and building.
+  /// Buildings of one snug group (see [BuildingSnug.snug]) may stand right
+  /// next to each other, and a 1x1 building ([BuildingSnug.hugs]) right
+  /// next to any building, though off the tile in front of either's door;
+  /// none on each other.
   /// Its bottom side may not lie against the fence (2026-10-29, 사용자;
   /// its sides and top may): the row below holds its door ([doorBelow]),
   /// where its path starts.
   /// [ignoring] is a building or field to leave out, e.g. one being moved
   /// (ids are shared, so one id names either).
-  bool canPlace(TileRect rect, {int? ignoring, String? snug}) {
+  bool canPlace(TileRect rect, {int? ignoring, BuildingData? building}) {
     if (!rect.tiles.every(isOpen)) return false;
     if (rect.contains(entrance)) return false;
     for (var x = rect.left; x < rect.left + rect.width; x++) {
       if (!isOpen(TilePos(x, rect.bottom))) return false;
     }
-    final others = [
-      for (final field in _fields.values)
-        if (field.id != ignoring) (rect: field.rect, snug: null),
-      for (final building in _buildings.values)
-        if (building.id != ignoring)
-          (rect: building.rect, snug: building.data.snug),
-    ];
-    for (final (rect: other, snug: otherSnug) in others) {
-      if (snug != null && snug == otherSnug) {
-        if (rect.overlaps(other)) return false;
-        continue;
-      }
-      final margin = TileRect(
+    final snug = building?.snug;
+    final hugs = building?.hugs ?? false;
+    bool apart(TileRect other) => !rect.overlaps(
+      TileRect(
         origin: other.origin - const TilePos(1, 1),
         width: other.width + 2,
         height: other.height + 2,
-      );
-      if (rect.overlaps(margin)) return false;
+      ),
+    );
+    for (final field in _fields.values) {
+      if (field.id != ignoring && !apart(field.rect)) return false;
+    }
+    for (final other in _buildings.values) {
+      if (other.id == ignoring) continue;
+      if (rect.overlaps(other.rect)) return false;
+      if (snug != null && snug == other.data.snug) continue;
+      if (building != null && (hugs || other.data.hugs)) {
+        if (rect.contains(other.door) || other.rect.contains(doorBelow(rect))) {
+          return false;
+        }
+        continue;
+      }
+      if (!apart(other.rect)) return false;
     }
     return true;
   }
@@ -1271,7 +1281,7 @@ final class FarmSimulation {
       width: building.data.width,
       height: building.data.height,
     );
-    if (!canPlace(rect, ignoring: buildingId, snug: building.data.snug)) {
+    if (!canPlace(rect, ignoring: buildingId, building: building.data)) {
       return FarmRejection.blocked;
     }
     building.origin = origin;
@@ -1300,7 +1310,7 @@ final class FarmSimulation {
       return FarmRejection.totemLimit;
     }
     final building = FarmBuilding(id: _nextId, data: data, origin: origin);
-    if (!canPlace(building.rect, snug: data.snug)) {
+    if (!canPlace(building.rect, building: data)) {
       return FarmRejection.blocked;
     }
     final cost = data.levels.first.cost;
@@ -1625,7 +1635,7 @@ final class FarmSimulation {
       TilePos? spot;
       bool fits(TilePos origin) => canPlace(
         TileRect(origin: origin, width: data.width, height: data.height),
-        snug: data.snug,
+        building: data,
       );
       if (fits(start.origin)) {
         spot = start.origin;
@@ -2148,7 +2158,11 @@ final class FarmSimulation {
   int clearMillisOf(FarmField field) {
     final pest = field.pest;
     if (pest == null) return 0;
-    final seconds = switch (pest.kind) {
+    return _clearMillis(field, pest.kind);
+  }
+
+  int _clearMillis(FarmField field, PestKind kind) {
+    final seconds = switch (kind) {
       PestKind.bug => _rules.pests.bug.clearSeconds,
       PestKind.blight => _rules.pests.blight.clearSeconds,
     };
@@ -2159,6 +2173,82 @@ final class FarmSimulation {
               .round();
     return (seconds * 1000 * levelGrowth(_rules.pests.levelPermille, level))
         .round();
+  }
+
+  /// What reaches every potato in [field]: effects of the potatoes planted
+  /// there and of lit totems (2026-10-30, 사용자: shown on its sheet).
+  StatSums fieldEffects(FarmField field) => <String, StatSum>{}
+    ..addAll(field._sums(_effects))
+    ..addAll(_totemSums());
+
+  /// How the grown guards keep up with pests (2026-10-30, 사용자), an
+  /// estimate from the farm as it is now. Blight comes by its chance at
+  /// every check on each planted field. Bugs come to a field once it has
+  /// stored enough, at most once each quiet time after a clearing. Guards
+  /// work at their strength, level and clearing speed on the mix of pests
+  /// expected, not counting the walk.
+  PestBalance pestBalance() {
+    if (!isUnlocked(StoryUnlock.pests)) {
+      return const PestBalance(appearing: 0, clearing: 0);
+    }
+    final rules = _rules.pests;
+    // Expected pests an hour, and the guard work they take, by kind.
+    final count = {for (final kind in PestKind.values) kind: 0.0};
+    final work = {for (final kind in PestKind.values) kind: 0.0};
+    void add(PestKind kind, double perHour, FarmField field) {
+      count[kind] = count[kind]! + perHour;
+      work[kind] = work[kind]! + perHour * _clearMillis(field, kind) / 1000;
+    }
+
+    for (final field in _fields.values) {
+      if (field._potatoes.isEmpty) continue;
+      final chance = fieldEffects(field)
+          .apply(FarmStat.blightChance, rules.blight.chance)
+          .clamp(0.0, 1.0);
+      add(PestKind.blight, chance * 3600 / rules.checkEverySeconds, field);
+      final food = foodPerHourOf(field);
+      if (food > 0) {
+        final fillHours = rules.bug.storedPerBug / food;
+        final hours = math.max(rules.bug.quietSeconds / 3600, fillHours);
+        add(PestKind.bug, 1 / hours, field);
+      }
+    }
+    final appearing = count.values.fold(0.0, (a, b) => a + b);
+
+    // Without pests to go by, an even mix at level 0.
+    final mix = appearing > 0
+        ? work
+        : {
+            PestKind.bug: rules.bug.clearSeconds.toDouble(),
+            PestKind.blight: rules.blight.clearSeconds.toDouble(),
+          };
+    final mixCount = appearing > 0
+        ? appearing
+        : PestKind.values.length.toDouble();
+    final data = catalog.potatoType(PotatoType.combat);
+    var clearing = 0.0;
+    for (final guard in _guards.values) {
+      if (!guard.potato.isGrown(data)) continue;
+      final base =
+          3600 *
+          _strengthPercent(guard.potato) /
+          100 *
+          levelGrowth(_rules.potatoes.guards.levelPermille, guard.potato.level);
+      final sums = _work(guard.potato).sums;
+      // Hours of this guard's time per pest of the mix.
+      var hoursPerPest = 0.0;
+      for (final kind in PestKind.values) {
+        final speed = switch (kind) {
+          PestKind.bug => FarmStat.bugClearSpeed,
+          PestKind.blight => FarmStat.blightClearSpeed,
+        };
+        final perHour = sums.apply(speed, base);
+        if (perHour <= 0) continue;
+        hoursPerPest += mix[kind]! / mixCount / perHour;
+      }
+      if (hoursPerPest > 0) clearing += 1 / hoursPerPest;
+    }
+    return PestBalance(appearing: appearing, clearing: clearing);
   }
 
   /// Removes a field's pest. Clearing it gives nothing but the field back

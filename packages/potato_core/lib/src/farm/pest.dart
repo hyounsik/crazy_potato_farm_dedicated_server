@@ -22,3 +22,20 @@ final class Pest {
   /// Time toward the next bite (bugs only).
   int biteMillis;
 }
+
+/// How the farm's grown combat potatoes keep up with pests, in pests an
+/// hour (2026-10-30, 사용자: the farm's pest control on the status bar).
+/// Both are estimates from what the farm is like now.
+final class PestBalance {
+  const PestBalance({required this.appearing, required this.clearing});
+
+  /// Pests expected to appear an hour.
+  final double appearing;
+
+  /// Pests the guards could clear an hour, walking aside.
+  final double clearing;
+
+  /// Above 0 when guards keep up with more than appears, below when pests
+  /// pile up.
+  double get margin => clearing - appearing;
+}

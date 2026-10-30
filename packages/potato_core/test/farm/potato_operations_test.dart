@@ -125,7 +125,12 @@ void main() {
       expect(at(11, 9), FarmRejection.blocked, reason: 'next to the field');
       expect(at(11, 8), FarmRejection.blocked, reason: 'corner to corner');
       expect(at(10, 9), isNull, reason: 'one tile between');
-      expect(at(9, 10), FarmRejection.blocked, reason: 'corner to statue');
+      expect(
+        at(10, 10),
+        FarmRejection.blocked,
+        reason: "in front of the statue's door",
+      );
+      expect(at(9, 9), isNull, reason: '1x1 beside 1x1 (2026-10-30)');
       expect(at(7, 8), FarmRejection.blocked, reason: 'outside open land');
       expect(at(15, 14), isNull, reason: 'the open edge needs no gap');
       expect(at(13, 15), FarmRejection.blocked, reason: 'bottom on the fence');
@@ -353,6 +358,43 @@ void main() {
       // Growing, so life only moves from the blight: double speed.
       expect(potato.livedMillis - lived, 10 * 1000);
       expect(farm.totals.lifeLostToBlightMillis, potato.livedMillis);
+    });
+
+    test('pest balance: blight expected from planted fields against what '
+        'grown guards clear an hour (2026-10-30)', () {
+      expect(farm.pestBalance().appearing, 0, reason: 'nothing planted');
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      // Certain blight at every check.
+      final perHour = 3600 / checkSteps();
+      var balance = farm.pestBalance();
+      expect(balance.appearing, perHour);
+      expect(balance.clearing, 0, reason: 'no guards');
+      expect(balance.margin, -perHour);
+
+      growGuard(build('training_ground', const TilePos(8, 8)));
+      balance = farm.pestBalance();
+      // A level 0 guard at full strength on level 0 blight (the potato,
+      // grown by now, adds a sliver of bugs to the mix).
+      final clears = 3600 / catalog.rules.pests.blight.clearSeconds;
+      expect(balance.clearing, closeTo(clears, 1e-3));
+      expect(balance.margin, balance.clearing - balance.appearing);
+    });
+
+    test("a field's food an hour counts its grown potatoes only", () {
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+      final field = farm.field(1)!;
+      expect(farm.foodPerHourOf(field), 0, reason: 'still growing');
+      final data = catalog.potatoType(PotatoType.food);
+      farm.runSteps(data.growSeconds);
+      final production = data.production!;
+      expect(
+        farm.foodPerHourOf(field),
+        closeTo(
+          production.amount[Grade.normal]! * 3600 / production.everySeconds,
+          1e-9,
+        ),
+      );
+      expect(farm.fieldEffects(field), isEmpty);
     });
 
     test('blight goes once no potato is left (2026-10-30)', () {

@@ -113,7 +113,7 @@ void main() {
       putUp('totem_growth', const TilePos(9, 8));
       putUp('totem_growth', const TilePos(10, 8));
       Object? fourth() => farm.apply(
-        FarmCommand.build(kind: 'totem_growth', origin: const TilePos(9, 9)),
+        FarmCommand.build(kind: 'totem_growth', origin: const TilePos(8, 10)),
       );
       expect(fourth(), FarmRejection.totemLimit);
       final spot =
@@ -137,55 +137,99 @@ void main() {
       expect(save.containsKey('totem_limit'), isFalse);
     });
 
-    test('totems may stand right next to each other, not on one another '
-        'nor next to anything else (2026-10-27)', () {
-      putUp('totem_growth', const TilePos(8, 8));
-      putUp('totem_harvest', const TilePos(9, 8));
-      final building = farm.buildings.last;
-      expect(
-        farm.canPlace(building.rect, snug: 'totem'),
-        isFalse,
-        reason: 'not on one',
+    test('1x1 buildings may touch any building on their sides and top, '
+        'never on the tile in front of a door (2026-10-30)', () {
+      const one = TilePos(10, 8);
+      putUp('totem_growth', one);
+      final totem = catalog.buildings['totem_growth']!;
+      final house = catalog.buildings['house']!;
+      final field = catalog.buildings['field_office']!;
+      bool fits(TilePos origin, BuildingData data) => farm.canPlace(
+        TileRect(origin: origin, width: data.width, height: data.height),
+        building: data,
       );
+
+      expect(totem.hugs, isTrue);
+      expect(catalog.buildings['potato_cellar']!.hugs, isTrue);
+      expect(catalog.buildings['statue']!.hugs, isTrue);
+      expect(house.hugs, isFalse);
+      expect(fits(one, totem), isFalse, reason: 'not on one');
+      final statue = catalog.buildings['statue']!;
+      expect(fits(const TilePos(9, 8), statue), isTrue, reason: 'beside');
+      expect(fits(const TilePos(10, 9), statue), isFalse, reason: 'its door');
       expect(
-        farm.canPlace(
-          const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
-          snug: 'totem',
-        ),
+        fits(const TilePos(10, 9), totem),
         isTrue,
-        reason: 'corner to corner with a totem',
+        reason: 'totems touch on every side (2026-10-30)',
+      );
+      expect(
+        fits(const TilePos(9, 9), statue),
+        isTrue,
+        reason: 'corner to corner, off the door',
+      );
+      expect(
+        fits(const TilePos(8, 8), field),
+        isTrue,
+        reason: 'a bigger building may stand beside a 1x1 one',
+      );
+      expect(
+        fits(const TilePos(9, 9), field),
+        isFalse,
+        reason: 'nor over its door',
       );
       expect(
         farm.canPlace(
-          const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
+          const TileRect(origin: TilePos(9, 8), width: 1, height: 1),
         ),
         isFalse,
-        reason: 'anything else keeps its distance',
+        reason: 'fields keep their distance',
       );
-      final field = farm.fields.first.rect;
+      final fieldRect = farm.fields.first.rect;
       expect(
-        farm.canPlace(
-          TileRect(
-            origin: field.origin - const TilePos(1, 1),
-            width: 1,
-            height: 1,
-          ),
-          snug: 'totem',
-        ),
+        fits(fieldRect.origin - const TilePos(1, 1), totem),
         isFalse,
-        reason: 'a totem keeps its distance from a field',
+        reason: 'a 1x1 building keeps its distance from a field',
       );
     });
 
-    test('graveyards may stand next to each other too, but not next to a '
-        'totem (2026-10-30)', () {
-      expect(catalog.buildings['graveyard']!.snug, 'graveyard');
+    test('a 1x1 building may stand on top of a wider one, off its door '
+        '(2026-10-30)', () {
+      putUp('field_office', const TilePos(8, 8));
+      final totem = catalog.buildings['totem_growth']!;
+      // The office's door is below its left tile (8, 10).
+      expect(
+        farm.canPlace(
+          const TileRect(origin: TilePos(9, 10), width: 1, height: 1),
+          building: totem,
+        ),
+        isTrue,
+      );
+      expect(
+        farm.canPlace(
+          const TileRect(origin: TilePos(8, 10), width: 1, height: 1),
+          building: totem,
+        ),
+        isFalse,
+      );
+    });
+
+    test('graveyards may stand next to each other, even in front of a '
+        'door (2026-10-30)', () {
+      final graveyard = catalog.buildings['graveyard']!;
+      expect(graveyard.snug, 'graveyard');
       expect(catalog.buildings['totem_growth']!.snug, 'totem');
       expect(catalog.buildings['house']!.snug, isNull);
-      putUp('totem_growth', const TilePos(8, 8));
-      const beside = TileRect(origin: TilePos(9, 8), width: 2, height: 2);
-      expect(farm.canPlace(beside, snug: 'totem'), isTrue);
-      expect(farm.canPlace(beside, snug: 'graveyard'), isFalse);
+      putUp('graveyard', const TilePos(8, 8));
+      final below = TileRect(
+        origin: TilePos(8, 8 + graveyard.height),
+        width: graveyard.width,
+        height: graveyard.height,
+      );
+      expect(farm.canPlace(below, building: graveyard), isTrue);
+      expect(
+        farm.canPlace(below, building: catalog.buildings['totem_growth']),
+        isFalse,
+      );
     });
 
     test('a lit growth totem speeds growth, then goes out and waits', () {

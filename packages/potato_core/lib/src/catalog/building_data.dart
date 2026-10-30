@@ -72,14 +72,21 @@ abstract class BuildingLevelData with _$BuildingLevelData {
 
 /// Which buildings may stand right next to each other.
 extension BuildingSnug on BuildingData {
-  /// Kinds sharing a group may touch (though not overlap): totems
-  /// (2026-10-27, 사용자) and graveyards (2026-10-30, 사용자). Null keeps
-  /// the one free tile around it.
+  /// Kinds sharing a group may touch on every side, doors too (though not
+  /// overlap): totems (2026-10-27, 사용자, again on 2026-10-30) and
+  /// graveyards (2026-10-30, 사용자). Null keeps the one free tile around
+  /// it, or the [hugs] rule.
   String? get snug => totem != null
       ? 'totem'
       : levels.any((level) => level.graves > 0)
       ? 'graveyard'
       : null;
+
+  /// 1x1 buildings (the potato cellar, the statue, totems) may stand right
+  /// next to any building on their left, right and top; only the tile in
+  /// front of either's door stays free (2026-10-30, 사용자: to be tried
+  /// out).
+  bool get hugs => width == 1 && height == 1;
 }
 
 /// A totem's support while lit: farm stats raised (or lowered) by

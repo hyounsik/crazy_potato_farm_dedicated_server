@@ -17,6 +17,7 @@ final class RaidMemberStart {
     this.companions = const [],
     this.bag = const [],
     this.seedLevels = const {},
+    this.storedGearLevels = const {},
   });
 
   factory RaidMemberStart.fromJson(
@@ -42,6 +43,12 @@ final class RaidMemberStart {
           in (json['seed_levels'] as Map<String, dynamic>? ?? const {}).entries)
         PotatoType.values.byName(key): value as int,
     },
+    storedGearLevels: {
+      for (final MapEntry(:key, :value)
+          in (json['stored_gear_levels'] as Map<String, dynamic>? ?? const {})
+              .entries)
+        GearKind.values.byName(key): value as int,
+    },
   );
 
   final String name;
@@ -59,6 +66,11 @@ final class RaidMemberStart {
   /// in the run grow from it (2026-10-30, 사용자). → [LootLevels]
   final Map<PotatoType, int> seedLevels;
 
+  /// The best level of each gear kind the member keeps in their farm's
+  /// storage and could wear: gear found may grow from it, as
+  /// `GearRulesData.lootLevelMode` says (2026-10-30, 사용자). → [LootLevels]
+  final Map<GearKind, int> storedGearLevels;
+
   Map<String, dynamic> toJson() => {
     if (name.isNotEmpty) 'name': name,
     'food': food,
@@ -69,6 +81,11 @@ final class RaidMemberStart {
     if (seedLevels.isNotEmpty)
       'seed_levels': {
         for (final MapEntry(:key, :value) in seedLevels.entries)
+          key.name: value,
+      },
+    if (storedGearLevels.isNotEmpty)
+      'stored_gear_levels': {
+        for (final MapEntry(:key, :value) in storedGearLevels.entries)
           key.name: value,
       },
   };

@@ -354,6 +354,21 @@ abstract class WorkbenchRulesData with _$WorkbenchRulesData {
   );
 }
 
+/// What gear found in a run grows from (2026-10-30, 사용자). "Owned" is
+/// every piece the member could wear now, not broken and within their
+/// progress: in the farm's storage, in the bag and worn.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum LootLevelMode {
+  /// A: what the party wears of the found kind.
+  worn,
+
+  /// B: the average of the best owned piece of each kind, for every kind.
+  ownedAverage,
+
+  /// C: the best owned piece of the found kind.
+  ownedBest,
+}
+
 /// Equipment. Values are placeholders until the balance phase.
 @freezed
 abstract class GearRulesData with _$GearRulesData {
@@ -407,6 +422,10 @@ abstract class GearRulesData with _$GearRulesData {
 
     /// Gear can be worn up to the farm's progress plus this.
     required int useMargin,
+
+    /// How the level of gear found in a run is set (2026-10-30, 사용자:
+    /// kept apart to try each). → `LootLevels`
+    @Default(LootLevelMode.worn) LootLevelMode lootLevelMode,
 
     /// What a new farm wears.
     required Equipped start,

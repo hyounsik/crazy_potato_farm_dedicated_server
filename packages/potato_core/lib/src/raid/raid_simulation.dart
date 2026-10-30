@@ -203,6 +203,7 @@ final class RaidSimulation {
     required this._nextId,
     required this._tick,
     this.seedLevels = const [],
+    this.storedGearLevels = const [],
     List<RaidCloud>? clouds,
     this._revealed = false,
     this._clonesIn = 0,
@@ -223,6 +224,7 @@ final class RaidSimulation {
     List<CompanionStart> companions = const [],
     List<ItemStack> bag = const [],
     Map<PotatoType, int> seedLevels = const {},
+    Map<GearKind, int> storedGearLevels = const {},
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
@@ -236,6 +238,7 @@ final class RaidSimulation {
         companions: companions,
         bag: bag,
         seedLevels: seedLevels,
+        storedGearLevels: storedGearLevels,
       ),
     ],
   );
@@ -345,6 +348,7 @@ final class RaidSimulation {
       partySize: members.length,
     );
     final seedLevels = [for (final m in members) m.seedLevels];
+    final storedGearLevels = [for (final m in members) m.storedGearLevels];
     final piles = _placeSpots(
       catalog,
       zoneData,
@@ -353,11 +357,7 @@ final class RaidSimulation {
       random,
       () => nextId++,
       party.apply(RaidStat.lootRareChance, 1),
-      LootLevels(
-        zoneData,
-        worn: [for (final m in members) m.equipped],
-        seedLevels: seedLevels,
-      ),
+      _levelsFor(catalog, zoneData, team, seedLevels, storedGearLevels),
       partySize: members.length,
     );
     final exits = _openExits(zoneData, map, random, () => nextId++);
@@ -377,6 +377,7 @@ final class RaidSimulation {
       nextId: nextId,
       tick: 0,
       seedLevels: seedLevels,
+      storedGearLevels: storedGearLevels,
     );
     run._nextCloneAt = zoneData.danger?.cloneEverySeconds ?? 0;
     return run;
@@ -469,12 +470,20 @@ final class RaidSimulation {
               PotatoType.values.byName(key): value as int,
           },
       ],
+      storedGearLevels: [
+        for (final levels in json['stored_gear_levels'] as List<Object?>)
+          {
+            for (final MapEntry(:key, :value)
+                in (levels! as Map<String, dynamic>).entries)
+              GearKind.values.byName(key): value as int,
+          },
+      ],
     );
   }
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 11;
+  static const int formatVersion = 12;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -485,13 +494,41 @@ final class RaidSimulation {
   /// grow from it.
   final List<Map<PotatoType, int>> seedLevels;
 
-  /// Levels for what is found now: gear follows what the party wears at
-  /// the moment.
-  LootLevels get _lootLevels => LootLevels(
-    zone,
-    worn: [for (final m in members) m.player.equipped],
-    seedLevels: seedLevels,
-  );
+  /// Each member's best gear level per kind in their farm's storage, as
+  /// they set out.
+  final List<Map<GearKind, int>> storedGearLevels;
+
+  /// Levels for what is found now: gear follows what the party wears and
+  /// carries at the moment.
+  LootLevels get _lootLevels =>
+      _levelsFor(catalog, zone, members, seedLevels, storedGearLevels);
+
+  static LootLevels _levelsFor(
+    Catalog catalog,
+    ZoneData zone,
+    List<RaidMember> members,
+    List<Map<PotatoType, int>> seedLevels,
+    List<Map<GearKind, int>> storedGearLevels,
+  ) {
+    final stats = GearStats(catalog);
+    return LootLevels(
+      zone,
+      mode: catalog.rules.gear.lootLevelMode,
+      worn: [for (final m in members) m.player.equipped],
+      owned: [
+        for (final (i, m) in members.indexed)
+          LootLevels.ownedLevels(
+            stats,
+            [...m.player.equipped.all, for (final s in m.bag.slots) ?s?.gear],
+            m.progress,
+            stored: i < storedGearLevels.length
+                ? storedGearLevels[i]
+                : const {},
+          ),
+      ],
+      seedLevels: seedLevels,
+    );
+  }
 
   /// Everyone in the run, in the order they went in. Party members stay
   /// here after they are out, with how it ended.
@@ -2946,6 +2983,10 @@ final class RaidSimulation {
     'revealed': _revealed,
     'seed_levels': [
       for (final levels in seedLevels)
+        {for (final MapEntry(:key, :value) in levels.entries) key.name: value},
+    ],
+    'stored_gear_levels': [
+      for (final levels in storedGearLevels)
         {for (final MapEntry(:key, :value) in levels.entries) key.name: value},
     ],
   };

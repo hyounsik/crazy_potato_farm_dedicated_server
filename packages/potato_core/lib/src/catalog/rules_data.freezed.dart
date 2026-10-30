@@ -3986,7 +3986,9 @@ mixin _$GearRulesData {
 /// family (2026-10-30, 사용자: a quarter, still above bare hands).
  double get brokenDamage;/// Chance each worn piece is lost when a danger run fails.
  double get lossChance;/// Gear can be worn up to the farm's progress plus this.
- int get useMargin;/// What a new farm wears.
+ int get useMargin;/// How the level of gear found in a run is set (2026-10-30, 사용자:
+/// kept apart to try each). → `LootLevels`
+ LootLevelMode get lootLevelMode;/// What a new farm wears.
  Equipped get start;
 /// Create a copy of GearRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -4001,20 +4003,20 @@ $GearRulesDataCopyWith<GearRulesData> get copyWith => _$GearRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as GearRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is GearRulesData&&(identical(other.bareWeapon, _this.bareWeapon) || other.bareWeapon == _this.bareWeapon)&&(identical(other.bareBagSlots, _this.bareBagSlots) || other.bareBagSlots == _this.bareBagSlots)&&(identical(other.bareBeltSlots, _this.bareBeltSlots) || other.bareBeltSlots == _this.bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _this.gradeDamage)&&(identical(other.levelDamagePermille, _this.levelDamagePermille) || other.levelDamagePermille == _this.levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _this.bagSlots)&&(identical(other.bagEnhanceSlots, _this.bagEnhanceSlots) || other.bagEnhanceSlots == _this.bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _this.beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _this.beltPercent)&&(identical(other.beltPercentPerTenLevels, _this.beltPercentPerTenLevels) || other.beltPercentPerTenLevels == _this.beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, _this.beltEnhancePercent) || other.beltEnhancePercent == _this.beltEnhancePercent)&&(identical(other.bagHpPercentPerTenLevels, _this.bagHpPercentPerTenLevels) || other.bagHpPercentPerTenLevels == _this.bagHpPercentPerTenLevels)&&const DeepCollectionEquality().equals(other.disassemble, _this.disassemble)&&(identical(other.enhanceRefundPercent, _this.enhanceRefundPercent) || other.enhanceRefundPercent == _this.enhanceRefundPercent)&&(identical(other.durability, _this.durability) || other.durability == _this.durability)&&(identical(other.wearPerMinute, _this.wearPerMinute) || other.wearPerMinute == _this.wearPerMinute)&&(identical(other.wearPerRunMax, _this.wearPerRunMax) || other.wearPerRunMax == _this.wearPerRunMax)&&(identical(other.brokenDamage, _this.brokenDamage) || other.brokenDamage == _this.brokenDamage)&&(identical(other.lossChance, _this.lossChance) || other.lossChance == _this.lossChance)&&(identical(other.useMargin, _this.useMargin) || other.useMargin == _this.useMargin)&&(identical(other.start, _this.start) || other.start == _this.start));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GearRulesData&&(identical(other.bareWeapon, _this.bareWeapon) || other.bareWeapon == _this.bareWeapon)&&(identical(other.bareBagSlots, _this.bareBagSlots) || other.bareBagSlots == _this.bareBagSlots)&&(identical(other.bareBeltSlots, _this.bareBeltSlots) || other.bareBeltSlots == _this.bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _this.gradeDamage)&&(identical(other.levelDamagePermille, _this.levelDamagePermille) || other.levelDamagePermille == _this.levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _this.bagSlots)&&(identical(other.bagEnhanceSlots, _this.bagEnhanceSlots) || other.bagEnhanceSlots == _this.bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _this.beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _this.beltPercent)&&(identical(other.beltPercentPerTenLevels, _this.beltPercentPerTenLevels) || other.beltPercentPerTenLevels == _this.beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, _this.beltEnhancePercent) || other.beltEnhancePercent == _this.beltEnhancePercent)&&(identical(other.bagHpPercentPerTenLevels, _this.bagHpPercentPerTenLevels) || other.bagHpPercentPerTenLevels == _this.bagHpPercentPerTenLevels)&&const DeepCollectionEquality().equals(other.disassemble, _this.disassemble)&&(identical(other.enhanceRefundPercent, _this.enhanceRefundPercent) || other.enhanceRefundPercent == _this.enhanceRefundPercent)&&(identical(other.durability, _this.durability) || other.durability == _this.durability)&&(identical(other.wearPerMinute, _this.wearPerMinute) || other.wearPerMinute == _this.wearPerMinute)&&(identical(other.wearPerRunMax, _this.wearPerRunMax) || other.wearPerRunMax == _this.wearPerRunMax)&&(identical(other.brokenDamage, _this.brokenDamage) || other.brokenDamage == _this.brokenDamage)&&(identical(other.lossChance, _this.lossChance) || other.lossChance == _this.lossChance)&&(identical(other.useMargin, _this.useMargin) || other.useMargin == _this.useMargin)&&(identical(other.lootLevelMode, _this.lootLevelMode) || other.lootLevelMode == _this.lootLevelMode)&&(identical(other.start, _this.start) || other.start == _this.start));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as GearRulesData;
-  return Object.hashAll([runtimeType,_this.bareWeapon,_this.bareBagSlots,_this.bareBeltSlots,const DeepCollectionEquality().hash(_this.gradeDamage),_this.levelDamagePermille,const DeepCollectionEquality().hash(_this.bagSlots),_this.bagEnhanceSlots,const DeepCollectionEquality().hash(_this.beltSlots),const DeepCollectionEquality().hash(_this.beltPercent),_this.beltPercentPerTenLevels,_this.beltEnhancePercent,_this.bagHpPercentPerTenLevels,const DeepCollectionEquality().hash(_this.disassemble),_this.enhanceRefundPercent,_this.durability,_this.wearPerMinute,_this.wearPerRunMax,_this.brokenDamage,_this.lossChance,_this.useMargin,_this.start]);
+  return Object.hashAll([runtimeType,_this.bareWeapon,_this.bareBagSlots,_this.bareBeltSlots,const DeepCollectionEquality().hash(_this.gradeDamage),_this.levelDamagePermille,const DeepCollectionEquality().hash(_this.bagSlots),_this.bagEnhanceSlots,const DeepCollectionEquality().hash(_this.beltSlots),const DeepCollectionEquality().hash(_this.beltPercent),_this.beltPercentPerTenLevels,_this.beltEnhancePercent,_this.bagHpPercentPerTenLevels,const DeepCollectionEquality().hash(_this.disassemble),_this.enhanceRefundPercent,_this.durability,_this.wearPerMinute,_this.wearPerRunMax,_this.brokenDamage,_this.lossChance,_this.useMargin,_this.lootLevelMode,_this.start]);
 }
 
 @override
 String toString() {
   final _this = this as GearRulesData;
-  return 'GearRulesData(bareWeapon: ${_this.bareWeapon}, bareBagSlots: ${_this.bareBagSlots}, bareBeltSlots: ${_this.bareBeltSlots}, gradeDamage: ${_this.gradeDamage}, levelDamagePermille: ${_this.levelDamagePermille}, bagSlots: ${_this.bagSlots}, bagEnhanceSlots: ${_this.bagEnhanceSlots}, beltSlots: ${_this.beltSlots}, beltPercent: ${_this.beltPercent}, beltPercentPerTenLevels: ${_this.beltPercentPerTenLevels}, beltEnhancePercent: ${_this.beltEnhancePercent}, bagHpPercentPerTenLevels: ${_this.bagHpPercentPerTenLevels}, disassemble: ${_this.disassemble}, enhanceRefundPercent: ${_this.enhanceRefundPercent}, durability: ${_this.durability}, wearPerMinute: ${_this.wearPerMinute}, wearPerRunMax: ${_this.wearPerRunMax}, brokenDamage: ${_this.brokenDamage}, lossChance: ${_this.lossChance}, useMargin: ${_this.useMargin}, start: ${_this.start})';
+  return 'GearRulesData(bareWeapon: ${_this.bareWeapon}, bareBagSlots: ${_this.bareBagSlots}, bareBeltSlots: ${_this.bareBeltSlots}, gradeDamage: ${_this.gradeDamage}, levelDamagePermille: ${_this.levelDamagePermille}, bagSlots: ${_this.bagSlots}, bagEnhanceSlots: ${_this.bagEnhanceSlots}, beltSlots: ${_this.beltSlots}, beltPercent: ${_this.beltPercent}, beltPercentPerTenLevels: ${_this.beltPercentPerTenLevels}, beltEnhancePercent: ${_this.beltEnhancePercent}, bagHpPercentPerTenLevels: ${_this.bagHpPercentPerTenLevels}, disassemble: ${_this.disassemble}, enhanceRefundPercent: ${_this.enhanceRefundPercent}, durability: ${_this.durability}, wearPerMinute: ${_this.wearPerMinute}, wearPerRunMax: ${_this.wearPerRunMax}, brokenDamage: ${_this.brokenDamage}, lossChance: ${_this.lossChance}, useMargin: ${_this.useMargin}, lootLevelMode: ${_this.lootLevelMode}, start: ${_this.start})';
 }
 
 
@@ -4025,7 +4027,7 @@ abstract mixin class $GearRulesDataCopyWith<$Res>  {
   factory $GearRulesDataCopyWith(GearRulesData value, $Res Function(GearRulesData) _then) = _$GearRulesDataCopyWithImpl;
 @useResult
 $Res call({
- String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, double bagHpPercentPerTenLevels, Map<Grade, int> disassemble, int enhanceRefundPercent, int durability, double wearPerMinute, int wearPerRunMax, double brokenDamage, double lossChance, int useMargin, Equipped start
+ String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, double bagHpPercentPerTenLevels, Map<Grade, int> disassemble, int enhanceRefundPercent, int durability, double wearPerMinute, int wearPerRunMax, double brokenDamage, double lossChance, int useMargin, LootLevelMode lootLevelMode, Equipped start
 });
 
 
@@ -4042,7 +4044,7 @@ class _$GearRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of GearRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? bagHpPercentPerTenLevels = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? durability = null,Object? wearPerMinute = null,Object? wearPerRunMax = null,Object? brokenDamage = null,Object? lossChance = null,Object? useMargin = null,Object? start = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? bagHpPercentPerTenLevels = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? durability = null,Object? wearPerMinute = null,Object? wearPerRunMax = null,Object? brokenDamage = null,Object? lossChance = null,Object? useMargin = null,Object? lootLevelMode = null,Object? start = null,}) {
   return _then(GearRulesData(
 bareWeapon: null == bareWeapon ? _self.bareWeapon : bareWeapon // ignore: cast_nullable_to_non_nullable
 as String,bareBagSlots: null == bareBagSlots ? _self.bareBagSlots : bareBagSlots // ignore: cast_nullable_to_non_nullable
@@ -4064,7 +4066,8 @@ as double,wearPerRunMax: null == wearPerRunMax ? _self.wearPerRunMax : wearPerRu
 as int,brokenDamage: null == brokenDamage ? _self.brokenDamage : brokenDamage // ignore: cast_nullable_to_non_nullable
 as double,lossChance: null == lossChance ? _self.lossChance : lossChance // ignore: cast_nullable_to_non_nullable
 as double,useMargin: null == useMargin ? _self.useMargin : useMargin // ignore: cast_nullable_to_non_nullable
-as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as int,lootLevelMode: null == lootLevelMode ? _self.lootLevelMode : lootLevelMode // ignore: cast_nullable_to_non_nullable
+as LootLevelMode,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
 as Equipped,
   ));
 }
@@ -4159,10 +4162,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  Equipped start)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  LootLevelMode lootLevelMode,  Equipped start)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _GearRulesData() when $default != null:
-return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.start);case _:
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.lootLevelMode,_that.start);case _:
   return orElse();
 
 }
@@ -4180,10 +4183,10 @@ return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gr
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  Equipped start)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  LootLevelMode lootLevelMode,  Equipped start)  $default,) {final _that = this;
 switch (_that) {
 case _GearRulesData():
-return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.start);case _:
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.lootLevelMode,_that.start);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -4200,10 +4203,10 @@ return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gr
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  Equipped start)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String bareWeapon,  int bareBagSlots,  int bareBeltSlots,  Map<Grade, double> gradeDamage,  int levelDamagePermille,  Map<Grade, int> bagSlots,  int bagEnhanceSlots,  Map<Grade, int> beltSlots,  Map<Grade, double> beltPercent,  double beltPercentPerTenLevels,  double beltEnhancePercent,  double bagHpPercentPerTenLevels,  Map<Grade, int> disassemble,  int enhanceRefundPercent,  int durability,  double wearPerMinute,  int wearPerRunMax,  double brokenDamage,  double lossChance,  int useMargin,  LootLevelMode lootLevelMode,  Equipped start)?  $default,) {final _that = this;
 switch (_that) {
 case _GearRulesData() when $default != null:
-return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.start);case _:
+return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gradeDamage,_that.levelDamagePermille,_that.bagSlots,_that.bagEnhanceSlots,_that.beltSlots,_that.beltPercent,_that.beltPercentPerTenLevels,_that.beltEnhancePercent,_that.bagHpPercentPerTenLevels,_that.disassemble,_that.enhanceRefundPercent,_that.durability,_that.wearPerMinute,_that.wearPerRunMax,_that.brokenDamage,_that.lossChance,_that.useMargin,_that.lootLevelMode,_that.start);case _:
   return null;
 
 }
@@ -4215,7 +4218,7 @@ return $default(_that.bareWeapon,_that.bareBagSlots,_that.bareBeltSlots,_that.gr
 @JsonSerializable()
 
 class _GearRulesData implements GearRulesData {
-  const _GearRulesData({required this.bareWeapon, required this.bareBagSlots, required this.bareBeltSlots, required  Map<Grade, double> gradeDamage, required this.levelDamagePermille, required  Map<Grade, int> bagSlots, required this.bagEnhanceSlots, required  Map<Grade, int> beltSlots, required  Map<Grade, double> beltPercent, required this.beltPercentPerTenLevels, required this.beltEnhancePercent, this.bagHpPercentPerTenLevels = 0, required  Map<Grade, int> disassemble, required this.enhanceRefundPercent, this.durability = 100, this.wearPerMinute = 2, this.wearPerRunMax = 20, this.brokenDamage = 0.25, required this.lossChance, required this.useMargin, required this.start}): _gradeDamage = gradeDamage,_bagSlots = bagSlots,_beltSlots = beltSlots,_beltPercent = beltPercent,_disassemble = disassemble;
+  const _GearRulesData({required this.bareWeapon, required this.bareBagSlots, required this.bareBeltSlots, required  Map<Grade, double> gradeDamage, required this.levelDamagePermille, required  Map<Grade, int> bagSlots, required this.bagEnhanceSlots, required  Map<Grade, int> beltSlots, required  Map<Grade, double> beltPercent, required this.beltPercentPerTenLevels, required this.beltEnhancePercent, this.bagHpPercentPerTenLevels = 0, required  Map<Grade, int> disassemble, required this.enhanceRefundPercent, this.durability = 100, this.wearPerMinute = 2, this.wearPerRunMax = 20, this.brokenDamage = 0.25, required this.lossChance, required this.useMargin, this.lootLevelMode = LootLevelMode.worn, required this.start}): _gradeDamage = gradeDamage,_bagSlots = bagSlots,_beltSlots = beltSlots,_beltPercent = beltPercent,_disassemble = disassemble;
   factory _GearRulesData.fromJson(Map<String, dynamic> json) => _$GearRulesDataFromJson(json);
 
 /// Bare hands: the weapon used with none, the bag slots, and belt slots
@@ -4297,6 +4300,9 @@ class _GearRulesData implements GearRulesData {
 @override final  double lossChance;
 /// Gear can be worn up to the farm's progress plus this.
 @override final  int useMargin;
+/// How the level of gear found in a run is set (2026-10-30, 사용자:
+/// kept apart to try each). → `LootLevels`
+@override@JsonKey() final  LootLevelMode lootLevelMode;
 /// What a new farm wears.
 @override final  Equipped start;
 
@@ -4313,18 +4319,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GearRulesData&&(identical(other.bareWeapon, bareWeapon) || other.bareWeapon == bareWeapon)&&(identical(other.bareBagSlots, bareBagSlots) || other.bareBagSlots == bareBagSlots)&&(identical(other.bareBeltSlots, bareBeltSlots) || other.bareBeltSlots == bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _gradeDamage)&&(identical(other.levelDamagePermille, levelDamagePermille) || other.levelDamagePermille == levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _bagSlots)&&(identical(other.bagEnhanceSlots, bagEnhanceSlots) || other.bagEnhanceSlots == bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _beltPercent)&&(identical(other.beltPercentPerTenLevels, beltPercentPerTenLevels) || other.beltPercentPerTenLevels == beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, beltEnhancePercent) || other.beltEnhancePercent == beltEnhancePercent)&&(identical(other.bagHpPercentPerTenLevels, bagHpPercentPerTenLevels) || other.bagHpPercentPerTenLevels == bagHpPercentPerTenLevels)&&const DeepCollectionEquality().equals(other.disassemble, _disassemble)&&(identical(other.enhanceRefundPercent, enhanceRefundPercent) || other.enhanceRefundPercent == enhanceRefundPercent)&&(identical(other.durability, durability) || other.durability == durability)&&(identical(other.wearPerMinute, wearPerMinute) || other.wearPerMinute == wearPerMinute)&&(identical(other.wearPerRunMax, wearPerRunMax) || other.wearPerRunMax == wearPerRunMax)&&(identical(other.brokenDamage, brokenDamage) || other.brokenDamage == brokenDamage)&&(identical(other.lossChance, lossChance) || other.lossChance == lossChance)&&(identical(other.useMargin, useMargin) || other.useMargin == useMargin)&&(identical(other.start, start) || other.start == start));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GearRulesData&&(identical(other.bareWeapon, bareWeapon) || other.bareWeapon == bareWeapon)&&(identical(other.bareBagSlots, bareBagSlots) || other.bareBagSlots == bareBagSlots)&&(identical(other.bareBeltSlots, bareBeltSlots) || other.bareBeltSlots == bareBeltSlots)&&const DeepCollectionEquality().equals(other.gradeDamage, _gradeDamage)&&(identical(other.levelDamagePermille, levelDamagePermille) || other.levelDamagePermille == levelDamagePermille)&&const DeepCollectionEquality().equals(other.bagSlots, _bagSlots)&&(identical(other.bagEnhanceSlots, bagEnhanceSlots) || other.bagEnhanceSlots == bagEnhanceSlots)&&const DeepCollectionEquality().equals(other.beltSlots, _beltSlots)&&const DeepCollectionEquality().equals(other.beltPercent, _beltPercent)&&(identical(other.beltPercentPerTenLevels, beltPercentPerTenLevels) || other.beltPercentPerTenLevels == beltPercentPerTenLevels)&&(identical(other.beltEnhancePercent, beltEnhancePercent) || other.beltEnhancePercent == beltEnhancePercent)&&(identical(other.bagHpPercentPerTenLevels, bagHpPercentPerTenLevels) || other.bagHpPercentPerTenLevels == bagHpPercentPerTenLevels)&&const DeepCollectionEquality().equals(other.disassemble, _disassemble)&&(identical(other.enhanceRefundPercent, enhanceRefundPercent) || other.enhanceRefundPercent == enhanceRefundPercent)&&(identical(other.durability, durability) || other.durability == durability)&&(identical(other.wearPerMinute, wearPerMinute) || other.wearPerMinute == wearPerMinute)&&(identical(other.wearPerRunMax, wearPerRunMax) || other.wearPerRunMax == wearPerRunMax)&&(identical(other.brokenDamage, brokenDamage) || other.brokenDamage == brokenDamage)&&(identical(other.lossChance, lossChance) || other.lossChance == lossChance)&&(identical(other.useMargin, useMargin) || other.useMargin == useMargin)&&(identical(other.lootLevelMode, lootLevelMode) || other.lootLevelMode == lootLevelMode)&&(identical(other.start, start) || other.start == start));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hashAll([runtimeType,bareWeapon,bareBagSlots,bareBeltSlots,const DeepCollectionEquality().hash(_gradeDamage),levelDamagePermille,const DeepCollectionEquality().hash(_bagSlots),bagEnhanceSlots,const DeepCollectionEquality().hash(_beltSlots),const DeepCollectionEquality().hash(_beltPercent),beltPercentPerTenLevels,beltEnhancePercent,bagHpPercentPerTenLevels,const DeepCollectionEquality().hash(_disassemble),enhanceRefundPercent,durability,wearPerMinute,wearPerRunMax,brokenDamage,lossChance,useMargin,start]);
+    return Object.hashAll([runtimeType,bareWeapon,bareBagSlots,bareBeltSlots,const DeepCollectionEquality().hash(_gradeDamage),levelDamagePermille,const DeepCollectionEquality().hash(_bagSlots),bagEnhanceSlots,const DeepCollectionEquality().hash(_beltSlots),const DeepCollectionEquality().hash(_beltPercent),beltPercentPerTenLevels,beltEnhancePercent,bagHpPercentPerTenLevels,const DeepCollectionEquality().hash(_disassemble),enhanceRefundPercent,durability,wearPerMinute,wearPerRunMax,brokenDamage,lossChance,useMargin,lootLevelMode,start]);
 }
 
 @override
 String toString() {
-    return 'GearRulesData(bareWeapon: $bareWeapon, bareBagSlots: $bareBagSlots, bareBeltSlots: $bareBeltSlots, gradeDamage: $gradeDamage, levelDamagePermille: $levelDamagePermille, bagSlots: $bagSlots, bagEnhanceSlots: $bagEnhanceSlots, beltSlots: $beltSlots, beltPercent: $beltPercent, beltPercentPerTenLevels: $beltPercentPerTenLevels, beltEnhancePercent: $beltEnhancePercent, bagHpPercentPerTenLevels: $bagHpPercentPerTenLevels, disassemble: $disassemble, enhanceRefundPercent: $enhanceRefundPercent, durability: $durability, wearPerMinute: $wearPerMinute, wearPerRunMax: $wearPerRunMax, brokenDamage: $brokenDamage, lossChance: $lossChance, useMargin: $useMargin, start: $start)';
+    return 'GearRulesData(bareWeapon: $bareWeapon, bareBagSlots: $bareBagSlots, bareBeltSlots: $bareBeltSlots, gradeDamage: $gradeDamage, levelDamagePermille: $levelDamagePermille, bagSlots: $bagSlots, bagEnhanceSlots: $bagEnhanceSlots, beltSlots: $beltSlots, beltPercent: $beltPercent, beltPercentPerTenLevels: $beltPercentPerTenLevels, beltEnhancePercent: $beltEnhancePercent, bagHpPercentPerTenLevels: $bagHpPercentPerTenLevels, disassemble: $disassemble, enhanceRefundPercent: $enhanceRefundPercent, durability: $durability, wearPerMinute: $wearPerMinute, wearPerRunMax: $wearPerRunMax, brokenDamage: $brokenDamage, lossChance: $lossChance, useMargin: $useMargin, lootLevelMode: $lootLevelMode, start: $start)';
 }
 
 
@@ -4335,7 +4341,7 @@ abstract mixin class _$GearRulesDataCopyWith<$Res> implements $GearRulesDataCopy
   factory _$GearRulesDataCopyWith(_GearRulesData value, $Res Function(_GearRulesData) _then) = __$GearRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, double bagHpPercentPerTenLevels, Map<Grade, int> disassemble, int enhanceRefundPercent, int durability, double wearPerMinute, int wearPerRunMax, double brokenDamage, double lossChance, int useMargin, Equipped start
+ String bareWeapon, int bareBagSlots, int bareBeltSlots, Map<Grade, double> gradeDamage, int levelDamagePermille, Map<Grade, int> bagSlots, int bagEnhanceSlots, Map<Grade, int> beltSlots, Map<Grade, double> beltPercent, double beltPercentPerTenLevels, double beltEnhancePercent, double bagHpPercentPerTenLevels, Map<Grade, int> disassemble, int enhanceRefundPercent, int durability, double wearPerMinute, int wearPerRunMax, double brokenDamage, double lossChance, int useMargin, LootLevelMode lootLevelMode, Equipped start
 });
 
 
@@ -4352,7 +4358,7 @@ class __$GearRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of GearRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? bagHpPercentPerTenLevels = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? durability = null,Object? wearPerMinute = null,Object? wearPerRunMax = null,Object? brokenDamage = null,Object? lossChance = null,Object? useMargin = null,Object? start = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? bareWeapon = null,Object? bareBagSlots = null,Object? bareBeltSlots = null,Object? gradeDamage = null,Object? levelDamagePermille = null,Object? bagSlots = null,Object? bagEnhanceSlots = null,Object? beltSlots = null,Object? beltPercent = null,Object? beltPercentPerTenLevels = null,Object? beltEnhancePercent = null,Object? bagHpPercentPerTenLevels = null,Object? disassemble = null,Object? enhanceRefundPercent = null,Object? durability = null,Object? wearPerMinute = null,Object? wearPerRunMax = null,Object? brokenDamage = null,Object? lossChance = null,Object? useMargin = null,Object? lootLevelMode = null,Object? start = null,}) {
   return _then(_GearRulesData(
 bareWeapon: null == bareWeapon ? _self.bareWeapon : bareWeapon // ignore: cast_nullable_to_non_nullable
 as String,bareBagSlots: null == bareBagSlots ? _self.bareBagSlots : bareBagSlots // ignore: cast_nullable_to_non_nullable
@@ -4374,7 +4380,8 @@ as double,wearPerRunMax: null == wearPerRunMax ? _self.wearPerRunMax : wearPerRu
 as int,brokenDamage: null == brokenDamage ? _self.brokenDamage : brokenDamage // ignore: cast_nullable_to_non_nullable
 as double,lossChance: null == lossChance ? _self.lossChance : lossChance // ignore: cast_nullable_to_non_nullable
 as double,useMargin: null == useMargin ? _self.useMargin : useMargin // ignore: cast_nullable_to_non_nullable
-as int,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
+as int,lootLevelMode: null == lootLevelMode ? _self.lootLevelMode : lootLevelMode // ignore: cast_nullable_to_non_nullable
+as LootLevelMode,start: null == start ? _self.start : start // ignore: cast_nullable_to_non_nullable
 as Equipped,
   ));
 }

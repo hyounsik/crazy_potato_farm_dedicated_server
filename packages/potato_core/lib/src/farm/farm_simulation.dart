@@ -24,6 +24,7 @@ import 'package:potato_core/src/items/gear_stats.dart';
 import 'package:potato_core/src/potatoes/ability_roller.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
+import 'package:potato_core/src/raid/loot_levels.dart';
 import 'package:potato_core/src/potatoes/potato_effects.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -379,6 +380,11 @@ final class FarmSimulation {
 
   /// Potatoes out exploring, with where each came from.
   Iterable<AwayPotato> get awayEntries => _away.values;
+
+  /// The best level of each gear kind in storage that the farm could wear
+  /// now: gear found exploring may grow from it (2026-10-30, 사용자).
+  Map<GearKind, int> get bestStoredGearLevels =>
+      LootLevels.ownedLevels(_gearStats, _gear, progress);
 
   /// The highest level among the farm's potatoes of each type, wherever
   /// they are: seeds found exploring grow from it (2026-10-30, 사용자).

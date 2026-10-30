@@ -166,6 +166,55 @@ void main() {
         expect(levels.seed(PotatoType.food, random), inInclusiveRange(15, 17));
       }
     });
+
+    test('B: every kind from the average of the best owned of each', () {
+      final levels = LootLevels(
+        zone,
+        mode: LootLevelMode.ownedAverage,
+        worn: [const Equipped()],
+        owned: [
+          {GearKind.weapon: 21, GearKind.bag: 18, GearKind.belt: 15},
+        ],
+        seedLevels: [const {}],
+      );
+      for (var i = 0; i < 50; i++) {
+        for (final kind in GearKind.values) {
+          expect(levels.gear(kind, random), inInclusiveRange(18, 20));
+        }
+      }
+    });
+
+    test('C: each kind from the best owned of that kind', () {
+      final levels = LootLevels(
+        zone,
+        mode: LootLevelMode.ownedBest,
+        worn: [const Equipped()],
+        owned: [
+          {GearKind.weapon: 21},
+          {GearKind.weapon: 19, GearKind.bag: 20},
+        ],
+        seedLevels: [const {}],
+      );
+      for (var i = 0; i < 50; i++) {
+        expect(levels.gear(GearKind.weapon, random), inInclusiveRange(20, 22));
+        expect(levels.gear(GearKind.bag, random), inInclusiveRange(18, 20));
+      }
+    });
+
+    test('owned counts only pieces that are not broken and can be worn', () {
+      final owned = LootLevels.ownedLevels(
+        GearStats(catalog),
+        [
+          weapon(25),
+          weapon(12).copyWith(wear: catalog.rules.gear.durability),
+          weapon(9),
+          const Gear(kind: GearKind.belt, grade: Grade.normal, level: 4),
+        ],
+        catalog.rules.gear.useMargin,
+        stored: const {GearKind.bag: 7, GearKind.belt: 6},
+      );
+      expect(owned, {GearKind.weapon: 9, GearKind.bag: 7, GearKind.belt: 6});
+    });
   });
 
   test(
@@ -323,6 +372,22 @@ void main() {
       b.step();
     }
     expect(jsonEncode(b.toJson()), jsonEncode(a.toJson()));
+  });
+
+  test('stored gear levels come along and survive saving', () {
+    final a = RaidSimulation.start(
+      catalog: catalog,
+      zone: 'sample_zone',
+      seed: 3,
+      storedGearLevels: const {GearKind.weapon: 12},
+    );
+    final b = RaidSimulation.fromJson(
+      jsonDecode(jsonEncode(a.toJson())) as Map<String, dynamic>,
+      catalog,
+    );
+    expect(b.storedGearLevels, [
+      {GearKind.weapon: 12},
+    ]);
   });
 
   group('combat power', () {

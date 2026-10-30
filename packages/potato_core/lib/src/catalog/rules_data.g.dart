@@ -691,6 +691,12 @@ _GearRulesData _$GearRulesDataFromJson(
       ),
       lossChance: $checkedConvert('loss_chance', (v) => (v as num).toDouble()),
       useMargin: $checkedConvert('use_margin', (v) => (v as num).toInt()),
+      lootLevelMode: $checkedConvert(
+        'loot_level_mode',
+        (v) =>
+            $enumDecodeNullable(_$LootLevelModeEnumMap, v) ??
+            LootLevelMode.worn,
+      ),
       start: $checkedConvert(
         'start',
         (v) => Equipped.fromJson(v as Map<String, dynamic>),
@@ -717,6 +723,7 @@ _GearRulesData _$GearRulesDataFromJson(
     'brokenDamage': 'broken_damage',
     'lossChance': 'loss_chance',
     'useMargin': 'use_margin',
+    'lootLevelMode': 'loot_level_mode',
   },
 );
 
@@ -751,7 +758,14 @@ Map<String, dynamic> _$GearRulesDataToJson(
   'broken_damage': instance.brokenDamage,
   'loss_chance': instance.lossChance,
   'use_margin': instance.useMargin,
+  'loot_level_mode': _$LootLevelModeEnumMap[instance.lootLevelMode]!,
   'start': instance.start.toJson(),
+};
+
+const _$LootLevelModeEnumMap = {
+  LootLevelMode.worn: 'worn',
+  LootLevelMode.ownedAverage: 'owned_average',
+  LootLevelMode.ownedBest: 'owned_best',
 };
 
 _CombatPowerRulesData _$CombatPowerRulesDataFromJson(

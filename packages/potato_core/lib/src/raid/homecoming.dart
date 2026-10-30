@@ -27,6 +27,7 @@ RaidMemberStart memberStartFor(
   companions: companionsFor(farm, potatoIds, modes: modes),
   bag: (kit ?? farm.kit).bagItems,
   seedLevels: farm.bestLevels,
+  storedGearLevels: farm.bestStoredGearLevels,
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes
@@ -48,6 +49,7 @@ RaidSimulation startRun(
   companions: companionsFor(farm, potatoIds, modes: modes),
   bag: farm.bagItems,
   seedLevels: farm.bestLevels,
+  storedGearLevels: farm.bestStoredGearLevels,
 );
 
 /// The farm potatoes [potatoIds] as companions for a run, in that order,

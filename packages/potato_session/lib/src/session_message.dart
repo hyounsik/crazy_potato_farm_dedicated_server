@@ -11,7 +11,7 @@ import 'package:potato_core/potato_core.dart';
 /// Bump it whenever a message, or the JSON of anything a message carries
 /// (runs, farms, items), changes. `test/protocol_test.dart` fails until it
 /// is bumped and its fingerprint updated.
-const int sessionProtocol = 2;
+const int sessionProtocol = 3;
 
 /// Why a guest could not join a host's session.
 enum SessionJoinRejection {

@@ -160,6 +160,29 @@ const _$GradeEnumMap = {
   Grade.legendary: 'legendary',
 };
 
+SeedConverted _$SeedConvertedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('SeedConverted', json, ($checkedConvert) {
+      final val = SeedConverted(
+        from: $checkedConvert(
+          'from',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$SeedConvertedToJson(SeedConverted instance) =>
+    <String, dynamic>{
+      'from': instance.from.toJson(),
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
 SeedOverflowed _$SeedOverflowedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('SeedOverflowed', json, ($checkedConvert) {
       final val = SeedOverflowed(

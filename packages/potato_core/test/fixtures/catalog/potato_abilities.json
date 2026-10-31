@@ -218,6 +218,22 @@
           "action": "harvest_food",
           "value": null,
           "temp_value": 3
+        },
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "stat",
+          "stat": "combat.pest_clear_speed",
+          "op": "mul",
+          "value": 0
+        },
+        {
+          "context": "farm",
+          "target": "self",
+          "kind": "stat",
+          "stat": "combat.disease_clear_speed",
+          "op": "mul",
+          "value": 0
         }
       ],
       "rarity": "low"

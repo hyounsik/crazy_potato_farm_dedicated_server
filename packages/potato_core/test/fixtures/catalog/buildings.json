@@ -152,6 +152,18 @@
         "cooldown_seconds": 120,
         "food": 10
       }
+    },
+    {
+      "id": "seed_lab",
+      "width": 3,
+      "height": 3,
+      "single": true,
+      "needs_all": true,
+      "levels": [
+        {
+          "cost": 2000
+        }
+      ]
     }
   ]
 }

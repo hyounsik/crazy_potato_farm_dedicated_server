@@ -1,4 +1,5 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -59,6 +60,15 @@ sealed class FarmCommand with _$FarmCommand {
 
   /// Turns one [seed] from the pouch into baby potatoes.
   const factory FarmCommand.sellSeed({required Seed seed}) = SellSeed;
+
+  /// Turns one [seed] from the pouch into another type at the seed lab:
+  /// [to], or a random other type when null. [keep] paid steps raise the
+  /// chance it keeps its grade (2026-10-31, 사용자).
+  const factory FarmCommand.convertSeed({
+    required Seed seed,
+    PotatoType? to,
+    @Default(0) int keep,
+  }) = ConvertSeed;
 
   /// Moves one waiting [seed] that did not fit into the pouch, if there is
   /// room now.
@@ -372,4 +382,17 @@ enum FarmRejection {
 
   /// What is in the bag would not fit that smaller bag.
   bagTooSmall,
+
+  /// This building waits until every other kind stands on the farm (the
+  /// seed lab).
+  needsAllBuildings,
+
+  /// The farm has no seed lab.
+  noSeedLab,
+
+  /// The seed is that type already.
+  sameType,
+
+  /// More keep steps than the seed's grade has.
+  badKeep,
 }

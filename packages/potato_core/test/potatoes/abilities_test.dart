@@ -234,6 +234,22 @@ void main() {
     expect(farm.autoHarvestPerHour, 180);
   });
 
+  test('a harvesting guard leaves pests alone (2026-10-31)', () {
+    build('training_ground', const TilePos(8, 8));
+    final seed = _seed(PotatoType.combat, 'combat.gatherer');
+    farm.seeds.add(seed);
+    farm.apply(
+      FarmCommand.train(buildingId: farm.buildings.last.id, seed: seed),
+    );
+    plant(plainSeed(PotatoType.food));
+    farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+    farm.field(1)!.pest = Pest(kind: PestKind.blight);
+    expect(farm.pestBalance().clearing, 0);
+    farm.runSteps(600);
+    expect(farm.guards.single.targetFieldId, isNull);
+    expect(farm.field(1)!.pest?.clearedMillis, 0);
+  });
+
   test('a harvesting guard walks to the field and takes from it evenly', () {
     build('training_ground', const TilePos(8, 8));
     final seed = _seed(PotatoType.combat, 'combat.gatherer');

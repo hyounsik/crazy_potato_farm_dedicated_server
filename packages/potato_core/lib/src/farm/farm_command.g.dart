@@ -202,6 +202,38 @@ Map<String, dynamic> _$SellSeedToJson(SellSeed instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
+ConvertSeed _$ConvertSeedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ConvertSeed', json, ($checkedConvert) {
+      final val = ConvertSeed(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        to: $checkedConvert(
+          'to',
+          (v) => $enumDecodeNullable(_$PotatoTypeEnumMap, v),
+        ),
+        keep: $checkedConvert('keep', (v) => (v as num?)?.toInt() ?? 0),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$ConvertSeedToJson(ConvertSeed instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'to': _$PotatoTypeEnumMap[instance.to],
+      'keep': instance.keep,
+      'runtimeType': instance.$type,
+    };
+
+const _$PotatoTypeEnumMap = {
+  PotatoType.food: 'food',
+  PotatoType.combat: 'combat',
+  PotatoType.breeding: 'breeding',
+  PotatoType.buff: 'buff',
+};
+
 TakeOverflow _$TakeOverflowFromJson(Map<String, dynamic> json) =>
     $checkedCreate('TakeOverflow', json, ($checkedConvert) {
       final val = TakeOverflow(

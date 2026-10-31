@@ -28,6 +28,7 @@ abstract class RulesData with _$RulesData {
     required GearRulesData gear,
     required CombatPowerRulesData combatPower,
     @Default(ZoneScalingRulesData()) ZoneScalingRulesData zoneScaling,
+    @Default(SeedLabRulesData()) SeedLabRulesData seedLab,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -617,4 +618,80 @@ abstract class SeedStackData with _$SeedStackData {
 
   factory SeedStackData.fromJson(Map<String, dynamic> json) =>
       _$SeedStackDataFromJson(json);
+}
+
+/// What the seed lab charges to turn a seed into another type, and how
+/// likely the seed keeps its grade (2026-10-31, 사용자). Costs go up a step
+/// every [bandLevels] levels: 1-9 is the first band, 90-99 the tenth.
+@freezed
+abstract class SeedLabRulesData with _$SeedLabRulesData {
+  const factory SeedLabRulesData({
+    /// Levels in each cost band.
+    @Default(10) int bandLevels,
+
+    /// Baby potatoes a random turn of a normal seed costs, per band.
+    @Default(10) int bandFood,
+
+    /// What a seed of each grade multiplies the turn's cost by.
+    @Default({Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3})
+    Map<Grade, int> gradeTimes,
+
+    /// What naming the new type multiplies the turn's cost by (사용자: the
+    /// pick costs as much again).
+    @Default(2) int pickTimes,
+
+    /// The chance of keeping the grade with nothing paid, in percent. A
+    /// seed that loses it drops one grade.
+    @Default({Grade.normal: 100, Grade.rare: 70, Grade.legendary: 50})
+    Map<Grade, int> keepPercent,
+
+    /// Percent each paid keep step adds, up to 100.
+    @Default(10) int keepStepPercent,
+
+    /// Baby potatoes one keep step costs before its multiplier, per band.
+    @Default({Grade.rare: 10, Grade.legendary: 20}) Map<Grade, int> keepFood,
+
+    /// The multiplier of each keep step in turn, so the last steps cost
+    /// more (사용자: the sure keep is the dear one). Their number is the
+    /// steps there are.
+    @Default({
+      Grade.rare: [1, 2, 5],
+      Grade.legendary: [1, 1, 2, 3, 5],
+    })
+    Map<Grade, List<int>> keepStepTimes,
+  }) = _SeedLabRulesData;
+
+  const SeedLabRulesData._();
+
+  factory SeedLabRulesData.fromJson(Map<String, dynamic> json) =>
+      _$SeedLabRulesDataFromJson(json);
+
+  /// The cost band of a seed of [level], 1 for levels 0-9.
+  int band(int level) => level ~/ bandLevels + 1;
+
+  /// Baby potatoes turning a seed of [grade] and [level] costs, more when
+  /// the new type is [picked].
+  int turnFood(Grade grade, int level, {required bool picked}) =>
+      bandFood *
+      band(level) *
+      (gradeTimes[grade] ?? 1) *
+      (picked ? pickTimes : 1);
+
+  /// Keep steps a seed of [grade] may pay for.
+  int keepSteps(Grade grade) => keepStepTimes[grade]?.length ?? 0;
+
+  /// Baby potatoes the first [steps] keep steps cost for a seed of [grade]
+  /// and [level].
+  int keepStepsFood(Grade grade, int level, int steps) {
+    final times = keepStepTimes[grade] ?? const <int>[];
+    var total = 0;
+    for (var i = 0; i < steps && i < times.length; i++) {
+      total += times[i];
+    }
+    return total * (keepFood[grade] ?? 0) * band(level);
+  }
+
+  /// The chance of keeping [grade] with [steps] paid, in percent.
+  int keepChance(Grade grade, int steps) =>
+      math.min(100, (keepPercent[grade] ?? 100) + steps * keepStepPercent);
 }

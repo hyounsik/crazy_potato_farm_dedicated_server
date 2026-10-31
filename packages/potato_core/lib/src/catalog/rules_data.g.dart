@@ -65,6 +65,12 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
             ? const ZoneScalingRulesData()
             : ZoneScalingRulesData.fromJson(v as Map<String, dynamic>),
       ),
+      seedLab: $checkedConvert(
+        'seed_lab',
+        (v) => v == null
+            ? const SeedLabRulesData()
+            : SeedLabRulesData.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
@@ -72,6 +78,7 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'newFarm': 'new_farm',
     'combatPower': 'combat_power',
     'zoneScaling': 'zone_scaling',
+    'seedLab': 'seed_lab',
   },
 );
 
@@ -90,6 +97,7 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'gear': instance.gear.toJson(),
       'combat_power': instance.combatPower.toJson(),
       'zone_scaling': instance.zoneScaling.toJson(),
+      'seed_lab': instance.seedLab.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -1037,3 +1045,98 @@ Map<String, dynamic> _$SeedStackDataToJson(_SeedStackData instance) =>
       'ability': instance.ability,
       'style': _$CombatStyleEnumMap[instance.style],
     };
+
+_SeedLabRulesData _$SeedLabRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_SeedLabRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _SeedLabRulesData(
+      bandLevels: $checkedConvert(
+        'band_levels',
+        (v) => (v as num?)?.toInt() ?? 10,
+      ),
+      bandFood: $checkedConvert('band_food', (v) => (v as num?)?.toInt() ?? 10),
+      gradeTimes: $checkedConvert(
+        'grade_times',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3},
+      ),
+      pickTimes: $checkedConvert(
+        'pick_times',
+        (v) => (v as num?)?.toInt() ?? 2,
+      ),
+      keepPercent: $checkedConvert(
+        'keep_percent',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 100, Grade.rare: 70, Grade.legendary: 50},
+      ),
+      keepStepPercent: $checkedConvert(
+        'keep_step_percent',
+        (v) => (v as num?)?.toInt() ?? 10,
+      ),
+      keepFood: $checkedConvert(
+        'keep_food',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.rare: 10, Grade.legendary: 20},
+      ),
+      keepStepTimes: $checkedConvert(
+        'keep_step_times',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(
+                $enumDecode(_$GradeEnumMap, k),
+                (e as List<dynamic>).map((e) => (e as num).toInt()).toList(),
+              ),
+            ) ??
+            const {
+              Grade.rare: [1, 2, 5],
+              Grade.legendary: [1, 1, 2, 3, 5],
+            },
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'bandLevels': 'band_levels',
+    'bandFood': 'band_food',
+    'gradeTimes': 'grade_times',
+    'pickTimes': 'pick_times',
+    'keepPercent': 'keep_percent',
+    'keepStepPercent': 'keep_step_percent',
+    'keepFood': 'keep_food',
+    'keepStepTimes': 'keep_step_times',
+  },
+);
+
+Map<String, dynamic> _$SeedLabRulesDataToJson(
+  _SeedLabRulesData instance,
+) => <String, dynamic>{
+  'band_levels': instance.bandLevels,
+  'band_food': instance.bandFood,
+  'grade_times': instance.gradeTimes.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'pick_times': instance.pickTimes,
+  'keep_percent': instance.keepPercent.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'keep_step_percent': instance.keepStepPercent,
+  'keep_food': instance.keepFood.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
+  'keep_step_times': instance.keepStepTimes.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+};

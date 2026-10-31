@@ -303,6 +303,25 @@ final class FarmSimulation {
   /// Whether the build menu offers buildings of [kind].
   bool canBuildKind(String kind) => isUnlocked(StoryUnlock.building(kind));
 
+  /// The kinds still to build before [kind] may be: for a building that
+  /// needs all (the seed lab), every other buildable kind not on the farm
+  /// yet, totems aside (2026-10-31, 사용자). Empty otherwise.
+  List<String> missingFor(String kind) {
+    if (catalog.buildings[kind]?.needsAll != true) return const [];
+    final standing = {for (final b in _buildings.values) b.kind};
+    return [
+      for (final data in catalog.buildings.values)
+        if (data.buildable &&
+            !data.needsAll &&
+            data.totem == null &&
+            !standing.contains(data.id))
+          data.id,
+    ];
+  }
+
+  /// Whether a seed lab stands on the farm.
+  bool get hasSeedLab => _buildings.values.any((b) => b.data.needsAll);
+
   /// Whether the story opened any totem; the totem limit waits for one.
   bool get totemsOpen => catalog.buildings.values.any(
     (b) => b.totem != null && canBuildKind(b.id),
@@ -671,6 +690,11 @@ final class FarmSimulation {
     WidenPouch() => _widen(pouch: true),
     WidenGearBox() => _widen(pouch: false),
     SellSeed(:final seed) => _sellSeed(seed),
+    ConvertSeed(:final seed, :final to, :final keep) => _convertSeed(
+      seed,
+      to,
+      keep,
+    ),
     TakeOverflow(:final seed) => _takeOverflow(seed),
     SellOverflow() => _sellOverflow(),
     ReadMail(:final mailId) => _readMail(mailId),
@@ -967,12 +991,11 @@ final class FarmSimulation {
     }
     for (final guard in _guards.values) {
       if (guard.targetFieldId != null || !guard.potato.isGrown(data)) continue;
-      // Leave its patrol from where it has got to.
-      if (guard.walkTo != null) guard.stop();
       FarmField? best;
       var bestLoad = 0;
       var bestDistance = 0;
       for (final field in pests) {
+        if (!_clears(guard, field.pest!.kind)) continue;
         final load = assigned[field.id] ?? 0;
         final distance = guard.at.manhattanDistanceTo(
           _besideField(field, guard.at),
@@ -985,7 +1008,11 @@ final class FarmSimulation {
           bestDistance = distance;
         }
       }
-      assigned[best!.id] = bestLoad + 1;
+      // Harvesting guards clear nothing (2026-10-31, 사용자): they patrol.
+      if (best == null) continue;
+      // Leave its patrol from where it has got to.
+      if (guard.walkTo != null) guard.stop();
+      assigned[best.id] = bestLoad + 1;
       guard
         ..targetFieldId = best.id
         ..walk(
@@ -993,6 +1020,16 @@ final class FarmSimulation {
           walkMillisFor(guard.potato, bestDistance),
         );
     }
+  }
+
+  /// Whether [guard] does any work on a pest of [kind]: Pacifist and
+  /// Homebody do none (2026-10-31, 사용자).
+  bool _clears(Guard guard, PestKind kind) {
+    final speed = switch (kind) {
+      PestKind.bug => FarmStat.bugClearSpeed,
+      PestKind.blight => FarmStat.blightClearSpeed,
+    };
+    return _work(guard.potato).sums.apply(speed, 1) > 0;
   }
 
   /// How far a patrolling guard looks for its next stop, in tiles.
@@ -1341,6 +1378,7 @@ final class FarmSimulation {
     if (data.single && _buildings.values.any((b) => b.kind == kind)) {
       return FarmRejection.onlyOne;
     }
+    if (missingFor(kind).isNotEmpty) return FarmRejection.needsAllBuildings;
     if (data.totem != null && totemCount >= totemLimit) {
       return FarmRejection.totemLimit;
     }
@@ -1457,6 +1495,46 @@ final class FarmSimulation {
     if (!_seeds.take(seed)) return FarmRejection.noSeed;
     food += _rules.storage.seedFood[seed.grade]!;
     return null;
+  }
+
+  /// Turns [seed] into type [to] (or a random other type) at the seed
+  /// lab, paying for the turn and [keep] steps; it keeps its grade by the
+  /// odds those buy, or drops one. Its first ability (and a combat seed's
+  /// style) is rolled anew for the new type; its level stays.
+  FarmRejection? _convertSeed(Seed seed, PotatoType? to, int keep) {
+    if (!hasSeedLab) return FarmRejection.noSeedLab;
+    if (to == seed.type) return FarmRejection.sameType;
+    final lab = _rules.seedLab;
+    if (keep < 0 || keep > lab.keepSteps(seed.grade)) {
+      return FarmRejection.badKeep;
+    }
+    final cost = seedConvertFood(seed, picked: to != null, keep: keep);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    if (!_seeds.take(seed)) return FarmRejection.noSeed;
+    food -= cost;
+    final others = [
+      for (final type in PotatoType.values)
+        if (type != seed.type) type,
+    ];
+    final type = to ?? others[_random.nextInt(others.length)];
+    final kept = _random.chance(lab.keepChance(seed.grade, keep) / 100);
+    final turned = _roller.seed(
+      type: type,
+      grade: kept ? seed.grade : seed.grade.lower ?? seed.grade,
+      level: seed.level,
+      random: _random,
+    );
+    _seeds.add(turned);
+    _events.add(FarmEvent.seedConverted(from: seed, seed: turned));
+    return null;
+  }
+
+  /// Baby potatoes the seed lab asks to turn [seed], with the new type
+  /// [picked] or not, and [keep] keep steps.
+  int seedConvertFood(Seed seed, {required bool picked, int keep = 0}) {
+    final lab = _rules.seedLab;
+    return lab.turnFood(seed.grade, seed.level, picked: picked) +
+        lab.keepStepsFood(seed.grade, seed.level, keep);
   }
 
   FarmRejection? _takeOverflow(Seed seed) {

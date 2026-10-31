@@ -23,7 +23,9 @@ mixin _$BuildingData {
  bool get buildable;/// Whether it can be demolished. The house cannot; the potato cellar
 /// only while empty.
  bool get removable;/// Whether a farm has at most one (the potato cellar).
- bool get single;/// What it does when lit, for totems.
+ bool get single;/// Whether it waits until every other buildable kind stands on the farm
+/// (2026-10-31, 사용자: the seed lab).
+ bool get needsAll;/// What it does when lit, for totems.
  TotemData? get totem;/// Level 1 first. Level 1's cost is the cost to build; each later
 /// level's cost is the cost to upgrade to it.
  List<BuildingLevelData> get levels;
@@ -40,20 +42,20 @@ $BuildingDataCopyWith<BuildingData> get copyWith => _$BuildingDataCopyWithImpl<B
 @override
 bool operator ==(Object other) {
   final _this = this as BuildingData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.width, _this.width) || other.width == _this.width)&&(identical(other.height, _this.height) || other.height == _this.height)&&(identical(other.houses, _this.houses) || other.houses == _this.houses)&&(identical(other.buildable, _this.buildable) || other.buildable == _this.buildable)&&(identical(other.removable, _this.removable) || other.removable == _this.removable)&&(identical(other.single, _this.single) || other.single == _this.single)&&(identical(other.totem, _this.totem) || other.totem == _this.totem)&&const DeepCollectionEquality().equals(other.levels, _this.levels));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is BuildingData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.width, _this.width) || other.width == _this.width)&&(identical(other.height, _this.height) || other.height == _this.height)&&(identical(other.houses, _this.houses) || other.houses == _this.houses)&&(identical(other.buildable, _this.buildable) || other.buildable == _this.buildable)&&(identical(other.removable, _this.removable) || other.removable == _this.removable)&&(identical(other.single, _this.single) || other.single == _this.single)&&(identical(other.needsAll, _this.needsAll) || other.needsAll == _this.needsAll)&&(identical(other.totem, _this.totem) || other.totem == _this.totem)&&const DeepCollectionEquality().equals(other.levels, _this.levels));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as BuildingData;
-  return Object.hash(runtimeType,_this.id,_this.width,_this.height,_this.houses,_this.buildable,_this.removable,_this.single,_this.totem,const DeepCollectionEquality().hash(_this.levels));
+  return Object.hash(runtimeType,_this.id,_this.width,_this.height,_this.houses,_this.buildable,_this.removable,_this.single,_this.needsAll,_this.totem,const DeepCollectionEquality().hash(_this.levels));
 }
 
 @override
 String toString() {
   final _this = this as BuildingData;
-  return 'BuildingData(id: ${_this.id}, width: ${_this.width}, height: ${_this.height}, houses: ${_this.houses}, buildable: ${_this.buildable}, removable: ${_this.removable}, single: ${_this.single}, totem: ${_this.totem}, levels: ${_this.levels})';
+  return 'BuildingData(id: ${_this.id}, width: ${_this.width}, height: ${_this.height}, houses: ${_this.houses}, buildable: ${_this.buildable}, removable: ${_this.removable}, single: ${_this.single}, needsAll: ${_this.needsAll}, totem: ${_this.totem}, levels: ${_this.levels})';
 }
 
 
@@ -64,7 +66,7 @@ abstract mixin class $BuildingDataCopyWith<$Res>  {
   factory $BuildingDataCopyWith(BuildingData value, $Res Function(BuildingData) _then) = _$BuildingDataCopyWithImpl;
 @useResult
 $Res call({
- String id, int width, int height, PotatoType? houses, bool buildable, bool removable, bool single, TotemData? totem, List<BuildingLevelData> levels
+ String id, int width, int height, PotatoType? houses, bool buildable, bool removable, bool single, bool needsAll, TotemData? totem, List<BuildingLevelData> levels
 });
 
 
@@ -81,7 +83,7 @@ class _$BuildingDataCopyWithImpl<$Res>
 
 /// Create a copy of BuildingData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? buildable = null,Object? removable = null,Object? single = null,Object? totem = freezed,Object? levels = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? buildable = null,Object? removable = null,Object? single = null,Object? needsAll = null,Object? totem = freezed,Object? levels = null,}) {
   return _then(BuildingData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
@@ -90,6 +92,7 @@ as int,houses: freezed == houses ? _self.houses : houses // ignore: cast_nullabl
 as PotatoType?,buildable: null == buildable ? _self.buildable : buildable // ignore: cast_nullable_to_non_nullable
 as bool,removable: null == removable ? _self.removable : removable // ignore: cast_nullable_to_non_nullable
 as bool,single: null == single ? _self.single : single // ignore: cast_nullable_to_non_nullable
+as bool,needsAll: null == needsAll ? _self.needsAll : needsAll // ignore: cast_nullable_to_non_nullable
 as bool,totem: freezed == totem ? _self.totem : totem // ignore: cast_nullable_to_non_nullable
 as TotemData?,levels: null == levels ? _self.levels : levels // ignore: cast_nullable_to_non_nullable
 as List<BuildingLevelData>,
@@ -189,10 +192,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  TotemData? totem,  List<BuildingLevelData> levels)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  bool needsAll,  TotemData? totem,  List<BuildingLevelData> levels)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _BuildingData() when $default != null:
-return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.totem,_that.levels);case _:
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.needsAll,_that.totem,_that.levels);case _:
   return orElse();
 
 }
@@ -210,10 +213,10 @@ return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  TotemData? totem,  List<BuildingLevelData> levels)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  bool needsAll,  TotemData? totem,  List<BuildingLevelData> levels)  $default,) {final _that = this;
 switch (_that) {
 case _BuildingData():
-return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.totem,_that.levels);case _:
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.needsAll,_that.totem,_that.levels);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -230,10 +233,10 @@ return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  TotemData? totem,  List<BuildingLevelData> levels)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int width,  int height,  PotatoType? houses,  bool buildable,  bool removable,  bool single,  bool needsAll,  TotemData? totem,  List<BuildingLevelData> levels)?  $default,) {final _that = this;
 switch (_that) {
 case _BuildingData() when $default != null:
-return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.totem,_that.levels);case _:
+return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_that.removable,_that.single,_that.needsAll,_that.totem,_that.levels);case _:
   return null;
 
 }
@@ -245,7 +248,7 @@ return $default(_that.id,_that.width,_that.height,_that.houses,_that.buildable,_
 @JsonSerializable()
 
 class _BuildingData implements BuildingData {
-  const _BuildingData({required this.id, required this.width, required this.height, this.houses, this.buildable = true, this.removable = true, this.single = false, this.totem, required  List<BuildingLevelData> levels}): _levels = levels;
+  const _BuildingData({required this.id, required this.width, required this.height, this.houses, this.buildable = true, this.removable = true, this.single = false, this.needsAll = false, this.totem, required  List<BuildingLevelData> levels}): _levels = levels;
   factory _BuildingData.fromJson(Map<String, dynamic> json) => _$BuildingDataFromJson(json);
 
 @override final  String id;
@@ -262,6 +265,9 @@ class _BuildingData implements BuildingData {
 @override@JsonKey() final  bool removable;
 /// Whether a farm has at most one (the potato cellar).
 @override@JsonKey() final  bool single;
+/// Whether it waits until every other buildable kind stands on the farm
+/// (2026-10-31, 사용자: the seed lab).
+@override@JsonKey() final  bool needsAll;
 /// What it does when lit, for totems.
 @override final  TotemData? totem;
 /// Level 1 first. Level 1's cost is the cost to build; each later
@@ -289,18 +295,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingData&&(identical(other.id, id) || other.id == id)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.houses, houses) || other.houses == houses)&&(identical(other.buildable, buildable) || other.buildable == buildable)&&(identical(other.removable, removable) || other.removable == removable)&&(identical(other.single, single) || other.single == single)&&(identical(other.totem, totem) || other.totem == totem)&&const DeepCollectionEquality().equals(other.levels, _levels));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _BuildingData&&(identical(other.id, id) || other.id == id)&&(identical(other.width, width) || other.width == width)&&(identical(other.height, height) || other.height == height)&&(identical(other.houses, houses) || other.houses == houses)&&(identical(other.buildable, buildable) || other.buildable == buildable)&&(identical(other.removable, removable) || other.removable == removable)&&(identical(other.single, single) || other.single == single)&&(identical(other.needsAll, needsAll) || other.needsAll == needsAll)&&(identical(other.totem, totem) || other.totem == totem)&&const DeepCollectionEquality().equals(other.levels, _levels));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,width,height,houses,buildable,removable,single,totem,const DeepCollectionEquality().hash(_levels));
+    return Object.hash(runtimeType,id,width,height,houses,buildable,removable,single,needsAll,totem,const DeepCollectionEquality().hash(_levels));
 }
 
 @override
 String toString() {
-    return 'BuildingData(id: $id, width: $width, height: $height, houses: $houses, buildable: $buildable, removable: $removable, single: $single, totem: $totem, levels: $levels)';
+    return 'BuildingData(id: $id, width: $width, height: $height, houses: $houses, buildable: $buildable, removable: $removable, single: $single, needsAll: $needsAll, totem: $totem, levels: $levels)';
 }
 
 
@@ -311,7 +317,7 @@ abstract mixin class _$BuildingDataCopyWith<$Res> implements $BuildingDataCopyWi
   factory _$BuildingDataCopyWith(_BuildingData value, $Res Function(_BuildingData) _then) = __$BuildingDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int width, int height, PotatoType? houses, bool buildable, bool removable, bool single, TotemData? totem, List<BuildingLevelData> levels
+ String id, int width, int height, PotatoType? houses, bool buildable, bool removable, bool single, bool needsAll, TotemData? totem, List<BuildingLevelData> levels
 });
 
 
@@ -328,7 +334,7 @@ class __$BuildingDataCopyWithImpl<$Res>
 
 /// Create a copy of BuildingData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? buildable = null,Object? removable = null,Object? single = null,Object? totem = freezed,Object? levels = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? width = null,Object? height = null,Object? houses = freezed,Object? buildable = null,Object? removable = null,Object? single = null,Object? needsAll = null,Object? totem = freezed,Object? levels = null,}) {
   return _then(_BuildingData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
@@ -337,6 +343,7 @@ as int,houses: freezed == houses ? _self.houses : houses // ignore: cast_nullabl
 as PotatoType?,buildable: null == buildable ? _self.buildable : buildable // ignore: cast_nullable_to_non_nullable
 as bool,removable: null == removable ? _self.removable : removable // ignore: cast_nullable_to_non_nullable
 as bool,single: null == single ? _self.single : single // ignore: cast_nullable_to_non_nullable
+as bool,needsAll: null == needsAll ? _self.needsAll : needsAll // ignore: cast_nullable_to_non_nullable
 as bool,totem: freezed == totem ? _self.totem : totem // ignore: cast_nullable_to_non_nullable
 as TotemData?,levels: null == levels ? _self._levels : levels // ignore: cast_nullable_to_non_nullable
 as List<BuildingLevelData>,

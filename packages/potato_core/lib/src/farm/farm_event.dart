@@ -54,6 +54,13 @@ sealed class FarmEvent with _$FarmEvent {
     required Seed seed,
   }) = PotatoRevived;
 
+  /// The seed lab turned [from] into [seed], a grade lower if it did not
+  /// keep its grade.
+  const factory FarmEvent.seedConverted({
+    required Seed from,
+    required Seed seed,
+  }) = SeedConverted;
+
   /// A seed came with the pouch full and waits in the overflow.
   const factory FarmEvent.seedOverflowed({required Seed seed}) = SeedOverflowed;
 

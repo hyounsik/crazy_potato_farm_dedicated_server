@@ -28,6 +28,10 @@ abstract class BuildingData with _$BuildingData {
     /// Whether a farm has at most one (the potato cellar).
     @Default(false) bool single,
 
+    /// Whether it waits until every other buildable kind stands on the farm
+    /// (2026-10-31, 사용자: the seed lab).
+    @Default(false) bool needsAll,
+
     /// What it does when lit, for totems.
     TotemData? totem,
 

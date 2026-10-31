@@ -29,6 +29,11 @@ ADMIN_PASSWORD=admin dart run bin/server.dart   # admin page on ADMIN_PORT (defa
 | `DATA_DIR` | `data` | Where the shared farm and the game data are kept |
 | `ADMIN_PASSWORD` | none | Turns the admin page on; without it there is none |
 | `ADMIN_PORT` | `8081` | The admin page's port |
+| `REGISTER_KEY` | none | Puts the server on the public list (**not working yet**, see below) |
+| `REGISTER_NAME` | none | The name players see on the list (needed with `REGISTER_KEY`) |
+| `REGISTER_REGION` | none | The region players filter by, e.g. `KR`, `US`, `JP` |
+| `REGISTER_HOST` | the IP the list sees | A domain players connect to instead |
+| `REGISTER_URL` | the official list | The list service |
 
 Players connect over WebSocket at `ws://<host>:<port>/session` (put a TLS proxy in
 front for `wss://`). The password, when set, goes in the `x-potato-password` header;
@@ -36,6 +41,29 @@ a wrong one is refused with HTTP 401. Each binary message is one session packet:
 the first byte is the channel (0 reliable, 1 unreliable), the rest the payload
 (`WebSocketFrame` in `potato_session`). Clients use `WebSocketClientTransport`
 from `package:potato_session/websocket_client.dart`.
+
+### Public server list (not working yet)
+
+> **The public list is not open yet.** Keys can't be had in the released app, and
+> the list turns servers away until it opens; a server started with `REGISTER_KEY`
+> logs that, stops trying and runs as a private server.
+
+With `REGISTER_KEY` (an operator key from the app's settings, one per account and
+one listed server per key) the server tells the list it is up every five minutes
+and when its player count changes. Players who are signed in see it with its
+region, player count and version, and still need `PASSWORD` to join.
+
+- **A listed server takes only signed-in players.** The app gets a one-use ticket
+  for that one server and sends it in the `x-potato-ticket` header; the server asks
+  the list who it belongs to (HTTP 403 without a good one). Players are known by an
+  id the list gives for this server, not by their installation id.
+- **`PASSWORD` is required** for a listed server.
+- **Its address is shown to every signed-in player.** Running from home, prefer a
+  tunnel (e.g. Cloudflare Tunnel) or a domain (`REGISTER_HOST`) over your home IP.
+- **It must be reachable from the internet**: the list checks `GET /ping` from
+  outside and leaves out servers that don't answer. A cloud VM or port forwarding
+  works; behind carrier-grade NAT you need a tunnel. IPv4 is safest.
+- Revoking the key takes the server off the list at once; it keeps running.
 
 ### What the server hosts
 

@@ -2,6 +2,7 @@ import 'dart:io';
 
 import 'package:potato_dedicated_server/src/dedicated_room.dart';
 import 'package:potato_dedicated_server/src/dedicated_world.dart';
+import 'package:potato_dedicated_server/src/public_listing.dart';
 import 'package:potato_dedicated_server/src/websocket_host_transport.dart';
 import 'package:potato_session/potato_session.dart';
 
@@ -12,12 +13,18 @@ import 'package:potato_session/potato_session.dart';
 /// a connection must send it in [WebSocketFrame.passwordHeader] or is
 /// refused with 401. On that transport it hosts one exploration party at a
 /// time ([room]), and with a [world] the server's one shared farm.
+///
+/// With a [listing] the server is on the public list (not working yet): a
+/// connection must also bring a ticket in [WebSocketFrame.ticketHeader]
+/// that the list service vouches for (else 403), `GET /ping` answers with
+/// the listing's nonce, and the player count goes out as it changes.
 class DedicatedServer {
   DedicatedServer._(
     this._httpServer,
     this._password,
     this.log,
     this.world,
+    this.listing,
     Duration partyCountdown,
   ) {
     room = DedicatedRoom(
@@ -25,9 +32,17 @@ class DedicatedServer {
       log: log,
       world: world,
       partyCountdown: partyCountdown,
+      verifiedPlayer: listing == null ? null : transport.verifiedPlayer,
     );
     _httpServer.listen(_handleRequest);
+    if (listing case final listing?) {
+      transport.peerConnected.listen((_) => listing.changed());
+      transport.peerDisconnected.listen((_) => listing.changed());
+    }
   }
+
+  /// The public list entry, or null for a private server.
+  final PublicListing? listing;
 
   final HttpServer _httpServer;
   String? _password;
@@ -61,17 +76,28 @@ class DedicatedServer {
     String? password,
     void Function(String message)? log,
     DedicatedWorld? world,
+    PublicListing? listing,
     Duration partyCountdown = const Duration(seconds: 60),
   }) async => DedicatedServer._(
     await HttpServer.bind(address, port),
     password == null || password.isEmpty ? null : password,
     log,
     world,
+    listing,
     partyCountdown,
+  );
+
+  /// What a heartbeat reports now.
+  ListingStatus get listingStatus => (
+    protocol: sessionProtocol,
+    build: room.buildNumber,
+    players: transport.peers.length,
+    maxPlayers: 4,
   );
 
   /// Stops accepting requests and closes open connections.
   Future<void> stop() async {
+    await listing?.close();
     await room.close();
     await world?.close();
     await transport.close();
@@ -82,12 +108,29 @@ class DedicatedServer {
     final response = request.response;
     if (request.method == 'GET' && request.uri.path == '/health') {
       response.write('ok');
+    } else if (request.method == 'GET' && request.uri.path == '/ping') {
+      // The list service checks the address with it; players time it.
+      response.write(listing?.nonce ?? 'ok');
     } else if (request.uri.path == WebSocketFrame.path &&
         WebSocketTransformer.isUpgradeRequest(request)) {
       final password = _password;
       if (password != null &&
           request.headers.value(WebSocketFrame.passwordHeader) != password) {
         response.statusCode = HttpStatus.unauthorized;
+      } else if (listing case final listing? when !listing.listClosed) {
+        final ticket = request.headers.value(WebSocketFrame.ticketHeader);
+        final player = ticket == null || ticket.isEmpty
+            ? null
+            : await listing.checkTicket(ticket);
+        if (player == null) {
+          response.statusCode = HttpStatus.forbidden;
+        } else {
+          transport.accept(
+            await WebSocketTransformer.upgrade(request),
+            verifiedPlayer: player,
+          );
+          return;
+        }
       } else {
         transport.accept(await WebSocketTransformer.upgrade(request));
         return;

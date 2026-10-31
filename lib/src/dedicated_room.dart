@@ -56,6 +56,7 @@ final class DedicatedRoom {
     this.world,
     this.shareEvery = const Duration(milliseconds: 500),
     this.partyCountdown = const Duration(seconds: 60),
+    this.verifiedPlayer,
     Random? random,
   }) : _random = random ?? Random() {
     _packetSub = transport.packets.listen(_onPacket);
@@ -85,6 +86,11 @@ final class DedicatedRoom {
   /// How long a party opened on the farm waits for everyone to get ready
   /// (as a host's, 2026-10-22, 사용자: 60 s).
   final Duration partyCountdown;
+
+  /// Who a public list ticket proved guest [peerId] to be, or null. On a
+  /// listed server this replaces the installation id the guest sends in its
+  /// hello, so kits follow the account (2026-10-31, 사용자).
+  final String? Function(String peerId)? verifiedPlayer;
   Timer? _departTimer;
   StreamSubscription<List<HostedGuest>>? _readySub;
 
@@ -118,8 +124,12 @@ final class DedicatedRoom {
   /// The catalog the room runs on, or null until a guest brings one.
   Catalog? get catalog => _catalog;
 
-  void _onPacket(SessionPacket packet) {
+  /// The app build the room runs on, or 0 until a guest brings one.
+  int get buildNumber => _catalog == null ? 0 : _buildNumber;
+
+  void _onPacket(SessionPacket incoming) {
     if (_closed) return;
+    final packet = _withVerifiedPlayer(incoming);
     final relay = _relay;
     if (relay != null) {
       // Farm commands are the world's, from those on the farm; the rest is
@@ -229,6 +239,33 @@ final class DedicatedRoom {
         ..add(session.bedsChanged.listen((_) => world.touch()));
       _shareFarm();
     }
+  }
+
+  /// [packet] with its hello's player id replaced by the verified one.
+  SessionPacket _withVerifiedPlayer(SessionPacket packet) {
+    final player = verifiedPlayer?.call(packet.peerId);
+    if (player == null || packet.channel != SessionChannel.reliable) {
+      return packet;
+    }
+    if (_decode(packet) case final HelloMessage hello
+        when hello.playerId != player) {
+      return (
+        peerId: packet.peerId,
+        channel: packet.channel,
+        bytes: codec.encode(
+          HelloMessage(
+            protocol: hello.protocol,
+            buildNumber: hello.buildNumber,
+            catalogHash: hello.catalogHash,
+            start: hello.start,
+            playerId: player,
+            accountId: hello.accountId,
+            bed: hello.bed,
+          ),
+        ),
+      );
+    }
+    return packet;
   }
 
   SessionMessage? _decode(SessionPacket packet) {

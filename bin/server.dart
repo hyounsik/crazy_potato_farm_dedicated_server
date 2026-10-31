@@ -7,6 +7,10 @@ const _defaultPort = 8080;
 const _defaultAdminPort = 8081;
 const _defaultDataDir = 'data';
 
+/// The public list service (Cloud Functions, prod).
+const _defaultRegisterUrl =
+    'https://asia-northeast3-crazy-potato-farm.cloudfunctions.net/publicServer/';
+
 /// Settings come from the environment:
 ///
 /// - `PORT`: where guests connect (default 8080).
@@ -16,6 +20,11 @@ const _defaultDataDir = 'data';
 ///   `data`).
 /// - `ADMIN_PASSWORD`: turns the admin page on; without it there is none.
 /// - `ADMIN_PORT`: the admin page's port (default 8081).
+/// - `REGISTER_KEY`: puts the server on the public list (NOT WORKING YET).
+///   A listed server needs `PASSWORD` and `REGISTER_NAME`, takes only
+///   signed-in players, and shows its address to every signed-in player.
+///   `REGISTER_REGION` (e.g. `KR`), `REGISTER_HOST` (a domain instead of the
+///   IP the list sees), `REGISTER_URL` (the list service).
 Future<void> main() async {
   final port = _readPort('PORT', _defaultPort);
   final adminPort = _readPort('ADMIN_PORT', _defaultAdminPort);
@@ -30,18 +39,50 @@ Future<void> main() async {
     stdout.writeln(message);
   }
 
+  DedicatedServer? server;
+  PublicListing? listing;
+  final registerKey = env['REGISTER_KEY'] ?? '';
+  if (registerKey.isNotEmpty) {
+    final name = env['REGISTER_NAME'] ?? '';
+    if (password == null || password.isEmpty || name.isEmpty) {
+      stderr.writeln(
+        'A listed server (REGISTER_KEY) needs PASSWORD and REGISTER_NAME',
+      );
+      exit(64);
+    }
+    var url = env['REGISTER_URL'] ?? _defaultRegisterUrl;
+    if (!url.endsWith('/')) url = '$url/';
+    listing = PublicListing(
+      serviceUrl: Uri.parse(url),
+      key: registerKey,
+      name: name,
+      region: env['REGISTER_REGION'] ?? '',
+      host: env['REGISTER_HOST'] ?? '',
+      port: port,
+      status: () => server!.listingStatus,
+      log: log,
+    );
+    log(
+      'Public list: NOT WORKING YET (the list is not open). This server '
+      'takes only signed-in players, and its address is shown to every '
+      'signed-in player: from home, use a tunnel or a domain.',
+    );
+  }
+
   final world = DedicatedWorld(
     store: WorldStore(Directory(env['DATA_DIR'] ?? _defaultDataDir)),
     log: log,
   );
   await world.open();
-  final server = await DedicatedServer.start(
+  server = await DedicatedServer.start(
     address: InternetAddress.anyIPv4,
     port: port,
     password: password,
     log: log,
     world: world,
+    listing: listing,
   );
+  listing?.start();
   log(
     'Dedicated server listening on port ${server.port}'
     '${password == null || password.isEmpty ? '' : ' (password required)'}',

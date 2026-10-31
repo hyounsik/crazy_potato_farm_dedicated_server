@@ -12,6 +12,7 @@ final class WebSocketHostTransport implements HostTransport {
   final _peerConnected = StreamController<String>.broadcast();
   final _peerDisconnected = StreamController<String>.broadcast();
   final Map<String, WebSocket> _sockets = {};
+  final Map<String, String> _verified = {};
   int _nextId = 1;
   bool _closed = false;
 
@@ -27,15 +28,21 @@ final class WebSocketHostTransport implements HostTransport {
   /// Guests connected now.
   Iterable<String> get peers => _sockets.keys;
 
+  /// The player id a public list ticket proved for guest [peerId], or null
+  /// (a private server, which trusts what the guest says).
+  String? verifiedPlayer(String peerId) => _verified[peerId];
+
   /// Takes [socket] in as a new guest and returns its id. A closed
-  /// transport closes the socket instead.
-  String accept(WebSocket socket) {
+  /// transport closes the socket instead. [verifiedPlayer] is who a ticket
+  /// proved the guest to be.
+  String accept(WebSocket socket, {String? verifiedPlayer}) {
     final peerId = 'guest-${_nextId++}';
     if (_closed) {
       unawaited(socket.close(WebSocketStatus.goingAway));
       return peerId;
     }
     _sockets[peerId] = socket;
+    if (verifiedPlayer != null) _verified[peerId] = verifiedPlayer;
     socket.listen(
       (data) {
         if (_closed || data is! List<int>) return;
@@ -67,6 +74,7 @@ final class WebSocketHostTransport implements HostTransport {
   }
 
   void _drop(String peerId) {
+    _verified.remove(peerId);
     if (_sockets.remove(peerId) == null || _closed) return;
     _peerDisconnected.add(peerId);
   }

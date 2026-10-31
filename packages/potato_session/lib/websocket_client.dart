@@ -30,11 +30,13 @@ final class WebSocketClientTransport implements ClientTransport {
   }
 
   /// Connects to the server at [uri], sending [password] when the server
-  /// asks for one. Throws [WebSocketException] when the server refuses
-  /// (wrong password: HTTP 401) or cannot be reached.
+  /// asks for one, and [ticket] for a server on the public list. Throws
+  /// [WebSocketException] when the server refuses (wrong password: HTTP
+  /// 401, no good ticket: 403) or cannot be reached.
   static Future<WebSocketClientTransport> connect(
     Uri uri, {
     String? password,
+    String? ticket,
     Duration timeout = const Duration(seconds: 10),
   }) async {
     final socket = await WebSocket.connect(
@@ -42,6 +44,8 @@ final class WebSocketClientTransport implements ClientTransport {
       headers: {
         if (password != null && password.isNotEmpty)
           WebSocketFrame.passwordHeader: password,
+        if (ticket != null && ticket.isNotEmpty)
+          WebSocketFrame.ticketHeader: ticket,
       },
     ).timeout(timeout);
     return WebSocketClientTransport._(socket);

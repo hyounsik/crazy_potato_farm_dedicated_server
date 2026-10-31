@@ -15,6 +15,10 @@ abstract final class WebSocketFrame {
   /// The HTTP header carrying the server password, when one is set.
   static const String passwordHeader = 'x-potato-password';
 
+  /// Header carrying a one-use entry ticket to a server on the public list
+  /// (2026-10-31): such a server lets in only players who signed in.
+  static const String ticketHeader = 'x-potato-ticket';
+
   /// [bytes] on [channel], ready to send as one binary message.
   static Uint8List encode(SessionChannel channel, Uint8List bytes) {
     final frame = Uint8List(bytes.length + 1);

@@ -5,5 +5,6 @@ export 'package:potato_dedicated_server/src/admin_server.dart';
 export 'package:potato_dedicated_server/src/dedicated_room.dart';
 export 'package:potato_dedicated_server/src/dedicated_server.dart';
 export 'package:potato_dedicated_server/src/dedicated_world.dart';
+export 'package:potato_dedicated_server/src/public_listing.dart';
 export 'package:potato_dedicated_server/src/websocket_host_transport.dart';
 export 'package:potato_dedicated_server/src/world_store.dart';

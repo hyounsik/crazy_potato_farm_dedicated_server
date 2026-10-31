@@ -75,6 +75,9 @@ class PublicListing {
   bool _stopped = false;
   bool _sending = false;
 
+  /// A change came while a heartbeat was on its way: send again after it.
+  bool _changedWhileSending = false;
+
   /// Whether heartbeats stopped for good (key revoked, list closed).
   bool get stopped => _stopped;
 
@@ -94,6 +97,11 @@ class PublicListing {
   /// [minGap].
   void changed() {
     if (_stopped) return;
+    // The reply would replace a timer set now with the next period.
+    if (_sending) {
+      _changedWhileSending = true;
+      return;
+    }
     final since = DateTime.now().difference(_lastSent);
     _schedule(since >= minGap ? Duration.zero : minGap - since);
   }
@@ -119,7 +127,11 @@ class PublicListing {
       Duration(milliseconds: _random.nextInt((max - min).inMilliseconds + 1));
 
   Future<void> _beat() async {
-    if (_stopped || _sending) return;
+    if (_stopped) return;
+    if (_sending) {
+      _changedWhileSending = true;
+      return;
+    }
     _sending = true;
     _lastSent = DateTime.now();
     final now = status();
@@ -163,6 +175,10 @@ class PublicListing {
       _retry();
     } finally {
       _sending = false;
+      if (_changedWhileSending) {
+        _changedWhileSending = false;
+        changed();
+      }
     }
   }
 

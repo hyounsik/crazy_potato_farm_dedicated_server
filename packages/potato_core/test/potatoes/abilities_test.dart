@@ -211,6 +211,29 @@ void main() {
     expect(food.stored, lessThan(harvested), reason: 'taken as it comes');
   });
 
+  test('auto harvest an hour: grown harvesting guards, at most what the '
+      'fields make (2026-10-31)', () {
+    build('training_ground', const TilePos(8, 8));
+    final seed = _seed(PotatoType.combat, 'combat.gatherer');
+    farm.seeds.add(seed);
+    farm.apply(
+      FarmCommand.train(buildingId: farm.buildings.last.id, seed: seed),
+    );
+    expect(farm.autoHarvestPerHour, 0, reason: 'still growing');
+    final first = plant(plainSeed(PotatoType.food));
+    farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+    // 3 (stand-in) every 60 s is 180 an hour, more than one potato makes.
+    expect(farm.foodPerHour, inExclusiveRange(0, 180));
+    expect(farm.autoHarvestPerHour, farm.foodPerHour);
+    for (final tile in farm.field(1)!.rect.tiles.skip(1)) {
+      plant(plainSeed(PotatoType.food), tile);
+    }
+    farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
+    expect(first.isGrown(catalog.potatoType(PotatoType.food)), isTrue);
+    expect(farm.foodPerHour, greaterThan(180));
+    expect(farm.autoHarvestPerHour, 180);
+  });
+
   test('a harvesting guard walks to the field and takes from it evenly', () {
     build('training_ground', const TilePos(8, 8));
     final seed = _seed(PotatoType.combat, 'combat.gatherer');

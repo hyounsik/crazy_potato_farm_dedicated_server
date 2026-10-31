@@ -454,6 +454,29 @@ final class FarmSimulation {
     return total;
   }
 
+  /// Baby potatoes grown guards with a harvesting ability (Pacifist,
+  /// Homebody) bring in from the fields an hour now (2026-10-31, 사용자:
+  /// shown under pest control). Not made anew: it is what the fields make,
+  /// so it never tops [foodPerHour]. Each brings its amount (more with
+  /// level, and with harvest totems) every interval; walking aside.
+  double get autoHarvestPerHour {
+    final data = catalog.potatoType(PotatoType.combat);
+    var total = 0.0;
+    for (final guard in _guards.values) {
+      if (!guard.potato.isGrown(data)) continue;
+      final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
+      final interval = effect?.intervalInUse;
+      final value = effect?.valueInUse ?? 0;
+      if (interval == null || value <= 0) continue;
+      final amount =
+          value *
+          levelGrowth(_rules.potatoes.guards.levelPermille, guard.potato.level);
+      total +=
+          _totemSums().apply(FarmStat.harvestBonus, amount) * 3600 / interval;
+    }
+    return math.min(total, foodPerHour);
+  }
+
   /// Baby potatoes upkeep takes in an hour now: the planted potatoes and
   /// the guards, as [_payUpkeep] charges them.
   double get upkeepPerHour {

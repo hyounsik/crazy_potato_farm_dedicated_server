@@ -122,9 +122,20 @@ void main() {
     test('buildings keep one free tile from fields and each other', () {
       FarmRejection? at(int x, int y) =>
           farm.apply(FarmCommand.build(kind: 'statue', origin: TilePos(x, y)));
-      expect(at(11, 9), FarmRejection.blocked, reason: 'next to the field');
-      expect(at(11, 8), FarmRejection.blocked, reason: 'corner to corner');
-      expect(at(10, 9), isNull, reason: 'one tile between');
+      expect(
+        farm.apply(
+          FarmCommand.build(kind: 'training_ground', origin: TilePos(10, 9)),
+        ),
+        FarmRejection.blocked,
+        reason: 'a bigger building keeps away from the field',
+      );
+      expect(at(11, 9), isNull, reason: '1x1 next to the field (2026-10-31)');
+      expect(
+        at(11, 8),
+        FarmRejection.blocked,
+        reason: 'its door would be on the other statue',
+      );
+      expect(at(10, 9), isNull, reason: '1x1 beside 1x1');
       expect(
         at(10, 10),
         FarmRejection.blocked,
@@ -814,6 +825,53 @@ void main() {
     });
   });
 
+  test('a planted potato moves to another field as it is (2026-10-31)', () {
+    const rect = TileRect(origin: TilePos(8, 8), width: 2, height: 2);
+    expect(farm.apply(const FarmCommand.makeField(rect: rect)), isNull);
+    final other = farm.fields.last.id;
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+    farm.runSteps(40);
+    final potato = farm.field(1)!.potatoAt(_a)!;
+    final grown = potato.grownMillis;
+    farm.takeEvents();
+
+    FarmRejection? move(int fieldId, TilePos tile) => farm.apply(
+      FarmCommand.movePotato(potatoId: potato.id, fieldId: fieldId, tile: tile),
+    );
+    expect(move(other, const TilePos(12, 9)), FarmRejection.outsideField);
+    expect(move(99, const TilePos(8, 8)), FarmRejection.noSuchField);
+    expect(move(other, const TilePos(9, 9)), isNull, reason: 'even growing');
+    expect(farm.field(1)!.potatoAt(_a), isNull);
+    expect(farm.field(other)!.potatoAt(const TilePos(9, 9)), same(potato));
+    expect(potato.grownMillis, grown);
+    expect(farm.takeEvents(), [
+      FarmEvent.potatoMoved(
+        potatoId: potato.id,
+        fieldId: other,
+        tile: const TilePos(9, 9),
+      ),
+    ]);
+
+    farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
+    final second = farm.field(1)!.potatoAt(_a)!;
+    expect(
+      farm.apply(
+        FarmCommand.movePotato(
+          potatoId: second.id,
+          fieldId: other,
+          tile: const TilePos(9, 9),
+        ),
+      ),
+      FarmRejection.tileTaken,
+    );
+    expect(
+      farm.apply(
+        const FarmCommand.movePotato(potatoId: 999, fieldId: 1, tile: _b),
+      ),
+      FarmRejection.noPotato,
+    );
+  });
+
   group('fridge', () {
     test('uprooted potatoes keep what they had and age slowly', () {
       farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food));
@@ -945,20 +1003,66 @@ void main() {
       );
     });
 
-    test('a cellar potato can be let go: gone, no seed, no grave', () {
+    /// Lets a guard grown from [seed] go from the cellar, with a graveyard
+    /// when [graveyard], under the given chances.
+    PotatoReleased letGo({
+      required double grave,
+      Grade grade = Grade.normal,
+      bool graveyard = true,
+    }) {
+      open(
+        quietSampleCatalog((files) {
+          final potatoes = rulesOf(files)['potatoes'] as Map<String, dynamic>;
+          potatoes['release_grave_chance'] = grave;
+        }),
+      );
+      if (graveyard) build('graveyard', const TilePos(14, 13));
       final ground = build('training_ground', const TilePos(8, 8));
-      final id = growGuard(ground);
+      final seed = plainSeed(PotatoType.combat, grade);
+      farm.seeds.add(seed, 1);
+      expect(
+        farm.apply(FarmCommand.train(buildingId: ground, seed: seed)),
+        isNull,
+      );
+      final id = farm.guards.last.potato.id;
+      farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
       expect(
         farm.apply(FarmCommand.release(potatoId: id)),
         FarmRejection.notInFridge,
         reason: 'only from the cellar',
       );
       expect(farm.apply(FarmCommand.uproot(potatoId: id)), isNull);
+      farm.takeEvents();
       final seeds = farm.seeds.total;
       expect(farm.apply(FarmCommand.release(potatoId: id)), isNull);
       expect(farm.fridge, isEmpty);
       expect(farm.potatoById(id), isNull);
-      expect(farm.seeds.total, seeds);
+      expect(farm.seeds.total, seeds, reason: 'no seed right away');
+      return farm.takeEvents().whereType<PotatoReleased>().single;
+    }
+
+    test('a let-go cellar potato may leave the farm for good (2026-10-31)', () {
+      final event = letGo(grave: 0);
+      expect(event.buried, isFalse);
+      expect(farm.graves, isEmpty);
+    });
+
+    test('a let-go cellar potato may go to a graveyard as it is '
+        '(2026-10-31)', () {
+      final event = letGo(grave: 1, grade: Grade.rare);
+      expect(event.buried, isTrue);
+      expect(farm.graves.single.id, event.potatoId);
+      expect(
+        farm.graves.single.grade,
+        Grade.rare,
+        reason: 'reviving rolls the drop',
+      );
+    });
+
+    test('without a graveyard a let-go potato always leaves (2026-10-31)', () {
+      final event = letGo(grave: 1, graveyard: false);
+      expect(event.buried, isFalse);
+      expect(farm.graves, isEmpty);
     });
   });
 

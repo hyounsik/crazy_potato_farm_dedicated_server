@@ -181,14 +181,47 @@ void main() {
         farm.canPlace(
           const TileRect(origin: TilePos(9, 8), width: 1, height: 1),
         ),
-        isFalse,
-        reason: 'fields keep their distance',
+        isTrue,
+        reason: 'a field may stand beside a 1x1 building (2026-10-31)',
       );
-      final fieldRect = farm.fields.first.rect;
       expect(
-        fits(fieldRect.origin - const TilePos(1, 1), totem),
+        farm.canPlace(
+          const TileRect(origin: TilePos(10, 9), width: 1, height: 1),
+        ),
         isFalse,
-        reason: 'a 1x1 building keeps its distance from a field',
+        reason: 'but not over its door',
+      );
+    });
+
+    test('1x1 buildings may touch a field on their sides and top, never '
+        'on the tile in front of a door (2026-10-31)', () {
+      final statue = catalog.buildings['statue']!;
+      final house = catalog.buildings['house']!;
+      // The starting field covers (12, 9) to (13, 10); its door is (12, 11).
+      expect(farm.fields.first.rect.origin, const TilePos(12, 9));
+      bool fits(TilePos origin, BuildingData data) => farm.canPlace(
+        TileRect(origin: origin, width: data.width, height: data.height),
+        building: data,
+      );
+
+      expect(fits(const TilePos(11, 9), statue), isTrue, reason: 'left');
+      expect(fits(const TilePos(14, 9), statue), isTrue, reason: 'right');
+      expect(
+        fits(const TilePos(13, 11), statue),
+        isTrue,
+        reason: 'below, its top against the field',
+      );
+      expect(fits(const TilePos(11, 8), statue), isTrue, reason: 'corner');
+      expect(fits(const TilePos(12, 11), statue), isFalse, reason: 'its door');
+      expect(
+        fits(const TilePos(12, 8), statue),
+        isFalse,
+        reason: 'above: its own door would open into the field',
+      );
+      expect(
+        fits(const TilePos(14, 8), house),
+        isFalse,
+        reason: 'bigger buildings keep their distance',
       );
     });
 

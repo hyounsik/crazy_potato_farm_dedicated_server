@@ -85,7 +85,7 @@ extension BuildingSnug on BuildingData {
   /// 1x1 buildings (the potato cellar, the statue, totems) may stand right
   /// next to any building on their left, right and top; only the tile in
   /// front of either's door stays free (2026-10-30, 사용자: to be tried
-  /// out).
+  /// out). Fields too (2026-10-31, 사용자).
   bool get hugs => width == 1 && height == 1;
 }
 

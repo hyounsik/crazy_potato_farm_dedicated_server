@@ -512,6 +512,36 @@ Map<String, dynamic> _$ReplantToJson(Replant instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
+MovePotato _$MovePotatoFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'MovePotato',
+  json,
+  ($checkedConvert) {
+    final val = MovePotato(
+      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+      fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+      tile: $checkedConvert(
+        'tile',
+        (v) => TilePos.fromJson(v as Map<String, dynamic>),
+      ),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'potatoId': 'potato_id',
+    'fieldId': 'field_id',
+    r'$type': 'runtimeType',
+  },
+);
+
+Map<String, dynamic> _$MovePotatoToJson(MovePotato instance) =>
+    <String, dynamic>{
+      'potato_id': instance.potatoId,
+      'field_id': instance.fieldId,
+      'tile': instance.tile.toJson(),
+      'runtimeType': instance.$type,
+    };
+
 Retrain _$RetrainFromJson(Map<String, dynamic> json) => $checkedCreate(
   'Retrain',
   json,

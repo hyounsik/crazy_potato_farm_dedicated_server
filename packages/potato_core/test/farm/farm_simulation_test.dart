@@ -418,10 +418,13 @@ void main() {
       final loaded = FarmDocument.decode(json).toSimulation(catalog);
       final moved = loaded.building(building.id)!;
       expect(moved.origin, isNot(const TilePos(12, 9)));
-      expect(loaded.canPlace(moved.rect, ignoring: moved.id), isTrue);
+      expect(
+        loaded.canPlace(moved.rect, ignoring: moved.id, building: moved.data),
+        isTrue,
+      );
       for (final other in loaded.buildings) {
         expect(
-          loaded.canPlace(other.rect, ignoring: other.id),
+          loaded.canPlace(other.rect, ignoring: other.id, building: other.data),
           isTrue,
           reason: other.kind,
         );

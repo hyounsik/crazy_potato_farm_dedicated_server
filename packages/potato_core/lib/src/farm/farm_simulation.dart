@@ -572,8 +572,8 @@ final class FarmSimulation {
   /// (corners included) between it and every field and building.
   /// Buildings of one snug group (see [BuildingSnug.snug]) may stand right
   /// next to each other, and a 1x1 building ([BuildingSnug.hugs]) right
-  /// next to any building, though off the tile in front of either's door;
-  /// none on each other.
+  /// next to any building or field (fields too since 2026-10-31, 사용자),
+  /// though off the tile in front of either's door; none on each other.
   /// Its bottom side may not lie against the fence (2026-10-29, 사용자;
   /// its sides and top may): the row below holds its door ([doorBelow]),
   /// where its path starts.
@@ -594,17 +594,24 @@ final class FarmSimulation {
         height: other.height + 2,
       ),
     );
+    // Touching, off the tile in front of either's door.
+    bool offDoors(TileRect other) =>
+        !rect.contains(doorBelow(other)) && !other.contains(doorBelow(rect));
     for (final field in _fields.values) {
-      if (field.id != ignoring && !apart(field.rect)) return false;
+      if (field.id == ignoring) continue;
+      if (rect.overlaps(field.rect)) return false;
+      if (hugs) {
+        if (!offDoors(field.rect)) return false;
+        continue;
+      }
+      if (!apart(field.rect)) return false;
     }
     for (final other in _buildings.values) {
       if (other.id == ignoring) continue;
       if (rect.overlaps(other.rect)) return false;
       if (snug != null && snug == other.data.snug) continue;
-      if (building != null && (hugs || other.data.hugs)) {
-        if (rect.contains(other.door) || other.rect.contains(doorBelow(rect))) {
-          return false;
-        }
+      if (hugs || other.data.hugs) {
+        if (!offDoors(other.rect)) return false;
         continue;
       }
       if (!apart(other.rect)) return false;
@@ -660,6 +667,11 @@ final class FarmSimulation {
     TrainSeed(:final buildingId, :final seed) => _train(buildingId, seed),
     ClearPest(:final fieldId) => _tapPest(fieldId),
     Uproot(:final potatoId) => _uproot(potatoId),
+    MovePotato(:final potatoId, :final fieldId, :final tile) => _movePotato(
+      potatoId,
+      fieldId,
+      tile,
+    ),
     Replant(:final potatoId, :final fieldId, :final tile) => _replant(
       potatoId,
       fieldId,
@@ -1806,6 +1818,21 @@ final class FarmSimulation {
     return null;
   }
 
+  FarmRejection? _movePotato(int potatoId, int fieldId, TilePos tile) {
+    final spot = fieldSpotOf(potatoId);
+    if (spot == null) return FarmRejection.noPotato;
+    final field = _fields[fieldId];
+    if (field == null) return FarmRejection.noSuchField;
+    if (!field.rect.contains(tile)) return FarmRejection.outsideField;
+    if (field._potatoes.containsKey(tile)) return FarmRejection.tileTaken;
+    // What it grew, made and stored goes with it.
+    field._put(tile, spot.field._take(spot.tile)!);
+    _events.add(
+      FarmEvent.potatoMoved(potatoId: potatoId, fieldId: fieldId, tile: tile),
+    );
+    return null;
+  }
+
   FarmRejection? _retrain(int potatoId, int buildingId) {
     final potato = _fridge[potatoId];
     if (potato == null) return FarmRejection.notInFridge;
@@ -1822,9 +1849,19 @@ final class FarmSimulation {
     return null;
   }
 
+  /// Lets a cellar potato go: most often it goes to a graveyard as it is
+  /// (reviving rolls the grade drop); otherwise, or when the farm has no
+  /// graveyard, it leaves for good.
   FarmRejection? _release(int potatoId) {
-    if (_fridge.remove(potatoId) == null) return FarmRejection.notInFridge;
-    _events.add(FarmEvent.released(potatoId: potatoId));
+    final potato = _fridge.remove(potatoId);
+    if (potato == null) return FarmRejection.notInFridge;
+    if (graveCapacity == 0 ||
+        !_random.chance(_rules.potatoes.releaseGraveChance)) {
+      _worked.remove(potatoId);
+      _events.add(FarmEvent.released(potatoId: potatoId));
+      return null;
+    }
+    _events.add(FarmEvent.released(potatoId: potatoId, buried: _bury(potato)));
     return null;
   }
 

@@ -346,6 +346,10 @@ final class Catalog {
 
     final potatoes = rules.potatoes;
     check.probability('potatoes.grade_drop_chance', potatoes.gradeDropChance);
+    check.probability(
+      'potatoes.release_grave_chance',
+      potatoes.releaseGraveChance,
+    );
     for (final grade in Grade.values) {
       final food = potatoes.reviveFood[grade];
       if (food == null) {

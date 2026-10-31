@@ -159,8 +159,20 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.uprooted({required int potatoId}) = PotatoUprooted;
 
-  /// A potato in the fridge was let go for good.
-  const factory FarmEvent.released({required int potatoId}) = PotatoReleased;
+  /// A potato in the fridge was let go. It went to a graveyard as if it had
+  /// died ([buried], its grade as it was: reviving rolls the drop), or left
+  /// the farm for good (2026-10-31, 사용자).
+  const factory FarmEvent.released({
+    required int potatoId,
+    @Default(false) bool buried,
+  }) = PotatoReleased;
+
+  /// A planted potato moved to [tile] of field [fieldId].
+  const factory FarmEvent.potatoMoved({
+    required int potatoId,
+    required int fieldId,
+    required TilePos tile,
+  }) = PotatoMoved;
 
   /// A potato left the fridge for a field or a training ground.
   const factory FarmEvent.takenOut({required int potatoId}) = PotatoTakenOut;

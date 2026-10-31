@@ -122,6 +122,11 @@ abstract class PotatoRulesData with _$PotatoRulesData {
     /// grade.
     required Map<Grade, int> reviveFood,
 
+    /// Chance that a potato let go from the cellar goes to a graveyard (as
+    /// if it had died); otherwise it leaves the farm for good (2026-10-31,
+    /// 사용자).
+    @Default(0.7) double releaseGraveChance,
+
     /// Game time between two upkeep payments. A multiple of the farm step.
     required int upkeepEverySeconds,
 

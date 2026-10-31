@@ -192,6 +192,10 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
                   MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
             ),
           ),
+          releaseGraveChance: $checkedConvert(
+            'release_grave_chance',
+            (v) => (v as num?)?.toDouble() ?? 0.7,
+          ),
           upkeepEverySeconds: $checkedConvert(
             'upkeep_every_seconds',
             (v) => (v as num).toInt(),
@@ -235,6 +239,7 @@ _PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
       fieldKeyMap: const {
         'gradeDropChance': 'grade_drop_chance',
         'reviveFood': 'revive_food',
+        'releaseGraveChance': 'release_grave_chance',
         'upkeepEverySeconds': 'upkeep_every_seconds',
         'weakPercent': 'weak_percent',
         'breedingGradeUpChance': 'breeding_grade_up_chance',
@@ -249,6 +254,7 @@ Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
       'revive_food': instance.reviveFood.map(
         (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
       ),
+      'release_grave_chance': instance.releaseGraveChance,
       'upkeep_every_seconds': instance.upkeepEverySeconds,
       'weak_percent': instance.weakPercent,
       'breeding_grade_up_chance': instance.breedingGradeUpChance,

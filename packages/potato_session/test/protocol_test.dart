@@ -6,7 +6,7 @@ import 'package:test/test.dart';
 /// The wire fingerprint each [sessionProtocol] was given. When this test
 /// fails, the JSON on the wire changed: bump [sessionProtocol] and add its
 /// new fingerprint here (keep the old lines as a record).
-const Map<int, String> _fingerprints = {1: '27a2eda8'};
+const Map<int, String> _fingerprints = {1: '27a2eda8', 2: 'ced8d486'};
 
 void main() {
   test('sessionProtocol is bumped whenever the wire format changes '

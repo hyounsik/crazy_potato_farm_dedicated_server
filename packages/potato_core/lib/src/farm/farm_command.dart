@@ -141,6 +141,14 @@ sealed class FarmCommand with _$FarmCommand {
     required TilePos tile,
   }) = Replant;
 
+  /// Moves a planted potato, as it is, to an empty tile of another field
+  /// (2026-10-31, 사용자: chosen the way a cellar potato is put back).
+  const factory FarmCommand.movePotato({
+    required int potatoId,
+    required int fieldId,
+    required TilePos tile,
+  }) = MovePotato;
+
   /// Sends a combat potato from the fridge back to a training ground.
   const factory FarmCommand.retrain({
     required int potatoId,

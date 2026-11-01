@@ -310,14 +310,24 @@ final class FarmSimulation {
 
   /// The kinds still to build before [kind] may be: for a building that
   /// needs all (the seed lab), every other buildable kind not on the farm
-  /// yet, totems aside (2026-10-31, 사용자). Empty otherwise.
+  /// yet, totems and kinds with their own needs (built after) aside
+  /// (2026-10-31, 사용자); otherwise its [BuildingData.needs] not on the
+  /// farm yet (2026-11-01, 사용자: the ginkgo tree).
   List<String> missingFor(String kind) {
-    if (catalog.buildings[kind]?.needsAll != true) return const [];
+    final wanted = catalog.buildings[kind];
+    if (wanted == null) return const [];
     final standing = {for (final b in _buildings.values) b.kind};
+    if (!wanted.needsAll) {
+      return [
+        for (final need in wanted.needs)
+          if (!standing.contains(need)) need,
+      ];
+    }
     return [
       for (final data in catalog.buildings.values)
         if (data.buildable &&
             !data.needsAll &&
+            data.needs.isEmpty &&
             data.totem == null &&
             !standing.contains(data.id))
           data.id,
@@ -1385,7 +1395,11 @@ final class FarmSimulation {
     if (data.single && _buildings.values.any((b) => b.kind == kind)) {
       return FarmRejection.onlyOne;
     }
-    if (missingFor(kind).isNotEmpty) return FarmRejection.needsAllBuildings;
+    if (missingFor(kind).isNotEmpty) {
+      return data.needsAll
+          ? FarmRejection.needsAllBuildings
+          : FarmRejection.needsBuilding;
+    }
     if (data.totem != null && totemCount >= totemLimit) {
       return FarmRejection.totemLimit;
     }

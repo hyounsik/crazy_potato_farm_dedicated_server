@@ -164,6 +164,20 @@
           "cost": 2000
         }
       ]
+    },
+    {
+      "id": "ginkgo_tree",
+      "width": 3,
+      "height": 3,
+      "single": true,
+      "needs": [
+        "seed_lab"
+      ],
+      "levels": [
+        {
+          "cost": 3000
+        }
+      ]
     }
   ]
 }

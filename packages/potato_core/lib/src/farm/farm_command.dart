@@ -395,6 +395,10 @@ enum FarmRejection {
   /// seed lab).
   needsAllBuildings,
 
+  /// A building it needs is not on the farm yet (the ginkgo tree needs a
+  /// seed lab).
+  needsBuilding,
+
   /// The farm has no seed lab.
   noSeedLab,
 

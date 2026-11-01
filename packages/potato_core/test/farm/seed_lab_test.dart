@@ -95,6 +95,18 @@ void main() {
     expect(farm.hasSeedLab, isTrue);
   });
 
+  test('the ginkgo tree waits for the lab, and the lab not for it '
+      '(2026-11-01, 사용자)', () {
+    expect(farm.missingFor('seed_lab'), isNot(contains('ginkgo_tree')));
+    expect(farm.missingFor('ginkgo_tree'), ['seed_lab']);
+    expect(buildAnywhere('ginkgo_tree'), FarmRejection.needsBuilding);
+    buildLab();
+    expect(farm.missingFor('ginkgo_tree'), isEmpty);
+    final before = farm.food;
+    expect(buildAnywhere('ginkgo_tree'), isNull);
+    expect(farm.food, before - 3000);
+  });
+
   test('turning a seed needs the lab', () {
     final seed = plainSeed(PotatoType.food);
     farm.seeds.add(seed);

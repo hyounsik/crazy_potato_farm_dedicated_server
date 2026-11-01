@@ -20,6 +20,12 @@ _BuildingData _$BuildingDataFromJson(Map<String, dynamic> json) =>
         removable: $checkedConvert('removable', (v) => v as bool? ?? true),
         single: $checkedConvert('single', (v) => v as bool? ?? false),
         needsAll: $checkedConvert('needs_all', (v) => v as bool? ?? false),
+        needs: $checkedConvert(
+          'needs',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
         totem: $checkedConvert(
           'totem',
           (v) =>
@@ -45,6 +51,7 @@ Map<String, dynamic> _$BuildingDataToJson(_BuildingData instance) =>
       'removable': instance.removable,
       'single': instance.single,
       'needs_all': instance.needsAll,
+      'needs': instance.needs,
       'totem': instance.totem?.toJson(),
       'levels': instance.levels.map((e) => e.toJson()).toList(),
     };

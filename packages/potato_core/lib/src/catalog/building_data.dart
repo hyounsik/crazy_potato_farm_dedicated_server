@@ -32,6 +32,11 @@ abstract class BuildingData with _$BuildingData {
     /// (2026-10-31, 사용자: the seed lab).
     @Default(false) bool needsAll,
 
+    /// Kinds that must stand on the farm before it can be built
+    /// (2026-11-01, 사용자: the ginkgo tree needs a seed lab). A building
+    /// with needs comes after, so one that [needsAll] does not wait for it.
+    @Default(<String>[]) List<String> needs,
+
     /// What it does when lit, for totems.
     TotemData? totem,
 

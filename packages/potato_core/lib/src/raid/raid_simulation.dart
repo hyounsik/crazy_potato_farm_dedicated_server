@@ -693,18 +693,22 @@ final class RaidSimulation {
     return passed;
   }
 
+  /// How far a signal's sight has grown, 0 to 1: slowly at first, faster
+  /// the wider it gets (2026-11-01, 사용자), the square of [_waitPassed].
+  double get _waitGrowth => _waitPassed * _waitPassed;
+
   /// How far aggressive enemies see now: wider during a signal's countdown,
   /// the more the closer it is to zero.
   double get aggressiveSight {
     final grow = (zone.danger?.waitSightMultiplier ?? 1) - 1;
-    return enemySight * (1 + grow * _waitPassed);
+    return enemySight * (1 + grow * _waitGrowth);
   }
 
   /// How far clones see now; it grows like [aggressiveSight].
   double get cloneSight {
     final clone = rules.clones;
     final base = rules.player.sight * clone.sightMultiplier;
-    return base * (1 + (clone.waitSightMultiplier - 1) * _waitPassed);
+    return base * (1 + (clone.waitSightMultiplier - 1) * _waitGrowth);
   }
 
   double get _cloneSpeed => rules.player.speed * rules.clones.speedMultiplier;

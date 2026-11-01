@@ -677,7 +677,9 @@ void main() {
       expect(run.aggressiveSight, sight);
       run.apply(const Signal());
       runFor(run, 2.5);
-      expect(run.aggressiveSight, closeTo(sight * 1.5, sight * 0.02));
+      // Halfway the growth is a quarter: slow first, faster later
+      // (2026-11-01).
+      expect(run.aggressiveSight, closeTo(sight * 1.25, sight * 0.02));
     });
 
     test('hunger wears health down until everything is lost', () {
@@ -1108,7 +1110,7 @@ void main() {
       farClone(run);
       run.apply(const Signal());
       runFor(run, 2.5);
-      expect(run.cloneSight, closeTo(sight * 1.5, sight * 0.02));
+      expect(run.cloneSight, closeTo(sight * 1.25, sight * 0.02));
     });
 
     test('leave through an exit when their stay runs out', () {

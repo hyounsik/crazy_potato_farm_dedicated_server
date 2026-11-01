@@ -166,7 +166,8 @@ enum RaidRejection {
   /// The player is not standing in an open exit.
   notAtExit,
 
-  /// A signal is already counting down.
+  /// A signal is already counting down: anyone's in the party, since the
+  /// party has one at a time (2026-11-01, 사용자).
   signalling,
 
   /// The player is down, waiting for a teammate to revive them.

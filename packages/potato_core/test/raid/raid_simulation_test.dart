@@ -1692,6 +1692,24 @@ void main() {
         expect(run.isOver, isTrue);
       });
 
+      test('the party has one signal at a time (2026-11-01)', () {
+        final run = makeParty();
+        run.enemies.clear();
+        run.clones.clear();
+        final [host, guest] = run.members;
+        final first = run.exits.first;
+        final second = run.exits.last;
+        expect(first.id, isNot(second.id));
+        host.player.position = first.position;
+        guest.player.position = second.position;
+        expect(run.applyOf(host, const Signal()), isNull);
+        // Not from another exit, nor from the same one.
+        expect(run.applyOf(guest, const Signal()), RaidRejection.signalling);
+        guest.player.position = first.position;
+        expect(run.applyOf(guest, const Signal()), RaidRejection.signalling);
+        expect(guest.signal, isNull);
+      });
+
       test('everyone standing in the exit leaves together, not the downed', () {
         final three = RaidSimulation.party(
           catalog: catalog,

@@ -678,7 +678,7 @@ final class RaidSimulation {
   double get enemySpeed => rules.player.speed * zone.enemies.speedMultiplier;
 
   /// How far into a signal countdown the run is, 0 to 1; 0 without one.
-  /// With several members signalling, the one nearest zero counts.
+  /// The party has one signal at a time; the one nearest zero counts.
   double get _waitPassed {
     final danger = zone.danger;
     if (danger == null) return 0;
@@ -848,7 +848,11 @@ final class RaidSimulation {
         return RaidRejection.noSuchCompanion;
       case Signal():
         if (!isDanger) return RaidRejection.wrongZone;
-        if (member.signal != null) return RaidRejection.signalling;
+        // One signal at a time for the whole party, from one exit
+        // (2026-11-01, 사용자).
+        if (_active.any((m) => m.signal != null)) {
+          return RaidRejection.signalling;
+        }
         final exit = exitOf(member);
         if (exit == null) return RaidRejection.notAtExit;
         exit.found = true;

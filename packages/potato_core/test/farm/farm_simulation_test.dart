@@ -542,6 +542,33 @@ void main() {
       );
     });
 
+    test('reviving costs more by level band, a farewell costs nothing '
+        '(2026-11-01)', () {
+      farm.food = 1000;
+      farm.apply(
+        FarmCommand.build(kind: 'graveyard', origin: const TilePos(8, 8)),
+      );
+      plant();
+      final id = farm.field(1)!.potatoAt(_tile)!.id;
+      farm.runSteps(120 + 1800);
+      final grave = farm.graves.single;
+      final perBand = catalog.rules.potatoes.reviveFood[grave.grade]!;
+      expect(
+        farm.reviveCost(grave),
+        perBand * catalog.rules.seedLab.band(grave.level),
+      );
+      final food = farm.food;
+      final seeds = farm.seeds.counts.values.fold(0, (a, b) => a + b);
+      expect(farm.apply(FarmCommand.farewell(potatoId: id)), isNull);
+      expect(farm.graves, isEmpty);
+      expect(farm.food, food);
+      expect(farm.seeds.counts.values.fold(0, (a, b) => a + b), seeds);
+      expect(
+        farm.apply(FarmCommand.farewell(potatoId: id)),
+        FarmRejection.noGrave,
+      );
+    });
+
     test('a full graveyard loses its oldest grave', () {
       farm.food = 1000;
       farm.apply(

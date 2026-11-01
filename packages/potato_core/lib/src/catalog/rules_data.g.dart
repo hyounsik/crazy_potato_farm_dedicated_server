@@ -183,78 +183,106 @@ Map<String, dynamic> _$FarmRulesDataToJson(_FarmRulesData instance) =>
       'block_step_every': instance.blockStepEvery,
     };
 
-_PotatoRulesData _$PotatoRulesDataFromJson(Map<String, dynamic> json) =>
-    $checkedCreate(
-      '_PotatoRulesData',
-      json,
-      ($checkedConvert) {
-        final val = _PotatoRulesData(
-          gradeDropChance: $checkedConvert(
-            'grade_drop_chance',
-            (v) => (v as num).toDouble(),
-          ),
-          reviveFood: $checkedConvert(
-            'revive_food',
-            (v) => (v as Map<String, dynamic>).map(
+_PotatoRulesData _$PotatoRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_PotatoRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _PotatoRulesData(
+      gradeDropChance: $checkedConvert(
+        'grade_drop_chance',
+        (v) => (v as num).toDouble(),
+      ),
+      reviveFood: $checkedConvert(
+        'revive_food',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) =>
+              MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+        ),
+      ),
+      releaseGraveChance: $checkedConvert(
+        'release_grave_chance',
+        (v) => (v as num?)?.toDouble() ?? 0.7,
+      ),
+      gradeAttackPercent: $checkedConvert(
+        'grade_attack_percent',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
               (k, e) =>
                   MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
-            ),
+            ) ??
+            const {Grade.normal: 0, Grade.rare: 10, Grade.legendary: 25},
+      ),
+      gradeBuffPercent: $checkedConvert(
+        'grade_buff_percent',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 0, Grade.rare: 10, Grade.legendary: 25},
+      ),
+      gradeUpPercent: $checkedConvert(
+        'grade_up_percent',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 0, Grade.rare: 5, Grade.legendary: 10},
+      ),
+      upkeepEverySeconds: $checkedConvert(
+        'upkeep_every_seconds',
+        (v) => (v as num).toInt(),
+      ),
+      weakPercent: $checkedConvert('weak_percent', (v) => (v as num).toInt()),
+      breedingGradeUpChance: $checkedConvert(
+        'breeding_grade_up_chance',
+        (v) => (v as num).toDouble(),
+      ),
+      guards: $checkedConvert(
+        'guards',
+        (v) => GuardRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      fridge: $checkedConvert(
+        'fridge',
+        (v) => FridgeRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      harvestRareChance: $checkedConvert(
+        'harvest_rare_chance',
+        (v) => (v as num).toDouble(),
+      ),
+      level: $checkedConvert(
+        'level',
+        (v) => LevelRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      combatStyles: $checkedConvert(
+        'combat_styles',
+        (v) => (v as Map<String, dynamic>).map(
+          (k, e) => MapEntry(
+            $enumDecode(_$CombatStyleEnumMap, k),
+            CombatStyleData.fromJson(e as Map<String, dynamic>),
           ),
-          releaseGraveChance: $checkedConvert(
-            'release_grave_chance',
-            (v) => (v as num?)?.toDouble() ?? 0.7,
-          ),
-          upkeepEverySeconds: $checkedConvert(
-            'upkeep_every_seconds',
-            (v) => (v as num).toInt(),
-          ),
-          weakPercent: $checkedConvert(
-            'weak_percent',
-            (v) => (v as num).toInt(),
-          ),
-          breedingGradeUpChance: $checkedConvert(
-            'breeding_grade_up_chance',
-            (v) => (v as num).toDouble(),
-          ),
-          guards: $checkedConvert(
-            'guards',
-            (v) => GuardRulesData.fromJson(v as Map<String, dynamic>),
-          ),
-          fridge: $checkedConvert(
-            'fridge',
-            (v) => FridgeRulesData.fromJson(v as Map<String, dynamic>),
-          ),
-          harvestRareChance: $checkedConvert(
-            'harvest_rare_chance',
-            (v) => (v as num).toDouble(),
-          ),
-          level: $checkedConvert(
-            'level',
-            (v) => LevelRulesData.fromJson(v as Map<String, dynamic>),
-          ),
-          combatStyles: $checkedConvert(
-            'combat_styles',
-            (v) => (v as Map<String, dynamic>).map(
-              (k, e) => MapEntry(
-                $enumDecode(_$CombatStyleEnumMap, k),
-                CombatStyleData.fromJson(e as Map<String, dynamic>),
-              ),
-            ),
-          ),
-        );
-        return val;
-      },
-      fieldKeyMap: const {
-        'gradeDropChance': 'grade_drop_chance',
-        'reviveFood': 'revive_food',
-        'releaseGraveChance': 'release_grave_chance',
-        'upkeepEverySeconds': 'upkeep_every_seconds',
-        'weakPercent': 'weak_percent',
-        'breedingGradeUpChance': 'breeding_grade_up_chance',
-        'harvestRareChance': 'harvest_rare_chance',
-        'combatStyles': 'combat_styles',
-      },
+        ),
+      ),
     );
+    return val;
+  },
+  fieldKeyMap: const {
+    'gradeDropChance': 'grade_drop_chance',
+    'reviveFood': 'revive_food',
+    'releaseGraveChance': 'release_grave_chance',
+    'gradeAttackPercent': 'grade_attack_percent',
+    'gradeBuffPercent': 'grade_buff_percent',
+    'gradeUpPercent': 'grade_up_percent',
+    'upkeepEverySeconds': 'upkeep_every_seconds',
+    'weakPercent': 'weak_percent',
+    'breedingGradeUpChance': 'breeding_grade_up_chance',
+    'harvestRareChance': 'harvest_rare_chance',
+    'combatStyles': 'combat_styles',
+  },
+);
 
 Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
     <String, dynamic>{
@@ -263,6 +291,15 @@ Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
         (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
       ),
       'release_grave_chance': instance.releaseGraveChance,
+      'grade_attack_percent': instance.gradeAttackPercent.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+      'grade_buff_percent': instance.gradeBuffPercent.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+      'grade_up_percent': instance.gradeUpPercent.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
       'upkeep_every_seconds': instance.upkeepEverySeconds,
       'weak_percent': instance.weakPercent,
       'breeding_grade_up_chance': instance.breedingGradeUpChance,
@@ -506,6 +543,10 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
             (v) => (v as num).toInt(),
           ),
           pouchMax: $checkedConvert('pouch_max', (v) => (v as num).toInt()),
+          stepFoodRise: $checkedConvert(
+            'step_food_rise',
+            (v) => (v as num?)?.toInt() ?? 50,
+          ),
           gearSlots: $checkedConvert('gear_slots', (v) => (v as num).toInt()),
           gearStep: $checkedConvert('gear_step', (v) => (v as num).toInt()),
           gearStepFood: $checkedConvert(
@@ -536,6 +577,7 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
         'pouchStep': 'pouch_step',
         'pouchStepFood': 'pouch_step_food',
         'pouchMax': 'pouch_max',
+        'stepFoodRise': 'step_food_rise',
         'gearSlots': 'gear_slots',
         'gearStep': 'gear_step',
         'gearStepFood': 'gear_step_food',
@@ -553,6 +595,7 @@ Map<String, dynamic> _$StorageRulesDataToJson(
   'pouch_step': instance.pouchStep,
   'pouch_step_food': instance.pouchStepFood,
   'pouch_max': instance.pouchMax,
+  'step_food_rise': instance.stepFoodRise,
   'gear_slots': instance.gearSlots,
   'gear_step': instance.gearStep,
   'gear_step_food': instance.gearStepFood,
@@ -715,6 +758,34 @@ _GearRulesData _$GearRulesDataFromJson(
         'start',
         (v) => Equipped.fromJson(v as Map<String, dynamic>),
       ),
+      abilitySlots: $checkedConvert(
+        'ability_slots',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 0, Grade.rare: 1, Grade.legendary: 2},
+      ),
+      abilityRarityWeights: $checkedConvert(
+        'ability_rarity_weights',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$RarityEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Rarity.normal: 100, Rarity.low: 30, Rarity.veryLow: 5},
+      ),
+      abilities: $checkedConvert(
+        'abilities',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map(
+                  (e) => GearAbilityData.fromJson(e as Map<String, dynamic>),
+                )
+                .toList() ??
+            const <GearAbilityData>[],
+      ),
     );
     return val;
   },
@@ -738,6 +809,8 @@ _GearRulesData _$GearRulesDataFromJson(
     'lossChance': 'loss_chance',
     'useMargin': 'use_margin',
     'lootLevelMode': 'loot_level_mode',
+    'abilitySlots': 'ability_slots',
+    'abilityRarityWeights': 'ability_rarity_weights',
   },
 );
 
@@ -774,12 +847,101 @@ Map<String, dynamic> _$GearRulesDataToJson(
   'use_margin': instance.useMargin,
   'loot_level_mode': _$LootLevelModeEnumMap[instance.lootLevelMode]!,
   'start': instance.start.toJson(),
+  'ability_slots': instance.abilitySlots.map(
+    (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+  ),
+  'ability_rarity_weights': instance.abilityRarityWeights.map(
+    (k, e) => MapEntry(_$RarityEnumMap[k]!, e),
+  ),
+  'abilities': instance.abilities.map((e) => e.toJson()).toList(),
 };
 
 const _$LootLevelModeEnumMap = {
   LootLevelMode.worn: 'worn',
   LootLevelMode.ownedAverage: 'owned_average',
   LootLevelMode.ownedBest: 'owned_best',
+};
+
+const _$RarityEnumMap = {
+  Rarity.normal: 'normal',
+  Rarity.low: 'low',
+  Rarity.veryLow: 'very_low',
+};
+
+_GearAbilityData _$GearAbilityDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_GearAbilityData', json, ($checkedConvert) {
+      final val = _GearAbilityData(
+        id: $checkedConvert('id', (v) => v as String),
+        stat: $checkedConvert('stat', (v) => $enumDecode(_$GearStatEnumMap, v)),
+        kinds: $checkedConvert(
+          'kinds',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map((e) => $enumDecode(_$GearKindEnumMap, e))
+                  .toList() ??
+              const <GearKind>[],
+        ),
+        families: $checkedConvert(
+          'families',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
+        tiers: $checkedConvert(
+          'tiers',
+          (v) => (v as List<dynamic>)
+              .map(
+                (e) => GearAbilityTierData.fromJson(e as Map<String, dynamic>),
+              )
+              .toList(),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$GearAbilityDataToJson(_GearAbilityData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'stat': _$GearStatEnumMap[instance.stat]!,
+      'kinds': instance.kinds.map((e) => _$GearKindEnumMap[e]!).toList(),
+      'families': instance.families,
+      'tiers': instance.tiers.map((e) => e.toJson()).toList(),
+    };
+
+const _$GearStatEnumMap = {
+  GearStat.hp: 'hp',
+  GearStat.companionHp: 'companion_hp',
+  GearStat.foodUse: 'food_use',
+  GearStat.damage: 'damage',
+  GearStat.range: 'range',
+  GearStat.spread: 'spread',
+  GearStat.fireRate: 'fire_rate',
+  GearStat.beltBonus: 'belt_bonus',
+};
+
+const _$GearKindEnumMap = {
+  GearKind.weapon: 'weapon',
+  GearKind.bag: 'bag',
+  GearKind.belt: 'belt',
+};
+
+_GearAbilityTierData _$GearAbilityTierDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_GearAbilityTierData', json, ($checkedConvert) {
+      final val = _GearAbilityTierData(
+        rarity: $checkedConvert(
+          'rarity',
+          (v) => $enumDecode(_$RarityEnumMap, v),
+        ),
+        percent: $checkedConvert('percent', (v) => (v as num).toDouble()),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$GearAbilityTierDataToJson(
+  _GearAbilityTierData instance,
+) => <String, dynamic>{
+  'rarity': _$RarityEnumMap[instance.rarity]!,
+  'percent': instance.percent,
 };
 
 _CombatPowerRulesData _$CombatPowerRulesDataFromJson(
@@ -1067,6 +1229,10 @@ _SeedLabRulesData _$SeedLabRulesDataFromJson(
             ) ??
             const {Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3},
       ),
+      rerollBandFood: $checkedConvert(
+        'reroll_band_food',
+        (v) => (v as num?)?.toInt() ?? 10,
+      ),
       pickTimes: $checkedConvert(
         'pick_times',
         (v) => (v as num?)?.toInt() ?? 2,
@@ -1114,6 +1280,7 @@ _SeedLabRulesData _$SeedLabRulesDataFromJson(
     'bandLevels': 'band_levels',
     'bandFood': 'band_food',
     'gradeTimes': 'grade_times',
+    'rerollBandFood': 'reroll_band_food',
     'pickTimes': 'pick_times',
     'keepPercent': 'keep_percent',
     'keepStepPercent': 'keep_step_percent',
@@ -1130,6 +1297,7 @@ Map<String, dynamic> _$SeedLabRulesDataToJson(
   'grade_times': instance.gradeTimes.map(
     (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
   ),
+  'reroll_band_food': instance.rerollBandFood,
   'pick_times': instance.pickTimes,
   'keep_percent': instance.keepPercent.map(
     (k, e) => MapEntry(_$GradeEnumMap[k]!, e),

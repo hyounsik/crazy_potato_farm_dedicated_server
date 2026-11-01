@@ -187,10 +187,15 @@ final class FarmSimulation {
             random: random,
           )
           case final rolled)
-        rolled.copyWith(
-          ability: stack.ability ?? rolled.ability,
-          style: stack.style ?? rolled.style,
-        ),
+        stack.ability == null
+            ? rolled.copyWith(style: stack.style ?? rolled.style)
+            : roller.fill(
+                rolled.copyWith(
+                  ability: stack.ability!,
+                  style: stack.style ?? rolled.style,
+                ),
+                random,
+              ),
   ];
 
   final Catalog catalog;
@@ -690,6 +695,7 @@ final class FarmSimulation {
     WidenPouch() => _widen(pouch: true),
     WidenGearBox() => _widen(pouch: false),
     SellSeed(:final seed) => _sellSeed(seed),
+    RerollSeed(:final seed) => _rerollSeed(seed),
     ConvertSeed(:final seed, :final to, :final keep) => _convertSeed(
       seed,
       to,
@@ -730,6 +736,7 @@ final class FarmSimulation {
     ),
     ReleasePotato(:final potatoId) => _release(potatoId),
     Revive(:final potatoId) => _revive(potatoId),
+    Farewell(:final potatoId) => _farewell(potatoId),
     Depart(:final food, :final potatoIds, :final zone) => _depart(
       food,
       potatoIds,
@@ -1479,7 +1486,9 @@ final class FarmSimulation {
     final slots = pouch ? pouchSlots : gearSlots;
     final max = pouch ? storage.pouchMax : storage.gearMax;
     if (slots >= max) return FarmRejection.atMost;
-    final cost = pouch ? storage.pouchStepFood : storage.gearStepFood;
+    final cost = pouch
+        ? storage.pouchWidenFood(slots)
+        : storage.gearWidenFood(slots);
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
     final step = pouch ? storage.pouchStep : storage.gearStep;
@@ -1528,6 +1537,32 @@ final class FarmSimulation {
     _events.add(FarmEvent.seedConverted(from: seed, seed: turned));
     return null;
   }
+
+  /// Rolls [seed]'s abilities anew at the seed lab: its first from its
+  /// type's own pool and the others for its grade; type, grade, level and
+  /// style stay (2026-11-01, 사용자: again and again until taken).
+  FarmRejection? _rerollSeed(Seed seed) {
+    if (!hasSeedLab) return FarmRejection.noSeedLab;
+    final cost = seedRerollFood(seed);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    if (!_seeds.take(seed)) return FarmRejection.noSeed;
+    food -= cost;
+    final rolled = _roller
+        .seed(
+          type: seed.type,
+          grade: seed.grade,
+          level: seed.level,
+          random: _random,
+        )
+        .copyWith(style: seed.style);
+    _seeds.add(rolled);
+    _events.add(FarmEvent.seedRerolled(from: seed, seed: rolled));
+    return null;
+  }
+
+  /// Baby potatoes one roll of [seed]'s abilities costs at the seed lab.
+  int seedRerollFood(Seed seed) =>
+      _rules.seedLab.rerollFood(seed.grade, seed.level);
 
   /// Baby potatoes the seed lab asks to turn [seed], with the new type
   /// [picked] or not, and [keep] keep steps.
@@ -1786,10 +1821,11 @@ final class FarmSimulation {
     if (building == null) return FarmRejection.noSuchBuilding;
     final toFridge = <int>[];
     if (building.data.houses == PotatoType.combat) {
-      final other = _trainingGround();
       final data = catalog.potatoType(PotatoType.combat);
       for (final guard in _guards.values.toList()) {
         if (guard.buildingId != buildingId) continue;
+        // One at a time, so they spread over the grounds with room.
+        final other = _trainingGround();
         if (other != null) {
           guard.buildingId = other.id;
           if (!guard.potato.isGrown(data)) guard.at = _doorOf(other);
@@ -1819,6 +1855,7 @@ final class FarmSimulation {
     }
     final full = _roomFor(seed.type);
     if (full != null) return full;
+    if (!_hasRoom(building)) return FarmRejection.atCapacity;
     if (!_seeds.take(seed)) return FarmRejection.noSeed;
     final potato = _sprout(seed, seed.grade);
     _house(potato, building);
@@ -1944,6 +1981,7 @@ final class FarmSimulation {
     }
     final full = _roomFor(potato.type);
     if (full != null) return full;
+    if (!_hasRoom(building)) return FarmRejection.atCapacity;
     _fridge.remove(potatoId);
     _house(potato, building);
     _events.add(FarmEvent.takenOut(potatoId: potatoId));
@@ -2229,7 +2267,8 @@ final class FarmSimulation {
       return true;
     }
     final home = _buildings[away.buildingId];
-    final building = home != null && home.data.houses == PotatoType.combat
+    final building =
+        home != null && home.data.houses == PotatoType.combat && _hasRoom(home)
         ? home
         : _trainingGround();
     if (building == null) return false;
@@ -2260,11 +2299,33 @@ final class FarmSimulation {
   }
 
   FarmBuilding? _trainingGround() {
+    FarmBuilding? any;
     for (final building in _buildings.values) {
-      if (building.data.houses == PotatoType.combat) return building;
+      if (building.data.houses != PotatoType.combat) continue;
+      if (_hasRoom(building)) return building;
+      any ??= building;
+    }
+    return any;
+  }
+
+  /// A training ground for combat potatoes with a free place, the first in
+  /// id order (2026-11-01, 사용자: taking several out of the cellar filled
+  /// one ground past its places).
+  FarmBuilding? groundWithRoom() {
+    for (final building in _buildings.values) {
+      if (building.data.houses == PotatoType.combat && _hasRoom(building)) {
+        return building;
+      }
     }
     return null;
   }
+
+  /// Guards that live in building [buildingId].
+  int guardsIn(int buildingId) =>
+      _guards.values.where((g) => g.buildingId == buildingId).length;
+
+  bool _hasRoom(FarmBuilding building) =>
+      guardsIn(building.id) < building.capacity;
 
   /// The tile in front of a building where its guards come out: its
   /// [FarmBuilding.door], kept on the farm.
@@ -2533,7 +2594,24 @@ final class FarmSimulation {
   }
 
   /// Baby potatoes it costs to revive [potato] from a graveyard.
-  int reviveCost(Potato potato) => _rules.potatoes.reviveFood[potato.grade]!;
+  int reviveCost(Potato potato) =>
+      _rules.potatoes.reviveFood[potato.grade]! *
+      _rules.seedLab.band(potato.level);
+
+  /// Baby potatoes widening the seed pouch costs now.
+  int get pouchWidenFood => _rules.storage.pouchWidenFood(pouchSlots);
+
+  /// Baby potatoes widening the equipment box costs now.
+  int get gearWidenFood => _rules.storage.gearWidenFood(gearSlots);
+
+  /// Lets dead potato [potatoId] go from the graveyard for good
+  /// (2026-11-01, 사용자: "잘 가").
+  FarmRejection? _farewell(int potatoId) {
+    final index = _graves.indexWhere((p) => p.id == potatoId);
+    if (index < 0) return FarmRejection.noGrave;
+    _graves.removeAt(index);
+    return null;
+  }
 
   FarmRejection? _revive(int potatoId) {
     final index = _graves.indexWhere((p) => p.id == potatoId);
@@ -2566,7 +2644,7 @@ final class FarmSimulation {
     } else if (upChance > 0 && _random.chance(upChance)) {
       grade = grade.higher ?? grade;
     }
-    final seed = potato.seed.copyWith(grade: grade);
+    final seed = _roller.fill(potato.seed.copyWith(grade: grade), _random);
     _gainSeed(seed);
     return seed;
   }
@@ -2584,6 +2662,7 @@ final class FarmSimulation {
         grade: grade,
         first: seed.ability,
         random: _random,
+        kept: seed.extras,
       ),
       style: seed.style,
     );

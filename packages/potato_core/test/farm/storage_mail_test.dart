@@ -105,6 +105,12 @@ void main() {
       expect(farm.apply(const FarmCommand.widenPouch()), isNull);
       expect(farm.pouchSlots, storage.pouchSlots + storage.pouchStep);
       expect(farm.food, 1000 - storage.pouchStepFood);
+      // Each widening costs stepFoodRise more than the last (2026-11-01).
+      expect(farm.pouchWidenFood, storage.pouchStepFood + storage.stepFoodRise);
+      final before = farm.food;
+      expect(farm.apply(const FarmCommand.widenPouch()), isNull);
+      expect(farm.food, before - storage.pouchStepFood - storage.stepFoodRise);
+      expect(farm.gearWidenFood, storage.gearStepFood);
       while (farm.pouchSlots < storage.pouchMax) {
         farm.apply(const FarmCommand.widenPouch());
       }

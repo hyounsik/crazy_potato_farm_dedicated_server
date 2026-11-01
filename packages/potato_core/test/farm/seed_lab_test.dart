@@ -178,4 +178,73 @@ void main() {
       expect(grades, {Grade.legendary, Grade.rare});
     });
   });
+
+  group('rolling abilities anew (2026-11-01)', () {
+    test('costs 10 a band, x2 rare, x3 legendary', () {
+      const lab = SeedLabRulesData();
+      expect(lab.rerollFood(Grade.normal, 1), 10);
+      expect(lab.rerollFood(Grade.rare, 25), 60);
+      expect(lab.rerollFood(Grade.legendary, 95), 300);
+    });
+
+    test('needs the lab, keeps type, grade, level and style', () {
+      final seed = plainSeed(PotatoType.combat, Grade.legendary);
+      farm.seeds.add(seed);
+      expect(
+        farm.apply(FarmCommand.rerollSeed(seed: seed)),
+        FarmRejection.noSeedLab,
+      );
+      buildLab();
+      farm.takeEvents();
+      final food = farm.food;
+      expect(farm.apply(FarmCommand.rerollSeed(seed: seed)), isNull);
+      expect(farm.food, food - farm.seedRerollFood(seed));
+      final rolled = farm.takeEvents().whereType<SeedRerolled>().single;
+      expect(rolled.from, seed);
+      final got = rolled.seed;
+      expect(got.type, seed.type);
+      expect(got.grade, seed.grade);
+      expect(got.level, seed.level);
+      expect(got.style, seed.style);
+      expect(got.abilities, hasLength(3), reason: 'legendary: three slots');
+      expect(got.abilities.toSet(), hasLength(3));
+      expect(farm.seeds.count(seed), 0);
+      expect(farm.seeds.count(got), 1);
+      // Again, from the new one, until the player takes it.
+      expect(farm.apply(FarmCommand.rerollSeed(seed: got)), isNull);
+      expect(farm.seeds.count(got), anyOf(0, 1));
+    });
+
+    test('found seeds carry their grade\'s abilities, a potato grows '
+        'with them', () {
+      final roller = AbilityRoller(catalog);
+      final random = GameRandom(5);
+      for (final grade in Grade.values) {
+        final seed = roller.seed(
+          type: PotatoType.food,
+          grade: grade,
+          level: 1,
+          random: random,
+        );
+        expect(
+          seed.abilities,
+          hasLength(catalog.abilityRules.slotsByGrade[grade]),
+        );
+      }
+      final rare = roller.seed(
+        type: PotatoType.food,
+        grade: Grade.rare,
+        level: 1,
+        random: random,
+      );
+      final kept = roller.slots(
+        type: rare.type,
+        grade: rare.grade,
+        first: rare.ability,
+        random: random,
+        kept: rare.extras,
+      );
+      expect(kept, rare.abilities);
+    });
+  });
 }

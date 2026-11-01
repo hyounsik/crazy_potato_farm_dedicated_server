@@ -1121,6 +1121,24 @@ final class Catalog {
         missing('rules', 'gear.start.weapon.family', 'weapon', piece.family);
       }
     }
+    final abilityIds = <String>{};
+    for (final ability in gear.abilities) {
+      if (!abilityIds.add(ability.id)) {
+        issues.add(
+          CatalogIssue('rules', 'gear.abilities', 'duplicate ${ability.id}'),
+        );
+      }
+      if (ability.tiers.isEmpty) {
+        issues.add(
+          CatalogIssue('rules', 'gear.abilities.${ability.id}', 'no tiers'),
+        );
+      }
+      for (final family in ability.families) {
+        if (!weapons.containsKey(family)) {
+          missing('rules', 'gear.abilities.${ability.id}', 'weapon', family);
+        }
+      }
+    }
     for (final item in items.values) {
       final kind = item.gear;
       if (kind == null || kind.kind != GearKind.weapon) continue;

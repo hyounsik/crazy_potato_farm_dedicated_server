@@ -183,6 +183,29 @@ Map<String, dynamic> _$SeedConvertedToJson(SeedConverted instance) =>
       'runtimeType': instance.$type,
     };
 
+SeedRerolled _$SeedRerolledFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('SeedRerolled', json, ($checkedConvert) {
+      final val = SeedRerolled(
+        from: $checkedConvert(
+          'from',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$SeedRerolledToJson(SeedRerolled instance) =>
+    <String, dynamic>{
+      'from': instance.from.toJson(),
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
 SeedOverflowed _$SeedOverflowedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('SeedOverflowed', json, ($checkedConvert) {
       final val = SeedOverflowed(

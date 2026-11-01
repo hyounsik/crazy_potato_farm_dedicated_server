@@ -61,6 +61,12 @@ sealed class FarmEvent with _$FarmEvent {
     required Seed seed,
   }) = SeedConverted;
 
+  /// The seed lab rolled [from]'s abilities anew into [seed] (2026-11-01).
+  const factory FarmEvent.seedRerolled({
+    required Seed from,
+    required Seed seed,
+  }) = SeedRerolled;
+
   /// A seed came with the pouch full and waits in the overflow.
   const factory FarmEvent.seedOverflowed({required Seed seed}) = SeedOverflowed;
 

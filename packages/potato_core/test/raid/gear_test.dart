@@ -399,10 +399,34 @@ void main() {
         const [],
       );
       final party = stats.combatPower(const Equipped(weapon: rareRapid), const [
-        (type: PotatoType.combat, level: 5, style: CombatStyle.melee),
+        (
+          type: PotatoType.combat,
+          grade: Grade.normal,
+          level: 5,
+          style: CombatStyle.melee,
+        ),
       ]);
       expect(armed, greaterThan(bare));
       expect(party, greaterThan(armed));
+      // A legendary combat potato hits harder at the same level
+      // (2026-11-01).
+      final legendary = stats.combatPower(
+        const Equipped(weapon: rareRapid),
+        const [
+          (
+            type: PotatoType.combat,
+            grade: Grade.legendary,
+            level: 5,
+            style: CombatStyle.melee,
+          ),
+        ],
+      );
+      expect(legendary, greaterThan(party));
+      final potatoes = catalog.rules.potatoes;
+      expect(potatoes.attackOf(Grade.normal), 1);
+      expect(potatoes.attackOf(Grade.legendary), greaterThan(1));
+      expect(potatoes.buffOf(Grade.rare), greaterThan(1));
+      expect(potatoes.gradeUpOf(Grade.legendary), greaterThan(0));
       final need = stats.recommendedPower(10);
       expect(stats.recommendedPower(20), greaterThan(need));
       expect(stats.verdict(need * 2, need), PowerVerdict.easy);

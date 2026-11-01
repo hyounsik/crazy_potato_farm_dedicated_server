@@ -1,5 +1,6 @@
 import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
+import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/potatoes/potato_effects.dart';
 
@@ -7,6 +8,7 @@ import 'package:potato_core/src/potatoes/potato_effects.dart';
 /// to start a run and one in it fit.
 typedef CompanionTraits = ({
   PotatoType type,
+  Grade grade,
   int level,
   List<String> abilities,
 
@@ -35,6 +37,7 @@ final class RaidEffects {
                 potato.level *
                     catalog.rules.potatoes.level.buffPowerPermille /
                     1000) *
+            catalog.rules.potatoes.buffOf(potato.grade) *
             (1 + potato.boost)
       : 1;
 

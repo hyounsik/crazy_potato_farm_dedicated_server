@@ -53,7 +53,11 @@ final class PotatoEffects {
 
   /// How much stronger a buff potato's abilities are at its level.
   double _power(Potato potato) => potato.type == PotatoType.buff
-      ? 1 + potato.level * catalog.rules.potatoes.level.buffPowerPermille / 1000
+      ? (1 +
+                potato.level *
+                    catalog.rules.potatoes.level.buffPowerPermille /
+                    1000) *
+            catalog.rules.potatoes.buffOf(potato.grade)
       : 1;
 
   /// Farm effects of [potato]'s abilities on itself.
@@ -132,10 +136,11 @@ final class PotatoEffects {
   double gradeUpChanceOf(Potato breeder, StatSums sums) {
     final base =
         catalog.rules.potatoes.breedingGradeUpChance *
-        (1 +
-            breeder.level *
-                catalog.rules.potatoes.level.gradeUpChancePermille /
-                1000);
+            (1 +
+                breeder.level *
+                    catalog.rules.potatoes.level.gradeUpChancePermille /
+                    1000) +
+        catalog.rules.potatoes.gradeUpOf(breeder.grade);
     return _chance(sums.apply(FarmStat.gradeUpChance, base));
   }
 

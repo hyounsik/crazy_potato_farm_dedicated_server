@@ -14,21 +14,35 @@ final class AbilityRoller {
 
   final Catalog catalog;
 
-  /// A new seed: its first ability from the type's own pool, and a combat
-  /// style for combat seeds.
+  /// A new seed: its first ability from the type's own pool, a combat
+  /// style for combat seeds, and its other abilities for its grade.
   Seed seed({
     required PotatoType type,
     required Grade grade,
     required int level,
     required GameRandom random,
-  }) => Seed(
-    type: type,
-    grade: grade,
-    level: level,
-    ability: _pick(catalog.abilitiesIn(type.name), const {}, random)!.id,
-    style: type == PotatoType.combat
-        ? CombatStyle.values[random.nextInt(CombatStyle.values.length)]
-        : null,
+  }) => fill(
+    Seed(
+      type: type,
+      grade: grade,
+      level: level,
+      ability: _pick(catalog.abilitiesIn(type.name), const {}, random)!.id,
+      style: type == PotatoType.combat
+          ? CombatStyle.values[random.nextInt(CombatStyle.values.length)]
+          : null,
+    ),
+    random,
+  );
+
+  /// [seed] with its other abilities rolled anew for its grade, after its
+  /// first (2026-11-01, 사용자).
+  Seed fill(Seed seed, GameRandom random) => seed.copyWith(
+    extras: slots(
+      type: seed.type,
+      grade: seed.grade,
+      first: seed.ability,
+      random: random,
+    ).skip(1).toList(),
   );
 
   /// The abilities a potato of [type] and [grade] comes up with: [first]
@@ -41,14 +55,18 @@ final class AbilityRoller {
     required Grade grade,
     required String first,
     required GameRandom random,
+
+    /// Abilities the seed already has after the first: kept, as many as
+    /// the grade has room for.
+    List<String> kept = const [],
   }) {
     final rules = catalog.abilityRules;
     final count = rules.slotsByGrade[grade] ?? 1;
-    final taken = {first};
+    final taken = {first, ...kept.take(count - 1)};
     final common = catalog.abilitiesIn(Catalog.commonPool).toList();
     final own = catalog.abilitiesIn(type.name).toList();
     final odds = rules.extraSlotPoolWeight;
-    for (var slot = 1; slot < count; slot++) {
+    for (var slot = taken.length; slot < count; slot++) {
       final total = odds.common + odds.unique;
       final fromCommon = total > 0 && random.nextInt(total) < odds.common;
       final ability =

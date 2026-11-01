@@ -88,6 +88,7 @@ final class CompanionStart {
 
   CompanionTraits get traits => (
     type: type,
+    grade: grade,
     level: level,
     abilities: abilities,
     hpRatio: 1,
@@ -291,7 +292,7 @@ final class RaidSimulation {
         radius: rules.player.radius,
         maxHp: party.apply(
           RaidStat.hp,
-          rules.player.maxHp * (1 + gear.bagHp(m.equipped.bag)),
+          rules.player.maxHp * (1 + gear.hpBonus(m.equipped)),
         ),
         weapon: gear.weaponOf(m.equipped.weapon),
         equipped: m.equipped,
@@ -316,12 +317,9 @@ final class RaidSimulation {
                   rules.companion.radius,
                 ),
                 radius: rules.companion.radius,
-                maxHp: _startHp(
-                  catalog,
-                  start,
-                  effects.own(start.traits),
-                  party,
-                ),
+                maxHp:
+                    _startHp(catalog, start, effects.own(start.traits), party) *
+                    gear.factorOf(m.equipped, GearStat.companionHp),
                 potatoId: start.potatoId,
                 type: start.type,
                 grade: start.grade,
@@ -601,6 +599,7 @@ final class RaidSimulation {
 
   static CompanionTraits _traitsOf(RaidCompanion c) => (
     type: c.type,
+    grade: c.grade,
     level: c.level,
     abilities: c.abilities,
     hpRatio: c.hp / c.maxHp,
@@ -629,6 +628,7 @@ final class RaidSimulation {
     final base =
         style.damage *
         levelGrowth(rules.companion.levelAttackPermille, companion.level) *
+        catalog.rules.potatoes.attackOf(companion.grade) *
         (1 + companion.beltBoost);
     return statsOf(companion).apply(RaidStat.attack, base);
   }
@@ -670,8 +670,10 @@ final class RaidSimulation {
 
   WeaponData get weapon => weaponOf(_first);
 
-  WeaponData weaponOf(RaidMember member) =>
-      catalog.weapons[member.player.weapon]!;
+  WeaponData weaponOf(RaidMember member) => _gear.tuned(
+    catalog.weapons[member.player.weapon]!,
+    member.player.equipped.weapon,
+  );
 
   /// How far wild enemies see in this zone.
   double get enemySight => rules.player.sight * zone.enemies.sightMultiplier;
@@ -1272,7 +1274,7 @@ final class RaidSimulation {
     _stepMemberMove(member, dt);
     _eat(member, dt);
     if (member.isOut || player.isDown) return;
-    _fire(player, aimOf(member), shotDamageOf(member), dt);
+    _fire(player, aimOf(member), shotDamageOf(member), dt, weaponOf(member));
   }
 
   /// Food is eaten all the time, more while healing. With none left the
@@ -1300,7 +1302,9 @@ final class RaidSimulation {
       player.hp = math.min(player.maxHp, player.hp + regen * dt);
       rate += food.regenExtraPerSecond;
     }
-    rate = _party.apply(RaidStat.foodConsumption, rate);
+    rate =
+        _party.apply(RaidStat.foodConsumption, rate) *
+        _gear.factorOf(player.equipped, GearStat.foodUse);
     player.foodOwed += rate * dt;
     final whole = player.foodOwed.floor();
     if (whole > 0) {
@@ -1313,8 +1317,14 @@ final class RaidSimulation {
   /// stay on one target for a while first, and start only once the gun is
   /// ready again, so a shot takes the interval and the aim one after the
   /// other (2026-10-28, user: the sniper has the lowest DPS).
-  void _fire(RaidShooter shooter, RaidBody? target, double damage, double dt) {
-    final gun = catalog.weapons[shooter.weapon]!;
+  void _fire(
+    RaidShooter shooter,
+    RaidBody? target,
+    double damage,
+    double dt, [
+    WeaponData? tuned,
+  ]) {
+    final gun = tuned ?? catalog.weapons[shooter.weapon]!;
     shooter.fireCooldown -= dt;
     if (gun.aimSeconds > 0) {
       if (target?.id != shooter.aimTarget) shooter.aimProgress = 0;
@@ -2247,7 +2257,8 @@ final class RaidSimulation {
     } else if (upChance > 0 && _random.chance(upChance)) {
       grade = grade.higher ?? grade;
     }
-    final seed = companion.seed.copyWith(grade: grade);
+    final seed = AbilityRoller(catalog)
+        .fill(companion.seed.copyWith(grade: grade), _random);
     final item = catalog.seedItemOf(seed.type, seed.grade);
     if (item == null) return;
     piles.add(
@@ -2899,6 +2910,8 @@ final class RaidSimulation {
         grade: kind.grade,
         level: levels.gear(kind.kind, random),
         slots: slots,
+        abilities: GearStats(catalog)
+            .rollAbilities(kind.kind, kind.family, kind.grade, random),
       );
     };
   }

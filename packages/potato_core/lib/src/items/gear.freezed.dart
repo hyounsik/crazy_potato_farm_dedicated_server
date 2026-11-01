@@ -14,12 +14,287 @@ part of 'gear.dart';
 T _$identity<T>(T value) => value;
 
 /// @nodoc
+mixin _$GearAbility {
+
+ String get id; int get tier;
+/// Create a copy of GearAbility
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$GearAbilityCopyWith<GearAbility> get copyWith => _$GearAbilityCopyWithImpl<GearAbility>(this as GearAbility, _$identity);
+
+  /// Serializes this GearAbility to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as GearAbility;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is GearAbility&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.tier, _this.tier) || other.tier == _this.tier));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as GearAbility;
+  return Object.hash(runtimeType,_this.id,_this.tier);
+}
+
+@override
+String toString() {
+  final _this = this as GearAbility;
+  return 'GearAbility(id: ${_this.id}, tier: ${_this.tier})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $GearAbilityCopyWith<$Res>  {
+  factory $GearAbilityCopyWith(GearAbility value, $Res Function(GearAbility) _then) = _$GearAbilityCopyWithImpl;
+@useResult
+$Res call({
+ String id, int tier
+});
+
+
+
+
+}
+/// @nodoc
+class _$GearAbilityCopyWithImpl<$Res>
+    implements $GearAbilityCopyWith<$Res> {
+  _$GearAbilityCopyWithImpl(this._self, this._then);
+
+  final GearAbility _self;
+  final $Res Function(GearAbility) _then;
+
+/// Create a copy of GearAbility
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? tier = null,}) {
+  return _then(GearAbility(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [GearAbility].
+extension GearAbilityPatterns on GearAbility {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _GearAbility value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _GearAbility() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _GearAbility value)  $default,){
+final _that = this;
+switch (_that) {
+case _GearAbility():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _GearAbility value)?  $default,){
+final _that = this;
+switch (_that) {
+case _GearAbility() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int tier)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _GearAbility() when $default != null:
+return $default(_that.id,_that.tier);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int tier)  $default,) {final _that = this;
+switch (_that) {
+case _GearAbility():
+return $default(_that.id,_that.tier);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int tier)?  $default,) {final _that = this;
+switch (_that) {
+case _GearAbility() when $default != null:
+return $default(_that.id,_that.tier);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _GearAbility implements GearAbility {
+  const _GearAbility({required this.id, required this.tier});
+  factory _GearAbility.fromJson(Map<String, dynamic> json) => _$GearAbilityFromJson(json);
+
+@override final  String id;
+@override final  int tier;
+
+/// Create a copy of GearAbility
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$GearAbilityCopyWith<_GearAbility> get copyWith => __$GearAbilityCopyWithImpl<_GearAbility>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$GearAbilityToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _GearAbility&&(identical(other.id, id) || other.id == id)&&(identical(other.tier, tier) || other.tier == tier));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,tier);
+}
+
+@override
+String toString() {
+    return 'GearAbility(id: $id, tier: $tier)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$GearAbilityCopyWith<$Res> implements $GearAbilityCopyWith<$Res> {
+  factory _$GearAbilityCopyWith(_GearAbility value, $Res Function(_GearAbility) _then) = __$GearAbilityCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, int tier
+});
+
+
+
+
+}
+/// @nodoc
+class __$GearAbilityCopyWithImpl<$Res>
+    implements _$GearAbilityCopyWith<$Res> {
+  __$GearAbilityCopyWithImpl(this._self, this._then);
+
+  final _GearAbility _self;
+  final $Res Function(_GearAbility) _then;
+
+/// Create a copy of GearAbility
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? tier = null,}) {
+  return _then(_GearAbility(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,tier: null == tier ? _self.tier : tier // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
 mixin _$Gear {
 
  GearKind get kind;/// Weapons: the weapon's catalog id, which sets how it shoots.
  String get family; Grade get grade; int get level; int get enhance;/// How worn it is; 0 is as new, so pieces saved before wear are too.
  int get wear;/// Belts: the potato type each slot takes.
- List<PotatoType> get slots;
+ List<PotatoType> get slots;/// Abilities rolled when found: none for normal, one for rare, two for
+/// legendary (2026-11-01, 사용자). Gear found before has none.
+ List<GearAbility> get abilities;
 /// Create a copy of Gear
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +308,20 @@ $GearCopyWith<Gear> get copyWith => _$GearCopyWithImpl<Gear>(this as Gear, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Gear;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Gear&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.family, _this.family) || other.family == _this.family)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.enhance, _this.enhance) || other.enhance == _this.enhance)&&(identical(other.wear, _this.wear) || other.wear == _this.wear)&&const DeepCollectionEquality().equals(other.slots, _this.slots));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Gear&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.family, _this.family) || other.family == _this.family)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.enhance, _this.enhance) || other.enhance == _this.enhance)&&(identical(other.wear, _this.wear) || other.wear == _this.wear)&&const DeepCollectionEquality().equals(other.slots, _this.slots)&&const DeepCollectionEquality().equals(other.abilities, _this.abilities));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Gear;
-  return Object.hash(runtimeType,_this.kind,_this.family,_this.grade,_this.level,_this.enhance,_this.wear,const DeepCollectionEquality().hash(_this.slots));
+  return Object.hash(runtimeType,_this.kind,_this.family,_this.grade,_this.level,_this.enhance,_this.wear,const DeepCollectionEquality().hash(_this.slots),const DeepCollectionEquality().hash(_this.abilities));
 }
 
 @override
 String toString() {
   final _this = this as Gear;
-  return 'Gear(kind: ${_this.kind}, family: ${_this.family}, grade: ${_this.grade}, level: ${_this.level}, enhance: ${_this.enhance}, wear: ${_this.wear}, slots: ${_this.slots})';
+  return 'Gear(kind: ${_this.kind}, family: ${_this.family}, grade: ${_this.grade}, level: ${_this.level}, enhance: ${_this.enhance}, wear: ${_this.wear}, slots: ${_this.slots}, abilities: ${_this.abilities})';
 }
 
 
@@ -57,7 +332,7 @@ abstract mixin class $GearCopyWith<$Res>  {
   factory $GearCopyWith(Gear value, $Res Function(Gear) _then) = _$GearCopyWithImpl;
 @useResult
 $Res call({
- GearKind kind, String family, Grade grade, int level, int enhance, int wear, List<PotatoType> slots
+ GearKind kind, String family, Grade grade, int level, int enhance, int wear, List<PotatoType> slots, List<GearAbility> abilities
 });
 
 
@@ -74,7 +349,7 @@ class _$GearCopyWithImpl<$Res>
 
 /// Create a copy of Gear
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? family = null,Object? grade = null,Object? level = null,Object? enhance = null,Object? wear = null,Object? slots = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? family = null,Object? grade = null,Object? level = null,Object? enhance = null,Object? wear = null,Object? slots = null,Object? abilities = null,}) {
   return _then(Gear(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as GearKind,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
@@ -83,7 +358,8 @@ as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_
 as int,enhance: null == enhance ? _self.enhance : enhance // ignore: cast_nullable_to_non_nullable
 as int,wear: null == wear ? _self.wear : wear // ignore: cast_nullable_to_non_nullable
 as int,slots: null == slots ? _self.slots : slots // ignore: cast_nullable_to_non_nullable
-as List<PotatoType>,
+as List<PotatoType>,abilities: null == abilities ? _self.abilities : abilities // ignore: cast_nullable_to_non_nullable
+as List<GearAbility>,
   ));
 }
 
@@ -168,10 +444,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots,  List<GearAbility> abilities)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Gear() when $default != null:
-return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots);case _:
+return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots,_that.abilities);case _:
   return orElse();
 
 }
@@ -189,10 +465,10 @@ return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots,  List<GearAbility> abilities)  $default,) {final _that = this;
 switch (_that) {
 case _Gear():
-return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots);case _:
+return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots,_that.abilities);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -209,10 +485,10 @@ return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( GearKind kind,  String family,  Grade grade,  int level,  int enhance,  int wear,  List<PotatoType> slots,  List<GearAbility> abilities)?  $default,) {final _that = this;
 switch (_that) {
 case _Gear() when $default != null:
-return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots);case _:
+return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_that.wear,_that.slots,_that.abilities);case _:
   return null;
 
 }
@@ -224,7 +500,7 @@ return $default(_that.kind,_that.family,_that.grade,_that.level,_that.enhance,_t
 @JsonSerializable()
 
 class _Gear implements Gear {
-  const _Gear({required this.kind, this.family = '', required this.grade, required this.level, this.enhance = 0, this.wear = 0,  List<PotatoType> slots = const <PotatoType>[]}): _slots = slots;
+  const _Gear({required this.kind, this.family = '', required this.grade, required this.level, this.enhance = 0, this.wear = 0,  List<PotatoType> slots = const <PotatoType>[],  List<GearAbility> abilities = const <GearAbility>[]}): _slots = slots,_abilities = abilities;
   factory _Gear.fromJson(Map<String, dynamic> json) => _$GearFromJson(json);
 
 @override final  GearKind kind;
@@ -244,6 +520,17 @@ class _Gear implements Gear {
   return EqualUnmodifiableListView(_slots);
 }
 
+/// Abilities rolled when found: none for normal, one for rare, two for
+/// legendary (2026-11-01, 사용자). Gear found before has none.
+ final  List<GearAbility> _abilities;
+/// Abilities rolled when found: none for normal, one for rare, two for
+/// legendary (2026-11-01, 사용자). Gear found before has none.
+@override@JsonKey() List<GearAbility> get abilities {
+  if (_abilities is EqualUnmodifiableListView) return _abilities;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_abilities);
+}
+
 
 /// Create a copy of Gear
 /// with the given fields replaced by the non-null parameter values.
@@ -258,18 +545,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Gear&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.family, family) || other.family == family)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.level, level) || other.level == level)&&(identical(other.enhance, enhance) || other.enhance == enhance)&&(identical(other.wear, wear) || other.wear == wear)&&const DeepCollectionEquality().equals(other.slots, _slots));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Gear&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.family, family) || other.family == family)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.level, level) || other.level == level)&&(identical(other.enhance, enhance) || other.enhance == enhance)&&(identical(other.wear, wear) || other.wear == wear)&&const DeepCollectionEquality().equals(other.slots, _slots)&&const DeepCollectionEquality().equals(other.abilities, _abilities));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,kind,family,grade,level,enhance,wear,const DeepCollectionEquality().hash(_slots));
+    return Object.hash(runtimeType,kind,family,grade,level,enhance,wear,const DeepCollectionEquality().hash(_slots),const DeepCollectionEquality().hash(_abilities));
 }
 
 @override
 String toString() {
-    return 'Gear(kind: $kind, family: $family, grade: $grade, level: $level, enhance: $enhance, wear: $wear, slots: $slots)';
+    return 'Gear(kind: $kind, family: $family, grade: $grade, level: $level, enhance: $enhance, wear: $wear, slots: $slots, abilities: $abilities)';
 }
 
 
@@ -280,7 +567,7 @@ abstract mixin class _$GearCopyWith<$Res> implements $GearCopyWith<$Res> {
   factory _$GearCopyWith(_Gear value, $Res Function(_Gear) _then) = __$GearCopyWithImpl;
 @override @useResult
 $Res call({
- GearKind kind, String family, Grade grade, int level, int enhance, int wear, List<PotatoType> slots
+ GearKind kind, String family, Grade grade, int level, int enhance, int wear, List<PotatoType> slots, List<GearAbility> abilities
 });
 
 
@@ -297,7 +584,7 @@ class __$GearCopyWithImpl<$Res>
 
 /// Create a copy of Gear
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? family = null,Object? grade = null,Object? level = null,Object? enhance = null,Object? wear = null,Object? slots = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? family = null,Object? grade = null,Object? level = null,Object? enhance = null,Object? wear = null,Object? slots = null,Object? abilities = null,}) {
   return _then(_Gear(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as GearKind,family: null == family ? _self.family : family // ignore: cast_nullable_to_non_nullable
@@ -306,7 +593,8 @@ as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_
 as int,enhance: null == enhance ? _self.enhance : enhance // ignore: cast_nullable_to_non_nullable
 as int,wear: null == wear ? _self.wear : wear // ignore: cast_nullable_to_non_nullable
 as int,slots: null == slots ? _self._slots : slots // ignore: cast_nullable_to_non_nullable
-as List<PotatoType>,
+as List<PotatoType>,abilities: null == abilities ? _self._abilities : abilities // ignore: cast_nullable_to_non_nullable
+as List<GearAbility>,
   ));
 }
 

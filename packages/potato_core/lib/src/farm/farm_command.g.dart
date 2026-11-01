@@ -202,6 +202,24 @@ Map<String, dynamic> _$SellSeedToJson(SellSeed instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
+RerollSeed _$RerollSeedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RerollSeed', json, ($checkedConvert) {
+      final val = RerollSeed(
+        seed: $checkedConvert(
+          'seed',
+          (v) => Seed.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RerollSeedToJson(RerollSeed instance) =>
+    <String, dynamic>{
+      'seed': instance.seed.toJson(),
+      'runtimeType': instance.$type,
+    };
+
 ConvertSeed _$ConvertSeedFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ConvertSeed', json, ($checkedConvert) {
       final val = ConvertSeed(
@@ -623,6 +641,20 @@ Revive _$ReviveFromJson(Map<String, dynamic> json) =>
     }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
 
 Map<String, dynamic> _$ReviveToJson(Revive instance) => <String, dynamic>{
+  'potato_id': instance.potatoId,
+  'runtimeType': instance.$type,
+};
+
+Farewell _$FarewellFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('Farewell', json, ($checkedConvert) {
+      final val = Farewell(
+        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$FarewellToJson(Farewell instance) => <String, dynamic>{
   'potato_id': instance.potatoId,
   'runtimeType': instance.$type,
 };

@@ -1057,10 +1057,12 @@ void main() {
       expect(run.takeEvents().whereType<CloneEntered>(), hasLength(2));
       final before = run.clones.length;
       runFor(run, danger.cloneEverySeconds + 0.1);
+      // One take: a second would find the events already gone.
+      final events = run.takeEvents();
       expect(
         run.clones.length +
-            run.takeEvents().whereType<CloneEscaped>().length +
-            run.takeEvents().whereType<CloneDown>().length,
+            events.whereType<CloneEscaped>().length +
+            events.whereType<CloneDown>().length,
         greaterThanOrEqualTo(before),
       );
     });

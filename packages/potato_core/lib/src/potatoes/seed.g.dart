@@ -19,6 +19,12 @@ _Seed _$SeedFromJson(Map<String, dynamic> json) => $checkedCreate(
         'style',
         (v) => $enumDecodeNullable(_$CombatStyleEnumMap, v),
       ),
+      extras: $checkedConvert(
+        'extras',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+            const <String>[],
+      ),
     );
     return val;
   },
@@ -30,6 +36,7 @@ Map<String, dynamic> _$SeedToJson(_Seed instance) => <String, dynamic>{
   'level': instance.level,
   'ability': instance.ability,
   'style': _$CombatStyleEnumMap[instance.style],
+  'extras': instance.extras,
 };
 
 const _$PotatoTypeEnumMap = {

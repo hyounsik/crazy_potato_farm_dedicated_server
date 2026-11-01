@@ -6,6 +6,18 @@ part of 'gear.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+_GearAbility _$GearAbilityFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_GearAbility', json, ($checkedConvert) {
+      final val = _GearAbility(
+        id: $checkedConvert('id', (v) => v as String),
+        tier: $checkedConvert('tier', (v) => (v as num).toInt()),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$GearAbilityToJson(_GearAbility instance) =>
+    <String, dynamic>{'id': instance.id, 'tier': instance.tier};
+
 _Gear _$GearFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_Gear', json, ($checkedConvert) {
       final val = _Gear(
@@ -23,6 +35,14 @@ _Gear _$GearFromJson(Map<String, dynamic> json) =>
                   .toList() ??
               const <PotatoType>[],
         ),
+        abilities: $checkedConvert(
+          'abilities',
+          (v) =>
+              (v as List<dynamic>?)
+                  ?.map((e) => GearAbility.fromJson(e as Map<String, dynamic>))
+                  .toList() ??
+              const <GearAbility>[],
+        ),
       );
       return val;
     });
@@ -35,6 +55,7 @@ Map<String, dynamic> _$GearToJson(_Gear instance) => <String, dynamic>{
   'enhance': instance.enhance,
   'wear': instance.wear,
   'slots': instance.slots.map((e) => _$PotatoTypeEnumMap[e]!).toList(),
+  'abilities': instance.abilities.map((e) => e.toJson()).toList(),
 };
 
 const _$GearKindEnumMap = {

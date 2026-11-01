@@ -1,6 +1,7 @@
 import 'dart:math' as math;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
+import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
@@ -120,13 +121,29 @@ abstract class PotatoRulesData with _$PotatoRulesData {
     required double gradeDropChance,
 
     /// Baby potatoes it costs to revive a dead potato as a seed, by its
-    /// grade.
+    /// grade, per cost band of its level: the seed lab's bands, 1-9 the
+    /// first (2026-11-01, 사용자: by level and grade, cheaper than the lab).
     required Map<Grade, int> reviveFood,
 
     /// Chance that a potato let go from the cellar goes to a graveyard (as
     /// if it had died); otherwise it leaves the farm for good (2026-10-31,
     /// 사용자).
     @Default(0.7) double releaseGraveChance,
+
+    /// What a potato's grade adds, always, on top of its level (2026-11-01,
+    /// 사용자: grade should count for more than ability slots). A combat
+    /// potato's attack, in percent.
+    @Default({Grade.normal: 0, Grade.rare: 10, Grade.legendary: 25})
+    Map<Grade, int> gradeAttackPercent,
+
+    /// A buff potato's buff power, in percent.
+    @Default({Grade.normal: 0, Grade.rare: 10, Grade.legendary: 25})
+    Map<Grade, int> gradeBuffPercent,
+
+    /// Points added to a breeding potato's chance that a seed comes out a
+    /// grade higher, in percent.
+    @Default({Grade.normal: 0, Grade.rare: 5, Grade.legendary: 10})
+    Map<Grade, int> gradeUpPercent,
 
     /// Game time between two upkeep payments. A multiple of the farm step.
     required int upkeepEverySeconds,
@@ -150,8 +167,19 @@ abstract class PotatoRulesData with _$PotatoRulesData {
     required Map<CombatStyle, CombatStyleData> combatStyles,
   }) = _PotatoRulesData;
 
+  const PotatoRulesData._();
+
   factory PotatoRulesData.fromJson(Map<String, dynamic> json) =>
       _$PotatoRulesDataFromJson(json);
+
+  /// What a combat potato of [grade] multiplies its attack by.
+  double attackOf(Grade grade) => 1 + (gradeAttackPercent[grade] ?? 0) / 100;
+
+  /// What a buff potato of [grade] multiplies its buff power by.
+  double buffOf(Grade grade) => 1 + (gradeBuffPercent[grade] ?? 0) / 100;
+
+  /// What a breeding potato of [grade] adds to its grade-up chance.
+  double gradeUpOf(Grade grade) => (gradeUpPercent[grade] ?? 0) / 100;
 }
 
 /// What each level adds to a potato's main job, in thousandths: 50 means
@@ -297,6 +325,10 @@ abstract class StorageRulesData with _$StorageRulesData {
     required int pouchStepFood,
     required int pouchMax,
 
+    /// What each widening adds to the price of the next (2026-11-01,
+    /// 사용자: 50 more every time). The same for both.
+    @Default(50) int stepFoodRise,
+
     /// The same for the equipment box.
     required int gearSlots,
     required int gearStep,
@@ -315,8 +347,23 @@ abstract class StorageRulesData with _$StorageRulesData {
     @Default(8) int bedSlots,
   }) = _StorageRulesData;
 
+  const StorageRulesData._();
+
   factory StorageRulesData.fromJson(Map<String, dynamic> json) =>
       _$StorageRulesDataFromJson(json);
+
+  /// Baby potatoes widening the pouch from [slots] costs.
+  int pouchWidenFood(int slots) =>
+      _widenFood(pouchStepFood, slots - pouchSlots, pouchStep);
+
+  /// Baby potatoes widening the equipment box from [slots] costs.
+  int gearWidenFood(int slots) =>
+      _widenFood(gearStepFood, slots - gearSlots, gearStep);
+
+  int _widenFood(int first, int added, int step) {
+    final done = step <= 0 ? 0 : math.max(0, (added + step - 1) ~/ step);
+    return first + stepFoodRise * done;
+  }
 }
 
 /// Strengthening the weapon at the house's workbench. Values are
@@ -436,10 +483,69 @@ abstract class GearRulesData with _$GearRulesData {
 
     /// What a new farm wears.
     required Equipped start,
+
+    /// Abilities found gear rolls, by grade (2026-11-01, 사용자).
+    @Default({Grade.normal: 0, Grade.rare: 1, Grade.legendary: 2})
+    Map<Grade, int> abilitySlots,
+
+    /// How heavily each tier's rarity weighs when rolling.
+    @Default({Rarity.normal: 100, Rarity.low: 30, Rarity.veryLow: 5})
+    Map<Rarity, int> abilityRarityWeights,
+
+    /// Every gear ability. All the tiers of all that fit a piece go in one
+    /// pool weighed by rarity (사용자); an ability comes once a piece.
+    @Default(<GearAbilityData>[]) List<GearAbilityData> abilities,
   }) = _GearRulesData;
+
+  const GearRulesData._();
 
   factory GearRulesData.fromJson(Map<String, dynamic> json) =>
       _$GearRulesDataFromJson(json);
+
+  GearAbilityData? ability(String id) {
+    for (final data in abilities) {
+      if (data.id == id) return data;
+    }
+    return null;
+  }
+}
+
+/// A gear ability: what it changes, which pieces can have it, and its
+/// tiers from the most common.
+@freezed
+abstract class GearAbilityData with _$GearAbilityData {
+  const factory GearAbilityData({
+    required String id,
+    required GearStat stat,
+
+    /// Kinds of gear it goes on; empty is every kind.
+    @Default(<GearKind>[]) List<GearKind> kinds,
+
+    /// Weapon families it goes on; empty is every family.
+    @Default(<String>[]) List<String> families,
+    required List<GearAbilityTierData> tiers,
+  }) = _GearAbilityData;
+
+  const GearAbilityData._();
+
+  factory GearAbilityData.fromJson(Map<String, dynamic> json) =>
+      _$GearAbilityDataFromJson(json);
+
+  /// Whether a piece of [kind] (and weapon [family]) can have it.
+  bool fits(GearKind kind, String family) =>
+      (kinds.isEmpty || kinds.contains(kind)) &&
+      (families.isEmpty || families.contains(family));
+}
+
+@freezed
+abstract class GearAbilityTierData with _$GearAbilityTierData {
+  const factory GearAbilityTierData({
+    required Rarity rarity,
+    required double percent,
+  }) = _GearAbilityTierData;
+
+  factory GearAbilityTierData.fromJson(Map<String, dynamic> json) =>
+      _$GearAbilityTierDataFromJson(json);
 }
 
 /// One number for how strong a party is, against what a zone's score
@@ -636,6 +742,11 @@ abstract class SeedLabRulesData with _$SeedLabRulesData {
     @Default({Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3})
     Map<Grade, int> gradeTimes,
 
+    /// Baby potatoes one roll of a normal seed's abilities costs, per band
+    /// (2026-11-01, 사용자: by level and grade, raised from 5 the same day);
+    /// times [gradeTimes].
+    @Default(10) int rerollBandFood,
+
     /// What naming the new type multiplies the turn's cost by (사용자: the
     /// pick costs as much again).
     @Default(2) int pickTimes,
@@ -676,6 +787,11 @@ abstract class SeedLabRulesData with _$SeedLabRulesData {
       band(level) *
       (gradeTimes[grade] ?? 1) *
       (picked ? pickTimes : 1);
+
+  /// Baby potatoes rolling the abilities of a seed of [grade] and [level]
+  /// costs.
+  int rerollFood(Grade grade, int level) =>
+      rerollBandFood * band(level) * (gradeTimes[grade] ?? 1);
 
   /// Keep steps a seed of [grade] may pay for.
   int keepSteps(Grade grade) => keepStepTimes[grade]?.length ?? 0;

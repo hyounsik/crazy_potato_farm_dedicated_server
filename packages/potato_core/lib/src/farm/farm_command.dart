@@ -61,6 +61,10 @@ sealed class FarmCommand with _$FarmCommand {
   /// Turns one [seed] from the pouch into baby potatoes.
   const factory FarmCommand.sellSeed({required Seed seed}) = SellSeed;
 
+  /// Rolls the abilities of one [seed] from the pouch anew at the seed
+  /// lab, for a price by its level and grade (2026-11-01, 사용자).
+  const factory FarmCommand.rerollSeed({required Seed seed}) = RerollSeed;
+
   /// Turns one [seed] from the pouch into another type at the seed lab:
   /// [to], or a random other type when null. [keep] paid steps raise the
   /// chance it keeps its grade (2026-10-31, 사용자).
@@ -171,6 +175,10 @@ sealed class FarmCommand with _$FarmCommand {
 
   /// Turns dead potato [potatoId] in a graveyard into its seed.
   const factory FarmCommand.revive({required int potatoId}) = Revive;
+
+  /// Lets dead potato [potatoId] go from the graveyard for good: no seed
+  /// (2026-11-01, 사용자: "잘 가").
+  const factory FarmCommand.farewell({required int potatoId}) = Farewell;
 
   /// Sets out exploring zone [zone] with [food] baby potatoes and the
   /// potatoes [potatoIds] as companions. They leave the farm until

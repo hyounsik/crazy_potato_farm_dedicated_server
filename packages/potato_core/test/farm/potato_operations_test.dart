@@ -313,6 +313,26 @@ void main() {
       expect(farm.guards, isEmpty);
       expect(farm.fridge.single.id, moved);
     });
+
+    test('each training ground keeps to its own places (2026-11-01)', () {
+      // The sample ground holds 2.
+      final first = build('training_ground', const TilePos(8, 8));
+      final second = build('training_ground', const TilePos(8, 11));
+      final third = build('training_ground', const TilePos(14, 12));
+      growGuard(first);
+      growGuard(first);
+      expect(farm.groundWithRoom()!.id, second);
+      expect(
+        farm.apply(FarmCommand.train(buildingId: first, seed: _combat)),
+        FarmRejection.atCapacity,
+        reason: 'the farm has room, this ground does not',
+      );
+      expect(farm.guardsIn(first), 2);
+      growGuard(second);
+      farm.apply(FarmCommand.demolish(buildingId: first));
+      expect(farm.guardsIn(second), 2);
+      expect(farm.guardsIn(third), 1);
+    });
   });
 
   test('the top bar rates: food grown potatoes make, upkeep all pay, by '

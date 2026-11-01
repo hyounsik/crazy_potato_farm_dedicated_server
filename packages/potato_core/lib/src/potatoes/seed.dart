@@ -35,7 +35,18 @@ abstract class Seed with _$Seed {
 
     /// Combat seeds only.
     CombatStyle? style,
+
+    /// Its other abilities, one per slot its grade has after the first
+    /// (2026-11-01, 사용자: a seed shows all it will grow with, and the
+    /// seed lab rolls them anew). Seeds made before have none; their
+    /// potatoes roll them when they sprout, as before.
+    @Default(<String>[]) List<String> extras,
   }) = _Seed;
+
+  const Seed._();
+
+  /// Every ability it has: the first, then the extras.
+  List<String> get abilities => [ability, ...extras];
 
   factory Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
 }

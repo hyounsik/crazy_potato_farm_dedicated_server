@@ -19,7 +19,11 @@ mixin _$Seed {
  PotatoType get type; Grade get grade;/// The score of the region it came from; sets how strong it grows.
  int get level;/// The id of its first ability, from its type's own pool.
  String get ability;/// Combat seeds only.
- CombatStyle? get style;
+ CombatStyle? get style;/// Its other abilities, one per slot its grade has after the first
+/// (2026-11-01, 사용자: a seed shows all it will grow with, and the
+/// seed lab rolls them anew). Seeds made before have none; their
+/// potatoes roll them when they sprout, as before.
+ List<String> get extras;
 /// Create a copy of Seed
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +37,20 @@ $SeedCopyWith<Seed> get copyWith => _$SeedCopyWithImpl<Seed>(this as Seed, _$ide
 @override
 bool operator ==(Object other) {
   final _this = this as Seed;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is Seed&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.ability, _this.ability) || other.ability == _this.ability)&&(identical(other.style, _this.style) || other.style == _this.style));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is Seed&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.grade, _this.grade) || other.grade == _this.grade)&&(identical(other.level, _this.level) || other.level == _this.level)&&(identical(other.ability, _this.ability) || other.ability == _this.ability)&&(identical(other.style, _this.style) || other.style == _this.style)&&const DeepCollectionEquality().equals(other.extras, _this.extras));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as Seed;
-  return Object.hash(runtimeType,_this.type,_this.grade,_this.level,_this.ability,_this.style);
+  return Object.hash(runtimeType,_this.type,_this.grade,_this.level,_this.ability,_this.style,const DeepCollectionEquality().hash(_this.extras));
 }
 
 @override
 String toString() {
   final _this = this as Seed;
-  return 'Seed(type: ${_this.type}, grade: ${_this.grade}, level: ${_this.level}, ability: ${_this.ability}, style: ${_this.style})';
+  return 'Seed(type: ${_this.type}, grade: ${_this.grade}, level: ${_this.level}, ability: ${_this.ability}, style: ${_this.style}, extras: ${_this.extras})';
 }
 
 
@@ -57,7 +61,7 @@ abstract mixin class $SeedCopyWith<$Res>  {
   factory $SeedCopyWith(Seed value, $Res Function(Seed) _then) = _$SeedCopyWithImpl;
 @useResult
 $Res call({
- PotatoType type, Grade grade, int level, String ability, CombatStyle? style
+ PotatoType type, Grade grade, int level, String ability, CombatStyle? style, List<String> extras
 });
 
 
@@ -74,14 +78,15 @@ class _$SeedCopyWithImpl<$Res>
 
 /// Create a copy of Seed
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? ability = null,Object? style = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? ability = null,Object? style = freezed,Object? extras = null,}) {
   return _then(Seed(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
 as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as int,ability: null == ability ? _self.ability : ability // ignore: cast_nullable_to_non_nullable
 as String,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
-as CombatStyle?,
+as CombatStyle?,extras: null == extras ? _self.extras : extras // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -166,10 +171,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style,  List<String> extras)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _Seed() when $default != null:
-return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);case _:
+return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style,_that.extras);case _:
   return orElse();
 
 }
@@ -187,10 +192,10 @@ return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style,  List<String> extras)  $default,) {final _that = this;
 switch (_that) {
 case _Seed():
-return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);case _:
+return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style,_that.extras);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -207,10 +212,10 @@ return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);ca
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PotatoType type,  Grade grade,  int level,  String ability,  CombatStyle? style,  List<String> extras)?  $default,) {final _that = this;
 switch (_that) {
 case _Seed() when $default != null:
-return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);case _:
+return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style,_that.extras);case _:
   return null;
 
 }
@@ -221,8 +226,8 @@ return $default(_that.type,_that.grade,_that.level,_that.ability,_that.style);ca
 /// @nodoc
 @JsonSerializable()
 
-class _Seed implements Seed {
-  const _Seed({required this.type, required this.grade, required this.level, required this.ability, this.style});
+class _Seed extends Seed {
+  const _Seed({required this.type, required this.grade, required this.level, required this.ability, this.style,  List<String> extras = const <String>[]}): _extras = extras,super._();
   factory _Seed.fromJson(Map<String, dynamic> json) => _$SeedFromJson(json);
 
 @override final  PotatoType type;
@@ -233,6 +238,21 @@ class _Seed implements Seed {
 @override final  String ability;
 /// Combat seeds only.
 @override final  CombatStyle? style;
+/// Its other abilities, one per slot its grade has after the first
+/// (2026-11-01, 사용자: a seed shows all it will grow with, and the
+/// seed lab rolls them anew). Seeds made before have none; their
+/// potatoes roll them when they sprout, as before.
+ final  List<String> _extras;
+/// Its other abilities, one per slot its grade has after the first
+/// (2026-11-01, 사용자: a seed shows all it will grow with, and the
+/// seed lab rolls them anew). Seeds made before have none; their
+/// potatoes roll them when they sprout, as before.
+@override@JsonKey() List<String> get extras {
+  if (_extras is EqualUnmodifiableListView) return _extras;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_extras);
+}
+
 
 /// Create a copy of Seed
 /// with the given fields replaced by the non-null parameter values.
@@ -247,18 +267,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Seed&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.level, level) || other.level == level)&&(identical(other.ability, ability) || other.ability == ability)&&(identical(other.style, style) || other.style == style));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _Seed&&(identical(other.type, type) || other.type == type)&&(identical(other.grade, grade) || other.grade == grade)&&(identical(other.level, level) || other.level == level)&&(identical(other.ability, ability) || other.ability == ability)&&(identical(other.style, style) || other.style == style)&&const DeepCollectionEquality().equals(other.extras, _extras));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,type,grade,level,ability,style);
+    return Object.hash(runtimeType,type,grade,level,ability,style,const DeepCollectionEquality().hash(_extras));
 }
 
 @override
 String toString() {
-    return 'Seed(type: $type, grade: $grade, level: $level, ability: $ability, style: $style)';
+    return 'Seed(type: $type, grade: $grade, level: $level, ability: $ability, style: $style, extras: $extras)';
 }
 
 
@@ -269,7 +289,7 @@ abstract mixin class _$SeedCopyWith<$Res> implements $SeedCopyWith<$Res> {
   factory _$SeedCopyWith(_Seed value, $Res Function(_Seed) _then) = __$SeedCopyWithImpl;
 @override @useResult
 $Res call({
- PotatoType type, Grade grade, int level, String ability, CombatStyle? style
+ PotatoType type, Grade grade, int level, String ability, CombatStyle? style, List<String> extras
 });
 
 
@@ -286,14 +306,15 @@ class __$SeedCopyWithImpl<$Res>
 
 /// Create a copy of Seed
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? ability = null,Object? style = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? type = null,Object? grade = null,Object? level = null,Object? ability = null,Object? style = freezed,Object? extras = null,}) {
   return _then(_Seed(
 type: null == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType,grade: null == grade ? _self.grade : grade // ignore: cast_nullable_to_non_nullable
 as Grade,level: null == level ? _self.level : level // ignore: cast_nullable_to_non_nullable
 as int,ability: null == ability ? _self.ability : ability // ignore: cast_nullable_to_non_nullable
 as String,style: freezed == style ? _self.style : style // ignore: cast_nullable_to_non_nullable
-as CombatStyle?,
+as CombatStyle?,extras: null == extras ? _self._extras : extras // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

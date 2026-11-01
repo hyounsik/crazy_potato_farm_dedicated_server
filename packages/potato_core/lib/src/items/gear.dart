@@ -18,6 +18,47 @@ enum GearKind {
   belt,
 }
 
+/// What a gear ability changes (2026-11-01, 사용자: gear abilities, like
+/// potatoes'). Values are percent; negative ones lower the stat.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum GearStat {
+  /// The wearer's max health.
+  hp,
+
+  /// Max health of the wearer's companions.
+  companionHp,
+
+  /// Baby potatoes the wearer eats in a run, as it goes and to heal.
+  foodUse,
+
+  /// The weapon's damage.
+  damage,
+
+  /// The weapon's range.
+  range,
+
+  /// How wide the weapon's shots spread.
+  spread,
+
+  /// How fast the weapon fires (shots per second).
+  fireRate,
+
+  /// Percent points added to the belt's boost.
+  beltBonus,
+}
+
+/// An ability on a piece of gear: catalog ability [id] at [tier] (0 is the
+/// most common). The value is looked up, so balance changes reach found
+/// gear too.
+@freezed
+abstract class GearAbility with _$GearAbility {
+  const factory GearAbility({required String id, required int tier}) =
+      _GearAbility;
+
+  factory GearAbility.fromJson(Map<String, dynamic> json) =>
+      _$GearAbilityFromJson(json);
+}
+
 /// One piece of equipment. Found in runs with a level from the party's
 /// (`LootLevels`); the workbench raises [enhance]. Runs wear it out: once
 /// [wear] reaches `GearRulesData.durability` it is broken for good and only
@@ -38,6 +79,10 @@ abstract class Gear with _$Gear {
 
     /// Belts: the potato type each slot takes.
     @Default(<PotatoType>[]) List<PotatoType> slots,
+
+    /// Abilities rolled when found: none for normal, one for rare, two for
+    /// legendary (2026-11-01, 사용자). Gear found before has none.
+    @Default(<GearAbility>[]) List<GearAbility> abilities,
   }) = _Gear;
 
   factory Gear.fromJson(Map<String, dynamic> json) => _$GearFromJson(json);

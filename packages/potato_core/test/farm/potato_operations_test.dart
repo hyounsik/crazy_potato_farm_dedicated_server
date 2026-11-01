@@ -1126,4 +1126,22 @@ void main() {
     loaded.runSteps(3000);
     expect(FarmDocument.of(loaded), FarmDocument.of(farm));
   });
+
+  test('a longer grow time in the data keeps grown potatoes grown '
+      '(2026-11-01)', () {
+    expect(
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _a, seed: _food)),
+      isNull,
+    );
+    final data = catalog.potatoType(PotatoType.food);
+    farm.runSteps(data.growSeconds + 60);
+    final potato = farm.field(1)!.potatoAt(_a)!;
+    expect(potato.isGrown(data), isTrue);
+    final longer = data.copyWith(growSeconds: data.growSeconds * 3 ~/ 2);
+    expect(potato.isGrown(longer), isTrue);
+    expect(potato.growthOf(longer), 1);
+    final lived = potato.livedMillis;
+    potato.live(1000, longer, const PotatoRates());
+    expect(potato.livedMillis, greaterThan(lived), reason: 'it keeps living');
+  });
 }

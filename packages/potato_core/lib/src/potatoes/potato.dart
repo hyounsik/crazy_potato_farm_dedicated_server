@@ -73,6 +73,12 @@ final class Potato {
     style: style,
   );
 
+  /// What [grownMillis] becomes once grown, so a longer grow time in the
+  /// data never sends grown potatoes back to growing (2026-11-01: raising
+  /// it from 24 to 36 minutes stopped every grown potato, whose growth was
+  /// saved at the old time).
+  static const int grownForGood = 1 << 40;
+
   bool isGrown(PotatoTypeData data) => grownMillis >= data.growSeconds * 1000;
 
   bool get isDead => livedMillis >= lifespanMillis;
@@ -99,15 +105,15 @@ final class Potato {
     final growMillis = data.growSeconds * 1000;
     var working = millis;
     var grew = false;
-    if (grownMillis < growMillis) {
+    if (!isGrown(data)) {
       final step = (millis * rates.growth).floor();
       final grown = grownMillis + step;
       // The part of the step after growth ends, back in game time.
       working = grown <= growMillis
           ? 0
           : ((grown - growMillis) / rates.growth).floor();
-      grownMillis = math.min(grown, growMillis);
-      grew = grownMillis == growMillis;
+      grew = grown >= growMillis;
+      grownMillis = grew ? grownForGood : grown;
     }
     if (working == 0) return (grew: grew, died: isDead, seedsDue: 0);
 

@@ -1954,9 +1954,7 @@ final class RaidSimulation {
         ? enemy.chargeDirection
         : target.position - enemy.position;
     enemy
-      ..chargeDirection = toward.isZero
-          ? const Vec2(1, 0)
-          : toward.normalized()
+      ..chargeDirection = toward.isZero ? const Vec2(1, 0) : toward.normalized()
       ..telegraphLeft = boss.chargeTelegraphSeconds;
   }
 

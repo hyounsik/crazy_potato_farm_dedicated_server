@@ -1965,25 +1965,28 @@ void main() {
       expect(cloud.covers(spot + const Vec2(0.9, 0), 0.1), isFalse);
     });
 
-    test('charges in a row: three, each warned and aimed anew (2026-11-03)', () {
-      final (run, boss) = facing('chain');
-      run.player.position = boss.position + const Vec2(2, 0);
-      run.step();
-      expect(boss.isTelegraphing, isTrue);
-      expect(boss.chargeChainLeft, 2);
-      expect(boss.chargeDirection.x, greaterThan(0.99));
-      runFor(run, 0.55 + 1 / 6);
-      expect(boss.isTelegraphing, isTrue, reason: 'the second warning');
-      expect(boss.chargeChainLeft, 1);
-      run.player.position = boss.position + const Vec2(0, 2);
-      runFor(run, 0.55 + 1 / 6);
-      expect(boss.chargeChainLeft, 0);
-      expect(boss.isTelegraphing, isTrue, reason: 'the third warning');
-      expect(boss.chargeDirection.y, greaterThan(0.8));
-      runFor(run, 0.55 + 1 / 6);
-      expect(boss.isTelegraphing || boss.isCharging, isFalse);
-      expect(boss.cooldowns['gap'], greaterThan(0));
-    });
+    test(
+      'charges in a row: three, each warned and aimed anew (2026-11-03)',
+      () {
+        final (run, boss) = facing('chain');
+        run.player.position = boss.position + const Vec2(2, 0);
+        run.step();
+        expect(boss.isTelegraphing, isTrue);
+        expect(boss.chargeChainLeft, 2);
+        expect(boss.chargeDirection.x, greaterThan(0.99));
+        runFor(run, 0.55 + 1 / 6);
+        expect(boss.isTelegraphing, isTrue, reason: 'the second warning');
+        expect(boss.chargeChainLeft, 1);
+        run.player.position = boss.position + const Vec2(0, 2);
+        runFor(run, 0.55 + 1 / 6);
+        expect(boss.chargeChainLeft, 0);
+        expect(boss.isTelegraphing, isTrue, reason: 'the third warning');
+        expect(boss.chargeDirection.y, greaterThan(0.8));
+        runFor(run, 0.55 + 1 / 6);
+        expect(boss.isTelegraphing || boss.isCharging, isFalse);
+        expect(boss.cooldowns['gap'], greaterThan(0));
+      },
+    );
 
     test('every boss swings at whoever is next to it', () {
       final (run, boss) = facing('none');

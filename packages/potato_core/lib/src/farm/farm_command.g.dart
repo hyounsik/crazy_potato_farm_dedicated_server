@@ -741,6 +741,7 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
         'equipped',
         (v) => v == null ? null : Equipped.fromJson(v as Map<String, dynamic>),
       ),
+      bossKilledIn: $checkedConvert('boss_killed_in', (v) => v as String?),
       zone: $checkedConvert('zone', (v) => v as String?),
       bag: $checkedConvert(
         'bag',
@@ -755,6 +756,7 @@ ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
   fieldKeyMap: const {
     'potatoIds': 'potato_ids',
     'lostPotatoIds': 'lost_potato_ids',
+    'bossKilledIn': 'boss_killed_in',
     r'$type': 'runtimeType',
   },
 );
@@ -769,6 +771,7 @@ Map<String, dynamic> _$ReturnHomeToJson(ReturnHome instance) =>
       'score': instance.score,
       'gear': instance.gear.map((e) => e.toJson()).toList(),
       'equipped': instance.equipped?.toJson(),
+      'boss_killed_in': instance.bossKilledIn,
       'zone': instance.zone,
       'bag': instance.bag?.map((e) => e.toJson()).toList(),
       'runtimeType': instance.$type,

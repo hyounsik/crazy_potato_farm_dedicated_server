@@ -764,6 +764,7 @@ final class FarmSimulation {
       :final equipped,
       :final zone,
       :final bag,
+      :final bossKilledIn,
     ) =>
       _returnHome(
         food,
@@ -776,6 +777,7 @@ final class FarmSimulation {
         equipped,
         zone,
         bag,
+        bossKilledIn,
       ),
     LoadBed(:final item, :final count, :final seed, :final gearIndex) => _load(
       _actor.bed,
@@ -2089,8 +2091,12 @@ final class FarmSimulation {
     Equipped? equipped,
     String? zone,
     List<ItemStack>? bag,
+    String? bossKilledIn,
   ) {
     this.food += food;
+    if (bossKilledIn != null) {
+      totals.bossKills.update(bossKilledIn, (n) => n + 1, ifAbsent: () => 1);
+    }
     if (score != null && zone != null) {
       totals.escapes.update(zone, (n) => n + 1, ifAbsent: () => 1);
     }
@@ -2554,6 +2560,10 @@ final class FarmSimulation {
                     (goal.danger == null ||
                         (catalog.zones[e.key]?.danger != null) == goal.danger),
               )
+              .fold(0, (n, e) => n + e.value),
+        StoryGoalKind.bossKills =>
+          totals.bossKills.entries
+              .where((e) => goal.zone == null || e.key == goal.zone)
               .fold(0, (n, e) => n + e.value),
         StoryGoalKind.progress => progress,
         StoryGoalKind.power => _gearStats.combatPower(equipped, const []),

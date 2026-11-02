@@ -216,6 +216,9 @@ sealed class FarmCommand with _$FarmCommand {
     /// What is worn at the end of the run; null keeps what the farm has.
     Equipped? equipped,
 
+    /// The zone whose boss fell in the run, even if it ended badly.
+    String? bossKilledIn,
+
     /// The zone the run went to, counted for story goals when [score] is
     /// set (the run succeeded).
     String? zone,

@@ -227,6 +227,9 @@ void main() {
         ],
       },
     ]);
+    (((files['rules']! as Map<String, dynamic>)['raid'] as Map)['clones']
+            as Map)['versus_player_damage'] =
+        0.25;
     final result = Catalog.load(files);
     expect(result.issues, isEmpty);
     catalog = result.catalog!;
@@ -677,9 +680,9 @@ void main() {
       expect(run.aggressiveSight, sight);
       run.apply(const Signal());
       runFor(run, 2.5);
-      // Halfway the growth is a quarter: slow first, faster later
-      // (2026-11-01).
-      expect(run.aggressiveSight, closeTo(sight * 1.25, sight * 0.02));
+      // Halfway the growth is 3/8: under half, so faster later (2026-11-01),
+      // but well on its way (2026-11-02).
+      expect(run.aggressiveSight, closeTo(sight * 1.375, sight * 0.02));
     });
 
     test('hunger wears health down until everything is lost', () {
@@ -1110,7 +1113,31 @@ void main() {
       farClone(run);
       run.apply(const Signal());
       runFor(run, 2.5);
-      expect(run.cloneSight, closeTo(sight * 1.25, sight * 0.02));
+      expect(run.cloneSight, closeTo(sight * 1.375, sight * 0.02));
+    });
+
+    test('clones and players hurt each other less '
+        '(2026-11-02)', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      RaidBullet shot(RaidBody from, RaidSide side, Vec2 at) => RaidBullet(
+        id: 9000 + run.bullets.length,
+        position: at,
+        velocity: Vec2.zero,
+        damage: 40,
+        owner: from.id,
+        side: side,
+        team: from.team,
+        remaining: 5,
+      );
+      clone.weapon = 'blank';
+      final playerHp = run.player.hp;
+      final cloneHp = clone.hp;
+      run.bullets.add(shot(clone, RaidSide.clone, run.player.position));
+      run.bullets.add(shot(run.player, RaidSide.player, clone.position));
+      run.step();
+      expect(run.player.hp, closeTo(playerHp - 10, 0.5));
+      expect(clone.hp, closeTo(cloneHp - 10, 0.5));
     });
 
     test('leave through an exit when their stay runs out', () {
@@ -1918,6 +1945,45 @@ void main() {
       final shots = run.bullets.where((b) => b.owner == boss.id).toList();
       expect(shots, hasLength(5));
       expect(boss.isAttacking, isTrue);
+    });
+
+    test('the pattern overdue the longest goes first, so none starves '
+        '(2026-11-02)', () {
+      final (run, boss) = facing('jump');
+      boss.cooldowns
+        ..['jump'] = -1
+        ..['shot0'] = -5;
+      run.step();
+      expect(boss.isJumping, isFalse);
+      expect(run.bullets.where((b) => b.owner == boss.id), hasLength(5));
+    });
+
+    test('notices a body just outside its area, not one farther off '
+        '(2026-11-02)', () {
+      final (run, boss) = facing('none');
+      // Clear of its own swing and with no pattern coming.
+      final inside = [...run.bossArea]..sort((a, b) => b.x.compareTo(a.x));
+      final edge = inside.first;
+      boss.position = Vec2(edge.x - 2.5, edge.y + 0.5);
+      run.player.position = Vec2(edge.x + 1.2, edge.y + 0.5);
+      run.step();
+      expect(boss.target, run.player.id);
+      run.player.position = Vec2(edge.x + 1.9, edge.y + 0.5);
+      run.step();
+      expect(boss.target, isNull);
+    });
+
+    test('its fall is counted for those in the run, however it ends '
+        '(2026-11-02)', () {
+      final (run, boss) = facing('none');
+      boss.hp = 0;
+      run.step();
+      run.apply(const GoHome());
+      final result = run.result!;
+      expect(result.bossKilled, isTrue);
+      expect(RaidResult.fromJson(result.toJson()).bossKilled, isTrue);
+      final command = result.homecoming(catalog) as ReturnHome;
+      expect(command.bossKilledIn, 'zone_boss_open');
     });
 
     test('a run with gas about saves and comes back the same', () {

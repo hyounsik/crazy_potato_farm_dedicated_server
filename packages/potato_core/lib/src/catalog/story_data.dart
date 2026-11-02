@@ -98,6 +98,10 @@ enum StoryGoalKind {
   /// danger (true) or safe (false) zones when [StoryGoalData.danger] is set.
   escapes,
 
+  /// Runs in which the boss of [StoryGoalData.zone] (any zone when null)
+  /// fell, however the run ended (2026-11-02, 사용자).
+  bossKills,
+
   /// The farm's progress (highest zone score escaped from).
   progress,
 

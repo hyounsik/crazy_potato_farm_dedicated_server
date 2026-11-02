@@ -1643,7 +1643,9 @@ mixin _$CloneRulesData {
  double get lowHpRatio;/// How long one stays before heading out, picked between these.
  double get staySecondsMin; double get staySecondsMax;/// While the player's signal counts down, clone sight grows up to this
 /// share at zero.
- double get waitSightMultiplier;
+ double get waitSightMultiplier;/// What a clone's shots do to a player, and a player's to a clone, as a
+/// share of their damage (2026-11-02, 사용자).
+ double get versusPlayerDamage;
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1657,20 +1659,20 @@ $CloneRulesDataCopyWith<CloneRulesData> get copyWith => _$CloneRulesDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as CloneRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneRulesData&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.lowHpRatio, _this.lowHpRatio) || other.lowHpRatio == _this.lowHpRatio)&&(identical(other.staySecondsMin, _this.staySecondsMin) || other.staySecondsMin == _this.staySecondsMin)&&(identical(other.staySecondsMax, _this.staySecondsMax) || other.staySecondsMax == _this.staySecondsMax)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneRulesData&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.lowHpRatio, _this.lowHpRatio) || other.lowHpRatio == _this.lowHpRatio)&&(identical(other.staySecondsMin, _this.staySecondsMin) || other.staySecondsMin == _this.staySecondsMin)&&(identical(other.staySecondsMax, _this.staySecondsMax) || other.staySecondsMax == _this.staySecondsMax)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.versusPlayerDamage, _this.versusPlayerDamage) || other.versusPlayerDamage == _this.versusPlayerDamage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CloneRulesData;
-  return Object.hash(runtimeType,_this.sightMultiplier,_this.speedMultiplier,_this.maxHp,_this.radius,_this.lowHpRatio,_this.staySecondsMin,_this.staySecondsMax,_this.waitSightMultiplier);
+  return Object.hash(runtimeType,_this.sightMultiplier,_this.speedMultiplier,_this.maxHp,_this.radius,_this.lowHpRatio,_this.staySecondsMin,_this.staySecondsMax,_this.waitSightMultiplier,_this.versusPlayerDamage);
 }
 
 @override
 String toString() {
   final _this = this as CloneRulesData;
-  return 'CloneRulesData(sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, lowHpRatio: ${_this.lowHpRatio}, staySecondsMin: ${_this.staySecondsMin}, staySecondsMax: ${_this.staySecondsMax}, waitSightMultiplier: ${_this.waitSightMultiplier})';
+  return 'CloneRulesData(sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, lowHpRatio: ${_this.lowHpRatio}, staySecondsMin: ${_this.staySecondsMin}, staySecondsMax: ${_this.staySecondsMax}, waitSightMultiplier: ${_this.waitSightMultiplier}, versusPlayerDamage: ${_this.versusPlayerDamage})';
 }
 
 
@@ -1681,7 +1683,7 @@ abstract mixin class $CloneRulesDataCopyWith<$Res>  {
   factory $CloneRulesDataCopyWith(CloneRulesData value, $Res Function(CloneRulesData) _then) = _$CloneRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage
 });
 
 
@@ -1698,7 +1700,7 @@ class _$CloneRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,}) {
   return _then(CloneRulesData(
 sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
@@ -1708,6 +1710,7 @@ as double,lowHpRatio: null == lowHpRatio ? _self.lowHpRatio : lowHpRatio // igno
 as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySecondsMin // ignore: cast_nullable_to_non_nullable
 as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,versusPlayerDamage: null == versusPlayerDamage ? _self.versusPlayerDamage : versusPlayerDamage // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -1793,10 +1796,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CloneRulesData() when $default != null:
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
   return orElse();
 
 }
@@ -1814,10 +1817,10 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)  $default,) {final _that = this;
 switch (_that) {
 case _CloneRulesData():
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1834,10 +1837,10 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)?  $default,) {final _that = this;
 switch (_that) {
 case _CloneRulesData() when $default != null:
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
   return null;
 
 }
@@ -1849,7 +1852,7 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 @JsonSerializable()
 
 class _CloneRulesData implements CloneRulesData {
-  const _CloneRulesData({required this.sightMultiplier, required this.speedMultiplier, required this.maxHp, required this.radius, required this.lowHpRatio, required this.staySecondsMin, required this.staySecondsMax, required this.waitSightMultiplier});
+  const _CloneRulesData({required this.sightMultiplier, required this.speedMultiplier, required this.maxHp, required this.radius, required this.lowHpRatio, required this.staySecondsMin, required this.staySecondsMax, required this.waitSightMultiplier, this.versusPlayerDamage = 1.0});
   factory _CloneRulesData.fromJson(Map<String, dynamic> json) => _$CloneRulesDataFromJson(json);
 
 /// Shares of the player's sight and speed.
@@ -1865,6 +1868,9 @@ class _CloneRulesData implements CloneRulesData {
 /// While the player's signal counts down, clone sight grows up to this
 /// share at zero.
 @override final  double waitSightMultiplier;
+/// What a clone's shots do to a player, and a player's to a clone, as a
+/// share of their damage (2026-11-02, 사용자).
+@override@JsonKey() final  double versusPlayerDamage;
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -1879,18 +1885,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneRulesData&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.lowHpRatio, lowHpRatio) || other.lowHpRatio == lowHpRatio)&&(identical(other.staySecondsMin, staySecondsMin) || other.staySecondsMin == staySecondsMin)&&(identical(other.staySecondsMax, staySecondsMax) || other.staySecondsMax == staySecondsMax)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneRulesData&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.lowHpRatio, lowHpRatio) || other.lowHpRatio == lowHpRatio)&&(identical(other.staySecondsMin, staySecondsMin) || other.staySecondsMin == staySecondsMin)&&(identical(other.staySecondsMax, staySecondsMax) || other.staySecondsMax == staySecondsMax)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.versusPlayerDamage, versusPlayerDamage) || other.versusPlayerDamage == versusPlayerDamage));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sightMultiplier,speedMultiplier,maxHp,radius,lowHpRatio,staySecondsMin,staySecondsMax,waitSightMultiplier);
+    return Object.hash(runtimeType,sightMultiplier,speedMultiplier,maxHp,radius,lowHpRatio,staySecondsMin,staySecondsMax,waitSightMultiplier,versusPlayerDamage);
 }
 
 @override
 String toString() {
-    return 'CloneRulesData(sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, maxHp: $maxHp, radius: $radius, lowHpRatio: $lowHpRatio, staySecondsMin: $staySecondsMin, staySecondsMax: $staySecondsMax, waitSightMultiplier: $waitSightMultiplier)';
+    return 'CloneRulesData(sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, maxHp: $maxHp, radius: $radius, lowHpRatio: $lowHpRatio, staySecondsMin: $staySecondsMin, staySecondsMax: $staySecondsMax, waitSightMultiplier: $waitSightMultiplier, versusPlayerDamage: $versusPlayerDamage)';
 }
 
 
@@ -1901,7 +1907,7 @@ abstract mixin class _$CloneRulesDataCopyWith<$Res> implements $CloneRulesDataCo
   factory _$CloneRulesDataCopyWith(_CloneRulesData value, $Res Function(_CloneRulesData) _then) = __$CloneRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage
 });
 
 
@@ -1918,7 +1924,7 @@ class __$CloneRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,}) {
   return _then(_CloneRulesData(
 sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
@@ -1928,6 +1934,7 @@ as double,lowHpRatio: null == lowHpRatio ? _self.lowHpRatio : lowHpRatio // igno
 as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySecondsMin // ignore: cast_nullable_to_non_nullable
 as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
+as double,versusPlayerDamage: null == versusPlayerDamage ? _self.versusPlayerDamage : versusPlayerDamage // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

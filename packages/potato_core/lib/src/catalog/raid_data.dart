@@ -175,6 +175,10 @@ abstract class CloneRulesData with _$CloneRulesData {
     /// While the player's signal counts down, clone sight grows up to this
     /// share at zero.
     required double waitSightMultiplier,
+
+    /// What a clone's shots do to a player, and a player's to a clone, as a
+    /// share of their damage (2026-11-02, 사용자).
+    @Default(1.0) double versusPlayerDamage,
   }) = _CloneRulesData;
 
   factory CloneRulesData.fromJson(Map<String, dynamic> json) =>

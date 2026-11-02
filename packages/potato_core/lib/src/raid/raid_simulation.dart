@@ -119,6 +119,7 @@ final class RaidResult {
     required this.lost,
     this.equipped = const Equipped(),
     this.zone,
+    this.bossKilled = false,
   });
 
   factory RaidResult.fromJson(Map<String, dynamic> json) => RaidResult(
@@ -130,6 +131,7 @@ final class RaidResult {
     },
     score: json['score'] as int,
     lost: json['lost'] as bool,
+    bossKilled: json['boss_killed'] as bool? ?? false,
     items: [
       for (final i in json['items'] as List<Object?>)
         ItemStack.fromJson(i! as Map<String, dynamic>),
@@ -161,6 +163,10 @@ final class RaidResult {
   /// [items] and [companions] say what was lost.
   final bool lost;
 
+  /// The zone's boss fell while this member was in the run, however the run
+  /// ended for them (2026-11-02, 사용자).
+  final bool bossKilled;
+
   /// Everything in the bag, food included.
   final List<ItemStack> items;
 
@@ -174,6 +180,7 @@ final class RaidResult {
     'equipped': equipped.toJson(),
     'score': score,
     'lost': lost,
+    if (bossKilled) 'boss_killed': true,
     'items': [for (final i in items) i.toJson()],
     'companions': [
       for (final c in companions)
@@ -693,9 +700,13 @@ final class RaidSimulation {
     return passed;
   }
 
-  /// How far a signal's sight has grown, 0 to 1: slowly at first, faster
-  /// the wider it gets (2026-11-01, 사용자), the square of [_waitPassed].
-  double get _waitGrowth => _waitPassed * _waitPassed;
+  /// How far a signal's sight has grown, 0 to 1: it grows from the start
+  /// (2026-11-02, 사용자: before, the wait was nearly over by the time it
+  /// mattered) and faster the wider it gets (2026-11-01, 사용자).
+  double get _waitGrowth {
+    final passed = _waitPassed;
+    return (passed + passed * passed) / 2;
+  }
 
   /// How far aggressive enemies see now: wider during a signal's countdown,
   /// the more the closer it is to zero.
@@ -720,6 +731,28 @@ final class RaidSimulation {
 
   bool inBossArea(Vec2 at) =>
       bossArea.contains(TilePos(at.x.floor(), at.y.floor()));
+
+  /// How far outside its area a boss notices bodies: a tenth of the area's
+  /// radius, from the area's own tiles so any design gets it (2026-11-02,
+  /// 사용자).
+  late final double _bossNoticeMargin =
+      math.sqrt(bossArea.length / math.pi) * 0.1;
+
+  /// Whether a boss standing at [from] takes on a body at [at]: in its area,
+  /// or in sight just outside it. The boss itself stays in the area.
+  bool _inBossReach(Vec2 from, Vec2 at) {
+    if (inBossArea(at)) return true;
+    for (final tile in bossArea) {
+      // The tile's square, grown by the margin.
+      final dx = (at.x - (tile.x + 0.5)).abs() - 0.5;
+      final dy = (at.y - (tile.y + 0.5)).abs() - 0.5;
+      if (dx <= _bossNoticeMargin && dy <= _bossNoticeMargin) {
+        final outside = Vec2(math.max(dx, 0), math.max(dy, 0));
+        if (outside.length <= _bossNoticeMargin) return map.canSee(from, at);
+      }
+    }
+    return false;
+  }
 
   /// The standing boss, if the zone has one.
   RaidEnemy? get boss {
@@ -770,6 +803,7 @@ final class RaidSimulation {
       score: zone.score,
       zone: zone.id,
       lost: isDanger && outcome != RaidOutcome.extracted,
+      bossKilled: member.bossKilled,
       equipped: member.kept ?? member.player.equipped,
     );
   }
@@ -1837,11 +1871,13 @@ final class RaidSimulation {
     }
 
     var target = enemy.target == null ? null : _body(enemy.target!);
-    if (target == null || target.isDown || !inBossArea(target.position)) {
+    if (target == null ||
+        target.isDown ||
+        !_inBossReach(enemy.position, target.position)) {
       target = null;
       var best = double.infinity;
       for (final body in _wildTargets) {
-        if (!inBossArea(body.position)) continue;
+        if (!_inBossReach(enemy.position, body.position)) continue;
         final d = body.position.distanceTo(enemy.position);
         if (d < best) {
           target = body;
@@ -1927,17 +1963,29 @@ final class RaidSimulation {
     for (final (i, s) in boss.shots.indexed) ('shot$i', s.everySeconds),
   ];
 
-  /// Starts the first zone-boss pattern whose time has come, unless one
-  /// just ended. Returns whether one started.
+  /// Starts the zone-boss pattern overdue the longest, unless one just ended;
+  /// a tie goes to the one listed first. Picking the first ready one let the
+  /// jump and the cloud, always ready again by then, starve the fan of shots
+  /// (2026-11-02, 사용자). Returns whether one started.
   bool _startPattern(
     RaidEnemy enemy,
     BossData boss,
     RaidBody target,
     double damage,
   ) {
+    final patterns = _patternsOf(boss);
+    // Every pattern's wait counts from the first fight on.
+    for (final (key, _) in patterns) {
+      enemy.cooldowns.putIfAbsent(key, () => 0);
+    }
     if ((enemy.cooldowns['gap'] ?? 0) > 0) return false;
-    for (final (key, every) in _patternsOf(boss)) {
-      if ((enemy.cooldowns[key] ?? 0) > 0) continue;
+    (String, double)? next;
+    for (final pattern in patterns) {
+      final left = enemy.cooldowns[pattern.$1]!;
+      if (left > 0) continue;
+      if (next == null || left < enemy.cooldowns[next.$1]!) next = pattern;
+    }
+    if (next case (final key, final every)) {
       enemy.cooldowns[key] = every;
       enemy.cooldowns['gap'] = _patternGap;
       final toward = target.position - enemy.position;
@@ -2010,7 +2058,9 @@ final class RaidSimulation {
     enemy.burrowStrikes--;
     if (enemy.burrowStrikes > 0) {
       final target = enemy.target == null ? null : _body(enemy.target!);
-      if (target != null && !target.isDown && inBossArea(target.position)) {
+      if (target != null &&
+          !target.isDown &&
+          _inBossReach(enemy.position, target.position)) {
         enemy.burrowAt = target.position;
       }
       enemy.burrowLeft = burrow.followUpLockSeconds;
@@ -2294,12 +2344,28 @@ final class RaidSimulation {
       for (final target in _opponentsOf(bullet.team)) {
         if (target.position.distanceTo(bullet.position) <=
             target.radius + 0.05) {
-          _hurt(target, bullet.damage, _body(bullet.owner));
+          _hurt(
+            target,
+            bullet.damage * _versusScale(bullet, target),
+            _body(bullet.owner),
+          );
           return true;
         }
       }
       return false;
     });
+  }
+
+  /// Clones and players hurt each other less (2026-11-02, 사용자): guns grow
+  /// with the zone and gear while a player's health barely does, so a clone
+  /// killed in one shot. Told by the bullet, as its shooter may be gone.
+  double _versusScale(RaidBullet bullet, RaidBody target) {
+    final versus = switch (target) {
+      RaidPlayer() => bullet.side == RaidSide.clone,
+      RaidClone() => memberOf(bullet.owner) != null,
+      _ => false,
+    };
+    return versus ? rules.clones.versusPlayerDamage : 1;
   }
 
   void _pickUpFloorItems() {
@@ -2330,6 +2396,9 @@ final class RaidSimulation {
       if (!enemy.isDown) return false;
       _events.add(EnemyDefeated(enemy.id, enemy.kind));
       if (zone.boss case final boss? when boss.enemy == enemy.kind) {
+        for (final m in _active) {
+          m.bossKilled = true;
+        }
         _leaveLoot(
           enemy.position,
           PileKind.bossBundle,

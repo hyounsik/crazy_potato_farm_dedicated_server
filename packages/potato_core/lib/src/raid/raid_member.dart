@@ -108,6 +108,7 @@ final class RaidMember {
     this.outcome,
     this.downLeft,
     this.revive = 0,
+    this.bossKilled = false,
   });
 
   factory RaidMember.fromJson(Map<String, dynamic> json, Catalog catalog) {
@@ -123,6 +124,7 @@ final class RaidMember {
           RaidCompanion.fromJson(c! as Map<String, dynamic>),
       ],
       progress: json['progress'] as int,
+      bossKilled: json['boss_killed'] as bool? ?? false,
       signal: switch (json['signal']) {
         final Map<String, dynamic> signal => RaidSignal.fromJson(signal),
         _ => null,
@@ -164,6 +166,9 @@ final class RaidMember {
   /// slowly while nobody is.
   double revive;
 
+  /// The zone's boss fell while this member was in the run.
+  bool bossKilled;
+
   /// The stick: a direction on the world plane, at most 1 long. Not saved.
   Vec2 move = Vec2.zero;
 
@@ -183,5 +188,6 @@ final class RaidMember {
     'outcome': outcome?.name,
     if (downLeft != null) 'down_left': downLeft,
     if (revive > 0) 'revive': revive,
+    if (bossKilled) 'boss_killed': true,
   };
 }

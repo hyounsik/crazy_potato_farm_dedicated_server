@@ -93,6 +93,7 @@ extension RaidHomecoming on RaidResult {
         lostPotatoIds: [for (final c in companions) c.potatoId],
         equipped: equipped,
         bag: toBag ? const [] : null,
+        bossKilledIn: bossKilled ? zone : null,
       );
     }
     if (toBag) {
@@ -110,6 +111,7 @@ extension RaidHomecoming on RaidResult {
         zone: zone,
         equipped: equipped,
         bag: [for (final s in items) s.copyWithCount(s.count)],
+        bossKilledIn: bossKilled ? zone : null,
       );
     }
     var food = 0;
@@ -159,6 +161,7 @@ extension RaidHomecoming on RaidResult {
       zone: zone,
       gear: gear,
       equipped: equipped,
+      bossKilledIn: bossKilled ? zone : null,
     );
   }
 }

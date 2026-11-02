@@ -204,6 +204,11 @@ final class ClientSession {
   Duration _quietFor = Duration.zero;
   int _moveSeq = 0;
   Vec2 _lastSentMove = Vec2.zero;
+  Duration _sinceMoveSent = Duration.zero;
+
+  /// How often a held push is said again: the channel may lose it, and the
+  /// host forgets it when the link blinks (2026-11-02, 사용자).
+  static const Duration _moveResendEvery = Duration(milliseconds: 250);
   Vec2 _reconcileError = Vec2.zero;
   bool _helloSent = false;
   bool _closed = false;
@@ -287,9 +292,14 @@ final class ClientSession {
     final clamped = sim.members[_memberIndex].move;
     if (clamped == _lastSentMove) return;
     _lastSentMove = clamped;
+    _sendMove();
+  }
+
+  void _sendMove() {
+    _sinceMoveSent = Duration.zero;
     _send(
       SessionChannel.unreliable,
-      MoveMessage(direction: clamped, seq: ++_moveSeq),
+      MoveMessage(direction: _lastSentMove, seq: ++_moveSeq),
     );
   }
 
@@ -330,6 +340,10 @@ final class ClientSession {
     }
     final clamped = elapsed > maxElapsed ? maxElapsed : elapsed;
     _clientClock += clamped;
+    _sinceMoveSent += clamped;
+    if (!_lastSentMove.isZero && _sinceMoveSent >= _moveResendEvery) {
+      _sendMove();
+    }
     final steps = clock.advance(clamped, maxElapsed: maxElapsed);
     for (var i = 0; i < steps; i++) {
       sim.predictMove();
@@ -734,6 +748,7 @@ final class ClientSession {
       me
         ..bag = auth.bag
         ..signal = auth.signal
+        ..bossKilled = auth.bossKilled
         ..kept = auth.kept
         ..outcome = auth.outcome
         ..downLeft = auth.downLeft

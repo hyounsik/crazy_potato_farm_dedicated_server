@@ -638,6 +638,38 @@ void main() {
       return (net, host, guest);
     }
 
+    test('a guest sees the signal someone else sent, and it widens '
+        '(2026-11-02)', () async {
+      final (_, host, guest) = await started();
+      final run = host.run!;
+      final exit = run.exits.first;
+      run.members[0].player.position = exit.position;
+      run.apply(const Signal());
+      for (var i = 0; i < 40; i++) {
+        host.advance(Duration(milliseconds: run.rules.stepMillis));
+        await _pumpMicrotasks();
+        guest.advance(Duration(milliseconds: run.rules.stepMillis));
+      }
+      final seen = guest.run!;
+      expect(seen.members[0].signal?.exit, exit.id);
+      expect(seen.aggressiveSight, greaterThan(seen.enemySight));
+    });
+
+    test('a held push is said again, so a lost one does not freeze the guest '
+        '(2026-11-02)', () async {
+      final (_, host, guest) = await started();
+      final member = host.run!.members[1];
+      guest.setMove(const Vec2(1, 0));
+      await _pumpMicrotasks();
+      expect(member.move, const Vec2(1, 0));
+      // The host lost it, or forgot it in a blink of the link.
+      host.run!.setMoveOf(member, Vec2.zero);
+      guest.advance(const Duration(milliseconds: 100));
+      guest.advance(const Duration(milliseconds: 200));
+      await _pumpMicrotasks();
+      expect(member.move, const Vec2(1, 0));
+    });
+
     test('a guest whose link dropped comes back as the same member', () async {
       final (net, host, guest) = await started();
       final run = host.run!;

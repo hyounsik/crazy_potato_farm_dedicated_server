@@ -1858,6 +1858,15 @@ final class RaidSimulation {
         enemy.chargeHits.add(body.id);
         _hurt(body, boss.chargeDamage * damage, enemy);
       }
+      enemy.heading = enemy.chargeDirection;
+      if (!enemy.isCharging && enemy.chargeChainLeft > 0) {
+        enemy.chargeChainLeft--;
+        final next = enemy.target == null ? null : _body(enemy.target!);
+        _warnCharge(enemy, boss, next);
+        if (enemy.chargeChainLeft == 0) {
+          enemy.cooldowns['gap'] = _patternGap;
+        }
+      }
       return;
     }
     if (enemy.isTelegraphing) {
@@ -1892,13 +1901,8 @@ final class RaidSimulation {
     }
     if (_startPattern(enemy, boss, target, damage)) return;
     if (enemy.chargeCooldown <= 0 && boss.chargeEverySeconds > 0) {
-      final toward = target.position - enemy.position;
-      enemy
-        ..chargeDirection = toward.isZero
-            ? const Vec2(1, 0)
-            : toward.normalized()
-        ..telegraphLeft = boss.chargeTelegraphSeconds
-        ..chargeCooldown = boss.chargeEverySeconds;
+      _warnCharge(enemy, boss, target);
+      enemy.chargeCooldown = boss.chargeEverySeconds;
       return;
     }
     if (enemy.sprayCooldown <= 0 && boss.sprayBullets > 0) {
@@ -1938,6 +1942,22 @@ final class RaidSimulation {
     final before = enemy.position;
     _moveToward(enemy, target.position, enemySpeed, dt);
     if (!inBossArea(enemy.position)) enemy.position = before;
+    if (enemy.position != before) {
+      enemy.heading = (enemy.position - before).normalized();
+    }
+  }
+
+  /// Shows where [enemy] is about to charge, at [target] (straight on as it
+  /// was without one).
+  void _warnCharge(RaidEnemy enemy, BossData boss, RaidBody? target) {
+    final toward = target == null
+        ? enemy.chargeDirection
+        : target.position - enemy.position;
+    enemy
+      ..chargeDirection = toward.isZero
+          ? const Vec2(1, 0)
+          : toward.normalized()
+      ..telegraphLeft = boss.chargeTelegraphSeconds;
   }
 
   /// How long the attack face stays after a quick pattern (a spray, a
@@ -1959,6 +1979,7 @@ final class RaidSimulation {
   static List<(String, double)> _patternsOf(BossData boss) => [
     if (boss.jump case final jump?) ('jump', jump.everySeconds),
     if (boss.burrow case final burrow?) ('burrow', burrow.everySeconds),
+    if (boss.chargeChain case final chain?) ('chain', chain.everySeconds),
     for (final (i, c) in boss.clouds.indexed) ('cloud$i', c.everySeconds),
     for (final (i, s) in boss.shots.indexed) ('shot$i', s.everySeconds),
   ];
@@ -1983,6 +2004,11 @@ final class RaidSimulation {
     for (final pattern in patterns) {
       final left = enemy.cooldowns[pattern.$1]!;
       if (left > 0) continue;
+      if (pattern.$1.startsWith('cloud') &&
+          boss.clouds[int.parse(pattern.$1.substring(5))].behind &&
+          !_isBehind(enemy, target)) {
+        continue;
+      }
       if (next == null || left < enemy.cooldowns[next.$1]!) next = pattern;
     }
     if (next case (final key, final every)) {
@@ -2002,6 +2028,9 @@ final class RaidSimulation {
             ..windupLeft = _windupSeconds
             ..windupCloud = burrowWindup
             ..windupAt = facing;
+        case 'chain':
+          enemy.chargeChainLeft = boss.chargeChain!.count - 1;
+          _warnCharge(enemy, boss, target);
         default:
           final i = int.parse(key.replaceAll(RegExp(r'\D'), ''));
           if (key.startsWith('cloud')) {
@@ -2009,7 +2038,7 @@ final class RaidSimulation {
             enemy
               ..windupLeft = _windupSeconds
               ..windupCloud = i
-              ..windupAt = facing;
+              ..windupAt = boss.clouds[i].behind ? enemy.heading * -1 : facing;
           } else {
             _fan(enemy, boss.shots[i], facing, damage);
             enemy.poseLeft = _poseSeconds;
@@ -2140,6 +2169,12 @@ final class RaidSimulation {
       ),
     );
     enemy.poseLeft = cloud.seconds;
+  }
+
+  /// Whether [target] is behind the way [enemy] last moved.
+  bool _isBehind(RaidEnemy enemy, RaidBody target) {
+    final away = target.position - enemy.position;
+    return away.x * enemy.heading.x + away.y * enemy.heading.y < 0;
   }
 
   /// A fan of shots toward [facing].

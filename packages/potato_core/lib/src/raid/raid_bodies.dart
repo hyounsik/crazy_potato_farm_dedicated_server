@@ -192,6 +192,8 @@ final class RaidEnemy extends RaidBody {
     this.burrowLeft = 0,
     this.burrowAt = Vec2.zero,
     this.burrowStrikes = 0,
+    this.chargeChainLeft = 0,
+    this.heading = Vec2.zero,
     this.poseLeft = 0,
     this.windupLeft = 0,
     this.windupCloud = 0,
@@ -249,6 +251,11 @@ final class RaidEnemy extends RaidBody {
         _ => Vec2.zero,
       },
       burrowStrikes: json['burrow_strikes'] as int? ?? 0,
+      chargeChainLeft: json['charge_chain_left'] as int? ?? 0,
+      heading: switch (json['heading']) {
+        final List<Object?> at => Vec2.fromJson(at),
+        _ => Vec2.zero,
+      },
       poseLeft: (json['pose_left'] as num?)?.toDouble() ?? 0,
       windupLeft: (json['windup_left'] as num?)?.toDouble() ?? 0,
       windupCloud: json['windup_cloud'] as int? ?? 0,
@@ -306,6 +313,12 @@ final class RaidEnemy extends RaidBody {
   double burrowLeft;
   Vec2 burrowAt;
   int burrowStrikes;
+
+  /// Charges still to come in a row after this one (2026-11-03, 사용자).
+  int chargeChainLeft;
+
+  /// The way a boss last moved; zero before it has.
+  Vec2 heading;
 
   /// Showing its attack face a little longer after a pattern (2026-10-23,
   /// 사용자: the face changes while attacking).
@@ -374,6 +387,8 @@ final class RaidEnemy extends RaidBody {
       'burrow_at': burrowAt.toJson(),
       'burrow_strikes': burrowStrikes,
     },
+    if (chargeChainLeft > 0) 'charge_chain_left': chargeChainLeft,
+    if (!heading.isZero) 'heading': heading.toJson(),
     if (poseLeft > 0) 'pose_left': poseLeft,
     if (isWindingUp) ...{
       'windup_left': windupLeft,

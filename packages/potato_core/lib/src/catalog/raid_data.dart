@@ -340,6 +340,7 @@ abstract class BossData with _$BossData {
     @Default(0.0) double sprayDamage,
     @Default(0.0) double spraySpeed,
     @Default(0.0) double sprayRange,
+    BossChargeChainData? chargeChain,
     BossJumpData? jump,
     BossBurrowData? burrow,
     @Default(<BossCloudData>[]) List<BossCloudData> clouds,
@@ -392,12 +393,30 @@ abstract class BossBurrowData with _$BossBurrowData {
       _$BossBurrowDataFromJson(json);
 }
 
+/// Charges in a row (the camel, 2026-11-03, 사용자): the boss's own charge
+/// [count] times over, each with its warning and aimed anew. A pattern of
+/// its own, apart from the plain charge's timer.
+@freezed
+abstract class BossChargeChainData with _$BossChargeChainData {
+  const factory BossChargeChainData({
+    required double everySeconds,
+    required int count,
+  }) = _BossChargeChainData;
+
+  factory BossChargeChainData.fromJson(Map<String, dynamic> json) =>
+      _$BossChargeChainDataFromJson(json);
+}
+
 /// Gas or spores (2026-10-23, 사용자): the boss stops where it is, winds up
 /// for a second and spews; the gas spreads out to [radius] over
 /// [spreadSeconds], stays [seconds] in all and hurts [damagePerSecond]
 /// whoever is inside. It goes through obstacles. All around the boss when
 /// [fanDegrees] is 0; otherwise a fan that wide toward the target, reaching
 /// further out as it spreads. The boss stays put until the gas is gone.
+///
+/// A [behind] cloud (the camel's kicked sand, 2026-10-23, 사용자) fans out
+/// behind the way the boss last moved, and it only uses it on a target
+/// behind it.
 @freezed
 abstract class BossCloudData with _$BossCloudData {
   const factory BossCloudData({
@@ -407,6 +426,7 @@ abstract class BossCloudData with _$BossCloudData {
     required double spreadSeconds,
     required double damagePerSecond,
     @Default(0.0) double fanDegrees,
+    @Default(false) bool behind,
   }) = _BossCloudData;
 
   factory BossCloudData.fromJson(Map<String, dynamic> json) =>

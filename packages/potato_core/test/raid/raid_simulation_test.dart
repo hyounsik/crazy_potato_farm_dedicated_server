@@ -99,6 +99,11 @@ void main() {
           'attack_interval': 100,
           'reach': 0.2,
           'boss': {
+            'charge_telegraph_seconds': 0.5,
+            'charge_speed': 6,
+            'charge_distance': 1,
+            'charge_damage': 5,
+            'charge_chain': {'every_seconds': 100, 'count': 3},
             'jump': {
               'every_seconds': 100,
               'air_seconds': 2,
@@ -130,6 +135,15 @@ void main() {
                 'spread_seconds': 1,
                 'damage_per_second': 4,
                 'fan_degrees': 60,
+              },
+              {
+                'every_seconds': 100,
+                'radius': 2,
+                'seconds': 1,
+                'spread_seconds': 0.2,
+                'damage_per_second': 4,
+                'fan_degrees': 90,
+                'behind': true,
               },
             ],
             'shots': [
@@ -1929,6 +1943,46 @@ void main() {
       expect(cloud.covers(spot + toward * 0.9, 0.1), isTrue);
       expect(cloud.covers(spot - toward * 0.9, 0.1), isFalse);
       expect(boss.position, spot);
+    });
+
+    test('kicked sand goes behind the way it moved, only at one behind it '
+        '(2026-11-03)', () {
+      final (run, boss) = facing('cloud2');
+      final spot = boss.position;
+      boss.heading = const Vec2(1, 0);
+      run.player.position = spot + const Vec2(1.5, 0);
+      run.step();
+      expect(boss.isWindingUp, isFalse, reason: 'the target is ahead of it');
+      boss
+        ..position = spot
+        ..heading = const Vec2(1, 0);
+      run.player.position = spot - const Vec2(1.5, 0);
+      run.step();
+      expect(boss.isWindingUp, isTrue);
+      runFor(run, 1.3);
+      final cloud = run.clouds.single;
+      expect(cloud.covers(spot - const Vec2(0.9, 0), 0.1), isTrue);
+      expect(cloud.covers(spot + const Vec2(0.9, 0), 0.1), isFalse);
+    });
+
+    test('charges in a row: three, each warned and aimed anew (2026-11-03)', () {
+      final (run, boss) = facing('chain');
+      run.player.position = boss.position + const Vec2(2, 0);
+      run.step();
+      expect(boss.isTelegraphing, isTrue);
+      expect(boss.chargeChainLeft, 2);
+      expect(boss.chargeDirection.x, greaterThan(0.99));
+      runFor(run, 0.55 + 1 / 6);
+      expect(boss.isTelegraphing, isTrue, reason: 'the second warning');
+      expect(boss.chargeChainLeft, 1);
+      run.player.position = boss.position + const Vec2(0, 2);
+      runFor(run, 0.55 + 1 / 6);
+      expect(boss.chargeChainLeft, 0);
+      expect(boss.isTelegraphing, isTrue, reason: 'the third warning');
+      expect(boss.chargeDirection.y, greaterThan(0.8));
+      runFor(run, 0.55 + 1 / 6);
+      expect(boss.isTelegraphing || boss.isCharging, isFalse);
+      expect(boss.cooldowns['gap'], greaterThan(0));
     });
 
     test('every boss swings at whoever is next to it', () {

@@ -863,6 +863,14 @@ final class Catalog {
         check.positiveNumber('$at.burrow.radius', burrow.radius);
         check.atLeastNumber('$at.burrow.damage', burrow.damage, 0);
       }
+      if (boss.chargeChain case final chain?) {
+        check.positiveNumber(
+          '$at.charge_chain.every_seconds',
+          chain.everySeconds,
+        );
+        check.positive('$at.charge_chain.count', chain.count);
+        check.positiveNumber('$at.charge_distance', boss.chargeDistance);
+      }
       for (final (i, cloud) in boss.clouds.indexed) {
         final c = '$at.clouds[$i]';
         check.positiveNumber('$c.every_seconds', cloud.everySeconds);

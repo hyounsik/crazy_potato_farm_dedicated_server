@@ -698,6 +698,12 @@ _BossData _$BossDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'spray_range',
         (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
+      chargeChain: $checkedConvert(
+        'charge_chain',
+        (v) => v == null
+            ? null
+            : BossChargeChainData.fromJson(v as Map<String, dynamic>),
+      ),
       jump: $checkedConvert(
         'jump',
         (v) =>
@@ -739,6 +745,7 @@ _BossData _$BossDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'sprayDamage': 'spray_damage',
     'spraySpeed': 'spray_speed',
     'sprayRange': 'spray_range',
+    'chargeChain': 'charge_chain',
   },
 );
 
@@ -753,6 +760,7 @@ Map<String, dynamic> _$BossDataToJson(_BossData instance) => <String, dynamic>{
   'spray_damage': instance.sprayDamage,
   'spray_speed': instance.spraySpeed,
   'spray_range': instance.sprayRange,
+  'charge_chain': instance.chargeChain?.toJson(),
   'jump': instance.jump?.toJson(),
   'burrow': instance.burrow?.toJson(),
   'clouds': instance.clouds.map((e) => e.toJson()).toList(),
@@ -849,6 +857,25 @@ Map<String, dynamic> _$BossBurrowDataToJson(_BossBurrowData instance) =>
       'damage': instance.damage,
     };
 
+_BossChargeChainData _$BossChargeChainDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_BossChargeChainData', json, ($checkedConvert) {
+      final val = _BossChargeChainData(
+        everySeconds: $checkedConvert(
+          'every_seconds',
+          (v) => (v as num).toDouble(),
+        ),
+        count: $checkedConvert('count', (v) => (v as num).toInt()),
+      );
+      return val;
+    }, fieldKeyMap: const {'everySeconds': 'every_seconds'});
+
+Map<String, dynamic> _$BossChargeChainDataToJson(
+  _BossChargeChainData instance,
+) => <String, dynamic>{
+  'every_seconds': instance.everySeconds,
+  'count': instance.count,
+};
+
 _BossCloudData _$BossCloudDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate(
       '_BossCloudData',
@@ -876,6 +903,7 @@ _BossCloudData _$BossCloudDataFromJson(Map<String, dynamic> json) =>
             'fan_degrees',
             (v) => (v as num?)?.toDouble() ?? 0.0,
           ),
+          behind: $checkedConvert('behind', (v) => v as bool? ?? false),
         );
         return val;
       },
@@ -895,6 +923,7 @@ Map<String, dynamic> _$BossCloudDataToJson(_BossCloudData instance) =>
       'spread_seconds': instance.spreadSeconds,
       'damage_per_second': instance.damagePerSecond,
       'fan_degrees': instance.fanDegrees,
+      'behind': instance.behind,
     };
 
 _BossShotData _$BossShotDataFromJson(Map<String, dynamic> json) =>

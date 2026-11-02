@@ -36,6 +36,13 @@ enum KitMoveRefusal {
 /// connected any more, it forgets the catalog so an updated app can bring
 /// its own.
 ///
+/// With a [world] the world only moves forward (2026-11-01, 사용자): a
+/// guest on another protocol, or on an older build than the world has
+/// seen, is turned away; one on the world's build comes in on the data it
+/// keeps (and must have the same data); one on a newer build brings its data
+/// and the farm moves onto it, but only once the room is empty, so everyone
+/// in a room plays on one build's data.
+///
 /// With a [world] the room also keeps the server's one shared farm
 /// (2026-10-28, 사용자): the game data stays with the world, so a guest on
 /// the same data comes in without sending it again; guests' farm commands
@@ -131,11 +138,21 @@ final class DedicatedRoom {
     if (_closed) return;
     final packet = _withVerifiedPlayer(incoming);
     final relay = _relay;
+    final world = this.world;
     if (relay != null) {
       // Farm commands are the world's, from those on the farm; the rest is
       // the session's.
-      if (world != null && !_outOnRun(packet.peerId)) {
-        if (_decode(packet) case final FarmCommandMessage msg) {
+      if (world != null) {
+        final msg = _decode(packet);
+        // Everyone in the room is on the world's build: older ones must
+        // update, newer ones wait until the room is empty.
+        if (msg case HelloMessage(:final buildNumber)
+            when buildNumber != _buildNumber) {
+          log?.call('Build $buildNumber turned away (room on $_buildNumber)');
+          return _reject(packet.peerId);
+        }
+        if (msg case final FarmCommandMessage msg
+            when !_outOnRun(packet.peerId)) {
           return _onFarmCommand(packet.peerId, msg.command);
         }
       }
@@ -144,10 +161,26 @@ final class DedicatedRoom {
     }
     final msg = _decode(packet);
     switch (msg) {
+      case HelloMessage(:final protocol) when protocol != sessionProtocol:
+        _reject(packet.peerId);
+      case HelloMessage(:final buildNumber)
+          when world != null && buildNumber < world.buildNumber:
+        log?.call(
+          'Build $buildNumber turned away (world on '
+          '${world.buildNumber})',
+        );
+        _reject(packet.peerId);
       case HelloMessage(:final catalogHash, :final buildNumber)
-          when world?.catalog != null && world?.catalogHash == catalogHash:
-        // The world already has this game data.
-        _catalog = world!.catalog;
+          when world?.catalog != null && buildNumber == world!.buildNumber:
+        if (world.catalogHash != catalogHash) {
+          // The world's build, other data: not the data that build ships.
+          log?.call(
+            'Game data $catalogHash on build $buildNumber turned '
+            'away (world has ${world.catalogHash})',
+          );
+          return _reject(packet.peerId);
+        }
+        _catalog = world.catalog;
         _buildNumber = buildNumber;
         log?.call('Game data $catalogHash from the world');
         _openWaitingRoom();
@@ -176,18 +209,19 @@ final class DedicatedRoom {
     if (catalog == null || computeCatalogHash(catalog) != hello.catalogHash) {
       return _reject(peerId);
     }
-    _catalog = catalog;
-    _buildNumber = hello.buildNumber;
-    if (world case final world?) {
-      unawaited(
-        world.adoptCatalog(
+    if (world case final world?
+        when !world.adoptCatalog(
           catalog: catalog,
           files: files,
           hash: hello.catalogHash,
           buildNumber: hello.buildNumber,
-        ),
-      );
+        )) {
+      // The farm does not fit this data: the world stays as it was, and
+      // nobody plays on data the farm is not on.
+      return _reject(peerId);
     }
+    _catalog = catalog;
+    _buildNumber = hello.buildNumber;
     log?.call(
       'Catalog ${hello.catalogHash} (build ${hello.buildNumber}) '
       'from $peerId',

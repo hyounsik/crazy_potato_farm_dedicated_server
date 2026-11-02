@@ -36,18 +36,19 @@ void main() {
     saveAfter: const Duration(milliseconds: 20),
   );
 
-  Future<void> adopt(DedicatedWorld w, {String hash = 'h1'}) => w.adoptCatalog(
-    catalog: catalog,
-    files: files,
-    hash: hash,
-    buildNumber: 7,
-  );
+  bool adopt(DedicatedWorld w, {String hash = 'h1', int build = 7}) =>
+      w.adoptCatalog(
+        catalog: catalog,
+        files: files,
+        hash: hash,
+        buildNumber: build,
+      );
 
   test('the first game data makes a new farm, kept with the kits', () async {
     final w = world();
     await w.open();
     expect(w.room, isNull, reason: 'nothing saved, no game data yet');
-    await adopt(w);
+    expect(adopt(w), isTrue);
     expect(w.room, isNotNull);
     final food = w.room!.farm.food;
     w.apply('a', const FarmCommand.loadBag(item: 'food', count: 10));
@@ -64,7 +65,7 @@ void main() {
   test('time goes on with nobody there', () async {
     final w = world();
     await w.open();
-    await adopt(w);
+    expect(adopt(w), isTrue);
     final tick = w.room!.farm.tick;
     await Future<void>.delayed(const Duration(milliseconds: 1200));
     expect(w.room!.farm.tick, greaterThan(tick));
@@ -74,9 +75,10 @@ void main() {
   test('newer game data carries the farm over', () async {
     final w = world();
     await w.open();
-    await adopt(w);
+    expect(adopt(w), isTrue);
     w.apply('a', const FarmCommand.loadBag(item: 'food', count: 5));
-    await adopt(w, hash: 'h2');
+    expect(adopt(w, hash: 'h2', build: 8), isTrue);
+    expect(w.buildNumber, 8);
     expect(w.catalogHash, 'h2');
     expect(w.room!.kitOf('a').bag.countOf('food'), 5);
     await w.close();

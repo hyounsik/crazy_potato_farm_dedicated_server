@@ -51,23 +51,28 @@ void main() {
     return server;
   }
 
+  final transports = <ClientSession, WebSocketClientTransport>{};
+
   Future<ClientSession> join(
     DedicatedServer server,
     String name, {
     Map<String, Object?>? catalogFiles,
+    Catalog? onCatalog,
+    int buildNumber = 7,
   }) async {
     final transport = await WebSocketClientTransport.connect(
       Uri.parse('ws://127.0.0.1:${server.port}'),
     );
     final session = ClientSession(
       codec: const ZlibSessionCodec(),
-      catalog: catalog,
+      catalog: onCatalog ?? catalog,
       transport: transport,
       start: RaidMemberStart(name: name),
-      buildNumber: 7,
+      buildNumber: buildNumber,
       playerId: 'install-$name',
       catalogFiles: catalogFiles,
     );
+    transports[session] = transport;
     addTearDown(() async {
       await session.close();
       await transport.close();
@@ -125,6 +130,78 @@ void main() {
     final again = await join(server, 'A');
     await until(() => again.kit != null);
     expect(PlayerKit.fromJson(catalog, again.kit!).bag.countOf('food'), 7);
+  });
+
+  group('the world only moves forward (2026-11-01)', () {
+    Future<void> leave(DedicatedServer server, ClientSession guest) async {
+      await guest.close();
+      await transports[guest]!.close();
+      await until(() => server.room.catalog == null);
+    }
+
+    test(
+      'an older build is turned away, a newer one moves the world on',
+      () async {
+        final server = await startServer();
+        final a = await join(server, 'A', catalogFiles: files);
+        await until(() => a.kit != null);
+        await leave(server, a);
+
+        final old = await join(server, 'Old', buildNumber: 6);
+        await until(() => old.stage == ClientSessionStage.rejected);
+        expect(old.joinRejection, SessionJoinRejection.versionMismatch);
+        await transports[old]!.close();
+
+        final newer = await join(
+          server,
+          'New',
+          catalogFiles: files,
+          buildNumber: 8,
+        );
+        await until(() => newer.kit != null);
+        expect(server.world!.buildNumber, 8);
+        await leave(server, newer);
+
+        // Build 7 was fine before; now the world is on 8.
+        final back = await join(server, 'A');
+        await until(() => back.stage == ClientSessionStage.rejected);
+      },
+    );
+
+    test('a newer build waits while the room is in use', () async {
+      final server = await startServer();
+      final a = await join(server, 'A', catalogFiles: files);
+      await until(() => a.kit != null);
+      final newer = await join(
+        server,
+        'New',
+        catalogFiles: files,
+        buildNumber: 8,
+      );
+      await until(() => newer.stage == ClientSessionStage.rejected);
+      expect(server.world!.buildNumber, 7);
+    });
+
+    test("the world's build with other data is turned away", () async {
+      final server = await startServer();
+      final a = await join(server, 'A', catalogFiles: files);
+      await until(() => a.kit != null);
+      await leave(server, a);
+
+      // Same build, a weapon changed: not the data build 7 shipped.
+      final changed = jsonDecode(jsonEncode(files)) as Map<String, Object?>;
+      final weapons = (changed['weapons']! as Map)['weapons'] as List;
+      final weapon = weapons.first as Map;
+      weapon['damage'] = (weapon['damage'] as num) + 1;
+      final other = await join(
+        server,
+        'Other',
+        catalogFiles: changed,
+        onCatalog: Catalog.load(changed).catalog,
+      );
+      await until(() => other.stage == ClientSessionStage.rejected);
+      expect(server.world!.catalogHash, computeCatalogHash(catalog));
+    });
   });
 
   test('a run sets out with the kit and comes home to the farm', () async {

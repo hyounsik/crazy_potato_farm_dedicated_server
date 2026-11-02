@@ -86,11 +86,16 @@ One shared farm (`DedicatedWorld`) and one exploration party at a time
 - The server ships **without game data**. The first player to connect is asked
   for it and sends the data files their app was built with; the server accepts
   them when they load and match that player's catalog hash. That player's app
-  build becomes the server's: later players must be on the same build and
-  catalog, or they are turned away. The data is kept with the farm, so the
-  next player on the same data need not send it. When everyone has left, a
-  player on a newer app can bring newer data, and the farm carries over onto
-  it.
+  build becomes the server's, and the server only moves forward:
+  - An app on another session protocol (a server too old or too new for it)
+    or on an older build than the server has seen is turned away and asked to
+    update.
+  - An app on the server's build comes in on the data the server keeps, so it
+    need not send it; it must have the same data, or it is turned away.
+  - An app on a newer build brings its data once nobody else is connected
+    (until then it is turned away), and the farm carries over onto it. If the
+    farm does not fit the new data, the server stays as it was and turns that
+    app away.
 - Nobody plays on the server. Anyone on the farm may call everyone to set
   out for a zone; those who get ready within a minute go (at once when
   everyone is ready), and the rest stay on the farm, where newcomers can

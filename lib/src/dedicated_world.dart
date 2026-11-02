@@ -79,23 +79,40 @@ final class DedicatedWorld {
     log?.call('World loaded (game data ${saved.catalogHash})');
   }
 
-  /// Takes the game data a guest brought: kept on disk, and the farm moves
-  /// onto it when it differs from what the world has.
-  Future<void> adoptCatalog({
+  /// Takes the game data a guest on a newer build brought (the room turns
+  /// older builds away, 2026-11-01, 사용자): the farm carries over onto it
+  /// and the data is kept on disk. The same data on a newer build only
+  /// raises [buildNumber]. Decided at once, so the room opens on what the
+  /// world runs on: false, with the world as it was, when the farm does not
+  /// fit the new data. The writing finishes in the background ([close]
+  /// waits for it).
+  bool adoptCatalog({
     required Catalog catalog,
     required Map<String, dynamic> files,
     required String hash,
     required int buildNumber,
-  }) async {
-    if (_closed || hash == _catalogHash) return;
-    await store.saveCatalog(files: files, hash: hash, buildNumber: buildNumber);
+  }) {
+    if (_closed) return false;
+    if (hash == _catalogHash) {
+      if (buildNumber > _buildNumber) {
+        _buildNumber = buildNumber;
+        _write(
+          () => store.saveCatalog(
+            files: files,
+            hash: hash,
+            buildNumber: buildNumber,
+          ),
+        );
+      }
+      return true;
+    }
     final old = _room;
     final room = old == null
         ? _newRoom(catalog)
-        : _restore(catalog, old.toJson()) ?? old;
-    if (identical(room, old)) {
+        : _restore(catalog, old.toJson());
+    if (room == null) {
       log?.call('The farm does not fit game data $hash; kept as it was');
-      return;
+      return false;
     }
     _catalog = catalog;
     _catalogHash = hash;
@@ -103,11 +120,24 @@ final class DedicatedWorld {
     _setRoom(room);
     log?.call(
       old == null
-          ? 'New farm on game data $hash'
-          : 'Farm carried onto game data $hash',
+          ? 'New farm on game data $hash (build $buildNumber)'
+          : 'Farm carried onto game data $hash (build $buildNumber)',
     );
-    await save();
+    _write(() async {
+      await store.saveCatalog(
+        files: files,
+        hash: hash,
+        buildNumber: buildNumber,
+      );
+      await save();
+    });
+    return true;
   }
+
+  /// Disk writes in order, one after another.
+  Future<void> _writing = Future.value();
+  void _write(Future<void> Function() write) =>
+      _writing = _writing.then((_) => write());
 
   /// Player [playerId] sends [command] to the farm.
   FarmRoomReply? apply(String playerId, FarmCommand command) =>
@@ -182,6 +212,7 @@ final class DedicatedWorld {
     _closed = true;
     _ticker?.cancel();
     _savePeriodic?.cancel();
+    await _writing;
     await save();
     await _roomSub?.cancel();
     await _room?.close();

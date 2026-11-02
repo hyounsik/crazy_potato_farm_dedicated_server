@@ -1039,8 +1039,8 @@ final class FarmSimulation {
     }
   }
 
-  /// Whether [guard] does any work on a pest of [kind]: Pacifist and
-  /// Homebody do none (2026-10-31, 사용자).
+  /// Whether [guard] does any work on a pest of [kind]: an ability may take
+  /// its clearing speed to nothing.
   bool _clears(Guard guard, PestKind kind) {
     final speed = switch (kind) {
       PestKind.bug => FarmStat.bugClearSpeed,

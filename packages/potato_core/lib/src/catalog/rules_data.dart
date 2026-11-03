@@ -3,6 +3,7 @@ import 'dart:math' as math;
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
+import 'package:potato_core/src/catalog/localized_text.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/tile.dart';
@@ -30,6 +31,8 @@ abstract class RulesData with _$RulesData {
     required CombatPowerRulesData combatPower,
     @Default(ZoneScalingRulesData()) ZoneScalingRulesData zoneScaling,
     @Default(SeedLabRulesData()) SeedLabRulesData seedLab,
+    @Default(GearLabRulesData()) GearLabRulesData gearLab,
+    @Default(MealRulesData()) MealRulesData meals,
   }) = _RulesData;
 
   factory RulesData.fromJson(Map<String, dynamic> json) =>
@@ -345,6 +348,11 @@ abstract class StorageRulesData with _$StorageRulesData {
     /// Slots in the truck bed, the same for everyone and never widened
     /// (`multiplayer.md`, 2026-10-28).
     @Default(8) int bedSlots,
+
+    /// Slots a warehouse adds to the seed pouch and the equipment box, past
+    /// their widened sizes (2026-11-03, 사용자).
+    @Default(20) int warehousePouch,
+    @Default(10) int warehouseGear,
   }) = _StorageRulesData;
 
   const StorageRulesData._();
@@ -729,6 +737,62 @@ abstract class SeedStackData with _$SeedStackData {
 /// What the seed lab charges to turn a seed into another type, and how
 /// likely the seed keeps its grade (2026-10-31, 사용자). Costs go up a step
 /// every [bandLevels] levels: 1-9 is the first band, 90-99 the tenth.
+@freezed
+abstract class GearLabRulesData with _$GearLabRulesData {
+  /// The gear lab (2026-11-03, 사용자): rolling a piece's abilities anew and
+  /// mending it. Costs go by level band and grade, as the seed lab's do
+  /// ([SeedLabRulesData.band], [SeedLabRulesData.gradeTimes]). A mend may
+  /// fail and break the piece into materials, more likely the better its
+  /// grade however worn it is (사용자: or mending early keeps it for ever).
+  const factory GearLabRulesData({
+    /// Baby potatoes one roll of a normal piece costs, per band.
+    @Default(10) int rerollBandFood,
+
+    /// Baby potatoes one mend of a normal piece costs, per band.
+    @Default(10) int repairBandFood,
+
+    /// Materials one mend costs, by grade.
+    @Default({Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3})
+    Map<Grade, int> repairMaterials,
+
+    /// The chance a mend holds, by grade; otherwise the piece breaks up.
+    @Default({Grade.normal: 0.95, Grade.rare: 0.85, Grade.legendary: 0.7})
+    Map<Grade, double> repairChance,
+  }) = _GearLabRulesData;
+
+  factory GearLabRulesData.fromJson(Map<String, dynamic> json) =>
+      _$GearLabRulesDataFromJson(json);
+}
+
+/// One region's dish at the house table (2026-11-03, 사용자): open once its
+/// [zone]'s boss was killed and the player escaped.
+@freezed
+abstract class MealData with _$MealData {
+  const factory MealData({
+    required String id,
+    required String zone,
+    @LocalizedTextConverter() required LocalizedText name,
+  }) = _MealData;
+
+  factory MealData.fromJson(Map<String, dynamic> json) =>
+      _$MealDataFromJson(json);
+}
+
+/// What eating does (2026-11-03, 사용자: every dish the same for now): more
+/// health on runs for [seconds]. It neither stacks nor renews while it
+/// lasts; a run set out on with it keeps it to the end *(제안)*.
+@freezed
+abstract class MealRulesData with _$MealRulesData {
+  const factory MealRulesData({
+    @Default(3600) int seconds,
+    @Default(10) int hpPercent,
+    @Default(<MealData>[]) List<MealData> dishes,
+  }) = _MealRulesData;
+
+  factory MealRulesData.fromJson(Map<String, dynamic> json) =>
+      _$MealRulesDataFromJson(json);
+}
+
 @freezed
 abstract class SeedLabRulesData with _$SeedLabRulesData {
   const factory SeedLabRulesData({

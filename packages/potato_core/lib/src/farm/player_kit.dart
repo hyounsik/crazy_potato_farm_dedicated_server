@@ -14,6 +14,7 @@ final class PlayerKit {
     this.equipped = const Equipped(),
     List<ItemStack?> bed = const [],
     List<ItemStack?> bag = const [],
+    this.mealUntilTick = 0,
   }) : _catalog = catalog,
        _gearStats = GearStats(catalog),
        bed = Bag.restore([
@@ -28,6 +29,9 @@ final class PlayerKit {
 
   final Catalog _catalog;
   final GearStats _gearStats;
+
+  /// The farm tick the player's last dish wears off on (2026-11-03, 사용자).
+  int mealUntilTick;
 
   /// What the player wears (and takes on runs).
   Equipped equipped;
@@ -68,6 +72,7 @@ final class PlayerKit {
     'equipped': equipped.toJson(),
     'bed': _slots(bed),
     'bag': _slots(_bag),
+    if (mealUntilTick > 0) 'meal_until_tick': mealUntilTick,
   };
 
   /// Rebuilds a kit saved with [toJson].
@@ -84,6 +89,7 @@ final class PlayerKit {
       },
       bed: slots(json['bed']),
       bag: slots(json['bag']),
+      mealUntilTick: json['meal_until_tick'] as int? ?? 0,
     );
   }
 

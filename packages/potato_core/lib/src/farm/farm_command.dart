@@ -34,6 +34,19 @@ sealed class FarmCommand with _$FarmCommand {
   const factory FarmCommand.enhanceGear({GearKind? worn, int? index}) =
       EnhanceGear;
 
+  /// Rolls a piece's abilities anew at the gear lab (2026-11-03, 사용자).
+  const factory FarmCommand.rerollGear({GearKind? worn, int? index}) =
+      RerollGear;
+
+  /// Mends a piece as new, at the gear lab or, with one on the farm, the
+  /// workbench. It may fail: the piece breaks up into materials, more
+  /// likely the better its grade (2026-11-03, 사용자).
+  const factory FarmCommand.repairGear({GearKind? worn, int? index}) =
+      RepairGear;
+
+  /// Eats dish [meal] at the house table (2026-11-03, 사용자).
+  const factory FarmCommand.eatMeal({required String meal}) = EatMeal;
+
   /// Wears box piece [index], putting what was worn there in its place.
   const factory FarmCommand.equipGear({required int index}) = EquipGear;
 
@@ -404,6 +417,24 @@ enum FarmRejection {
 
   /// The farm has no seed lab.
   noSeedLab,
+
+  /// The farm has no gear lab.
+  noGearLab,
+
+  /// The piece has no abilities to roll (normal grade).
+  noAbilities,
+
+  /// The piece is as new already.
+  notWorn,
+
+  /// What is stored would not fit without this warehouse.
+  warehouseNotEmpty,
+
+  /// This dish has not opened yet.
+  mealLocked,
+
+  /// Still full from the last dish: eating does nothing (2026-11-03, 사용자).
+  stillFull,
 
   /// The seed is that type already.
   sameType,

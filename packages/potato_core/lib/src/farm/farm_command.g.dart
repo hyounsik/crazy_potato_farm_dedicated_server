@@ -91,6 +91,60 @@ const _$GearKindEnumMap = {
   GearKind.belt: 'belt',
 };
 
+RerollGear _$RerollGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RerollGear', json, ($checkedConvert) {
+      final val = RerollGear(
+        worn: $checkedConvert(
+          'worn',
+          (v) => $enumDecodeNullable(_$GearKindEnumMap, v),
+        ),
+        index: $checkedConvert('index', (v) => (v as num?)?.toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RerollGearToJson(RerollGear instance) =>
+    <String, dynamic>{
+      'worn': _$GearKindEnumMap[instance.worn],
+      'index': instance.index,
+      'runtimeType': instance.$type,
+    };
+
+RepairGear _$RepairGearFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RepairGear', json, ($checkedConvert) {
+      final val = RepairGear(
+        worn: $checkedConvert(
+          'worn',
+          (v) => $enumDecodeNullable(_$GearKindEnumMap, v),
+        ),
+        index: $checkedConvert('index', (v) => (v as num?)?.toInt()),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RepairGearToJson(RepairGear instance) =>
+    <String, dynamic>{
+      'worn': _$GearKindEnumMap[instance.worn],
+      'index': instance.index,
+      'runtimeType': instance.$type,
+    };
+
+EatMeal _$EatMealFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('EatMeal', json, ($checkedConvert) {
+      final val = EatMeal(
+        meal: $checkedConvert('meal', (v) => v as String),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$EatMealToJson(EatMeal instance) => <String, dynamic>{
+  'meal': instance.meal,
+  'runtimeType': instance.$type,
+};
+
 EquipGear _$EquipGearFromJson(Map<String, dynamic> json) =>
     $checkedCreate('EquipGear', json, ($checkedConvert) {
       final val = EquipGear(

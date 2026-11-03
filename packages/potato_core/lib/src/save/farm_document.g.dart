@@ -183,6 +183,16 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <ItemStack?>[],
       ),
+      mealUntilTick: $checkedConvert(
+        'meal_until_tick',
+        (v) => (v as num?)?.toInt() ?? 0,
+      ),
+      mealsOpen: $checkedConvert(
+        'meals_open',
+        (v) =>
+            (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+            const <String>[],
+      ),
     );
     return val;
   },
@@ -198,6 +208,8 @@ _FarmDocument _$FarmDocumentFromJson(
     'storyDone': 'story_done',
     'storySkipped': 'story_skipped',
     'missingBuildings': 'missing_buildings',
+    'mealUntilTick': 'meal_until_tick',
+    'mealsOpen': 'meals_open',
   },
 );
 
@@ -232,6 +244,8 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'missing_buildings': instance.missingBuildings,
       'bed': instance.bed.map((e) => e?.toJson()).toList(),
       'bag': instance.bag.map((e) => e?.toJson()).toList(),
+      'meal_until_tick': instance.mealUntilTick,
+      'meals_open': instance.mealsOpen,
     };
 
 _FieldDocument _$FieldDocumentFromJson(Map<String, dynamic> json) =>

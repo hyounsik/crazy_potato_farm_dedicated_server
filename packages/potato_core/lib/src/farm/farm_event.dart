@@ -92,6 +92,16 @@ sealed class FarmEvent with _$FarmEvent {
     required bool worked,
   }) = GearEnhanced;
 
+  /// A piece of [kind] had its abilities rolled anew.
+  const factory FarmEvent.gearRerolled({required GearKind kind}) = GearRerolled;
+
+  /// A mend of a piece of [kind]; if it did not [worked], the piece broke
+  /// up (a [FarmEvent.gearDisassembled] follows).
+  const factory FarmEvent.gearRepaired({
+    required GearKind kind,
+    required bool worked,
+  }) = GearRepaired;
+
   /// A piece broke down into [materials].
   const factory FarmEvent.gearDisassembled({required int materials}) =
       GearDisassembled;

@@ -68,8 +68,17 @@ final class FarmSimulation {
     Iterable<Seed> returnedSeeds = const [],
     List<ItemStack?> bed = const [],
     List<ItemStack?> bag = const [],
+    int mealUntilTick = 0,
+    Iterable<String> mealsOpen = const [],
   }) : _gear = List.of(gear),
-       kit = PlayerKit(catalog, equipped: equipped, bed: bed, bag: bag),
+       _mealsOpen = {...mealsOpen},
+       kit = PlayerKit(
+         catalog,
+         equipped: equipped,
+         bed: bed,
+         bag: bag,
+         mealUntilTick: mealUntilTick,
+       ),
        _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
        pouchSlots = pouchSlots ?? catalog.rules.storage.pouchSlots,
@@ -234,6 +243,10 @@ final class FarmSimulation {
   final List<Gear> _gear;
   List<Gear> get gear => List.unmodifiable(_gear);
 
+  /// Dishes open at the house table, by id (2026-11-03, 사용자).
+  final Set<String> _mealsOpen;
+  Set<String> get mealsOpen => Set.unmodifiable(_mealsOpen);
+
   /// What the farm's own player carries: worn gear, bag and truck bed
   /// (2026-10-28, 사용자: kept apart from the farm, so a shared farm can
   /// have one for each player and the rules stay the same).
@@ -335,7 +348,24 @@ final class FarmSimulation {
   }
 
   /// Whether a seed lab stands on the farm.
-  bool get hasSeedLab => _buildings.values.any((b) => b.data.needsAll);
+  bool get hasSeedLab => _hasBuilding('seed_lab');
+
+  /// Whether a gear lab stands on the farm (2026-11-03, 사용자).
+  bool get hasGearLab => _hasBuilding('gear_lab');
+
+  /// Whether a warehouse stands on the farm (2026-11-03, 사용자).
+  bool get hasWarehouse => _hasBuilding('warehouse');
+
+  bool _hasBuilding(String kind) =>
+      _buildings.values.any((b) => b.kind == kind);
+
+  /// Seeds the pouch holds now: its widened size and a warehouse's room.
+  int get pouchCapacity =>
+      pouchSlots + (hasWarehouse ? _rules.storage.warehousePouch : 0);
+
+  /// Pieces the equipment box holds now, likewise.
+  int get gearCapacity =>
+      gearSlots + (hasWarehouse ? _rules.storage.warehouseGear : 0);
 
   /// Whether the story opened any totem; the totem limit waits for one.
   bool get totemsOpen => catalog.buildings.values.any(
@@ -567,7 +597,7 @@ final class FarmSimulation {
   int get unreadMail => _mail.where((m) => !m.read).length;
 
   /// Free slots in the seed pouch.
-  int get pouchRoom => math.max(0, pouchSlots - _seeds.total);
+  int get pouchRoom => math.max(0, pouchCapacity - _seeds.total);
 
   /// Whether [tile] is on the farm and in an open block.
   bool isOpen(TilePos tile) {
@@ -697,6 +727,9 @@ final class FarmSimulation {
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
     EnhanceGear(:final worn, :final index) => _enhanceGear(worn, index),
+    RerollGear(:final worn, :final index) => _rerollGear(worn, index),
+    RepairGear(:final worn, :final index) => _repairGear(worn, index),
+    EatMeal(:final meal) => _eatMeal(meal),
     EquipGear(:final index) => _equipGear(index),
     UnequipGear(:final kind) => _unequipGear(kind),
     DisassembleGear(:final index) => _disassembleGear(index),
@@ -1646,6 +1679,115 @@ final class FarmSimulation {
     return null;
   }
 
+  void _putGear(GearKind? worn, int? index, Gear piece) {
+    if (worn != null) {
+      _actor.equipped = _actor.equipped.wearing(worn, piece);
+    } else {
+      _gear[index!] = piece;
+    }
+  }
+
+  /// Baby potatoes one roll of [piece]'s abilities costs at the gear lab.
+  int gearRerollFood(Gear piece) =>
+      _rules.gearLab.rerollBandFood *
+      _rules.seedLab.band(piece.level) *
+      _rules.seedLab.gradeTimes[piece.grade]!;
+
+  /// Baby potatoes one mend of [piece] costs.
+  int gearRepairFood(Gear piece) =>
+      _rules.gearLab.repairBandFood *
+      _rules.seedLab.band(piece.level) *
+      _rules.seedLab.gradeTimes[piece.grade]!;
+
+  /// Rolls [worn] or box [index]'s abilities anew; again and again until
+  /// the player is pleased, as with seeds.
+  FarmRejection? _rerollGear(GearKind? worn, int? index) {
+    if (!hasGearLab) return FarmRejection.noGearLab;
+    final piece = _gearAt(worn, index);
+    if (piece == null) return FarmRejection.noSuchGear;
+    if (piece.abilities.isEmpty) return FarmRejection.noAbilities;
+    final cost = gearRerollFood(piece);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    food -= cost;
+    _putGear(
+      worn,
+      index,
+      piece.copyWith(
+        abilities: _gearStats.rollAbilities(
+          piece.kind,
+          piece.family,
+          piece.grade,
+          _random,
+        ),
+      ),
+    );
+    _events.add(FarmEvent.gearRerolled(kind: piece.kind));
+    return null;
+  }
+
+  /// Mends [worn] or box [index] as new, or breaks it up if the mend fails.
+  FarmRejection? _repairGear(GearKind? worn, int? index) {
+    if (!hasGearLab) return FarmRejection.noGearLab;
+    final piece = _gearAt(worn, index);
+    if (piece == null) return FarmRejection.noSuchGear;
+    if (piece.wear <= 0) return FarmRejection.notWorn;
+    // A worn bag may break up: what is in the bag must fit without it.
+    if (worn == GearKind.bag && !_actor.bagFits(null)) {
+      return FarmRejection.bagTooSmall;
+    }
+    final lab = _rules.gearLab;
+    final cost = gearRepairFood(piece);
+    if (food < cost) return FarmRejection.notEnoughFood;
+    final material = _rules.workbench.material;
+    final needs = lab.repairMaterials[piece.grade]!;
+    final have = _materials[material] ?? 0;
+    if (have < needs) return FarmRejection.notEnoughMaterials;
+    food -= cost;
+    if (have == needs) {
+      _materials.remove(material);
+    } else {
+      _materials[material] = have - needs;
+    }
+    final worked = _random.chance(lab.repairChance[piece.grade]!);
+    _events.add(FarmEvent.gearRepaired(kind: piece.kind, worked: worked));
+    if (worked) {
+      _putGear(worn, index, piece.copyWith(wear: 0));
+      return null;
+    }
+    if (worn != null) {
+      _actor.equipped = _actor.equipped.wearing(worn, null);
+      if (worn == GearKind.bag) _actor.fitBag();
+    } else {
+      _gear.removeAt(index!);
+    }
+    _breakUp(piece);
+    return null;
+  }
+
+  /// Seconds left on the last dish [kit] ate; 0 when it has worn off.
+  int mealSecondsLeft([PlayerKit? kit]) {
+    final left = (kit ?? _actor).mealUntilTick - _tick;
+    if (left <= 0) return 0;
+    return (left * _rules.farm.stepMillis / 1000).ceil();
+  }
+
+  /// What [kit]'s dish adds to health on a run set out on now: 0.1 is 10%.
+  double mealHpBonusOf(PlayerKit kit) =>
+      mealSecondsLeft(kit) > 0 ? _rules.meals.hpPercent / 100 : 0;
+
+  /// Eats dish [meal]: while one lasts, eating only fills the belly
+  /// (2026-11-03, 사용자: no stacking, no renewing).
+  FarmRejection? _eatMeal(String meal) {
+    if (!_rules.meals.dishes.any((d) => d.id == meal)) {
+      return FarmRejection.mealLocked;
+    }
+    if (!_mealsOpen.contains(meal)) return FarmRejection.mealLocked;
+    if (mealSecondsLeft() > 0) return FarmRejection.stillFull;
+    _actor.mealUntilTick =
+        _tick + _rules.meals.seconds * 1000 ~/ _rules.farm.stepMillis;
+    return null;
+  }
+
   /// Wears box piece [index]; what was worn there goes to its place.
   FarmRejection? _equipGear(int index) {
     if (index < 0 || index >= _gear.length) return FarmRejection.noSuchGear;
@@ -1671,7 +1813,7 @@ final class FarmSimulation {
     final wearer = _actor;
     final piece = wearer.equipped.of(kind);
     if (piece == null) return FarmRejection.noSuchGear;
-    if (_gear.length >= gearSlots) return FarmRejection.boxFull;
+    if (_gear.length >= gearCapacity) return FarmRejection.boxFull;
     if (kind == GearKind.bag && !wearer.bagFits(null)) {
       return FarmRejection.bagTooSmall;
     }
@@ -1828,6 +1970,10 @@ final class FarmSimulation {
     final tiles = _buildings[buildingId]?.fieldTiles ?? 0;
     if (tiles > 0 && fieldTiles > fieldRoom - tiles) {
       return FarmRejection.fieldsNeedIt;
+    }
+    if (_buildings[buildingId]?.kind == 'warehouse' &&
+        (_seeds.total > pouchSlots || _gear.length > gearSlots)) {
+      return FarmRejection.warehouseNotEmpty;
     }
     final totems = _buildings[buildingId]?.totems ?? 0;
     if (totems > 0 && totemCount > totemLimit - totems) {
@@ -2099,6 +2245,12 @@ final class FarmSimulation {
     }
     if (score != null && zone != null) {
       totals.escapes.update(zone, (n) => n + 1, ifAbsent: () => 1);
+      // Killed the boss and got out: the region's dish opens (2026-11-03).
+      if (bossKilledIn == zone) {
+        for (final dish in _rules.meals.dishes) {
+          if (dish.zone == zone) _mealsOpen.add(dish.id);
+        }
+      }
     }
     _gear.addAll(gear);
     if (equipped != null) _actor.equipped = equipped;

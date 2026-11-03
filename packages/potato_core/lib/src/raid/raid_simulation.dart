@@ -233,6 +233,7 @@ final class RaidSimulation {
     List<ItemStack> bag = const [],
     Map<PotatoType, int> seedLevels = const {},
     Map<GearKind, int> storedGearLevels = const {},
+    double mealHpBonus = 0,
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
@@ -247,6 +248,7 @@ final class RaidSimulation {
         bag: bag,
         seedLevels: seedLevels,
         storedGearLevels: storedGearLevels,
+        mealHpBonus: mealHpBonus,
       ),
     ],
   );
@@ -299,7 +301,7 @@ final class RaidSimulation {
         radius: rules.player.radius,
         maxHp: party.apply(
           RaidStat.hp,
-          rules.player.maxHp * (1 + gear.hpBonus(m.equipped)),
+          rules.player.maxHp * (1 + gear.hpBonus(m.equipped) + m.mealHpBonus),
         ),
         weapon: gear.weaponOf(m.equipped.weapon),
         equipped: m.equipped,

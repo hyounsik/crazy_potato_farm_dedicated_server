@@ -18,6 +18,7 @@ final class RaidMemberStart {
     this.bag = const [],
     this.seedLevels = const {},
     this.storedGearLevels = const {},
+    this.mealHpBonus = 0,
   });
 
   factory RaidMemberStart.fromJson(
@@ -30,6 +31,7 @@ final class RaidMemberStart {
       _ => const Equipped(),
     },
     progress: json['progress'] as int? ?? 0,
+    mealHpBonus: (json['meal_hp_bonus'] as num?)?.toDouble() ?? 0,
     companions: [
       for (final c in json['companions'] as List<Object?>? ?? const [])
         CompanionStart.fromJson(c! as Map<String, dynamic>),
@@ -71,7 +73,12 @@ final class RaidMemberStart {
   /// `GearRulesData.lootLevelMode` says (2026-10-30, 사용자). → [LootLevels]
   final Map<GearKind, int> storedGearLevels;
 
+  /// What a dish eaten at home adds to health this run: 0.1 is 10%
+  /// (2026-11-03, 사용자).
+  final double mealHpBonus;
+
   Map<String, dynamic> toJson() => {
+    if (mealHpBonus > 0) 'meal_hp_bonus': mealHpBonus,
     if (name.isNotEmpty) 'name': name,
     'food': food,
     'equipped': equipped.toJson(),

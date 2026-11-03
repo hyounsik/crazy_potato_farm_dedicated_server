@@ -85,6 +85,12 @@ abstract class FarmDocument with _$FarmDocument {
 
     /// The bag's slots: what came back from a run and is not sorted yet.
     @Default(<ItemStack?>[]) List<ItemStack?> bag,
+
+    /// The farm tick the player's last dish wears off on (2026-11-03).
+    @Default(0) int mealUntilTick,
+
+    /// Dishes open at the house table, by id (2026-11-03).
+    @Default(<String>[]) List<String> mealsOpen,
   }) = _FarmDocument;
 
   const FarmDocument._();
@@ -189,6 +195,8 @@ abstract class FarmDocument with _$FarmDocument {
     storySkipped: farm.storySkipped,
     bed: _slots(farm.bed),
     bag: _slots(farm.bag),
+    mealUntilTick: farm.kit.mealUntilTick,
+    mealsOpen: farm.mealsOpen.toList()..sort(),
   );
 
   /// [bag]'s slots as saved: copies, with trailing empty slots left out.
@@ -301,6 +309,8 @@ abstract class FarmDocument with _$FarmDocument {
       returnedSeeds: returnedSeeds,
       bed: [for (final s in bed) s?.copyWithCount(s.count)],
       bag: [for (final s in bag) s?.copyWithCount(s.count)],
+      mealUntilTick: mealUntilTick,
+      mealsOpen: mealsOpen,
     );
     return farm..addMissingStartBuildings(also: missingBuildings);
   }

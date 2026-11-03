@@ -28,6 +28,7 @@ RaidMemberStart memberStartFor(
   bag: (kit ?? farm.kit).bagItems,
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
+  mealHpBonus: farm.mealHpBonusOf(kit ?? farm.kit),
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes
@@ -50,6 +51,7 @@ RaidSimulation startRun(
   bag: farm.bagItems,
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
+  mealHpBonus: farm.mealHpBonusOf(farm.kit),
 );
 
 /// The farm potatoes [potatoIds] as companions for a run, in that order,

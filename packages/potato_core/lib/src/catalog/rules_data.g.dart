@@ -71,6 +71,18 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
             ? const SeedLabRulesData()
             : SeedLabRulesData.fromJson(v as Map<String, dynamic>),
       ),
+      gearLab: $checkedConvert(
+        'gear_lab',
+        (v) => v == null
+            ? const GearLabRulesData()
+            : GearLabRulesData.fromJson(v as Map<String, dynamic>),
+      ),
+      meals: $checkedConvert(
+        'meals',
+        (v) => v == null
+            ? const MealRulesData()
+            : MealRulesData.fromJson(v as Map<String, dynamic>),
+      ),
     );
     return val;
   },
@@ -79,6 +91,7 @@ _RulesData _$RulesDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'combatPower': 'combat_power',
     'zoneScaling': 'zone_scaling',
     'seedLab': 'seed_lab',
+    'gearLab': 'gear_lab',
   },
 );
 
@@ -98,6 +111,8 @@ Map<String, dynamic> _$RulesDataToJson(_RulesData instance) =>
       'combat_power': instance.combatPower.toJson(),
       'zone_scaling': instance.zoneScaling.toJson(),
       'seed_lab': instance.seedLab.toJson(),
+      'gear_lab': instance.gearLab.toJson(),
+      'meals': instance.meals.toJson(),
     };
 
 _FarmRulesData _$FarmRulesDataFromJson(Map<String, dynamic> json) =>
@@ -569,6 +584,14 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
             'bed_slots',
             (v) => (v as num?)?.toInt() ?? 8,
           ),
+          warehousePouch: $checkedConvert(
+            'warehouse_pouch',
+            (v) => (v as num?)?.toInt() ?? 20,
+          ),
+          warehouseGear: $checkedConvert(
+            'warehouse_gear',
+            (v) => (v as num?)?.toInt() ?? 10,
+          ),
         );
         return val;
       },
@@ -585,6 +608,8 @@ _StorageRulesData _$StorageRulesDataFromJson(Map<String, dynamic> json) =>
         'overflowSeconds': 'overflow_seconds',
         'seedFood': 'seed_food',
         'bedSlots': 'bed_slots',
+        'warehousePouch': 'warehouse_pouch',
+        'warehouseGear': 'warehouse_gear',
       },
     );
 
@@ -603,6 +628,8 @@ Map<String, dynamic> _$StorageRulesDataToJson(
   'overflow_seconds': instance.overflowSeconds,
   'seed_food': instance.seedFood.map((k, e) => MapEntry(_$GradeEnumMap[k]!, e)),
   'bed_slots': instance.bedSlots,
+  'warehouse_pouch': instance.warehousePouch,
+  'warehouse_gear': instance.warehouseGear,
 };
 
 _WorkbenchRulesData _$WorkbenchRulesDataFromJson(
@@ -1206,6 +1233,108 @@ Map<String, dynamic> _$SeedStackDataToJson(_SeedStackData instance) =>
       'level': instance.level,
       'ability': instance.ability,
       'style': _$CombatStyleEnumMap[instance.style],
+    };
+
+_GearLabRulesData _$GearLabRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate(
+  '_GearLabRulesData',
+  json,
+  ($checkedConvert) {
+    final val = _GearLabRulesData(
+      rerollBandFood: $checkedConvert(
+        'reroll_band_food',
+        (v) => (v as num?)?.toInt() ?? 10,
+      ),
+      repairBandFood: $checkedConvert(
+        'repair_band_food',
+        (v) => (v as num?)?.toInt() ?? 10,
+      ),
+      repairMaterials: $checkedConvert(
+        'repair_materials',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) =>
+                  MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
+            ) ??
+            const {Grade.normal: 1, Grade.rare: 2, Grade.legendary: 3},
+      ),
+      repairChance: $checkedConvert(
+        'repair_chance',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(
+                $enumDecode(_$GradeEnumMap, k),
+                (e as num).toDouble(),
+              ),
+            ) ??
+            const {Grade.normal: 0.95, Grade.rare: 0.85, Grade.legendary: 0.7},
+      ),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'rerollBandFood': 'reroll_band_food',
+    'repairBandFood': 'repair_band_food',
+    'repairMaterials': 'repair_materials',
+    'repairChance': 'repair_chance',
+  },
+);
+
+Map<String, dynamic> _$GearLabRulesDataToJson(_GearLabRulesData instance) =>
+    <String, dynamic>{
+      'reroll_band_food': instance.rerollBandFood,
+      'repair_band_food': instance.repairBandFood,
+      'repair_materials': instance.repairMaterials.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+      'repair_chance': instance.repairChance.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+    };
+
+_MealData _$MealDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_MealData', json, ($checkedConvert) {
+      final val = _MealData(
+        id: $checkedConvert('id', (v) => v as String),
+        zone: $checkedConvert('zone', (v) => v as String),
+        name: $checkedConvert(
+          'name',
+          (v) => const LocalizedTextConverter().fromJson(v as Object),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$MealDataToJson(_MealData instance) => <String, dynamic>{
+  'id': instance.id,
+  'zone': instance.zone,
+  'name': const LocalizedTextConverter().toJson(instance.name),
+};
+
+_MealRulesData _$MealRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('_MealRulesData', json, ($checkedConvert) {
+  final val = _MealRulesData(
+    seconds: $checkedConvert('seconds', (v) => (v as num?)?.toInt() ?? 3600),
+    hpPercent: $checkedConvert('hp_percent', (v) => (v as num?)?.toInt() ?? 10),
+    dishes: $checkedConvert(
+      'dishes',
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map((e) => MealData.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <MealData>[],
+    ),
+  );
+  return val;
+}, fieldKeyMap: const {'hpPercent': 'hp_percent'});
+
+Map<String, dynamic> _$MealRulesDataToJson(_MealRulesData instance) =>
+    <String, dynamic>{
+      'seconds': instance.seconds,
+      'hp_percent': instance.hpPercent,
+      'dishes': instance.dishes.map((e) => e.toJson()).toList(),
     };
 
 _SeedLabRulesData _$SeedLabRulesDataFromJson(

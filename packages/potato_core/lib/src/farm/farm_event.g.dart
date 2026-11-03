@@ -305,6 +305,38 @@ const _$GearKindEnumMap = {
   GearKind.belt: 'belt',
 };
 
+GearRerolled _$GearRerolledFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('GearRerolled', json, ($checkedConvert) {
+      final val = GearRerolled(
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$GearKindEnumMap, v)),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$GearRerolledToJson(GearRerolled instance) =>
+    <String, dynamic>{
+      'kind': _$GearKindEnumMap[instance.kind]!,
+      'runtimeType': instance.$type,
+    };
+
+GearRepaired _$GearRepairedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('GearRepaired', json, ($checkedConvert) {
+      final val = GearRepaired(
+        kind: $checkedConvert('kind', (v) => $enumDecode(_$GearKindEnumMap, v)),
+        worked: $checkedConvert('worked', (v) => v as bool),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$GearRepairedToJson(GearRepaired instance) =>
+    <String, dynamic>{
+      'kind': _$GearKindEnumMap[instance.kind]!,
+      'worked': instance.worked,
+      'runtimeType': instance.$type,
+    };
+
 GearDisassembled _$GearDisassembledFromJson(Map<String, dynamic> json) =>
     $checkedCreate('GearDisassembled', json, ($checkedConvert) {
       final val = GearDisassembled(

@@ -318,5 +318,19 @@
     "recommended_per_score": 6,
     "easy_ratio": 1.2,
     "fair_ratio": 0.8
+  },
+  "meals": {
+    "seconds": 3600,
+    "hp_percent": 10,
+    "dishes": [
+      {
+        "id": "steamed_potato",
+        "zone": "sample_danger",
+        "name": {
+          "en": "Steamed Potato",
+          "ko": "찐 감자"
+        }
+      }
+    ]
   }
 }

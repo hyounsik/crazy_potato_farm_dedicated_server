@@ -520,7 +520,14 @@ abstract class ZoneData with _$ZoneData {
     /// The region's name, shown with safe or danger zone. Null for test
     /// zones, which the app names itself.
     @LocalizedTextConverter() LocalizedText? name,
-    required MapRecipe map,
+
+    /// How to generate the map; a zone has this or [drawnMap].
+    MapRecipe? map,
+
+    /// The hand-drawn map (`maps.json`) this zone always uses (2026-11-04,
+    /// 사용자: story maps). Its enemies and gathering spots stand where its
+    /// markers say; the counts in [enemies] and [gathering] are not used.
+    String? drawnMap,
     required ZoneEnemiesData enemies,
     required ZoneGatheringData gathering,
     required ZoneDropsData drops,

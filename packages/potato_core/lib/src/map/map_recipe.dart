@@ -69,6 +69,13 @@ const String bossAreaMarker = 'clearing';
 /// The map marker holding the clone entry sites.
 const String cloneEntryMarker = 'clone_entry';
 
+/// On a drawn map, the marker holding its gathering spots.
+const String spotMarker = 'spot';
+
+/// On a drawn map, a marker named this plus an enemy's id holds where that
+/// kind of enemy stands.
+const String enemyMarkerPrefix = 'enemy:';
+
 /// Loose obstacles sprinkled over open ground.
 @freezed
 abstract class ScatterRule with _$ScatterRule {

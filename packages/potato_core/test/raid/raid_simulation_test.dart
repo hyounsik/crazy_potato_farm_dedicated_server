@@ -680,7 +680,7 @@ void main() {
       );
       final run = start();
       final zone = catalog.zones['sample_danger']!;
-      expect(run.map.exits, hasLength(zone.map.exitSites));
+      expect(run.map.exits, hasLength(zone.map!.exitSites));
       expect(run.exits, hasLength(zone.danger!.openExits));
       expect(run.exits.every((e) => !e.found), isTrue);
       expect(jsonEncode(run.toJson()), jsonEncode(start().toJson()));

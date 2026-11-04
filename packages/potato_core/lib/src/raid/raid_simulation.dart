@@ -267,7 +267,10 @@ final class RaidSimulation {
     final zoneData = catalog.zones[zone];
     if (zoneData == null) throw ArgumentError.value(zone, 'zone', 'unknown');
     final rules = catalog.rules.raid;
-    final map = generateMap(zoneData.map, seed: seed, chunks: chunks);
+    final map = switch (zoneData.drawnMap) {
+      final id? => catalog.maps[id]!.map,
+      null => generateMap(zoneData.map!, seed: seed, chunks: chunks),
+    };
     final random = GameRandom((seed ^ 0x2545f491) & 0xffffffff);
     final entry = Vec2(map.entry.x + 0.5, map.entry.y + 0.5);
     var nextId = 1;
@@ -2988,8 +2991,22 @@ final class RaidSimulation {
       );
     }
 
+    // A drawn map says where its enemies stand; nothing is scattered.
+    final drawn = zone.drawnMap != null;
+    if (drawn) {
+      for (final MapEntry(key: name, value: tiles) in map.markers.entries) {
+        if (!name.startsWith(enemyMarkerPrefix)) continue;
+        for (final tile in tiles) {
+          add(
+            name.substring(enemyMarkerPrefix.length),
+            Vec2(tile.x + 0.5, tile.y + 0.5),
+          );
+        }
+      }
+    }
+
     var packs = 0;
-    final packGoal = (spec.packs * scale).round();
+    final packGoal = drawn ? 0 : (spec.packs * scale).round();
     for (var tries = 0; packs < packGoal && tries < 2000; tries++) {
       final center = _randomTile(map, random);
       if (!free(center, 3)) continue;
@@ -3010,7 +3027,7 @@ final class RaidSimulation {
 
     final total = spec.kinds.fold(0, (sum, k) => sum + k.weight);
     var loners = 0;
-    final lonerGoal = (spec.count * scale).round();
+    final lonerGoal = drawn ? 0 : (spec.count * scale).round();
     for (var tries = 0; loners < lonerGoal && tries < 2000; tries++) {
       final at = _randomTile(map, random);
       if (!free(at, 1.5)) continue;
@@ -3168,26 +3185,34 @@ final class RaidSimulation {
     final goal = (spec.count * _partyScale(partySize)).round();
     final table = catalog.lootTables[spec.loot]!;
     final spots = <RaidPile>[];
+    void add(Vec2 at) => spots.add(
+      RaidPile(
+        id: newId(),
+        position: at,
+        kind: PileKind.spot,
+        loot: LootPile.roll(
+          table,
+          catalog.stackOf,
+          random,
+          makeSeed: _seedMaker(catalog, levels, random),
+          makeGear: _gearMaker(catalog, levels, random),
+          weigh: _luck(catalog, zone, luck),
+          amount: catalog.rules.zoneScaling.lootAmount(zone.score),
+        ),
+      ),
+    );
+    // A drawn map says where its spots are; nothing is scattered.
+    if (zone.drawnMap != null) {
+      for (final tile in map.markers[spotMarker] ?? const <TilePos>[]) {
+        add(Vec2(tile.x + 0.5, tile.y + 0.5));
+      }
+      return spots;
+    }
     for (var tries = 0; spots.length < goal && tries < 3000; tries++) {
       final at = _randomTile(map, random);
       if (at.distanceTo(entry) < 1.5 || map.overlapsCircle(at, 0.3)) continue;
       if (spots.any((s) => s.position.distanceTo(at) < spec.spacing)) continue;
-      spots.add(
-        RaidPile(
-          id: newId(),
-          position: at,
-          kind: PileKind.spot,
-          loot: LootPile.roll(
-            table,
-            catalog.stackOf,
-            random,
-            makeSeed: _seedMaker(catalog, levels, random),
-            makeGear: _gearMaker(catalog, levels, random),
-            weigh: _luck(catalog, zone, luck),
-            amount: catalog.rules.zoneScaling.lootAmount(zone.score),
-          ),
-        ),
-      );
+      add(at);
     }
     return spots;
   }

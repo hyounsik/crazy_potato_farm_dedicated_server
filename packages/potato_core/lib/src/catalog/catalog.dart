@@ -1,6 +1,7 @@
 import 'package:json_annotation/json_annotation.dart';
 import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/building_data.dart';
+import 'package:potato_core/src/catalog/drawn_map_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/item_data.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
@@ -30,8 +31,10 @@ final class Catalog {
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
     required Map<String, DefaultCloneData> defaultClones,
+    required Map<String, DrawnMapData> maps,
     required this.story,
-  }) : defaultClones = Map.unmodifiable(defaultClones),
+  }) : maps = Map.unmodifiable(maps),
+       defaultClones = Map.unmodifiable(defaultClones),
        _potatoTypes = Map.unmodifiable(potatoTypes),
        buildings = Map.unmodifiable(buildings),
        abilities = Map.unmodifiable(abilities),
@@ -55,6 +58,7 @@ final class Catalog {
     'weapons': 1,
     'enemies': 1,
     'zones': 2,
+    'maps': 1,
     'default_clones': 1,
     'story': 1,
   };
@@ -75,6 +79,9 @@ final class Catalog {
   final Map<String, WeaponData> weapons;
   final Map<String, EnemyData> enemies;
   final Map<String, ZoneData> zones;
+
+  /// Hand-drawn maps by id, which zones name in `drawn_map`.
+  final Map<String, DrawnMapData> maps;
 
   /// Clones shipped with the game, in file order.
   final Map<String, DefaultCloneData> defaultClones;
@@ -244,6 +251,14 @@ final class Catalog {
       (z) => z.id,
       _checkZone,
     );
+    final maps = _readEntries(
+      files,
+      'maps',
+      issues,
+      DrawnMapData.fromJson,
+      (m) => m.id,
+      _checkDrawnMap,
+    );
     final defaultClones = _readEntries(
       files,
       'default_clones',
@@ -268,6 +283,7 @@ final class Catalog {
         weapons == null ||
         enemies == null ||
         zones == null ||
+        maps == null ||
         defaultClones == null ||
         story == null) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
@@ -283,6 +299,7 @@ final class Catalog {
       weapons: weapons,
       enemies: enemies,
       zones: zones,
+      maps: maps,
       defaultClones: defaultClones,
     );
     _checkStory(_FileCheck('story', issues), story, buildings, zones);
@@ -301,6 +318,7 @@ final class Catalog {
         weapons: weapons,
         enemies: enemies,
         zones: zones,
+        maps: maps,
         defaultClones: defaultClones,
         story: story,
       ),
@@ -917,9 +935,7 @@ final class Catalog {
     }
   }
 
-  static void _checkZone(_FileCheck check, String path, ZoneData zone) {
-    check.atLeast('$path.score', zone.score, 0);
-    final map = zone.map;
+  static void _checkRecipe(_FileCheck check, String path, MapRecipe map) {
     check.positive('$path.map.size', map.size);
     bool inside(int x, int y) =>
         x >= 0 && y >= 0 && x < map.size && y < map.size;
@@ -956,6 +972,34 @@ final class Catalog {
     check.atLeast('$path.map.exit_spacing', map.exitSpacing, 0);
     check.atLeast('$path.map.scatter.count', map.scatter.count, 0);
     check.probability('$path.map.scatter.big_chance', map.scatter.bigChance);
+  }
+
+  /// A drawn map must be walkable like a generated one: every exit and
+  /// marker can be reached from the entry.
+  static void _checkDrawnMap(_FileCheck check, String path, DrawnMapData map) {
+    final data = map.map;
+    final reached = data.reachableFrom(data.entry);
+    if (reached.isEmpty) check.issue('$path.map.entry', 'must be open ground');
+    for (final (index, exit) in data.exits.indexed) {
+      if (!reached.contains(exit)) {
+        check.issue('$path.map.exits[$index]', 'cannot be walked to');
+      }
+    }
+    for (final MapEntry(key: name, value: tiles) in data.markers.entries) {
+      for (final (index, tile) in tiles.indexed) {
+        if (!reached.contains(tile)) {
+          check.issue('$path.map.markers.$name[$index]', 'cannot be walked to');
+        }
+      }
+    }
+  }
+
+  static void _checkZone(_FileCheck check, String path, ZoneData zone) {
+    check.atLeast('$path.score', zone.score, 0);
+    if ((zone.map == null) == (zone.drawnMap == null)) {
+      check.issue('$path.map', 'must have one of map and drawn_map');
+    }
+    if (zone.map case final map?) _checkRecipe(check, path, map);
 
     final enemies = zone.enemies;
     check.atLeast('$path.enemies.count', enemies.count, 0);
@@ -990,7 +1034,8 @@ final class Catalog {
     if (zone.danger case final danger?) {
       final at = '$path.danger';
       check.positive('$at.open_exits', danger.openExits);
-      if (map.exits.length + map.exitSites < danger.openExits) {
+      if (zone.map case final map?
+          when map.exits.length + map.exitSites < danger.openExits) {
         check.issue('$at.open_exits', 'must not exceed the map\'s exits');
       }
       check.atLeastNumber('$at.reveal_seconds', danger.revealSeconds, 0);
@@ -1088,6 +1133,7 @@ final class Catalog {
     required Map<String, WeaponData> weapons,
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
+    required Map<String, DrawnMapData> maps,
     required Map<String, DefaultCloneData> defaultClones,
   }) {
     void missing(String file, String path, String what, String id) =>
@@ -1189,6 +1235,32 @@ final class Catalog {
             '${table.id}.entries[$index].item',
             'item',
             entry.item,
+          );
+        }
+      }
+    }
+    for (final map in maps.values) {
+      for (final name in map.map.markers.keys) {
+        if (!name.startsWith(enemyMarkerPrefix)) continue;
+        final kind = name.substring(enemyMarkerPrefix.length);
+        if (!enemies.containsKey(kind)) {
+          missing('maps', '${map.id}.map.markers.$name', 'enemy', kind);
+        }
+      }
+    }
+    for (final zone in zones.values) {
+      if (zone.drawnMap case final id?) {
+        final map = maps[id];
+        if (map == null) {
+          missing('zones', '${zone.id}.drawn_map', 'map', id);
+        } else if (zone.danger case final danger?
+            when map.map.exits.length < danger.openExits) {
+          issues.add(
+            CatalogIssue(
+              'zones',
+              '${zone.id}.danger.open_exits',
+              'must not exceed the map\'s exits',
+            ),
           );
         }
       }

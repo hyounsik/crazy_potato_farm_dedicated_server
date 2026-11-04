@@ -171,7 +171,7 @@ void main() {
       expect(catalog.items['seed_food_rare']!.seed!.grade, Grade.rare);
       expect(catalog.weapons['spread']!.pellets, 6);
       expect(catalog.enemies['spitter']!.attack, EnemyAttack.ranged);
-      expect(catalog.zones['sample_zone']!.map.size, 40);
+      expect(catalog.zones['sample_zone']!.map!.size, 40);
     });
 
     test('reports ids that point nowhere', () {

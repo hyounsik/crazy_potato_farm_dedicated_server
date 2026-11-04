@@ -1033,51 +1033,60 @@ _ZoneBossData _$ZoneBossDataFromJson(Map<String, dynamic> json) =>
 Map<String, dynamic> _$ZoneBossDataToJson(_ZoneBossData instance) =>
     <String, dynamic>{'enemy': instance.enemy, 'loot': instance.loot};
 
-_ZoneData _$ZoneDataFromJson(
-  Map<String, dynamic> json,
-) => $checkedCreate('_ZoneData', json, ($checkedConvert) {
-  final val = _ZoneData(
-    id: $checkedConvert('id', (v) => v as String),
-    score: $checkedConvert('score', (v) => (v as num).toInt()),
-    levelMin: $checkedConvert('level_min', (v) => (v as num?)?.toInt()),
-    levelMax: $checkedConvert('level_max', (v) => (v as num?)?.toInt()),
-    name: $checkedConvert(
-      'name',
-      (v) => _$JsonConverterFromJson<Object, LocalizedText>(
-        v,
-        const LocalizedTextConverter().fromJson,
+_ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) => $checkedCreate(
+  '_ZoneData',
+  json,
+  ($checkedConvert) {
+    final val = _ZoneData(
+      id: $checkedConvert('id', (v) => v as String),
+      score: $checkedConvert('score', (v) => (v as num).toInt()),
+      levelMin: $checkedConvert('level_min', (v) => (v as num?)?.toInt()),
+      levelMax: $checkedConvert('level_max', (v) => (v as num?)?.toInt()),
+      name: $checkedConvert(
+        'name',
+        (v) => _$JsonConverterFromJson<Object, LocalizedText>(
+          v,
+          const LocalizedTextConverter().fromJson,
+        ),
       ),
-    ),
-    map: $checkedConvert(
-      'map',
-      (v) => MapRecipe.fromJson(v as Map<String, dynamic>),
-    ),
-    enemies: $checkedConvert(
-      'enemies',
-      (v) => ZoneEnemiesData.fromJson(v as Map<String, dynamic>),
-    ),
-    gathering: $checkedConvert(
-      'gathering',
-      (v) => ZoneGatheringData.fromJson(v as Map<String, dynamic>),
-    ),
-    drops: $checkedConvert(
-      'drops',
-      (v) => ZoneDropsData.fromJson(v as Map<String, dynamic>),
-    ),
-    danger: $checkedConvert(
-      'danger',
-      (v) =>
-          v == null ? null : ZoneDangerData.fromJson(v as Map<String, dynamic>),
-    ),
-    boss: $checkedConvert(
-      'boss',
-      (v) =>
-          v == null ? null : ZoneBossData.fromJson(v as Map<String, dynamic>),
-    ),
-    look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
-  );
-  return val;
-}, fieldKeyMap: const {'levelMin': 'level_min', 'levelMax': 'level_max'});
+      map: $checkedConvert(
+        'map',
+        (v) => v == null ? null : MapRecipe.fromJson(v as Map<String, dynamic>),
+      ),
+      drawnMap: $checkedConvert('drawn_map', (v) => v as String?),
+      enemies: $checkedConvert(
+        'enemies',
+        (v) => ZoneEnemiesData.fromJson(v as Map<String, dynamic>),
+      ),
+      gathering: $checkedConvert(
+        'gathering',
+        (v) => ZoneGatheringData.fromJson(v as Map<String, dynamic>),
+      ),
+      drops: $checkedConvert(
+        'drops',
+        (v) => ZoneDropsData.fromJson(v as Map<String, dynamic>),
+      ),
+      danger: $checkedConvert(
+        'danger',
+        (v) => v == null
+            ? null
+            : ZoneDangerData.fromJson(v as Map<String, dynamic>),
+      ),
+      boss: $checkedConvert(
+        'boss',
+        (v) =>
+            v == null ? null : ZoneBossData.fromJson(v as Map<String, dynamic>),
+      ),
+      look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'levelMin': 'level_min',
+    'levelMax': 'level_max',
+    'drawnMap': 'drawn_map',
+  },
+);
 
 Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'id': instance.id,
@@ -1088,7 +1097,8 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
     instance.name,
     const LocalizedTextConverter().toJson,
   ),
-  'map': instance.map.toJson(),
+  'map': instance.map?.toJson(),
+  'drawn_map': instance.drawnMap,
   'enemies': instance.enemies.toJson(),
   'gathering': instance.gathering.toJson(),
   'drops': instance.drops.toJson(),

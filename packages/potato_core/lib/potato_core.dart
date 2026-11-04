@@ -7,6 +7,7 @@ library;
 export 'src/catalog/ability_data.dart';
 export 'src/catalog/building_data.dart';
 export 'src/catalog/catalog.dart';
+export 'src/catalog/drawn_map_data.dart';
 export 'src/catalog/grade.dart';
 export 'src/catalog/item_data.dart';
 export 'src/catalog/localized_text.dart';

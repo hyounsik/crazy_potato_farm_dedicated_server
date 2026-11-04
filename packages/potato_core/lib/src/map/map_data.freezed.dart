@@ -315,4 +315,301 @@ $TilePosCopyWith<$Res> get origin {
 }
 }
 
+
+/// @nodoc
+mixin _$MapObject {
+
+ String get id; TilePos get origin; int get width; int get rows;
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$MapObjectCopyWith<MapObject> get copyWith => _$MapObjectCopyWithImpl<MapObject>(this as MapObject, _$identity);
+
+  /// Serializes this MapObject to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as MapObject;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapObject&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.origin, _this.origin) || other.origin == _this.origin)&&(identical(other.width, _this.width) || other.width == _this.width)&&(identical(other.rows, _this.rows) || other.rows == _this.rows));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as MapObject;
+  return Object.hash(runtimeType,_this.id,_this.origin,_this.width,_this.rows);
+}
+
+@override
+String toString() {
+  final _this = this as MapObject;
+  return 'MapObject(id: ${_this.id}, origin: ${_this.origin}, width: ${_this.width}, rows: ${_this.rows})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $MapObjectCopyWith<$Res>  {
+  factory $MapObjectCopyWith(MapObject value, $Res Function(MapObject) _then) = _$MapObjectCopyWithImpl;
+@useResult
+$Res call({
+ String id, TilePos origin, int width, int rows
+});
+
+
+$TilePosCopyWith<$Res> get origin;
+
+}
+/// @nodoc
+class _$MapObjectCopyWithImpl<$Res>
+    implements $MapObjectCopyWith<$Res> {
+  _$MapObjectCopyWithImpl(this._self, this._then);
+
+  final MapObject _self;
+  final $Res Function(MapObject) _then;
+
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? origin = null,Object? width = null,Object? rows = null,}) {
+  return _then(MapObject(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
+as TilePos,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int,rows: null == rows ? _self.rows : rows // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TilePosCopyWith<$Res> get origin {
+  
+  return $TilePosCopyWith<$Res>(_self.origin, (value) {
+    return _then(_self.copyWith(origin: value));
+  });
+}
+}
+
+
+/// Adds pattern-matching-related methods to [MapObject].
+extension MapObjectPatterns on MapObject {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _MapObject value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _MapObject() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _MapObject value)  $default,){
+final _that = this;
+switch (_that) {
+case _MapObject():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _MapObject value)?  $default,){
+final _that = this;
+switch (_that) {
+case _MapObject() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  TilePos origin,  int width,  int rows)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _MapObject() when $default != null:
+return $default(_that.id,_that.origin,_that.width,_that.rows);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  TilePos origin,  int width,  int rows)  $default,) {final _that = this;
+switch (_that) {
+case _MapObject():
+return $default(_that.id,_that.origin,_that.width,_that.rows);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  TilePos origin,  int width,  int rows)?  $default,) {final _that = this;
+switch (_that) {
+case _MapObject() when $default != null:
+return $default(_that.id,_that.origin,_that.width,_that.rows);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _MapObject extends MapObject {
+  const _MapObject({required this.id, required this.origin, this.width = 1, this.rows = 1}): super._();
+  factory _MapObject.fromJson(Map<String, dynamic> json) => _$MapObjectFromJson(json);
+
+@override final  String id;
+@override final  TilePos origin;
+@override@JsonKey() final  int width;
+@override@JsonKey() final  int rows;
+
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$MapObjectCopyWith<_MapObject> get copyWith => __$MapObjectCopyWithImpl<_MapObject>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$MapObjectToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapObject&&(identical(other.id, id) || other.id == id)&&(identical(other.origin, origin) || other.origin == origin)&&(identical(other.width, width) || other.width == width)&&(identical(other.rows, rows) || other.rows == rows));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,origin,width,rows);
+}
+
+@override
+String toString() {
+    return 'MapObject(id: $id, origin: $origin, width: $width, rows: $rows)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$MapObjectCopyWith<$Res> implements $MapObjectCopyWith<$Res> {
+  factory _$MapObjectCopyWith(_MapObject value, $Res Function(_MapObject) _then) = __$MapObjectCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, TilePos origin, int width, int rows
+});
+
+
+@override $TilePosCopyWith<$Res> get origin;
+
+}
+/// @nodoc
+class __$MapObjectCopyWithImpl<$Res>
+    implements _$MapObjectCopyWith<$Res> {
+  __$MapObjectCopyWithImpl(this._self, this._then);
+
+  final _MapObject _self;
+  final $Res Function(_MapObject) _then;
+
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? origin = null,Object? width = null,Object? rows = null,}) {
+  return _then(_MapObject(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,origin: null == origin ? _self.origin : origin // ignore: cast_nullable_to_non_nullable
+as TilePos,width: null == width ? _self.width : width // ignore: cast_nullable_to_non_nullable
+as int,rows: null == rows ? _self.rows : rows // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+/// Create a copy of MapObject
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TilePosCopyWith<$Res> get origin {
+  
+  return $TilePosCopyWith<$Res>(_self.origin, (value) {
+    return _then(_self.copyWith(origin: value));
+  });
+}
+}
+
 // dart format on

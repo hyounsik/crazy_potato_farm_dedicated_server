@@ -269,7 +269,11 @@ final class RaidSimulation {
     final rules = catalog.rules.raid;
     final map = switch (zoneData.drawnMap) {
       final id? => catalog.maps[id]!.map,
-      null => generateMap(zoneData.map!, seed: seed, chunks: chunks),
+      null => generateMap(
+        zoneData.map!,
+        seed: seed,
+        chunks: {...catalog.chunks, ...chunks},
+      ),
     };
     final random = GameRandom((seed ^ 0x2545f491) & 0xffffffff);
     final entry = Vec2(map.entry.x + 0.5, map.entry.y + 0.5);
@@ -2991,17 +2995,16 @@ final class RaidSimulation {
       );
     }
 
-    // A drawn map says where its enemies stand; nothing is scattered.
+    // Enemies drawn on the map or its chunks stand where they are; a drawn
+    // map has no others.
     final drawn = zone.drawnMap != null;
-    if (drawn) {
-      for (final MapEntry(key: name, value: tiles) in map.markers.entries) {
-        if (!name.startsWith(enemyMarkerPrefix)) continue;
-        for (final tile in tiles) {
-          add(
-            name.substring(enemyMarkerPrefix.length),
-            Vec2(tile.x + 0.5, tile.y + 0.5),
-          );
-        }
+    for (final MapEntry(key: name, value: tiles) in map.markers.entries) {
+      if (!name.startsWith(enemyMarkerPrefix)) continue;
+      for (final tile in tiles) {
+        add(
+          name.substring(enemyMarkerPrefix.length),
+          Vec2(tile.x + 0.5, tile.y + 0.5),
+        );
       }
     }
 
@@ -3201,13 +3204,11 @@ final class RaidSimulation {
         ),
       ),
     );
-    // A drawn map says where its spots are; nothing is scattered.
-    if (zone.drawnMap != null) {
-      for (final tile in map.markers[spotMarker] ?? const <TilePos>[]) {
-        add(Vec2(tile.x + 0.5, tile.y + 0.5));
-      }
-      return spots;
+    // Spots drawn on the map or its chunks stay; a drawn map has no others.
+    for (final tile in map.markers[spotMarker] ?? const <TilePos>[]) {
+      add(Vec2(tile.x + 0.5, tile.y + 0.5));
     }
+    if (zone.drawnMap != null) return spots;
     for (var tries = 0; spots.length < goal && tries < 3000; tries++) {
       final at = _randomTile(map, random);
       if (at.distanceTo(entry) < 1.5 || map.overlapsCircle(at, 0.3)) continue;

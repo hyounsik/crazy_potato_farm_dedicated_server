@@ -39,6 +39,9 @@ abstract class MapRecipe with _$MapRecipe {
     /// Terrain placed as given, before scattering.
     @Default(<TerrainPiece>[]) List<TerrainPiece> terrain,
 
+    /// Chunks the seed picks and places on free ground, after [terrain].
+    @Default(<ChunkPick>[]) List<ChunkPick> chunkPicks,
+
     required ScatterRule scatter,
 
     /// Turns the whole map a random quarter turn per seed, so the same
@@ -48,6 +51,18 @@ abstract class MapRecipe with _$MapRecipe {
 
   factory MapRecipe.fromJson(Map<String, dynamic> json) =>
       _$MapRecipeFromJson(json);
+}
+
+/// Picks [count] times among the chunks named in [from]: the seed chooses
+/// which, where and how it is turned (2026-11-04, 사용자: varied pieces in
+/// generated maps). Fewer when the map runs out of room.
+@freezed
+abstract class ChunkPick with _$ChunkPick {
+  const factory ChunkPick({required List<String> from, required int count}) =
+      _ChunkPick;
+
+  factory ChunkPick.fromJson(Map<String, dynamic> json) =>
+      _$ChunkPickFromJson(json);
 }
 
 /// What a ring is made of.

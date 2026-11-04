@@ -11,7 +11,7 @@ import 'package:potato_core/potato_core.dart';
 /// Bump it whenever a message, or the JSON of anything a message carries
 /// (runs, farms, items), changes. `test/protocol_test.dart` fails until it
 /// is bumped and its fingerprint updated.
-const int sessionProtocol = 12;
+const int sessionProtocol = 13;
 
 /// Why a guest could not join a host's session.
 enum SessionJoinRejection {
@@ -146,6 +146,8 @@ String computeCatalogHash(Catalog catalog) {
       'z:$id:${catalog.zones[id]!.score}:${catalog.zones[id]!.enemies.count}',
     for (final id in catalog.maps.keys.toList()..sort())
       'm:$id:${jsonEncode(catalog.maps[id]!.map.toJson())}',
+    for (final id in catalog.chunkMaps.keys.toList()..sort())
+      'k:$id:${jsonEncode(catalog.chunkMaps[id]!.map.toJson())}',
     for (final id in catalog.weapons.keys.toList()..sort())
       'w:$id:${catalog.weapons[id]!.damage}:${catalog.weapons[id]!.range}',
     for (final id in catalog.enemies.keys.toList()..sort())

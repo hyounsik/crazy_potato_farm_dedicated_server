@@ -53,6 +53,34 @@ abstract class MapObstacle with _$MapObstacle {
       _$MapObstacleFromJson(json);
 }
 
+/// A particular picture placed on a drawn map or chunk (2026-11-04, 사용자):
+/// [id] says which, and what it looks like is for whoever draws the map. It
+/// blocks [rows] rows of [width] tiles from [origin] down (none for a
+/// decoration), and its picture stands on the bottom of those.
+@freezed
+abstract class MapObject with _$MapObject {
+  const MapObject._();
+
+  const factory MapObject({
+    required String id,
+    required TilePos origin,
+    @Default(1) int width,
+    @Default(1) int rows,
+  }) = _MapObject;
+
+  /// The tiles it blocks.
+  Iterable<TilePos> get blocked sync* {
+    for (var y = origin.y; y < origin.y + rows; y++) {
+      for (var x = origin.x; x < origin.x + width; x++) {
+        yield TilePos(x, y);
+      }
+    }
+  }
+
+  factory MapObject.fromJson(Map<String, dynamic> json) =>
+      _$MapObjectFromJson(json);
+}
+
 /// How high a tile is. Bodies move between [low] and [high] only over
 /// [ramp] tiles; from [low] ground nothing on [high] ground can be seen.
 enum MapHeight {
@@ -93,6 +121,7 @@ final class MapData {
     List<TilePos> exits = const [],
     Map<String, List<TilePos>> markers = const {},
     List<MapObstacle> obstacles = const [],
+    List<MapObject> objects = const [],
     List<MapHeight>? heights,
     List<MapFloor>? floors,
   }) : _tiles = List.unmodifiable(tiles),
@@ -107,7 +136,8 @@ final class MapData {
          for (final MapEntry(:key, :value) in markers.entries)
            key: List<TilePos>.unmodifiable(value),
        }),
-       obstacles = List.unmodifiable(obstacles) {
+       obstacles = List.unmodifiable(obstacles),
+       objects = List.unmodifiable(objects) {
     if (tiles.length != size * size) {
       throw ArgumentError.value(tiles.length, 'tiles', 'must be size²');
     }
@@ -152,6 +182,10 @@ final class MapData {
         for (final o in json['obstacles'] as List<Object?>)
           MapObstacle.fromJson(o! as Map<String, dynamic>),
       ],
+      objects: [
+        for (final o in json['objects'] as List<Object?>? ?? const [])
+          MapObject.fromJson(o! as Map<String, dynamic>),
+      ],
       heights: switch (json['heights']) {
         final List<Object?> rows => [
           for (final row in rows.cast<String>())
@@ -190,6 +224,9 @@ final class MapData {
   /// chunks.
   final Map<String, List<TilePos>> markers;
   final List<MapObstacle> obstacles;
+
+  /// Pictures placed by hand; generated scatter is in [obstacles].
+  final List<MapObject> objects;
 
   MapTile tileAt(int x, int y) => _tiles[y * size + x];
 
@@ -262,6 +299,7 @@ final class MapData {
         key: [for (final t in value) t.toJson()],
     },
     'obstacles': [for (final o in obstacles) o.toJson()],
+    if (objects.isNotEmpty) 'objects': [for (final o in objects) o.toJson()],
     if (hasHeights)
       'heights': [
         for (var y = 0; y < size; y++)

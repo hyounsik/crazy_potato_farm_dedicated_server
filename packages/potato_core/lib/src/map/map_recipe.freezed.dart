@@ -27,7 +27,8 @@ mixin _$MapRecipe {
  int get cloneEntrySites;/// Scattered obstacles stay at least this many tiles (Chebyshev) from
 /// [entry], [exits] and chunk markers.
  int get clearRadius;/// Terrain placed as given, before scattering.
- List<TerrainPiece> get terrain; ScatterRule get scatter;/// Turns the whole map a random quarter turn per seed, so the same
+ List<TerrainPiece> get terrain;/// Chunks the seed picks and places on free ground, after [terrain].
+ List<ChunkPick> get chunkPicks; ScatterRule get scatter;/// Turns the whole map a random quarter turn per seed, so the same
 /// terrain reads differently from run to run.
  bool get rotate;
 /// Create a copy of MapRecipe
@@ -43,20 +44,20 @@ $MapRecipeCopyWith<MapRecipe> get copyWith => _$MapRecipeCopyWithImpl<MapRecipe>
 @override
 bool operator ==(Object other) {
   final _this = this as MapRecipe;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapRecipe&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&const DeepCollectionEquality().equals(other.exits, _this.exits)&&(identical(other.exitSites, _this.exitSites) || other.exitSites == _this.exitSites)&&(identical(other.exitSpacing, _this.exitSpacing) || other.exitSpacing == _this.exitSpacing)&&(identical(other.cloneEntrySites, _this.cloneEntrySites) || other.cloneEntrySites == _this.cloneEntrySites)&&(identical(other.clearRadius, _this.clearRadius) || other.clearRadius == _this.clearRadius)&&const DeepCollectionEquality().equals(other.terrain, _this.terrain)&&(identical(other.scatter, _this.scatter) || other.scatter == _this.scatter)&&(identical(other.rotate, _this.rotate) || other.rotate == _this.rotate));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MapRecipe&&(identical(other.size, _this.size) || other.size == _this.size)&&(identical(other.entry, _this.entry) || other.entry == _this.entry)&&const DeepCollectionEquality().equals(other.exits, _this.exits)&&(identical(other.exitSites, _this.exitSites) || other.exitSites == _this.exitSites)&&(identical(other.exitSpacing, _this.exitSpacing) || other.exitSpacing == _this.exitSpacing)&&(identical(other.cloneEntrySites, _this.cloneEntrySites) || other.cloneEntrySites == _this.cloneEntrySites)&&(identical(other.clearRadius, _this.clearRadius) || other.clearRadius == _this.clearRadius)&&const DeepCollectionEquality().equals(other.terrain, _this.terrain)&&const DeepCollectionEquality().equals(other.chunkPicks, _this.chunkPicks)&&(identical(other.scatter, _this.scatter) || other.scatter == _this.scatter)&&(identical(other.rotate, _this.rotate) || other.rotate == _this.rotate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MapRecipe;
-  return Object.hash(runtimeType,_this.size,_this.entry,const DeepCollectionEquality().hash(_this.exits),_this.exitSites,_this.exitSpacing,_this.cloneEntrySites,_this.clearRadius,const DeepCollectionEquality().hash(_this.terrain),_this.scatter,_this.rotate);
+  return Object.hash(runtimeType,_this.size,_this.entry,const DeepCollectionEquality().hash(_this.exits),_this.exitSites,_this.exitSpacing,_this.cloneEntrySites,_this.clearRadius,const DeepCollectionEquality().hash(_this.terrain),const DeepCollectionEquality().hash(_this.chunkPicks),_this.scatter,_this.rotate);
 }
 
 @override
 String toString() {
   final _this = this as MapRecipe;
-  return 'MapRecipe(size: ${_this.size}, entry: ${_this.entry}, exits: ${_this.exits}, exitSites: ${_this.exitSites}, exitSpacing: ${_this.exitSpacing}, cloneEntrySites: ${_this.cloneEntrySites}, clearRadius: ${_this.clearRadius}, terrain: ${_this.terrain}, scatter: ${_this.scatter}, rotate: ${_this.rotate})';
+  return 'MapRecipe(size: ${_this.size}, entry: ${_this.entry}, exits: ${_this.exits}, exitSites: ${_this.exitSites}, exitSpacing: ${_this.exitSpacing}, cloneEntrySites: ${_this.cloneEntrySites}, clearRadius: ${_this.clearRadius}, terrain: ${_this.terrain}, chunkPicks: ${_this.chunkPicks}, scatter: ${_this.scatter}, rotate: ${_this.rotate})';
 }
 
 
@@ -67,7 +68,7 @@ abstract mixin class $MapRecipeCopyWith<$Res>  {
   factory $MapRecipeCopyWith(MapRecipe value, $Res Function(MapRecipe) _then) = _$MapRecipeCopyWithImpl;
 @useResult
 $Res call({
- int size, TilePos entry, List<TilePos> exits, int exitSites, int exitSpacing, int cloneEntrySites, int clearRadius, List<TerrainPiece> terrain, ScatterRule scatter, bool rotate
+ int size, TilePos entry, List<TilePos> exits, int exitSites, int exitSpacing, int cloneEntrySites, int clearRadius, List<TerrainPiece> terrain, List<ChunkPick> chunkPicks, ScatterRule scatter, bool rotate
 });
 
 
@@ -84,7 +85,7 @@ class _$MapRecipeCopyWithImpl<$Res>
 
 /// Create a copy of MapRecipe
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? entry = null,Object? exits = null,Object? exitSites = null,Object? exitSpacing = null,Object? cloneEntrySites = null,Object? clearRadius = null,Object? terrain = null,Object? scatter = null,Object? rotate = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? size = null,Object? entry = null,Object? exits = null,Object? exitSites = null,Object? exitSpacing = null,Object? cloneEntrySites = null,Object? clearRadius = null,Object? terrain = null,Object? chunkPicks = null,Object? scatter = null,Object? rotate = null,}) {
   return _then(MapRecipe(
 size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
@@ -94,7 +95,8 @@ as int,exitSpacing: null == exitSpacing ? _self.exitSpacing : exitSpacing // ign
 as int,cloneEntrySites: null == cloneEntrySites ? _self.cloneEntrySites : cloneEntrySites // ignore: cast_nullable_to_non_nullable
 as int,clearRadius: null == clearRadius ? _self.clearRadius : clearRadius // ignore: cast_nullable_to_non_nullable
 as int,terrain: null == terrain ? _self.terrain : terrain // ignore: cast_nullable_to_non_nullable
-as List<TerrainPiece>,scatter: null == scatter ? _self.scatter : scatter // ignore: cast_nullable_to_non_nullable
+as List<TerrainPiece>,chunkPicks: null == chunkPicks ? _self.chunkPicks : chunkPicks // ignore: cast_nullable_to_non_nullable
+as List<ChunkPick>,scatter: null == scatter ? _self.scatter : scatter // ignore: cast_nullable_to_non_nullable
 as ScatterRule,rotate: null == rotate ? _self.rotate : rotate // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -199,10 +201,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  ScatterRule scatter,  bool rotate)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  List<ChunkPick> chunkPicks,  ScatterRule scatter,  bool rotate)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MapRecipe() when $default != null:
-return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.scatter,_that.rotate);case _:
+return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.chunkPicks,_that.scatter,_that.rotate);case _:
   return orElse();
 
 }
@@ -220,10 +222,10 @@ return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpa
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  ScatterRule scatter,  bool rotate)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  List<ChunkPick> chunkPicks,  ScatterRule scatter,  bool rotate)  $default,) {final _that = this;
 switch (_that) {
 case _MapRecipe():
-return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.scatter,_that.rotate);case _:
+return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.chunkPicks,_that.scatter,_that.rotate);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -240,10 +242,10 @@ return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpa
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  ScatterRule scatter,  bool rotate)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int size,  TilePos entry,  List<TilePos> exits,  int exitSites,  int exitSpacing,  int cloneEntrySites,  int clearRadius,  List<TerrainPiece> terrain,  List<ChunkPick> chunkPicks,  ScatterRule scatter,  bool rotate)?  $default,) {final _that = this;
 switch (_that) {
 case _MapRecipe() when $default != null:
-return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.scatter,_that.rotate);case _:
+return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpacing,_that.cloneEntrySites,_that.clearRadius,_that.terrain,_that.chunkPicks,_that.scatter,_that.rotate);case _:
   return null;
 
 }
@@ -255,7 +257,7 @@ return $default(_that.size,_that.entry,_that.exits,_that.exitSites,_that.exitSpa
 @JsonSerializable()
 
 class _MapRecipe implements MapRecipe {
-  const _MapRecipe({required this.size, required this.entry,  List<TilePos> exits = const <TilePos>[], this.exitSites = 0, this.exitSpacing = 0, this.cloneEntrySites = 0, required this.clearRadius,  List<TerrainPiece> terrain = const <TerrainPiece>[], required this.scatter, this.rotate = true}): _exits = exits,_terrain = terrain;
+  const _MapRecipe({required this.size, required this.entry,  List<TilePos> exits = const <TilePos>[], this.exitSites = 0, this.exitSpacing = 0, this.cloneEntrySites = 0, required this.clearRadius,  List<TerrainPiece> terrain = const <TerrainPiece>[],  List<ChunkPick> chunkPicks = const <ChunkPick>[], required this.scatter, this.rotate = true}): _exits = exits,_terrain = terrain,_chunkPicks = chunkPicks;
   factory _MapRecipe.fromJson(Map<String, dynamic> json) => _$MapRecipeFromJson(json);
 
 /// Tiles along one side of the square map.
@@ -291,6 +293,15 @@ class _MapRecipe implements MapRecipe {
   return EqualUnmodifiableListView(_terrain);
 }
 
+/// Chunks the seed picks and places on free ground, after [terrain].
+ final  List<ChunkPick> _chunkPicks;
+/// Chunks the seed picks and places on free ground, after [terrain].
+@override@JsonKey() List<ChunkPick> get chunkPicks {
+  if (_chunkPicks is EqualUnmodifiableListView) return _chunkPicks;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_chunkPicks);
+}
+
 @override final  ScatterRule scatter;
 /// Turns the whole map a random quarter turn per seed, so the same
 /// terrain reads differently from run to run.
@@ -309,18 +320,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapRecipe&&(identical(other.size, size) || other.size == size)&&(identical(other.entry, entry) || other.entry == entry)&&const DeepCollectionEquality().equals(other.exits, _exits)&&(identical(other.exitSites, exitSites) || other.exitSites == exitSites)&&(identical(other.exitSpacing, exitSpacing) || other.exitSpacing == exitSpacing)&&(identical(other.cloneEntrySites, cloneEntrySites) || other.cloneEntrySites == cloneEntrySites)&&(identical(other.clearRadius, clearRadius) || other.clearRadius == clearRadius)&&const DeepCollectionEquality().equals(other.terrain, _terrain)&&(identical(other.scatter, scatter) || other.scatter == scatter)&&(identical(other.rotate, rotate) || other.rotate == rotate));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MapRecipe&&(identical(other.size, size) || other.size == size)&&(identical(other.entry, entry) || other.entry == entry)&&const DeepCollectionEquality().equals(other.exits, _exits)&&(identical(other.exitSites, exitSites) || other.exitSites == exitSites)&&(identical(other.exitSpacing, exitSpacing) || other.exitSpacing == exitSpacing)&&(identical(other.cloneEntrySites, cloneEntrySites) || other.cloneEntrySites == cloneEntrySites)&&(identical(other.clearRadius, clearRadius) || other.clearRadius == clearRadius)&&const DeepCollectionEquality().equals(other.terrain, _terrain)&&const DeepCollectionEquality().equals(other.chunkPicks, _chunkPicks)&&(identical(other.scatter, scatter) || other.scatter == scatter)&&(identical(other.rotate, rotate) || other.rotate == rotate));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,size,entry,const DeepCollectionEquality().hash(_exits),exitSites,exitSpacing,cloneEntrySites,clearRadius,const DeepCollectionEquality().hash(_terrain),scatter,rotate);
+    return Object.hash(runtimeType,size,entry,const DeepCollectionEquality().hash(_exits),exitSites,exitSpacing,cloneEntrySites,clearRadius,const DeepCollectionEquality().hash(_terrain),const DeepCollectionEquality().hash(_chunkPicks),scatter,rotate);
 }
 
 @override
 String toString() {
-    return 'MapRecipe(size: $size, entry: $entry, exits: $exits, exitSites: $exitSites, exitSpacing: $exitSpacing, cloneEntrySites: $cloneEntrySites, clearRadius: $clearRadius, terrain: $terrain, scatter: $scatter, rotate: $rotate)';
+    return 'MapRecipe(size: $size, entry: $entry, exits: $exits, exitSites: $exitSites, exitSpacing: $exitSpacing, cloneEntrySites: $cloneEntrySites, clearRadius: $clearRadius, terrain: $terrain, chunkPicks: $chunkPicks, scatter: $scatter, rotate: $rotate)';
 }
 
 
@@ -331,7 +342,7 @@ abstract mixin class _$MapRecipeCopyWith<$Res> implements $MapRecipeCopyWith<$Re
   factory _$MapRecipeCopyWith(_MapRecipe value, $Res Function(_MapRecipe) _then) = __$MapRecipeCopyWithImpl;
 @override @useResult
 $Res call({
- int size, TilePos entry, List<TilePos> exits, int exitSites, int exitSpacing, int cloneEntrySites, int clearRadius, List<TerrainPiece> terrain, ScatterRule scatter, bool rotate
+ int size, TilePos entry, List<TilePos> exits, int exitSites, int exitSpacing, int cloneEntrySites, int clearRadius, List<TerrainPiece> terrain, List<ChunkPick> chunkPicks, ScatterRule scatter, bool rotate
 });
 
 
@@ -348,7 +359,7 @@ class __$MapRecipeCopyWithImpl<$Res>
 
 /// Create a copy of MapRecipe
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? entry = null,Object? exits = null,Object? exitSites = null,Object? exitSpacing = null,Object? cloneEntrySites = null,Object? clearRadius = null,Object? terrain = null,Object? scatter = null,Object? rotate = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? size = null,Object? entry = null,Object? exits = null,Object? exitSites = null,Object? exitSpacing = null,Object? cloneEntrySites = null,Object? clearRadius = null,Object? terrain = null,Object? chunkPicks = null,Object? scatter = null,Object? rotate = null,}) {
   return _then(_MapRecipe(
 size: null == size ? _self.size : size // ignore: cast_nullable_to_non_nullable
 as int,entry: null == entry ? _self.entry : entry // ignore: cast_nullable_to_non_nullable
@@ -358,7 +369,8 @@ as int,exitSpacing: null == exitSpacing ? _self.exitSpacing : exitSpacing // ign
 as int,cloneEntrySites: null == cloneEntrySites ? _self.cloneEntrySites : cloneEntrySites // ignore: cast_nullable_to_non_nullable
 as int,clearRadius: null == clearRadius ? _self.clearRadius : clearRadius // ignore: cast_nullable_to_non_nullable
 as int,terrain: null == terrain ? _self._terrain : terrain // ignore: cast_nullable_to_non_nullable
-as List<TerrainPiece>,scatter: null == scatter ? _self.scatter : scatter // ignore: cast_nullable_to_non_nullable
+as List<TerrainPiece>,chunkPicks: null == chunkPicks ? _self._chunkPicks : chunkPicks // ignore: cast_nullable_to_non_nullable
+as List<ChunkPick>,scatter: null == scatter ? _self.scatter : scatter // ignore: cast_nullable_to_non_nullable
 as ScatterRule,rotate: null == rotate ? _self.rotate : rotate // ignore: cast_nullable_to_non_nullable
 as bool,
   ));
@@ -383,6 +395,285 @@ $ScatterRuleCopyWith<$Res> get scatter {
     return _then(_self.copyWith(scatter: value));
   });
 }
+}
+
+
+/// @nodoc
+mixin _$ChunkPick {
+
+ List<String> get from; int get count;
+/// Create a copy of ChunkPick
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$ChunkPickCopyWith<ChunkPick> get copyWith => _$ChunkPickCopyWithImpl<ChunkPick>(this as ChunkPick, _$identity);
+
+  /// Serializes this ChunkPick to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as ChunkPick;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ChunkPick&&const DeepCollectionEquality().equals(other.from, _this.from)&&(identical(other.count, _this.count) || other.count == _this.count));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as ChunkPick;
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.from),_this.count);
+}
+
+@override
+String toString() {
+  final _this = this as ChunkPick;
+  return 'ChunkPick(from: ${_this.from}, count: ${_this.count})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $ChunkPickCopyWith<$Res>  {
+  factory $ChunkPickCopyWith(ChunkPick value, $Res Function(ChunkPick) _then) = _$ChunkPickCopyWithImpl;
+@useResult
+$Res call({
+ List<String> from, int count
+});
+
+
+
+
+}
+/// @nodoc
+class _$ChunkPickCopyWithImpl<$Res>
+    implements $ChunkPickCopyWith<$Res> {
+  _$ChunkPickCopyWithImpl(this._self, this._then);
+
+  final ChunkPick _self;
+  final $Res Function(ChunkPick) _then;
+
+/// Create a copy of ChunkPick
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? from = null,Object? count = null,}) {
+  return _then(ChunkPick(
+from: null == from ? _self.from : from // ignore: cast_nullable_to_non_nullable
+as List<String>,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [ChunkPick].
+extension ChunkPickPatterns on ChunkPick {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ChunkPick value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _ChunkPick() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ChunkPick value)  $default,){
+final _that = this;
+switch (_that) {
+case _ChunkPick():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ChunkPick value)?  $default,){
+final _that = this;
+switch (_that) {
+case _ChunkPick() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( List<String> from,  int count)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _ChunkPick() when $default != null:
+return $default(_that.from,_that.count);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( List<String> from,  int count)  $default,) {final _that = this;
+switch (_that) {
+case _ChunkPick():
+return $default(_that.from,_that.count);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( List<String> from,  int count)?  $default,) {final _that = this;
+switch (_that) {
+case _ChunkPick() when $default != null:
+return $default(_that.from,_that.count);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _ChunkPick implements ChunkPick {
+  const _ChunkPick({required  List<String> from, required this.count}): _from = from;
+  factory _ChunkPick.fromJson(Map<String, dynamic> json) => _$ChunkPickFromJson(json);
+
+ final  List<String> _from;
+@override List<String> get from {
+  if (_from is EqualUnmodifiableListView) return _from;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_from);
+}
+
+@override final  int count;
+
+/// Create a copy of ChunkPick
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$ChunkPickCopyWith<_ChunkPick> get copyWith => __$ChunkPickCopyWithImpl<_ChunkPick>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$ChunkPickToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ChunkPick&&const DeepCollectionEquality().equals(other.from, _from)&&(identical(other.count, count) || other.count == count));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_from),count);
+}
+
+@override
+String toString() {
+    return 'ChunkPick(from: $from, count: $count)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$ChunkPickCopyWith<$Res> implements $ChunkPickCopyWith<$Res> {
+  factory _$ChunkPickCopyWith(_ChunkPick value, $Res Function(_ChunkPick) _then) = __$ChunkPickCopyWithImpl;
+@override @useResult
+$Res call({
+ List<String> from, int count
+});
+
+
+
+
+}
+/// @nodoc
+class __$ChunkPickCopyWithImpl<$Res>
+    implements _$ChunkPickCopyWith<$Res> {
+  __$ChunkPickCopyWithImpl(this._self, this._then);
+
+  final _ChunkPick _self;
+  final $Res Function(_ChunkPick) _then;
+
+/// Create a copy of ChunkPick
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? from = null,Object? count = null,}) {
+  return _then(_ChunkPick(
+from: null == from ? _self._from : from // ignore: cast_nullable_to_non_nullable
+as List<String>,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+
 }
 
 

@@ -44,6 +44,7 @@ Iterable<String> _issues(Map<String, Object?> files) =>
     Catalog.load(files).issues.map((issue) => issue.toString());
 
 void main() {
+  chunkTests();
   group('Catalog with a drawn map', () {
     test('loads, and a zone can name it', () {
       final result = Catalog.load(_filesWith(_drawn()));
@@ -124,4 +125,154 @@ void main() {
       expect(back.enemies.length, run.enemies.length);
     });
   });
+}
+
+/// A 6x6 chunk: a hollow, high ground, mud, an exit, a spot, an enemy and an
+/// object that blocks.
+Map<String, dynamic> _chunkJson({String id = 'piece'}) => {
+  'id': id,
+  'map': {
+    'size': 6,
+    'rows': ['#.....', '......', '..~...', '......', '....o.', '......'],
+    'entry': _at(0, 0),
+    'exits': [_at(5, 0)],
+    'markers': {
+      spotMarker: [_at(1, 3)],
+      '${enemyMarkerPrefix}biter': [_at(3, 1)],
+    },
+    'obstacles': <Object?>[],
+    'objects': [
+      {'id': 'desert:3', 'origin': _at(4, 4)},
+    ],
+    'floors': ['......', '.m....', '......', '......', '......', '......'],
+  },
+};
+
+Map<String, Object?> _filesWithPicks({int count = 3}) {
+  final files = sampleCatalogFiles();
+  ((files['chunks']! as Map<String, dynamic>)['chunks'] as List).add(
+    _chunkJson(),
+  );
+  final zones = (files['zones']! as Map<String, dynamic>)['zones'] as List;
+  final zone = Map<String, dynamic>.of(zones[0] as Map<String, dynamic>);
+  final map = Map<String, dynamic>.of(zone['map'] as Map<String, dynamic>)
+    ..['size'] = 40
+    ..['chunk_picks'] = [
+      {
+        'from': ['piece'],
+        'count': count,
+      },
+    ];
+  zone
+    ..['id'] = 'picks'
+    ..['map'] = map
+    ..remove('boss');
+  zones.add(zone);
+  return files;
+}
+
+void chunkTests() {
+  group('chunks picked by the seed', () {
+    late Catalog catalog;
+
+    setUp(() => catalog = Catalog.load(_filesWithPicks()).catalog!);
+
+    MapData generate(int seed) => generateMap(
+      catalog.zones['picks']!.map!,
+      seed: seed,
+      chunks: catalog.chunks,
+    );
+
+    test('land whole, with what was drawn on them', () {
+      for (var seed = 1; seed <= 10; seed++) {
+        final map = generate(seed);
+        expect(map.objects, isNotEmpty, reason: 'seed $seed');
+        final count = map.objects.length;
+        expect(map.markers[spotMarker], hasLength(count));
+        expect(map.markers['${enemyMarkerPrefix}biter'], hasLength(count));
+        expect(map.floors(MapFloor.mud), hasLength(count));
+        for (final object in map.objects) {
+          expect(object.id, 'desert:3');
+          expect(map.isBlocked(object.origin.x, object.origin.y), isTrue);
+        }
+        final reached = map.reachableFrom(map.entry);
+        expect(map.exits.every(reached.contains), isTrue, reason: 'seed $seed');
+      }
+    });
+
+    test('differ with the seed and repeat for the same seed', () {
+      expect(generate(1).toJson(), generate(1).toJson());
+      final spots = {
+        for (var seed = 1; seed <= 6; seed++)
+          generate(seed).markers[spotMarker].toString(),
+      };
+      expect(spots.length, greaterThan(1));
+    });
+
+    test('add their enemies and spots to the scattered ones', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'picks',
+        seed: 1,
+      );
+      for (final tile in run.map.markers['${enemyMarkerPrefix}biter']!) {
+        final at = Vec2(tile.x + 0.5, tile.y + 0.5);
+        expect(run.enemies.any((e) => e.position == at), isTrue);
+      }
+      for (final tile in run.map.markers[spotMarker]!) {
+        final at = Vec2(tile.x + 0.5, tile.y + 0.5);
+        expect(run.piles.any((p) => p.position == at), isTrue);
+      }
+    });
+
+    test('a map without picks comes out as before', () {
+      final plain = sampleCatalogFiles();
+      final catalog = Catalog.load(plain).catalog!;
+      final zone = catalog.zones.values.first;
+      final map = generateMap(zone.map!, seed: 5);
+      expect(map.objects, isEmpty);
+    });
+
+    test('naming a missing chunk, or one its own edge cannot reach, is an '
+        'issue', () {
+      final files = _filesWithPicks();
+      final zones = (files['zones']! as Map<String, dynamic>)['zones'] as List;
+      final map = (zones.last as Map<String, dynamic>)['map'] as Map;
+      (((map['chunk_picks'] as List)[0] as Map)['from'] as List)[0] = 'ghost';
+      expect(
+        _issues(files),
+        contains('zones: picks.map.chunk_picks[0]: no chunk "ghost"'),
+      );
+
+      final sealed = _filesWithPicks();
+      final chunks =
+          (sealed['chunks']! as Map<String, dynamic>)['chunks'] as List;
+      final drawn = (chunks.first as Map<String, dynamic>)['map'] as Map;
+      drawn['rows'] = [
+        '#####.',
+        '#.#...',
+        '###...',
+        '......',
+        '......',
+        '......',
+      ];
+      drawn['markers'] = {
+        spotMarker: [_at(1, 1)],
+      };
+      drawn['objects'] = <Object?>[];
+      drawn.remove('floors');
+      expect(
+        _issues(sealed),
+        contains('chunks: chunks[0].map.markers.spot[0]: cannot be walked to'),
+      );
+    });
+  });
+}
+
+extension on MapData {
+  List<TilePos> floors(MapFloor floor) => [
+    for (var y = 0; y < size; y++)
+      for (var x = 0; x < size; x++)
+        if (floorAt(x, y) == floor) TilePos(x, y),
+  ];
 }

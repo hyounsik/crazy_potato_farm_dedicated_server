@@ -35,3 +35,25 @@ const _$ObstacleKindEnumMap = {
   ObstacleKind.rock: 'rock',
   ObstacleKind.tree: 'tree',
 };
+
+_MapObject _$MapObjectFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_MapObject', json, ($checkedConvert) {
+      final val = _MapObject(
+        id: $checkedConvert('id', (v) => v as String),
+        origin: $checkedConvert(
+          'origin',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        width: $checkedConvert('width', (v) => (v as num?)?.toInt() ?? 1),
+        rows: $checkedConvert('rows', (v) => (v as num?)?.toInt() ?? 1),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$MapObjectToJson(_MapObject instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'origin': instance.origin.toJson(),
+      'width': instance.width,
+      'rows': instance.rows,
+    };

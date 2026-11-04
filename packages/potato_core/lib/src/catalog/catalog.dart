@@ -8,7 +8,9 @@ import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/catalog/rules_data.dart';
 import 'package:potato_core/src/catalog/story_data.dart';
+import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/items/gear.dart';
+import 'package:potato_core/src/map/map_chunk.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
@@ -32,8 +34,14 @@ final class Catalog {
     required Map<String, ZoneData> zones,
     required Map<String, DefaultCloneData> defaultClones,
     required Map<String, DrawnMapData> maps,
+    required Map<String, DrawnMapData> chunkMaps,
     required this.story,
   }) : maps = Map.unmodifiable(maps),
+       chunkMaps = Map.unmodifiable(chunkMaps),
+       chunks = Map.unmodifiable({
+         for (final MapEntry(key: id, value: drawn) in chunkMaps.entries)
+           id: MapChunk.fromMap(drawn.map),
+       }),
        defaultClones = Map.unmodifiable(defaultClones),
        _potatoTypes = Map.unmodifiable(potatoTypes),
        buildings = Map.unmodifiable(buildings),
@@ -59,6 +67,7 @@ final class Catalog {
     'enemies': 1,
     'zones': 2,
     'maps': 1,
+    'chunks': 1,
     'default_clones': 1,
     'story': 1,
   };
@@ -82,6 +91,10 @@ final class Catalog {
 
   /// Hand-drawn maps by id, which zones name in `drawn_map`.
   final Map<String, DrawnMapData> maps;
+
+  /// Hand-drawn chunks by id, as drawn and as the map generator takes them.
+  final Map<String, DrawnMapData> chunkMaps;
+  final Map<String, MapChunk> chunks;
 
   /// Clones shipped with the game, in file order.
   final Map<String, DefaultCloneData> defaultClones;
@@ -259,6 +272,14 @@ final class Catalog {
       (m) => m.id,
       _checkDrawnMap,
     );
+    final chunkMaps = _readEntries(
+      files,
+      'chunks',
+      issues,
+      DrawnMapData.fromJson,
+      (m) => m.id,
+      _checkDrawnChunk,
+    );
     final defaultClones = _readEntries(
       files,
       'default_clones',
@@ -284,6 +305,7 @@ final class Catalog {
         enemies == null ||
         zones == null ||
         maps == null ||
+        chunkMaps == null ||
         defaultClones == null ||
         story == null) {
       return CatalogLoadResult._(null, List.unmodifiable(issues));
@@ -300,6 +322,7 @@ final class Catalog {
       enemies: enemies,
       zones: zones,
       maps: maps,
+      chunkMaps: chunkMaps,
       defaultClones: defaultClones,
     );
     _checkStory(_FileCheck('story', issues), story, buildings, zones);
@@ -319,6 +342,7 @@ final class Catalog {
         enemies: enemies,
         zones: zones,
         maps: maps,
+        chunkMaps: chunkMaps,
         defaultClones: defaultClones,
         story: story,
       ),
@@ -947,6 +971,12 @@ final class Catalog {
         check.issue('$path.map.exits[$index]', 'must lie inside the map');
       }
     }
+    for (final (index, pick) in map.chunkPicks.indexed) {
+      check.positive('$path.map.chunk_picks[$index].count', pick.count);
+      if (pick.from.isEmpty) {
+        check.issue('$path.map.chunk_picks[$index].from', 'must not be empty');
+      }
+    }
     for (final (index, piece) in map.terrain.indexed) {
       final at = '$path.map.terrain[$index]';
       switch (piece) {
@@ -980,6 +1010,40 @@ final class Catalog {
     final data = map.map;
     final reached = data.reachableFrom(data.entry);
     if (reached.isEmpty) check.issue('$path.map.entry', 'must be open ground');
+    for (final (index, exit) in data.exits.indexed) {
+      if (!reached.contains(exit)) {
+        check.issue('$path.map.exits[$index]', 'cannot be walked to');
+      }
+    }
+    for (final MapEntry(key: name, value: tiles) in data.markers.entries) {
+      for (final (index, tile) in tiles.indexed) {
+        if (!reached.contains(tile)) {
+          check.issue('$path.map.markers.$name[$index]', 'cannot be walked to');
+        }
+      }
+    }
+  }
+
+  /// A drawn chunk's exits and markers must be reachable from its edge, or
+  /// no generated map holding it would pass.
+  static void _checkDrawnChunk(
+    _FileCheck check,
+    String path,
+    DrawnMapData chunk,
+  ) {
+    final data = chunk.map;
+    final last = data.size - 1;
+    final reached = <TilePos>{};
+    for (var i = 0; i <= last; i++) {
+      for (final edge in [
+        TilePos(i, 0),
+        TilePos(i, last),
+        TilePos(0, i),
+        TilePos(last, i),
+      ]) {
+        if (!reached.contains(edge)) reached.addAll(data.reachableFrom(edge));
+      }
+    }
     for (final (index, exit) in data.exits.indexed) {
       if (!reached.contains(exit)) {
         check.issue('$path.map.exits[$index]', 'cannot be walked to');
@@ -1134,6 +1198,7 @@ final class Catalog {
     required Map<String, EnemyData> enemies,
     required Map<String, ZoneData> zones,
     required Map<String, DrawnMapData> maps,
+    required Map<String, DrawnMapData> chunkMaps,
     required Map<String, DefaultCloneData> defaultClones,
   }) {
     void missing(String file, String path, String what, String id) =>
@@ -1239,12 +1304,41 @@ final class Catalog {
         }
       }
     }
-    for (final map in maps.values) {
-      for (final name in map.map.markers.keys) {
-        if (!name.startsWith(enemyMarkerPrefix)) continue;
-        final kind = name.substring(enemyMarkerPrefix.length);
-        if (!enemies.containsKey(kind)) {
-          missing('maps', '${map.id}.map.markers.$name', 'enemy', kind);
+    for (final (file, drawn) in [('maps', maps), ('chunks', chunkMaps)]) {
+      for (final map in drawn.values) {
+        for (final name in map.map.markers.keys) {
+          if (!name.startsWith(enemyMarkerPrefix)) continue;
+          final kind = name.substring(enemyMarkerPrefix.length);
+          if (!enemies.containsKey(kind)) {
+            missing(file, '${map.id}.map.markers.$name', 'enemy', kind);
+          }
+        }
+      }
+    }
+    for (final zone in zones.values) {
+      final recipe = zone.map;
+      if (recipe == null) continue;
+      for (final (index, piece) in recipe.terrain.indexed) {
+        if (piece case ChunkPiece(:final chunk)
+            when !chunkMaps.containsKey(chunk)) {
+          missing(
+            'zones',
+            '${zone.id}.map.terrain[$index].chunk',
+            'chunk',
+            chunk,
+          );
+        }
+      }
+      for (final (index, pick) in recipe.chunkPicks.indexed) {
+        for (final name in pick.from) {
+          if (!chunkMaps.containsKey(name)) {
+            missing(
+              'zones',
+              '${zone.id}.map.chunk_picks[$index]',
+              'chunk',
+              name,
+            );
+          }
         }
       }
     }

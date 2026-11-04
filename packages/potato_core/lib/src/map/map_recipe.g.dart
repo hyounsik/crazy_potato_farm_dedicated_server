@@ -45,6 +45,14 @@ _MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
                 .toList() ??
             const <TerrainPiece>[],
       ),
+      chunkPicks: $checkedConvert(
+        'chunk_picks',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => ChunkPick.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <ChunkPick>[],
+      ),
       scatter: $checkedConvert(
         'scatter',
         (v) => ScatterRule.fromJson(v as Map<String, dynamic>),
@@ -58,6 +66,7 @@ _MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
     'exitSpacing': 'exit_spacing',
     'cloneEntrySites': 'clone_entry_sites',
     'clearRadius': 'clear_radius',
+    'chunkPicks': 'chunk_picks',
   },
 );
 
@@ -71,9 +80,25 @@ Map<String, dynamic> _$MapRecipeToJson(_MapRecipe instance) =>
       'clone_entry_sites': instance.cloneEntrySites,
       'clear_radius': instance.clearRadius,
       'terrain': instance.terrain.map((e) => e.toJson()).toList(),
+      'chunk_picks': instance.chunkPicks.map((e) => e.toJson()).toList(),
       'scatter': instance.scatter.toJson(),
       'rotate': instance.rotate,
     };
+
+_ChunkPick _$ChunkPickFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_ChunkPick', json, ($checkedConvert) {
+      final val = _ChunkPick(
+        from: $checkedConvert(
+          'from',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+        count: $checkedConvert('count', (v) => (v as num).toInt()),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$ChunkPickToJson(_ChunkPick instance) =>
+    <String, dynamic>{'from': instance.from, 'count': instance.count};
 
 _ScatterRule _$ScatterRuleFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_ScatterRule', json, ($checkedConvert) {

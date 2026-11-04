@@ -1,8 +1,10 @@
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/map/map_data.dart';
 import 'package:tiled/tiled.dart';
 
-/// A hand-made piece of map drawn in Tiled: blocked tiles and named marker
-/// points, in its own tile coordinates.
+/// A hand-made piece of map, in its own tile coordinates: what the map editor
+/// draws ([MapChunk.fromMap]), or the blocked tiles and marker points of a
+/// Tiled file.
 ///
 /// Tiled file rules:
 /// - A tile layer named `solid`: every non-empty tile blocks.
@@ -14,11 +16,50 @@ final class MapChunk {
     required this.height,
     required Set<TilePos> solid,
     Map<String, List<TilePos>> markers = const {},
+    this.hollows = const {},
+    this.heights = const {},
+    this.floors = const {},
+    this.exits = const [],
+    this.obstacles = const [],
+    this.objects = const [],
   }) : solid = Set.unmodifiable(solid),
        markers = Map.unmodifiable({
          for (final MapEntry(:key, :value) in markers.entries)
            key: List<TilePos>.unmodifiable(value),
        });
+
+  /// The chunk drawn as [map], a square; its entry means nothing.
+  factory MapChunk.fromMap(MapData map) {
+    final tiles = [
+      for (var y = 0; y < map.size; y++)
+        for (var x = 0; x < map.size; x++) TilePos(x, y),
+    ];
+    return MapChunk(
+      width: map.size,
+      height: map.size,
+      solid: {
+        for (final t in tiles)
+          if (map.tileAt(t.x, t.y) == MapTile.terrain) t,
+      },
+      hollows: {
+        for (final t in tiles)
+          if (map.tileAt(t.x, t.y) == MapTile.hollow) t,
+      },
+      heights: {
+        for (final t in tiles)
+          if (map.heightAt(t.x, t.y) != MapHeight.low)
+            t: map.heightAt(t.x, t.y),
+      },
+      floors: {
+        for (final t in tiles)
+          if (map.floorAt(t.x, t.y) != MapFloor.plain) t: map.floorAt(t.x, t.y),
+      },
+      markers: map.markers,
+      exits: map.exits,
+      obstacles: map.obstacles,
+      objects: map.objects,
+    );
+  }
 
   /// Reads a Tiled `.tmx` file's text. Both orthogonal and isometric maps
   /// work; only tile coordinates are kept.
@@ -61,6 +102,14 @@ final class MapChunk {
   final int height;
   final Set<TilePos> solid;
   final Map<String, List<TilePos>> markers;
+  final Set<TilePos> hollows;
+
+  /// The tiles that are not low ground, and those that are not plain.
+  final Map<TilePos, MapHeight> heights;
+  final Map<TilePos, MapFloor> floors;
+  final List<TilePos> exits;
+  final List<MapObstacle> obstacles;
+  final List<MapObject> objects;
 
   /// Where [tile] of this chunk lands when the chunk is turned
   /// [quarterTurns] times clockwise and its top-left put at [origin].

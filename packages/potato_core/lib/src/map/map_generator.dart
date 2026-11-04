@@ -27,6 +27,13 @@ MapData generateMap(
       throw ArgumentError.value(piece.chunk, 'chunks', 'missing chunk');
     }
   }
+  for (final pick in recipe.chunkPicks) {
+    for (final name in pick.from) {
+      if (!chunks.containsKey(name)) {
+        throw ArgumentError.value(name, 'chunks', 'missing chunk');
+      }
+    }
+  }
   for (var attempt = 0; attempt < attempts; attempt++) {
     // Fewer obstacles on each retry from the halfway point.
     final half = attempts ~/ 2;
@@ -70,6 +77,13 @@ final class _Builder {
   final List<TilePos> ramps = [];
   final Map<String, List<TilePos>> markers = {};
   final List<MapObstacle> obstacles = [];
+  final List<MapObject> objects = [];
+
+  /// Tiles of chunks picked by the seed, left as they were drawn.
+  final Set<TilePos> chunkArea = {};
+
+  /// Exits drawn in chunks.
+  final List<TilePos> chunkExits = [];
 
   MapData build(int scatterCount) {
     final turns = recipe.rotate ? random.nextInt(4) : 0;
@@ -91,6 +105,7 @@ final class _Builder {
           _floor(piece);
       }
     }
+    _pickChunks();
     _pickExitSites();
     _scatter(scatterCount);
     return _turned(turns);
@@ -103,7 +118,9 @@ final class _Builder {
   /// ground with an open ring around them, spaced from the entry and each
   /// other. Fewer when room runs out.
   void _pickExitSites() {
-    exits.addAll(recipe.exits);
+    exits
+      ..addAll(recipe.exits)
+      ..addAll(chunkExits);
     final taken = [recipe.entry, ...exits];
     exits.addAll(_pickSites(recipe.exitSites, taken));
     if (recipe.cloneEntrySites > 0) {
@@ -124,7 +141,9 @@ final class _Builder {
       final near = taken.any(
         (p) => (p.x - at.x).abs() < spacing && (p.y - at.y).abs() < spacing,
       );
-      if (near || !_freeAround(at.x, at.y, 1)) continue;
+      if (near || chunkArea.contains(at) || !_freeAround(at.x, at.y, 1)) {
+        continue;
+      }
       picked.add(at);
       taken.add(at);
     }
@@ -379,18 +398,129 @@ final class _Builder {
     }
   }
 
-  void _chunk(ChunkPiece piece) {
-    final chunk = chunks[piece.chunk]!;
+  void _chunk(ChunkPiece piece) =>
+      _lay(chunks[piece.chunk]!, piece.origin, piece.quarterTurns);
+
+  /// Lays [chunk] with its top-left at [origin], turned [quarterTurns] times
+  /// clockwise.
+  void _lay(MapChunk chunk, TilePos origin, int quarterTurns) {
+    TilePos place(TilePos tile) => chunk.place(tile, origin, quarterTurns);
     for (final tile in chunk.solid) {
-      final at = chunk.place(tile, piece.origin, piece.quarterTurns);
+      final at = place(tile);
       _set(at.x, at.y, MapTile.terrain);
     }
-    for (final MapEntry(key: name, value: points) in chunk.markers.entries) {
-      markers.putIfAbsent(name, () => []).addAll([
-        for (final p in points)
-          chunk.place(p, piece.origin, piece.quarterTurns),
-      ]);
+    for (final tile in chunk.hollows) {
+      final at = place(tile);
+      _set(at.x, at.y, MapTile.hollow);
     }
+    for (final MapEntry(key: tile, value: height) in chunk.heights.entries) {
+      final at = place(tile);
+      if (!_inside(at.x, at.y)) continue;
+      heights[at.y * size + at.x] = height;
+      if (height == MapHeight.ramp) ramps.add(at);
+    }
+    for (final MapEntry(key: tile, value: floor) in chunk.floors.entries) {
+      final at = place(tile);
+      if (_inside(at.x, at.y)) floors[at.y * size + at.x] = floor;
+    }
+    for (final MapEntry(key: name, value: points) in chunk.markers.entries) {
+      markers.putIfAbsent(name, () => []).addAll(points.map(place));
+    }
+    chunkExits.addAll(chunk.exits.map(place));
+    for (final o in chunk.obstacles) {
+      // Stored big rocks block a row of their square; the end of the build
+      // cuts every one down again once it knows which way up it is.
+      final square = TilePos(o.origin.x, o.origin.y - (o.size - o.blockedRows));
+      final corner = _topLeft([
+        place(square),
+        place(TilePos(square.x + o.size - 1, square.y + o.size - 1)),
+      ]);
+      for (var dy = 0; dy < o.size; dy++) {
+        for (var dx = 0; dx < o.size; dx++) {
+          _set(corner.x + dx, corner.y + dy, MapTile.obstacle);
+        }
+      }
+      obstacles.add(MapObstacle(origin: corner, size: o.size, kind: o.kind));
+    }
+    for (final o in chunk.objects) {
+      final object = _turnedObject(o, place);
+      objects.add(object);
+      for (final t in object.blocked) {
+        _set(t.x, t.y, MapTile.obstacle);
+      }
+    }
+  }
+
+  /// [o] with its tiles moved by [move]. The picture stands up whichever way
+  /// the map turns, so its shape stays and it lands where its tiles' middle
+  /// went, as near as whole tiles allow.
+  static MapObject _turnedObject(MapObject o, TilePos Function(TilePos) move) {
+    final rows = o.rows == 0 ? 1 : o.rows;
+    final corners = [
+      move(o.origin),
+      move(TilePos(o.origin.x + o.width - 1, o.origin.y + rows - 1)),
+    ];
+    final first = _topLeft(corners);
+    final last = _bottomRight(corners);
+    return o.copyWith(
+      origin: TilePos(
+        first.x + (last.x - first.x + 1 - o.width) ~/ 2,
+        first.y + (last.y - first.y + 1 - rows) ~/ 2,
+      ),
+    );
+  }
+
+  /// Places the recipe's picked chunks on free ground: each whole box and a
+  /// ring of tiles round it open, low and plain, away from the entry and
+  /// exits. A chunk that finds no room is left out.
+  void _pickChunks() {
+    for (final pick in recipe.chunkPicks) {
+      for (var i = 0; i < pick.count; i++) {
+        final chunk = chunks[pick.from[random.nextInt(pick.from.length)]]!;
+        final turns = random.nextInt(4);
+        final across = turns.isOdd ? chunk.height : chunk.width;
+        final down = turns.isOdd ? chunk.width : chunk.height;
+        if (size - across - 1 <= 1 || size - down - 1 <= 1) continue;
+        for (var tries = 0; tries < 200; tries++) {
+          final at = TilePos(
+            1 + random.nextInt(size - across - 1),
+            1 + random.nextInt(size - down - 1),
+          );
+          if (!_freeBox(at, across, down)) continue;
+          _lay(chunk, at, turns);
+          for (var y = at.y; y < at.y + down; y++) {
+            for (var x = at.x; x < at.x + across; x++) {
+              chunkArea.add(TilePos(x, y));
+            }
+          }
+          break;
+        }
+      }
+    }
+  }
+
+  bool _freeBox(TilePos at, int across, int down) {
+    final clear = recipe.clearRadius;
+    for (final p in [recipe.entry, ...recipe.exits, ...chunkExits]) {
+      if (p.x >= at.x - clear &&
+          p.x < at.x + across + clear &&
+          p.y >= at.y - clear &&
+          p.y < at.y + down + clear) {
+        return false;
+      }
+    }
+    for (var y = at.y - 1; y <= at.y + down; y++) {
+      for (var x = at.x - 1; x <= at.x + across; x++) {
+        if (!_inside(x, y) ||
+            _at(x, y) != MapTile.open ||
+            chunkArea.contains(TilePos(x, y)) ||
+            heights[y * size + x] != MapHeight.low ||
+            floors[y * size + x] != MapFloor.plain) {
+          return false;
+        }
+      }
+    }
+    return true;
   }
 
   /// Scatters 1×1 and 2×2 obstacles on open ground, keeping a free tile
@@ -421,7 +551,9 @@ final class _Builder {
             p.y >= y - clear &&
             p.y < y + s + clear,
       );
-      if (nearKept || !_freeAround(x, y, s)) continue;
+      if (nearKept || !_freeAround(x, y, s) || _touchesChunk(x, y, s)) {
+        continue;
+      }
       for (var dy = 0; dy < s; dy++) {
         for (var dx = 0; dx < s; dx++) {
           _set(x + dx, y + dy, MapTile.obstacle);
@@ -430,6 +562,17 @@ final class _Builder {
       obstacles.add(MapObstacle(origin: TilePos(x, y), size: s, kind: kind));
       placed++;
     }
+  }
+
+  /// Whether the s×s square at (x, y) or its ring lands on a picked chunk.
+  bool _touchesChunk(int x, int y, int s) {
+    if (chunkArea.isEmpty) return false;
+    for (var ty = y - 1; ty <= y + s; ty++) {
+      for (var tx = x - 1; tx <= x + s; tx++) {
+        if (chunkArea.contains(TilePos(tx, ty))) return true;
+      }
+    }
+    return false;
   }
 
   /// Whether the s×s square at (x, y) and the ring of tiles around it are all
@@ -482,6 +625,19 @@ final class _Builder {
         rows: 1,
       );
     }
+    // Objects keep their shape: only their blocked tiles move.
+    final turnedObjects = [for (final o in objects) _turnedObject(o, turn)];
+    for (final o in objects) {
+      for (final t in o.blocked) {
+        final at = turn(t);
+        turned[at.y * size + at.x] = MapTile.open;
+      }
+    }
+    for (final o in turnedObjects) {
+      for (final t in o.blocked) {
+        if (_inside(t.x, t.y)) turned[t.y * size + t.x] = MapTile.obstacle;
+      }
+    }
     return MapData(
       size: size,
       tiles: turned,
@@ -494,11 +650,17 @@ final class _Builder {
           key: [for (final t in value) turn(t)],
       },
       obstacles: turnedObstacles,
+      objects: turnedObjects,
     );
   }
 
   static TilePos _topLeft(List<TilePos> corners) => TilePos(
     corners.map((c) => c.x).reduce((a, b) => a < b ? a : b),
     corners.map((c) => c.y).reduce((a, b) => a < b ? a : b),
+  );
+
+  static TilePos _bottomRight(List<TilePos> corners) => TilePos(
+    corners.map((c) => c.x).reduce((a, b) => a > b ? a : b),
+    corners.map((c) => c.y).reduce((a, b) => a > b ? a : b),
   );
 }

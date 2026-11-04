@@ -1780,11 +1780,6 @@ final class FarmSimulation {
         ),
   ];
 
-  /// What [kit]'s dishes add to health on a run set out on now, each its
-  /// own (2026-11-04, 사용자: up to two at once): 0.1 is 10%.
-  double mealHpBonusOf(PlayerKit kit) =>
-      mealsLeft(kit).length * _rules.meals.hpPercent / 100;
-
   /// Eats dish [meal] beside those still lasting, up to
   /// `MealRulesData.maxMeals`; with that many, eating only fills the belly
   /// until the oldest wears off (2026-11-04, 사용자).

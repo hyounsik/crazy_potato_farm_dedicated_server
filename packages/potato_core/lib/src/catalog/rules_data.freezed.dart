@@ -7794,7 +7794,9 @@ mixin _$MealData {
 
  String get id;/// The zone whose boss, felled and got out of, opens it; none for a
 /// dish open from the start (2026-11-04, 사용자: steamed potatoes).
- String? get zone;@LocalizedTextConverter() LocalizedText get name;
+ String? get zone;@LocalizedTextConverter() LocalizedText get name;/// What it does, by [DishEffectData.id] (2026-11-04, 사용자: each dish
+/// its own).
+ List<String> get effects;
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7808,20 +7810,20 @@ $MealDataCopyWith<MealData> get copyWith => _$MealDataCopyWithImpl<MealData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as MealData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.zone, _this.zone) || other.zone == _this.zone)&&(identical(other.name, _this.name) || other.name == _this.name));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.zone, _this.zone) || other.zone == _this.zone)&&(identical(other.name, _this.name) || other.name == _this.name)&&const DeepCollectionEquality().equals(other.effects, _this.effects));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MealData;
-  return Object.hash(runtimeType,_this.id,_this.zone,_this.name);
+  return Object.hash(runtimeType,_this.id,_this.zone,_this.name,const DeepCollectionEquality().hash(_this.effects));
 }
 
 @override
 String toString() {
   final _this = this as MealData;
-  return 'MealData(id: ${_this.id}, zone: ${_this.zone}, name: ${_this.name})';
+  return 'MealData(id: ${_this.id}, zone: ${_this.zone}, name: ${_this.name}, effects: ${_this.effects})';
 }
 
 
@@ -7832,7 +7834,7 @@ abstract mixin class $MealDataCopyWith<$Res>  {
   factory $MealDataCopyWith(MealData value, $Res Function(MealData) _then) = _$MealDataCopyWithImpl;
 @useResult
 $Res call({
- String id, String? zone,@LocalizedTextConverter() LocalizedText name
+ String id, String? zone,@LocalizedTextConverter() LocalizedText name, List<String> effects
 });
 
 
@@ -7849,12 +7851,13 @@ class _$MealDataCopyWithImpl<$Res>
 
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? zone = freezed,Object? name = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? zone = freezed,Object? name = null,Object? effects = null,}) {
   return _then(MealData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
-as LocalizedText,
+as LocalizedText,effects: null == effects ? _self.effects : effects // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 
@@ -7939,10 +7942,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name,  List<String> effects)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MealData() when $default != null:
-return $default(_that.id,_that.zone,_that.name);case _:
+return $default(_that.id,_that.zone,_that.name,_that.effects);case _:
   return orElse();
 
 }
@@ -7960,10 +7963,10 @@ return $default(_that.id,_that.zone,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name,  List<String> effects)  $default,) {final _that = this;
 switch (_that) {
 case _MealData():
-return $default(_that.id,_that.zone,_that.name);case _:
+return $default(_that.id,_that.zone,_that.name,_that.effects);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -7980,10 +7983,10 @@ return $default(_that.id,_that.zone,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name,  List<String> effects)?  $default,) {final _that = this;
 switch (_that) {
 case _MealData() when $default != null:
-return $default(_that.id,_that.zone,_that.name);case _:
+return $default(_that.id,_that.zone,_that.name,_that.effects);case _:
   return null;
 
 }
@@ -7995,7 +7998,7 @@ return $default(_that.id,_that.zone,_that.name);case _:
 @JsonSerializable()
 
 class _MealData implements MealData {
-  const _MealData({required this.id, this.zone, @LocalizedTextConverter() required this.name});
+  const _MealData({required this.id, this.zone, @LocalizedTextConverter() required this.name,  List<String> effects = const <String>[]}): _effects = effects;
   factory _MealData.fromJson(Map<String, dynamic> json) => _$MealDataFromJson(json);
 
 @override final  String id;
@@ -8003,6 +8006,17 @@ class _MealData implements MealData {
 /// dish open from the start (2026-11-04, 사용자: steamed potatoes).
 @override final  String? zone;
 @override@LocalizedTextConverter() final  LocalizedText name;
+/// What it does, by [DishEffectData.id] (2026-11-04, 사용자: each dish
+/// its own).
+ final  List<String> _effects;
+/// What it does, by [DishEffectData.id] (2026-11-04, 사용자: each dish
+/// its own).
+@override@JsonKey() List<String> get effects {
+  if (_effects is EqualUnmodifiableListView) return _effects;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_effects);
+}
+
 
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
@@ -8017,18 +8031,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealData&&(identical(other.id, id) || other.id == id)&&(identical(other.zone, zone) || other.zone == zone)&&(identical(other.name, name) || other.name == name));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealData&&(identical(other.id, id) || other.id == id)&&(identical(other.zone, zone) || other.zone == zone)&&(identical(other.name, name) || other.name == name)&&const DeepCollectionEquality().equals(other.effects, _effects));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,zone,name);
+    return Object.hash(runtimeType,id,zone,name,const DeepCollectionEquality().hash(_effects));
 }
 
 @override
 String toString() {
-    return 'MealData(id: $id, zone: $zone, name: $name)';
+    return 'MealData(id: $id, zone: $zone, name: $name, effects: $effects)';
 }
 
 
@@ -8039,7 +8053,7 @@ abstract mixin class _$MealDataCopyWith<$Res> implements $MealDataCopyWith<$Res>
   factory _$MealDataCopyWith(_MealData value, $Res Function(_MealData) _then) = __$MealDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String? zone,@LocalizedTextConverter() LocalizedText name
+ String id, String? zone,@LocalizedTextConverter() LocalizedText name, List<String> effects
 });
 
 
@@ -8056,11 +8070,299 @@ class __$MealDataCopyWithImpl<$Res>
 
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? zone = freezed,Object? name = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? zone = freezed,Object? name = null,Object? effects = null,}) {
   return _then(_MealData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
 as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as LocalizedText,effects: null == effects ? _self._effects : effects // ignore: cast_nullable_to_non_nullable
+as List<String>,
+  ));
+}
+
+
+}
+
+
+/// @nodoc
+mixin _$DishEffectData {
+
+ String get id; DishTarget get target; String get stat; EffectOp get op; double get value;/// What it changes, without the amount (the screen adds it).
+@LocalizedTextConverter() LocalizedText get name;
+/// Create a copy of DishEffectData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$DishEffectDataCopyWith<DishEffectData> get copyWith => _$DishEffectDataCopyWithImpl<DishEffectData>(this as DishEffectData, _$identity);
+
+  /// Serializes this DishEffectData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as DishEffectData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is DishEffectData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.target, _this.target) || other.target == _this.target)&&(identical(other.stat, _this.stat) || other.stat == _this.stat)&&(identical(other.op, _this.op) || other.op == _this.op)&&(identical(other.value, _this.value) || other.value == _this.value)&&(identical(other.name, _this.name) || other.name == _this.name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as DishEffectData;
+  return Object.hash(runtimeType,_this.id,_this.target,_this.stat,_this.op,_this.value,_this.name);
+}
+
+@override
+String toString() {
+  final _this = this as DishEffectData;
+  return 'DishEffectData(id: ${_this.id}, target: ${_this.target}, stat: ${_this.stat}, op: ${_this.op}, value: ${_this.value}, name: ${_this.name})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $DishEffectDataCopyWith<$Res>  {
+  factory $DishEffectDataCopyWith(DishEffectData value, $Res Function(DishEffectData) _then) = _$DishEffectDataCopyWithImpl;
+@useResult
+$Res call({
+ String id, DishTarget target, String stat, EffectOp op, double value,@LocalizedTextConverter() LocalizedText name
+});
+
+
+
+
+}
+/// @nodoc
+class _$DishEffectDataCopyWithImpl<$Res>
+    implements $DishEffectDataCopyWith<$Res> {
+  _$DishEffectDataCopyWithImpl(this._self, this._then);
+
+  final DishEffectData _self;
+  final $Res Function(DishEffectData) _then;
+
+/// Create a copy of DishEffectData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? target = null,Object? stat = null,Object? op = null,Object? value = null,Object? name = null,}) {
+  return _then(DishEffectData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
+as DishTarget,stat: null == stat ? _self.stat : stat // ignore: cast_nullable_to_non_nullable
+as String,op: null == op ? _self.op : op // ignore: cast_nullable_to_non_nullable
+as EffectOp,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as double,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as LocalizedText,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [DishEffectData].
+extension DishEffectDataPatterns on DishEffectData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _DishEffectData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _DishEffectData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _DishEffectData value)  $default,){
+final _that = this;
+switch (_that) {
+case _DishEffectData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _DishEffectData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _DishEffectData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  DishTarget target,  String stat,  EffectOp op,  double value, @LocalizedTextConverter()  LocalizedText name)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _DishEffectData() when $default != null:
+return $default(_that.id,_that.target,_that.stat,_that.op,_that.value,_that.name);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  DishTarget target,  String stat,  EffectOp op,  double value, @LocalizedTextConverter()  LocalizedText name)  $default,) {final _that = this;
+switch (_that) {
+case _DishEffectData():
+return $default(_that.id,_that.target,_that.stat,_that.op,_that.value,_that.name);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  DishTarget target,  String stat,  EffectOp op,  double value, @LocalizedTextConverter()  LocalizedText name)?  $default,) {final _that = this;
+switch (_that) {
+case _DishEffectData() when $default != null:
+return $default(_that.id,_that.target,_that.stat,_that.op,_that.value,_that.name);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _DishEffectData extends DishEffectData {
+  const _DishEffectData({required this.id, required this.target, required this.stat, this.op = EffectOp.mul, required this.value, @LocalizedTextConverter() required this.name}): super._();
+  factory _DishEffectData.fromJson(Map<String, dynamic> json) => _$DishEffectDataFromJson(json);
+
+@override final  String id;
+@override final  DishTarget target;
+@override final  String stat;
+@override@JsonKey() final  EffectOp op;
+@override final  double value;
+/// What it changes, without the amount (the screen adds it).
+@override@LocalizedTextConverter() final  LocalizedText name;
+
+/// Create a copy of DishEffectData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$DishEffectDataCopyWith<_DishEffectData> get copyWith => __$DishEffectDataCopyWithImpl<_DishEffectData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$DishEffectDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _DishEffectData&&(identical(other.id, id) || other.id == id)&&(identical(other.target, target) || other.target == target)&&(identical(other.stat, stat) || other.stat == stat)&&(identical(other.op, op) || other.op == op)&&(identical(other.value, value) || other.value == value)&&(identical(other.name, name) || other.name == name));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,id,target,stat,op,value,name);
+}
+
+@override
+String toString() {
+    return 'DishEffectData(id: $id, target: $target, stat: $stat, op: $op, value: $value, name: $name)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$DishEffectDataCopyWith<$Res> implements $DishEffectDataCopyWith<$Res> {
+  factory _$DishEffectDataCopyWith(_DishEffectData value, $Res Function(_DishEffectData) _then) = __$DishEffectDataCopyWithImpl;
+@override @useResult
+$Res call({
+ String id, DishTarget target, String stat, EffectOp op, double value,@LocalizedTextConverter() LocalizedText name
+});
+
+
+
+
+}
+/// @nodoc
+class __$DishEffectDataCopyWithImpl<$Res>
+    implements _$DishEffectDataCopyWith<$Res> {
+  __$DishEffectDataCopyWithImpl(this._self, this._then);
+
+  final _DishEffectData _self;
+  final $Res Function(_DishEffectData) _then;
+
+/// Create a copy of DishEffectData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? target = null,Object? stat = null,Object? op = null,Object? value = null,Object? name = null,}) {
+  return _then(_DishEffectData(
+id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
+as String,target: null == target ? _self.target : target // ignore: cast_nullable_to_non_nullable
+as DishTarget,stat: null == stat ? _self.stat : stat // ignore: cast_nullable_to_non_nullable
+as String,op: null == op ? _self.op : op // ignore: cast_nullable_to_non_nullable
+as EffectOp,value: null == value ? _self.value : value // ignore: cast_nullable_to_non_nullable
+as double,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as LocalizedText,
   ));
 }
@@ -8072,8 +8374,8 @@ as LocalizedText,
 /// @nodoc
 mixin _$MealRulesData {
 
- int get seconds; int get hpPercent;/// Dishes that may last at once (2026-11-04, 사용자: two).
- int get maxMeals; List<MealData> get dishes;
+ int get seconds;/// Dishes that may last at once (2026-11-04, 사용자: two).
+ int get maxMeals; List<DishEffectData> get effects; List<MealData> get dishes;
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -8087,20 +8389,20 @@ $MealRulesDataCopyWith<MealRulesData> get copyWith => _$MealRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as MealRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealRulesData&&(identical(other.seconds, _this.seconds) || other.seconds == _this.seconds)&&(identical(other.hpPercent, _this.hpPercent) || other.hpPercent == _this.hpPercent)&&(identical(other.maxMeals, _this.maxMeals) || other.maxMeals == _this.maxMeals)&&const DeepCollectionEquality().equals(other.dishes, _this.dishes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealRulesData&&(identical(other.seconds, _this.seconds) || other.seconds == _this.seconds)&&(identical(other.maxMeals, _this.maxMeals) || other.maxMeals == _this.maxMeals)&&const DeepCollectionEquality().equals(other.effects, _this.effects)&&const DeepCollectionEquality().equals(other.dishes, _this.dishes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MealRulesData;
-  return Object.hash(runtimeType,_this.seconds,_this.hpPercent,_this.maxMeals,const DeepCollectionEquality().hash(_this.dishes));
+  return Object.hash(runtimeType,_this.seconds,_this.maxMeals,const DeepCollectionEquality().hash(_this.effects),const DeepCollectionEquality().hash(_this.dishes));
 }
 
 @override
 String toString() {
   final _this = this as MealRulesData;
-  return 'MealRulesData(seconds: ${_this.seconds}, hpPercent: ${_this.hpPercent}, maxMeals: ${_this.maxMeals}, dishes: ${_this.dishes})';
+  return 'MealRulesData(seconds: ${_this.seconds}, maxMeals: ${_this.maxMeals}, effects: ${_this.effects}, dishes: ${_this.dishes})';
 }
 
 
@@ -8111,7 +8413,7 @@ abstract mixin class $MealRulesDataCopyWith<$Res>  {
   factory $MealRulesDataCopyWith(MealRulesData value, $Res Function(MealRulesData) _then) = _$MealRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int seconds, int hpPercent, int maxMeals, List<MealData> dishes
+ int seconds, int maxMeals, List<DishEffectData> effects, List<MealData> dishes
 });
 
 
@@ -8128,12 +8430,12 @@ class _$MealRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? seconds = null,Object? hpPercent = null,Object? maxMeals = null,Object? dishes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? seconds = null,Object? maxMeals = null,Object? effects = null,Object? dishes = null,}) {
   return _then(MealRulesData(
 seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
-as int,hpPercent: null == hpPercent ? _self.hpPercent : hpPercent // ignore: cast_nullable_to_non_nullable
 as int,maxMeals: null == maxMeals ? _self.maxMeals : maxMeals // ignore: cast_nullable_to_non_nullable
-as int,dishes: null == dishes ? _self.dishes : dishes // ignore: cast_nullable_to_non_nullable
+as int,effects: null == effects ? _self.effects : effects // ignore: cast_nullable_to_non_nullable
+as List<DishEffectData>,dishes: null == dishes ? _self.dishes : dishes // ignore: cast_nullable_to_non_nullable
 as List<MealData>,
   ));
 }
@@ -8219,10 +8521,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seconds,  int maxMeals,  List<DishEffectData> effects,  List<MealData> dishes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MealRulesData() when $default != null:
-return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
+return $default(_that.seconds,_that.maxMeals,_that.effects,_that.dishes);case _:
   return orElse();
 
 }
@@ -8240,10 +8542,10 @@ return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seconds,  int maxMeals,  List<DishEffectData> effects,  List<MealData> dishes)  $default,) {final _that = this;
 switch (_that) {
 case _MealRulesData():
-return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
+return $default(_that.seconds,_that.maxMeals,_that.effects,_that.dishes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -8260,10 +8562,10 @@ return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case 
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seconds,  int maxMeals,  List<DishEffectData> effects,  List<MealData> dishes)?  $default,) {final _that = this;
 switch (_that) {
 case _MealRulesData() when $default != null:
-return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
+return $default(_that.seconds,_that.maxMeals,_that.effects,_that.dishes);case _:
   return null;
 
 }
@@ -8274,14 +8576,20 @@ return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case 
 /// @nodoc
 @JsonSerializable()
 
-class _MealRulesData implements MealRulesData {
-  const _MealRulesData({this.seconds = 3600, this.hpPercent = 10, this.maxMeals = 2,  List<MealData> dishes = const <MealData>[]}): _dishes = dishes;
+class _MealRulesData extends MealRulesData {
+  const _MealRulesData({this.seconds = 3600, this.maxMeals = 2,  List<DishEffectData> effects = const <DishEffectData>[],  List<MealData> dishes = const <MealData>[]}): _effects = effects,_dishes = dishes,super._();
   factory _MealRulesData.fromJson(Map<String, dynamic> json) => _$MealRulesDataFromJson(json);
 
 @override@JsonKey() final  int seconds;
-@override@JsonKey() final  int hpPercent;
 /// Dishes that may last at once (2026-11-04, 사용자: two).
 @override@JsonKey() final  int maxMeals;
+ final  List<DishEffectData> _effects;
+@override@JsonKey() List<DishEffectData> get effects {
+  if (_effects is EqualUnmodifiableListView) return _effects;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_effects);
+}
+
  final  List<MealData> _dishes;
 @override@JsonKey() List<MealData> get dishes {
   if (_dishes is EqualUnmodifiableListView) return _dishes;
@@ -8303,18 +8611,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealRulesData&&(identical(other.seconds, seconds) || other.seconds == seconds)&&(identical(other.hpPercent, hpPercent) || other.hpPercent == hpPercent)&&(identical(other.maxMeals, maxMeals) || other.maxMeals == maxMeals)&&const DeepCollectionEquality().equals(other.dishes, _dishes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealRulesData&&(identical(other.seconds, seconds) || other.seconds == seconds)&&(identical(other.maxMeals, maxMeals) || other.maxMeals == maxMeals)&&const DeepCollectionEquality().equals(other.effects, _effects)&&const DeepCollectionEquality().equals(other.dishes, _dishes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,seconds,hpPercent,maxMeals,const DeepCollectionEquality().hash(_dishes));
+    return Object.hash(runtimeType,seconds,maxMeals,const DeepCollectionEquality().hash(_effects),const DeepCollectionEquality().hash(_dishes));
 }
 
 @override
 String toString() {
-    return 'MealRulesData(seconds: $seconds, hpPercent: $hpPercent, maxMeals: $maxMeals, dishes: $dishes)';
+    return 'MealRulesData(seconds: $seconds, maxMeals: $maxMeals, effects: $effects, dishes: $dishes)';
 }
 
 
@@ -8325,7 +8633,7 @@ abstract mixin class _$MealRulesDataCopyWith<$Res> implements $MealRulesDataCopy
   factory _$MealRulesDataCopyWith(_MealRulesData value, $Res Function(_MealRulesData) _then) = __$MealRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int seconds, int hpPercent, int maxMeals, List<MealData> dishes
+ int seconds, int maxMeals, List<DishEffectData> effects, List<MealData> dishes
 });
 
 
@@ -8342,12 +8650,12 @@ class __$MealRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? seconds = null,Object? hpPercent = null,Object? maxMeals = null,Object? dishes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? seconds = null,Object? maxMeals = null,Object? effects = null,Object? dishes = null,}) {
   return _then(_MealRulesData(
 seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
-as int,hpPercent: null == hpPercent ? _self.hpPercent : hpPercent // ignore: cast_nullable_to_non_nullable
 as int,maxMeals: null == maxMeals ? _self.maxMeals : maxMeals // ignore: cast_nullable_to_non_nullable
-as int,dishes: null == dishes ? _self._dishes : dishes // ignore: cast_nullable_to_non_nullable
+as int,effects: null == effects ? _self._effects : effects // ignore: cast_nullable_to_non_nullable
+as List<DishEffectData>,dishes: null == dishes ? _self._dishes : dishes // ignore: cast_nullable_to_non_nullable
 as List<MealData>,
   ));
 }

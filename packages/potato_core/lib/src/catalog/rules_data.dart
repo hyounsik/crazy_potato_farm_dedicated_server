@@ -8,6 +8,7 @@ import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/items/gear.dart';
+import 'package:potato_core/src/potatoes/potato_effects.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 part 'rules_data.freezed.dart';
@@ -775,26 +776,101 @@ abstract class MealData with _$MealData {
     /// dish open from the start (2026-11-04, 사용자: steamed potatoes).
     String? zone,
     @LocalizedTextConverter() required LocalizedText name,
+
+    /// What it does, by [DishEffectData.id] (2026-11-04, 사용자: each dish
+    /// its own).
+    @Default(<String>[]) List<String> effects,
   }) = _MealData;
 
   factory MealData.fromJson(Map<String, dynamic> json) =>
       _$MealDataFromJson(json);
 }
 
-/// What eating does (2026-11-03, 사용자: every dish the same for now): more
-/// health on runs for [seconds]. Up to [maxMeals] last at once, each adding
-/// its own (2026-11-04, 사용자); none renews, and a run set out on with them
+/// Who a dish's effect reaches on a run: the one who ate it, their own
+/// potatoes, or both.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum DishTarget {
+  user,
+  potatoes,
+  both;
+
+  bool get reachesUser => this != potatoes;
+  bool get reachesPotatoes => this != user;
+}
+
+/// One thing a dish does on runs (2026-11-04, 사용자): a run stat
+/// (`RaidStat`) raised or lowered as potato abilities do. The same stat
+/// from two dishes adds up, like abilities.
+@freezed
+abstract class DishEffectData with _$DishEffectData {
+  const factory DishEffectData({
+    required String id,
+    required DishTarget target,
+    required String stat,
+    @Default(EffectOp.mul) EffectOp op,
+    required double value,
+
+    /// What it changes, without the amount (the screen adds it).
+    @LocalizedTextConverter() required LocalizedText name,
+  }) = _DishEffectData;
+
+  const DishEffectData._();
+
+  factory DishEffectData.fromJson(Map<String, dynamic> json) =>
+      _$DishEffectDataFromJson(json);
+
+  /// As an ability effect, to sum with [StatSum].
+  AbilityEffectData get asAbility => AbilityEffectData(
+    context: EffectContext.explore,
+    target: EffectTarget.self,
+    kind: EffectKind.stat,
+    stat: stat,
+    op: op,
+    value: value,
+  );
+}
+
+/// What eating does on runs for [seconds], each dish its [DishEffectData]s
+/// (2026-11-04, 사용자). Up to [maxMeals] last at once, the same dish twice
+/// too, each adding its own; none renews, and a run set out on with them
 /// keeps them to the end *(제안)*.
 @freezed
 abstract class MealRulesData with _$MealRulesData {
   const factory MealRulesData({
     @Default(3600) int seconds,
-    @Default(10) int hpPercent,
 
     /// Dishes that may last at once (2026-11-04, 사용자: two).
     @Default(2) int maxMeals,
+    @Default(<DishEffectData>[]) List<DishEffectData> effects,
     @Default(<MealData>[]) List<MealData> dishes,
   }) = _MealRulesData;
+
+  const MealRulesData._();
+
+  /// The effects of [dishes] (ids, eaten ones: a dish twice counts twice)
+  /// that reach the user, and those that reach their potatoes.
+  ({StatSums user, StatSums potatoes}) sumsOf(Iterable<String> dishes) {
+    final user = <String, StatSum>{};
+    final potatoes = <String, StatSum>{};
+    for (final id in dishes) {
+      final dish = this.dishes.where((d) => d.id == id).firstOrNull;
+      for (final effectId in dish?.effects ?? const <String>[]) {
+        final effect = effects.where((e) => e.id == effectId).firstOrNull;
+        if (effect == null) continue;
+        if (effect.target.reachesUser) {
+          user
+              .putIfAbsent(effect.stat, StatSum.new)
+              .addEffect(effect.asAbility, 1);
+        }
+        if (effect.target.reachesPotatoes) {
+          potatoes
+              .putIfAbsent(effect.stat, StatSum.new)
+              .addEffect(effect.asAbility, 1);
+        }
+      }
+    }
+    return (user: user, potatoes: potatoes);
+  }
 
   factory MealRulesData.fromJson(Map<String, dynamic> json) =>
       _$MealRulesDataFromJson(json);

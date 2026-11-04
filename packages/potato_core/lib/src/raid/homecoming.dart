@@ -28,7 +28,6 @@ RaidMemberStart memberStartFor(
   bag: (kit ?? farm.kit).bagItems,
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
-  mealHpBonus: farm.mealHpBonusOf(kit ?? farm.kit),
   meals: mealsOf(farm, kit ?? farm.kit),
 );
 
@@ -52,7 +51,6 @@ RaidSimulation startRun(
   bag: farm.bagItems,
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
-  mealHpBonus: farm.mealHpBonusOf(farm.kit),
   meals: mealsOf(farm, farm.kit),
 );
 

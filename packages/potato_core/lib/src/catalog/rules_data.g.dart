@@ -1302,6 +1302,12 @@ _MealData _$MealDataFromJson(Map<String, dynamic> json) =>
           'name',
           (v) => const LocalizedTextConverter().fromJson(v as Object),
         ),
+        effects: $checkedConvert(
+          'effects',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
       );
       return val;
     });
@@ -1310,15 +1316,63 @@ Map<String, dynamic> _$MealDataToJson(_MealData instance) => <String, dynamic>{
   'id': instance.id,
   'zone': instance.zone,
   'name': const LocalizedTextConverter().toJson(instance.name),
+  'effects': instance.effects,
 };
+
+_DishEffectData _$DishEffectDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_DishEffectData', json, ($checkedConvert) {
+      final val = _DishEffectData(
+        id: $checkedConvert('id', (v) => v as String),
+        target: $checkedConvert(
+          'target',
+          (v) => $enumDecode(_$DishTargetEnumMap, v),
+        ),
+        stat: $checkedConvert('stat', (v) => v as String),
+        op: $checkedConvert(
+          'op',
+          (v) => $enumDecodeNullable(_$EffectOpEnumMap, v) ?? EffectOp.mul,
+        ),
+        value: $checkedConvert('value', (v) => (v as num).toDouble()),
+        name: $checkedConvert(
+          'name',
+          (v) => const LocalizedTextConverter().fromJson(v as Object),
+        ),
+      );
+      return val;
+    });
+
+Map<String, dynamic> _$DishEffectDataToJson(_DishEffectData instance) =>
+    <String, dynamic>{
+      'id': instance.id,
+      'target': _$DishTargetEnumMap[instance.target]!,
+      'stat': instance.stat,
+      'op': _$EffectOpEnumMap[instance.op]!,
+      'value': instance.value,
+      'name': const LocalizedTextConverter().toJson(instance.name),
+    };
+
+const _$DishTargetEnumMap = {
+  DishTarget.user: 'user',
+  DishTarget.potatoes: 'potatoes',
+  DishTarget.both: 'both',
+};
+
+const _$EffectOpEnumMap = {EffectOp.mul: 'mul', EffectOp.add: 'add'};
 
 _MealRulesData _$MealRulesDataFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate('_MealRulesData', json, ($checkedConvert) {
   final val = _MealRulesData(
     seconds: $checkedConvert('seconds', (v) => (v as num?)?.toInt() ?? 3600),
-    hpPercent: $checkedConvert('hp_percent', (v) => (v as num?)?.toInt() ?? 10),
     maxMeals: $checkedConvert('max_meals', (v) => (v as num?)?.toInt() ?? 2),
+    effects: $checkedConvert(
+      'effects',
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map((e) => DishEffectData.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <DishEffectData>[],
+    ),
     dishes: $checkedConvert(
       'dishes',
       (v) =>
@@ -1329,13 +1383,13 @@ _MealRulesData _$MealRulesDataFromJson(
     ),
   );
   return val;
-}, fieldKeyMap: const {'hpPercent': 'hp_percent', 'maxMeals': 'max_meals'});
+}, fieldKeyMap: const {'maxMeals': 'max_meals'});
 
 Map<String, dynamic> _$MealRulesDataToJson(_MealRulesData instance) =>
     <String, dynamic>{
       'seconds': instance.seconds,
-      'hp_percent': instance.hpPercent,
       'max_meals': instance.maxMeals,
+      'effects': instance.effects.map((e) => e.toJson()).toList(),
       'dishes': instance.dishes.map((e) => e.toJson()).toList(),
     };
 

@@ -321,14 +321,16 @@
   },
   "meals": {
     "seconds": 3600,
-    "hp_percent": 10,
     "dishes": [
       {
         "id": "steamed_potato",
         "name": {
           "en": "Steamed Potato",
           "ko": "찐 감자"
-        }
+        },
+        "effects": [
+          "user_hp"
+        ]
       },
       {
         "id": "grilled_berries",
@@ -336,6 +338,53 @@
         "name": {
           "en": "Grilled Berries",
           "ko": "열매 구이"
+        },
+        "effects": [
+          "user_attack",
+          "potato_hp",
+          "move_speed"
+        ]
+      }
+    ],
+    "effects": [
+      {
+        "id": "user_hp",
+        "target": "user",
+        "stat": "unit.hp",
+        "value": 1.1,
+        "name": {
+          "en": "Health",
+          "ko": "체력"
+        }
+      },
+      {
+        "id": "user_attack",
+        "target": "user",
+        "stat": "unit.attack",
+        "value": 1.05,
+        "name": {
+          "en": "Attack",
+          "ko": "공격력"
+        }
+      },
+      {
+        "id": "potato_hp",
+        "target": "potatoes",
+        "stat": "unit.hp",
+        "value": 1.15,
+        "name": {
+          "en": "Potato health",
+          "ko": "감자 체력"
+        }
+      },
+      {
+        "id": "move_speed",
+        "target": "both",
+        "stat": "unit.move_speed",
+        "value": 1.05,
+        "name": {
+          "en": "Speed",
+          "ko": "이동 속도"
         }
       }
     ]

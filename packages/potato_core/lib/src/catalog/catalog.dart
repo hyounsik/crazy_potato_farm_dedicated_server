@@ -566,6 +566,29 @@ final class Catalog {
     );
     check.probability('raid.floors.mud_speed', raid.floors.mudSpeed);
     check.positiveNumber('raid.floors.ice_grip', raid.floors.iceGrip);
+    final meals = rules.meals;
+    check.positive('meals.max_meals', meals.maxMeals);
+    const dishStats = {
+      RaidStat.hp,
+      RaidStat.attack,
+      RaidStat.moveSpeed,
+      RaidStat.regenSpeed,
+      RaidStat.foodConsumption,
+      RaidStat.detectRange,
+    };
+    for (final (i, effect) in meals.effects.indexed) {
+      if (!dishStats.contains(effect.stat)) {
+        check.issue('meals.effects[$i].stat', 'no dish stat "${effect.stat}"');
+      }
+    }
+    final effectIds = {for (final e in meals.effects) e.id};
+    for (final (i, dish) in meals.dishes.indexed) {
+      for (final id in dish.effects) {
+        if (!effectIds.contains(id)) {
+          check.issue('meals.dishes[$i].effects', 'no effect "$id"');
+        }
+      }
+    }
     final companion = raid.companion;
     check.positiveNumber('raid.companion.max_hp', companion.maxHp);
     check.positiveNumber('raid.companion.radius', companion.radius);

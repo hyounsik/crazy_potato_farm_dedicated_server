@@ -233,7 +233,6 @@ final class RaidSimulation {
     List<ItemStack> bag = const [],
     Map<PotatoType, int> seedLevels = const {},
     Map<GearKind, int> storedGearLevels = const {},
-    double mealHpBonus = 0,
     List<RaidMeal> meals = const [],
   }) => RaidSimulation.party(
     catalog: catalog,
@@ -249,7 +248,6 @@ final class RaidSimulation {
         bag: bag,
         seedLevels: seedLevels,
         storedGearLevels: storedGearLevels,
-        mealHpBonus: mealHpBonus,
         meals: meals,
       ),
     ],
@@ -293,6 +291,9 @@ final class RaidSimulation {
     ]);
     final team = <RaidMember>[];
     for (final (index, m) in members.indexed) {
+      final meals = catalog.rules.meals.sumsOf([
+        for (final d in m.meals) d.dish,
+      ]);
       final at = index == 0
           ? entry
           : map.move(entry, _memberOffset(index), rules.player.radius);
@@ -301,9 +302,12 @@ final class RaidSimulation {
         name: m.name,
         position: at,
         radius: rules.player.radius,
-        maxHp: party.apply(
+        maxHp: meals.user.apply(
           RaidStat.hp,
-          rules.player.maxHp * (1 + gear.hpBonus(m.equipped) + m.mealHpBonus),
+          party.apply(
+            RaidStat.hp,
+            rules.player.maxHp * (1 + gear.hpBonus(m.equipped)),
+          ),
         ),
         weapon: gear.weaponOf(m.equipped.weapon),
         equipped: m.equipped,
@@ -330,7 +334,15 @@ final class RaidSimulation {
                 ),
                 radius: rules.companion.radius,
                 maxHp:
-                    _startHp(catalog, start, effects.own(start.traits), party) *
+                    meals.potatoes.apply(
+                      RaidStat.hp,
+                      _startHp(
+                        catalog,
+                        start,
+                        effects.own(start.traits),
+                        party,
+                      ),
+                    ) *
                     gear.factorOf(m.equipped, GearStat.companionHp),
                 potatoId: start.potatoId,
                 type: start.type,
@@ -402,11 +414,32 @@ final class RaidSimulation {
   double get playerShotDamage => shotDamageOf(_first);
 
   /// What one of [member]'s bullets does.
-  double shotDamageOf(RaidMember member) => _party.apply(
+  double shotDamageOf(RaidMember member) => _userStats(member).apply(
     RaidStat.attack,
     catalog.weapons[member.player.weapon]!.damage *
         _gear.damageScale(member.player.equipped.weapon),
   );
+
+  /// The party's effects on [member] plus their own dishes'.
+  StatSums _userStats(RaidMember member) => <String, StatSum>{}
+    ..addAll(_party)
+    ..addAll(_mealsOf(member).user);
+
+  /// What [member]'s dishes do, worked out once.
+  ({StatSums user, StatSums potatoes}) _mealsOf(RaidMember member) =>
+      _mealSums[member] ??= catalog.rules.meals.sumsOf([
+        for (final d in member.meals) d.dish,
+      ]);
+  final Expando<({StatSums user, StatSums potatoes})> _mealSums = Expando();
+
+  /// The dishes' effects on [companion], through the member it walks with;
+  /// none for a clone's.
+  StatSums _potatoMeals(RaidCompanion companion) {
+    for (final m in members) {
+      if (m.companions.contains(companion)) return _mealsOf(m).potatoes;
+    }
+    return const {};
+  }
 
   late final GearStats _gear = GearStats(catalog);
 
@@ -622,7 +655,8 @@ final class RaidSimulation {
   /// [companion]'s own effects plus its party's.
   StatSums statsOf(RaidCompanion companion) => <String, StatSum>{}
     ..addAll(_effects.own(_traitsOf(companion)))
-    ..addAll(_parties[companion.team] ?? const {});
+    ..addAll(_parties[companion.team] ?? const {})
+    ..addAll(_potatoMeals(companion));
 
   /// How fast [companion] moves now.
   double companionSpeed(RaidCompanion companion) {
@@ -1314,7 +1348,7 @@ final class RaidSimulation {
     } else if (!move.isZero) {
       player.facing = move.normalized();
       final speed =
-          _party.apply(RaidStat.moveSpeed, spec.speed) *
+          _userStats(member).apply(RaidStat.moveSpeed, spec.speed) *
           (isHungryOf(member) ? rules.food.hungrySpeedMultiplier : 1);
       player.position = map.move(
         player.position,
@@ -1404,12 +1438,13 @@ final class RaidSimulation {
     final spec = rules.player;
     var rate = food.perSecond;
     if (player.sinceHit >= spec.regenDelaySeconds && player.hp < player.maxHp) {
-      final regen = _party.apply(RaidStat.regenSpeed, spec.regenPerSecond);
+      final regen = _userStats(member)
+          .apply(RaidStat.regenSpeed, spec.regenPerSecond);
       player.hp = math.min(player.maxHp, player.hp + regen * dt);
       rate += food.regenExtraPerSecond;
     }
     rate =
-        _party.apply(RaidStat.foodConsumption, rate) *
+        _userStats(member).apply(RaidStat.foodConsumption, rate) *
         _gear.factorOf(player.equipped, GearStat.foodUse);
     player.foodOwed += rate * dt;
     final whole = player.foodOwed.floor();
@@ -2302,7 +2337,10 @@ final class RaidSimulation {
   /// potato easier to notice.
   double _noticeRange(RaidBody body, double sight) => switch (body) {
     final RaidCompanion c =>
-      _effects.own(_traitsOf(c)).apply(RaidStat.detectRange, sight),
+      (<String, StatSum>{}
+            ..addAll(_effects.own(_traitsOf(c)))
+            ..addAll(_potatoMeals(c)))
+          .apply(RaidStat.detectRange, sight),
     _ => sight,
   };
 

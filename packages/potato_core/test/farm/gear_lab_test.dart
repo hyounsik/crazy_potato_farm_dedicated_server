@@ -245,13 +245,11 @@ void main() {
         'oldest wears off (2026-11-04)', () {
       open();
       expect(farm.apply(const FarmCommand.eatMeal(meal: dish)), isNull);
-      expect(farm.mealHpBonusOf(farm.kit), closeTo(0.1, 1e-9));
       runMinutes(30);
       expect(
         farm.apply(const FarmCommand.eatMeal(meal: 'steamed_potato')),
         isNull,
       );
-      expect(farm.mealHpBonusOf(farm.kit), closeTo(0.2, 1e-9));
       final left = farm.mealsLeft();
       expect([for (final m in left) m.dish], [dish, 'steamed_potato']);
       expect(left.first.seconds, closeTo(30 * 60, 60));
@@ -265,7 +263,7 @@ void main() {
       expect(farm.mealsLeft(), hasLength(1));
       expect(farm.apply(const FarmCommand.eatMeal(meal: dish)), isNull);
       runMinutes(61);
-      expect(farm.mealHpBonusOf(farm.kit), 0);
+      expect(farm.mealsLeft(), isEmpty);
     });
 
     test('the dishes and what opened are saved', () {
@@ -286,18 +284,64 @@ void main() {
       expect([for (final m in loaded.kit.meals) m.dish], ['steamed_potato']);
     });
 
-    test('a run set out on after eating has more health', () {
-      final plain = memberStartFor(farm, food: 0);
+    test('each dish does its own on a run, a dish twice twice '
+        '(2026-11-04)', () {
+      RaidSimulation runOf(List<String> dishes) => RaidSimulation.party(
+        catalog: catalog,
+        zone: 'sample_zone',
+        seed: 1,
+        members: [
+          RaidMemberStart(
+            companions: const [
+              CompanionStart(
+                potatoId: 1,
+                type: PotatoType.food,
+                grade: Grade.normal,
+              ),
+            ],
+            meals: [for (final d in dishes) RaidMeal(dish: d, seconds: 60)],
+          ),
+        ],
+      );
+      final plain = runOf([]);
+      final potato = runOf(['steamed_potato']);
+      final berries = runOf(['grilled_berries']);
+      final twice = runOf(['grilled_berries', 'grilled_berries']);
+      double ratio(double a, double b) => a / b;
+      // Steamed potatoes: the user's health only.
+      expect(
+        ratio(potato.player.maxHp, plain.player.maxHp),
+        closeTo(1.1, 1e-9),
+      );
+      expect(potato.companions.single.maxHp, plain.companions.single.maxHp);
+      // Grilled berries: the user's attack, the potato's health, and both
+      // walk faster together (2026-11-04, 사용자).
+      expect(berries.player.maxHp, plain.player.maxHp);
+      expect(
+        ratio(berries.playerShotDamage, plain.playerShotDamage),
+        closeTo(1.05, 1e-9),
+      );
+      expect(
+        ratio(berries.companions.single.maxHp, plain.companions.single.maxHp),
+        closeTo(1.15, 1e-9),
+      );
+      expect(
+        ratio(
+          berries.companionSpeed(berries.companions.single),
+          plain.companionSpeed(plain.companions.single),
+        ),
+        closeTo(1.05, 1e-9),
+      );
+      expect(
+        ratio(twice.playerShotDamage, plain.playerShotDamage),
+        closeTo(1.1, 1e-9),
+      );
+    });
+
+    test('a run keeps the dishes with the time they had left', () {
       open();
       farm.apply(const FarmCommand.eatMeal(meal: dish));
       final fed = memberStartFor(farm, food: 0);
-      expect(plain.mealHpBonus, 0);
-      expect(fed.mealHpBonus, closeTo(0.1, 1e-9));
-      expect(
-        RaidMemberStart.fromJson(fed.toJson()).mealHpBonus,
-        closeTo(0.1, 1e-9),
-      );
-      // Shown on the run's status with the time it had left.
       final again = RaidMemberStart.fromJson(fed.toJson());
       expect([for (final m in again.meals) m.dish], [dish]);
       expect(again.meals.single.seconds, closeTo(3600, 1));

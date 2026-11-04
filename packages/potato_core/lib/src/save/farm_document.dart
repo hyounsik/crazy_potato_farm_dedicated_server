@@ -9,6 +9,7 @@ import 'package:potato_core/src/farm/farm_simulation.dart';
 import 'package:potato_core/src/farm/farm_totals.dart';
 import 'package:potato_core/src/farm/mail.dart';
 import 'package:potato_core/src/farm/pest.dart';
+import 'package:potato_core/src/farm/player_kit.dart';
 import 'package:potato_core/src/potatoes/guard.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
@@ -86,7 +87,11 @@ abstract class FarmDocument with _$FarmDocument {
     /// The bag's slots: what came back from a run and is not sorted yet.
     @Default(<ItemStack?>[]) List<ItemStack?> bag,
 
-    /// The farm tick the player's last dish wears off on (2026-11-03).
+    /// Dishes eaten that still last (2026-11-04).
+    @Default(<MealEffect>[]) List<MealEffect> meals,
+
+    /// The one dish of saves from before dishes could stack (2026-11-03):
+    /// read into [meals], never written.
     @Default(0) int mealUntilTick,
 
     /// Dishes open at the house table, by id (2026-11-03).
@@ -195,7 +200,7 @@ abstract class FarmDocument with _$FarmDocument {
     storySkipped: farm.storySkipped,
     bed: _slots(farm.bed),
     bag: _slots(farm.bag),
-    mealUntilTick: farm.kit.mealUntilTick,
+    meals: List.of(farm.kit.meals),
     mealsOpen: farm.mealsOpen.toList()..sort(),
   );
 
@@ -309,7 +314,11 @@ abstract class FarmDocument with _$FarmDocument {
       returnedSeeds: returnedSeeds,
       bed: [for (final s in bed) s?.copyWithCount(s.count)],
       bag: [for (final s in bag) s?.copyWithCount(s.count)],
-      mealUntilTick: mealUntilTick,
+      meals: [
+        ...meals,
+        if (mealUntilTick > 0)
+          MealEffect(dish: 'steamed_potato', untilTick: mealUntilTick),
+      ],
       mealsOpen: mealsOpen,
     );
     return farm..addMissingStartBuildings(also: missingBuildings);

@@ -8072,7 +8072,8 @@ as LocalizedText,
 /// @nodoc
 mixin _$MealRulesData {
 
- int get seconds; int get hpPercent; List<MealData> get dishes;
+ int get seconds; int get hpPercent;/// Dishes that may last at once (2026-11-04, 사용자: two).
+ int get maxMeals; List<MealData> get dishes;
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -8086,20 +8087,20 @@ $MealRulesDataCopyWith<MealRulesData> get copyWith => _$MealRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as MealRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealRulesData&&(identical(other.seconds, _this.seconds) || other.seconds == _this.seconds)&&(identical(other.hpPercent, _this.hpPercent) || other.hpPercent == _this.hpPercent)&&const DeepCollectionEquality().equals(other.dishes, _this.dishes));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is MealRulesData&&(identical(other.seconds, _this.seconds) || other.seconds == _this.seconds)&&(identical(other.hpPercent, _this.hpPercent) || other.hpPercent == _this.hpPercent)&&(identical(other.maxMeals, _this.maxMeals) || other.maxMeals == _this.maxMeals)&&const DeepCollectionEquality().equals(other.dishes, _this.dishes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as MealRulesData;
-  return Object.hash(runtimeType,_this.seconds,_this.hpPercent,const DeepCollectionEquality().hash(_this.dishes));
+  return Object.hash(runtimeType,_this.seconds,_this.hpPercent,_this.maxMeals,const DeepCollectionEquality().hash(_this.dishes));
 }
 
 @override
 String toString() {
   final _this = this as MealRulesData;
-  return 'MealRulesData(seconds: ${_this.seconds}, hpPercent: ${_this.hpPercent}, dishes: ${_this.dishes})';
+  return 'MealRulesData(seconds: ${_this.seconds}, hpPercent: ${_this.hpPercent}, maxMeals: ${_this.maxMeals}, dishes: ${_this.dishes})';
 }
 
 
@@ -8110,7 +8111,7 @@ abstract mixin class $MealRulesDataCopyWith<$Res>  {
   factory $MealRulesDataCopyWith(MealRulesData value, $Res Function(MealRulesData) _then) = _$MealRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int seconds, int hpPercent, List<MealData> dishes
+ int seconds, int hpPercent, int maxMeals, List<MealData> dishes
 });
 
 
@@ -8127,10 +8128,11 @@ class _$MealRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? seconds = null,Object? hpPercent = null,Object? dishes = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? seconds = null,Object? hpPercent = null,Object? maxMeals = null,Object? dishes = null,}) {
   return _then(MealRulesData(
 seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
 as int,hpPercent: null == hpPercent ? _self.hpPercent : hpPercent // ignore: cast_nullable_to_non_nullable
+as int,maxMeals: null == maxMeals ? _self.maxMeals : maxMeals // ignore: cast_nullable_to_non_nullable
 as int,dishes: null == dishes ? _self.dishes : dishes // ignore: cast_nullable_to_non_nullable
 as List<MealData>,
   ));
@@ -8217,10 +8219,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  List<MealData> dishes)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MealRulesData() when $default != null:
-return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
+return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
   return orElse();
 
 }
@@ -8238,10 +8240,10 @@ return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  List<MealData> dishes)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)  $default,) {final _that = this;
 switch (_that) {
 case _MealRulesData():
-return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
+return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -8258,10 +8260,10 @@ return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seconds,  int hpPercent,  List<MealData> dishes)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int seconds,  int hpPercent,  int maxMeals,  List<MealData> dishes)?  $default,) {final _that = this;
 switch (_that) {
 case _MealRulesData() when $default != null:
-return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
+return $default(_that.seconds,_that.hpPercent,_that.maxMeals,_that.dishes);case _:
   return null;
 
 }
@@ -8273,11 +8275,13 @@ return $default(_that.seconds,_that.hpPercent,_that.dishes);case _:
 @JsonSerializable()
 
 class _MealRulesData implements MealRulesData {
-  const _MealRulesData({this.seconds = 3600, this.hpPercent = 10,  List<MealData> dishes = const <MealData>[]}): _dishes = dishes;
+  const _MealRulesData({this.seconds = 3600, this.hpPercent = 10, this.maxMeals = 2,  List<MealData> dishes = const <MealData>[]}): _dishes = dishes;
   factory _MealRulesData.fromJson(Map<String, dynamic> json) => _$MealRulesDataFromJson(json);
 
 @override@JsonKey() final  int seconds;
 @override@JsonKey() final  int hpPercent;
+/// Dishes that may last at once (2026-11-04, 사용자: two).
+@override@JsonKey() final  int maxMeals;
  final  List<MealData> _dishes;
 @override@JsonKey() List<MealData> get dishes {
   if (_dishes is EqualUnmodifiableListView) return _dishes;
@@ -8299,18 +8303,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealRulesData&&(identical(other.seconds, seconds) || other.seconds == seconds)&&(identical(other.hpPercent, hpPercent) || other.hpPercent == hpPercent)&&const DeepCollectionEquality().equals(other.dishes, _dishes));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _MealRulesData&&(identical(other.seconds, seconds) || other.seconds == seconds)&&(identical(other.hpPercent, hpPercent) || other.hpPercent == hpPercent)&&(identical(other.maxMeals, maxMeals) || other.maxMeals == maxMeals)&&const DeepCollectionEquality().equals(other.dishes, _dishes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,seconds,hpPercent,const DeepCollectionEquality().hash(_dishes));
+    return Object.hash(runtimeType,seconds,hpPercent,maxMeals,const DeepCollectionEquality().hash(_dishes));
 }
 
 @override
 String toString() {
-    return 'MealRulesData(seconds: $seconds, hpPercent: $hpPercent, dishes: $dishes)';
+    return 'MealRulesData(seconds: $seconds, hpPercent: $hpPercent, maxMeals: $maxMeals, dishes: $dishes)';
 }
 
 
@@ -8321,7 +8325,7 @@ abstract mixin class _$MealRulesDataCopyWith<$Res> implements $MealRulesDataCopy
   factory _$MealRulesDataCopyWith(_MealRulesData value, $Res Function(_MealRulesData) _then) = __$MealRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int seconds, int hpPercent, List<MealData> dishes
+ int seconds, int hpPercent, int maxMeals, List<MealData> dishes
 });
 
 
@@ -8338,10 +8342,11 @@ class __$MealRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of MealRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? seconds = null,Object? hpPercent = null,Object? dishes = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? seconds = null,Object? hpPercent = null,Object? maxMeals = null,Object? dishes = null,}) {
   return _then(_MealRulesData(
 seconds: null == seconds ? _self.seconds : seconds // ignore: cast_nullable_to_non_nullable
 as int,hpPercent: null == hpPercent ? _self.hpPercent : hpPercent // ignore: cast_nullable_to_non_nullable
+as int,maxMeals: null == maxMeals ? _self.maxMeals : maxMeals // ignore: cast_nullable_to_non_nullable
 as int,dishes: null == dishes ? _self._dishes : dishes // ignore: cast_nullable_to_non_nullable
 as List<MealData>,
   ));

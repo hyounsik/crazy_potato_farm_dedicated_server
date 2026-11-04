@@ -1318,6 +1318,7 @@ _MealRulesData _$MealRulesDataFromJson(
   final val = _MealRulesData(
     seconds: $checkedConvert('seconds', (v) => (v as num?)?.toInt() ?? 3600),
     hpPercent: $checkedConvert('hp_percent', (v) => (v as num?)?.toInt() ?? 10),
+    maxMeals: $checkedConvert('max_meals', (v) => (v as num?)?.toInt() ?? 2),
     dishes: $checkedConvert(
       'dishes',
       (v) =>
@@ -1328,12 +1329,13 @@ _MealRulesData _$MealRulesDataFromJson(
     ),
   );
   return val;
-}, fieldKeyMap: const {'hpPercent': 'hp_percent'});
+}, fieldKeyMap: const {'hpPercent': 'hp_percent', 'maxMeals': 'max_meals'});
 
 Map<String, dynamic> _$MealRulesDataToJson(_MealRulesData instance) =>
     <String, dynamic>{
       'seconds': instance.seconds,
       'hp_percent': instance.hpPercent,
+      'max_meals': instance.maxMeals,
       'dishes': instance.dishes.map((e) => e.toJson()).toList(),
     };
 

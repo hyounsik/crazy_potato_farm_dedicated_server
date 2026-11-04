@@ -29,6 +29,7 @@ RaidMemberStart memberStartFor(
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
   mealHpBonus: farm.mealHpBonusOf(kit ?? farm.kit),
+  meals: mealsOf(farm, kit ?? farm.kit),
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes
@@ -52,7 +53,14 @@ RaidSimulation startRun(
   seedLevels: farm.bestLevels,
   storedGearLevels: farm.bestStoredGearLevels,
   mealHpBonus: farm.mealHpBonusOf(farm.kit),
+  meals: mealsOf(farm, farm.kit),
 );
+
+/// [kit]'s dishes still lasting on [farm], to show on a run.
+List<RaidMeal> mealsOf(FarmSimulation farm, PlayerKit kit) => [
+  for (final m in farm.mealsLeft(kit))
+    RaidMeal(dish: m.dish, seconds: m.seconds),
+];
 
 /// The farm potatoes [potatoIds] as companions for a run, in that order,
 /// with their level, abilities and style. Combat potatoes take their mode

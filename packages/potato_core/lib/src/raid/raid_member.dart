@@ -19,6 +19,7 @@ final class RaidMemberStart {
     this.seedLevels = const {},
     this.storedGearLevels = const {},
     this.mealHpBonus = 0,
+    this.meals = const [],
   });
 
   factory RaidMemberStart.fromJson(
@@ -32,6 +33,7 @@ final class RaidMemberStart {
     },
     progress: json['progress'] as int? ?? 0,
     mealHpBonus: (json['meal_hp_bonus'] as num?)?.toDouble() ?? 0,
+    meals: RaidMeal.listFromJson(json['meals']),
     companions: [
       for (final c in json['companions'] as List<Object?>? ?? const [])
         CompanionStart.fromJson(c! as Map<String, dynamic>),
@@ -77,8 +79,12 @@ final class RaidMemberStart {
   /// (2026-11-03, 사용자).
   final double mealHpBonus;
 
+  /// The dishes behind [mealHpBonus], shown on the run's status.
+  final List<RaidMeal> meals;
+
   Map<String, dynamic> toJson() => {
     if (mealHpBonus > 0) 'meal_hp_bonus': mealHpBonus,
+    if (meals.isNotEmpty) 'meals': [for (final m in meals) m.toJson()],
     if (name.isNotEmpty) 'name': name,
     'food': food,
     'equipped': equipped.toJson(),
@@ -116,6 +122,7 @@ final class RaidMember {
     this.downLeft,
     this.revive = 0,
     this.bossKilled = false,
+    this.meals = const [],
   });
 
   factory RaidMember.fromJson(Map<String, dynamic> json, Catalog catalog) {
@@ -143,6 +150,7 @@ final class RaidMember {
       outcome: outcome == null ? null : RaidOutcome.values.byName(outcome),
       downLeft: (json['down_left'] as num?)?.toDouble(),
       revive: (json['revive'] as num?)?.toDouble() ?? 0,
+      meals: RaidMeal.listFromJson(json['meals']),
     );
   }
 
@@ -176,6 +184,10 @@ final class RaidMember {
   /// The zone's boss fell while this member was in the run.
   bool bossKilled;
 
+  /// Dishes eaten at home before setting out (2026-11-04, 사용자: shown on
+  /// the status like hunger). Their health lasts the whole run.
+  final List<RaidMeal> meals;
+
   /// The stick: a direction on the world plane, at most 1 long. Not saved.
   Vec2 move = Vec2.zero;
 
@@ -196,5 +208,25 @@ final class RaidMember {
     if (downLeft != null) 'down_left': downLeft,
     if (revive > 0) 'revive': revive,
     if (bossKilled) 'boss_killed': true,
+    if (meals.isNotEmpty) 'meals': [for (final m in meals) m.toJson()],
   };
+}
+
+/// A dish eaten before a run, with the [seconds] it had left on setting
+/// out.
+final class RaidMeal {
+  const RaidMeal({required this.dish, required this.seconds});
+
+  factory RaidMeal.fromJson(Map<String, dynamic> json) =>
+      RaidMeal(dish: json['dish'] as String, seconds: json['seconds'] as int);
+
+  static List<RaidMeal> listFromJson(Object? json) => [
+    for (final m in json as List<Object?>? ?? const [])
+      RaidMeal.fromJson(m! as Map<String, dynamic>),
+  ];
+
+  final String dish;
+  final int seconds;
+
+  Map<String, dynamic> toJson() => {'dish': dish, 'seconds': seconds};
 }

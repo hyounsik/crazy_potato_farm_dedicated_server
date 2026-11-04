@@ -68,7 +68,7 @@ final class FarmSimulation {
     Iterable<Seed> returnedSeeds = const [],
     List<ItemStack?> bed = const [],
     List<ItemStack?> bag = const [],
-    int mealUntilTick = 0,
+    List<MealEffect> meals = const [],
     Iterable<String> mealsOpen = const [],
   }) : _gear = List.of(gear),
        _mealsOpen = {...mealsOpen},
@@ -77,7 +77,7 @@ final class FarmSimulation {
          equipped: equipped,
          bed: bed,
          bag: bag,
-         mealUntilTick: mealUntilTick,
+         meals: meals,
        ),
        _storyDone = Map.of(storyDone),
        _graves = List.of(graves),
@@ -1768,27 +1768,40 @@ final class FarmSimulation {
     return null;
   }
 
-  /// Seconds left on the last dish [kit] ate; 0 when it has worn off.
-  int mealSecondsLeft([PlayerKit? kit]) {
-    final left = (kit ?? _actor).mealUntilTick - _tick;
-    if (left <= 0) return 0;
-    return (left * _rules.farm.stepMillis / 1000).ceil();
-  }
+  /// The dishes [kit] ate that still last, oldest first, with seconds
+  /// left on each.
+  List<({String dish, int seconds})> mealsLeft([PlayerKit? kit]) => [
+    for (final meal in (kit ?? _actor).meals)
+      if (meal.untilTick > _tick)
+        (
+          dish: meal.dish,
+          seconds: ((meal.untilTick - _tick) * _rules.farm.stepMillis / 1000)
+              .ceil(),
+        ),
+  ];
 
-  /// What [kit]'s dish adds to health on a run set out on now: 0.1 is 10%.
+  /// What [kit]'s dishes add to health on a run set out on now, each its
+  /// own (2026-11-04, 사용자: up to two at once): 0.1 is 10%.
   double mealHpBonusOf(PlayerKit kit) =>
-      mealSecondsLeft(kit) > 0 ? _rules.meals.hpPercent / 100 : 0;
+      mealsLeft(kit).length * _rules.meals.hpPercent / 100;
 
-  /// Eats dish [meal]: while one lasts, eating only fills the belly
-  /// (2026-11-03, 사용자: no stacking, no renewing).
+  /// Eats dish [meal] beside those still lasting, up to
+  /// `MealRulesData.maxMeals`; with that many, eating only fills the belly
+  /// until the oldest wears off (2026-11-04, 사용자).
   FarmRejection? _eatMeal(String meal) {
     if (!_rules.meals.dishes.any((d) => d.id == meal)) {
       return FarmRejection.mealLocked;
     }
     if (!mealsOpen.contains(meal)) return FarmRejection.mealLocked;
-    if (mealSecondsLeft() > 0) return FarmRejection.stillFull;
-    _actor.mealUntilTick =
-        _tick + _rules.meals.seconds * 1000 ~/ _rules.farm.stepMillis;
+    final meals = _actor.meals..removeWhere((m) => m.untilTick <= _tick);
+    if (meals.length >= _rules.meals.maxMeals) return FarmRejection.stillFull;
+    meals.add(
+      MealEffect(
+        dish: meal,
+        untilTick:
+            _tick + _rules.meals.seconds * 1000 ~/ _rules.farm.stepMillis,
+      ),
+    );
     return null;
   }
 

@@ -241,28 +241,49 @@ void main() {
       );
     });
 
-    test('eating lasts its hour, and eating again only fills the belly', () {
+    test('two dishes last at once; a third only fills the belly until the '
+        'oldest wears off (2026-11-04)', () {
       open();
       expect(farm.apply(const FarmCommand.eatMeal(meal: dish)), isNull);
       expect(farm.mealHpBonusOf(farm.kit), closeTo(0.1, 1e-9));
-      final until = farm.kit.mealUntilTick;
       runMinutes(30);
+      expect(
+        farm.apply(const FarmCommand.eatMeal(meal: 'steamed_potato')),
+        isNull,
+      );
+      expect(farm.mealHpBonusOf(farm.kit), closeTo(0.2, 1e-9));
+      final left = farm.mealsLeft();
+      expect([for (final m in left) m.dish], [dish, 'steamed_potato']);
+      expect(left.first.seconds, closeTo(30 * 60, 60));
+      expect(left.last.seconds, closeTo(60 * 60, 60));
       expect(
         farm.apply(const FarmCommand.eatMeal(meal: dish)),
         FarmRejection.stillFull,
       );
-      expect(farm.kit.mealUntilTick, until, reason: 'it does not renew');
+      expect(farm.mealsLeft(), hasLength(2), reason: 'none renews');
       runMinutes(31);
-      expect(farm.mealHpBonusOf(farm.kit), 0);
+      expect(farm.mealsLeft(), hasLength(1));
       expect(farm.apply(const FarmCommand.eatMeal(meal: dish)), isNull);
+      runMinutes(61);
+      expect(farm.mealHpBonusOf(farm.kit), 0);
     });
 
-    test('the dish and what opened are saved', () {
+    test('the dishes and what opened are saved', () {
       open();
       farm.apply(const FarmCommand.eatMeal(meal: dish));
+      farm.apply(const FarmCommand.eatMeal(meal: 'steamed_potato'));
       final loaded = FarmDocument.of(farm).toSimulation(catalog);
       expect(loaded.mealsOpen, contains(dish));
-      expect(loaded.kit.mealUntilTick, farm.kit.mealUntilTick);
+      expect(loaded.kit.meals, farm.kit.meals);
+      expect(loaded.kit.meals, hasLength(2));
+    });
+
+    test('a save from before dishes stacked keeps its one dish', () {
+      final json = FarmDocument.of(farm).toJson()
+        ..remove('meals')
+        ..['meal_until_tick'] = farm.tick + 100;
+      final loaded = FarmDocument.fromJson(json).toSimulation(catalog);
+      expect([for (final m in loaded.kit.meals) m.dish], ['steamed_potato']);
     });
 
     test('a run set out on after eating has more health', () {
@@ -276,6 +297,18 @@ void main() {
         RaidMemberStart.fromJson(fed.toJson()).mealHpBonus,
         closeTo(0.1, 1e-9),
       );
+      // Shown on the run's status with the time it had left.
+      final again = RaidMemberStart.fromJson(fed.toJson());
+      expect([for (final m in again.meals) m.dish], [dish]);
+      expect(again.meals.single.seconds, closeTo(3600, 1));
+      final run = RaidSimulation.party(
+        catalog: catalog,
+        zone: 'sample_zone',
+        seed: 1,
+        members: [fed],
+      );
+      final saved = RaidSimulation.fromJson(run.toJson(), catalog);
+      expect([for (final m in saved.members.first.meals) m.dish], [dish]);
     });
   });
 }

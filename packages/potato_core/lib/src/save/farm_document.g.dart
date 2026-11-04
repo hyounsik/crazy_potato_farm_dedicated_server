@@ -183,6 +183,14 @@ _FarmDocument _$FarmDocumentFromJson(
                 .toList() ??
             const <ItemStack?>[],
       ),
+      meals: $checkedConvert(
+        'meals',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => MealEffect.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <MealEffect>[],
+      ),
       mealUntilTick: $checkedConvert(
         'meal_until_tick',
         (v) => (v as num?)?.toInt() ?? 0,
@@ -244,6 +252,7 @@ Map<String, dynamic> _$FarmDocumentToJson(_FarmDocument instance) =>
       'missing_buildings': instance.missingBuildings,
       'bed': instance.bed.map((e) => e?.toJson()).toList(),
       'bag': instance.bag.map((e) => e?.toJson()).toList(),
+      'meals': instance.meals.map((e) => e.toJson()).toList(),
       'meal_until_tick': instance.mealUntilTick,
       'meals_open': instance.mealsOpen,
     };

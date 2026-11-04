@@ -14,8 +14,9 @@ final class PlayerKit {
     this.equipped = const Equipped(),
     List<ItemStack?> bed = const [],
     List<ItemStack?> bag = const [],
-    this.mealUntilTick = 0,
-  }) : _catalog = catalog,
+    List<MealEffect> meals = const [],
+  }) : meals = List.of(meals),
+       _catalog = catalog,
        _gearStats = GearStats(catalog),
        bed = Bag.restore([
          ...bed,
@@ -30,8 +31,9 @@ final class PlayerKit {
   final Catalog _catalog;
   final GearStats _gearStats;
 
-  /// The farm tick the player's last dish wears off on (2026-11-03, 사용자).
-  int mealUntilTick;
+  /// Dishes eaten that still last, oldest first, at most
+  /// `MealRulesData.maxMeals` (2026-11-04, 사용자).
+  final List<MealEffect> meals;
 
   /// What the player wears (and takes on runs).
   Equipped equipped;
@@ -72,7 +74,7 @@ final class PlayerKit {
     'equipped': equipped.toJson(),
     'bed': _slots(bed),
     'bag': _slots(_bag),
-    if (mealUntilTick > 0) 'meal_until_tick': mealUntilTick,
+    if (meals.isNotEmpty) 'meals': [for (final m in meals) m.toJson()],
   };
 
   /// Rebuilds a kit saved with [toJson].
@@ -89,7 +91,7 @@ final class PlayerKit {
       },
       bed: slots(json['bed']),
       bag: slots(json['bag']),
-      mealUntilTick: json['meal_until_tick'] as int? ?? 0,
+      meals: MealEffect.listFromJson(json),
     );
   }
 
@@ -111,4 +113,36 @@ final class PlayerKit {
       _bag.addFrom(stack.copyWithCount(stack.count));
     }
   }
+}
+
+/// One dish eaten at home, lasting until farm tick [untilTick]
+/// (2026-11-03, 사용자).
+final class MealEffect {
+  const MealEffect({required this.dish, required this.untilTick});
+
+  factory MealEffect.fromJson(Map<String, dynamic> json) => MealEffect(
+    dish: json['dish'] as String,
+    untilTick: json['until_tick'] as int,
+  );
+
+  /// The [MealEffect]s saved under `meals` in [json], or the one dish of
+  /// saves from before they could stack (`meal_until_tick`).
+  static List<MealEffect> listFromJson(Map<String, dynamic> json) => [
+    for (final m in json['meals'] as List<Object?>? ?? const [])
+      MealEffect.fromJson(m! as Map<String, dynamic>),
+    if (json['meal_until_tick'] case final int until when until > 0)
+      MealEffect(dish: 'steamed_potato', untilTick: until),
+  ];
+
+  final String dish;
+  final int untilTick;
+
+  Map<String, dynamic> toJson() => {'dish': dish, 'until_tick': untilTick};
+
+  @override
+  bool operator ==(Object other) =>
+      other is MealEffect && other.dish == dish && other.untilTick == untilTick;
+
+  @override
+  int get hashCode => Object.hash(dish, untilTick);
 }

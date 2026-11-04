@@ -782,13 +782,17 @@ abstract class MealData with _$MealData {
 }
 
 /// What eating does (2026-11-03, 사용자: every dish the same for now): more
-/// health on runs for [seconds]. It neither stacks nor renews while it
-/// lasts; a run set out on with it keeps it to the end *(제안)*.
+/// health on runs for [seconds]. Up to [maxMeals] last at once, each adding
+/// its own (2026-11-04, 사용자); none renews, and a run set out on with them
+/// keeps them to the end *(제안)*.
 @freezed
 abstract class MealRulesData with _$MealRulesData {
   const factory MealRulesData({
     @Default(3600) int seconds,
     @Default(10) int hpPercent,
+
+    /// Dishes that may last at once (2026-11-04, 사용자: two).
+    @Default(2) int maxMeals,
     @Default(<MealData>[]) List<MealData> dishes,
   }) = _MealRulesData;
 

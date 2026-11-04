@@ -234,6 +234,7 @@ final class RaidSimulation {
     Map<PotatoType, int> seedLevels = const {},
     Map<GearKind, int> storedGearLevels = const {},
     double mealHpBonus = 0,
+    List<RaidMeal> meals = const [],
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
@@ -249,6 +250,7 @@ final class RaidSimulation {
         seedLevels: seedLevels,
         storedGearLevels: storedGearLevels,
         mealHpBonus: mealHpBonus,
+        meals: meals,
       ),
     ],
   );
@@ -316,6 +318,7 @@ final class RaidSimulation {
           player: player,
           bag: bag,
           progress: m.progress,
+          meals: m.meals,
           companions: [
             for (final (slot, start) in starts[index].indexed)
               RaidCompanion(

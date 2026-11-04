@@ -78,6 +78,89 @@ void main() {
     }
   });
 
+  group('a loose ring for a zone boss area (2026-11-04)', () {
+    MapRecipe ringed(RingWall wall, MapFloor floor, int spots) =>
+        const MapRecipe(
+          size: 24,
+          entry: TilePos(12, 21),
+          clearRadius: 2,
+          rotate: false,
+          scatter: ScatterRule(count: 0),
+        ).copyWith(
+          terrain: [
+            TerrainPiece.ring(
+              center: const TilePos(12, 10),
+              radius: 7,
+              thickness: 2,
+              facing: const TilePos(0, 1),
+              gap: 2,
+              wall: wall,
+              gaps: 5,
+              floor: floor,
+              floorSpots: spots,
+            ),
+          ],
+        );
+
+    test('high ground with gaps here and there, mud in spots', () {
+      for (var seed = 0; seed < 20; seed++) {
+        final map = generate(
+          seed,
+          recipe: ringed(RingWall.high, MapFloor.mud, 10),
+        );
+        var high = 0;
+        var mud = 0;
+        for (var y = 0; y < map.size; y++) {
+          for (var x = 0; x < map.size; x++) {
+            if (map.heightAt(x, y) == MapHeight.high) high++;
+            if (map.floorAt(x, y) == MapFloor.mud) mud++;
+            expect(map.tileAt(x, y), isNot(MapTile.terrain));
+          }
+        }
+        expect(high, greaterThan(40), reason: 'seed $seed');
+        expect(mud, 10, reason: 'seed $seed');
+        // More than one way in: the clearing is reached, and from several
+        // sides (low tiles of the ring band, the openings).
+        final reached = map.reachableFrom(map.entry);
+        expect(map.markers['clearing']!.every(reached.contains), isTrue);
+      }
+    });
+
+    test('holes with gaps, ice inside but the centre', () {
+      final map = generate(1, recipe: ringed(RingWall.hollow, MapFloor.ice, 0));
+      var hollow = 0;
+      for (var y = 0; y < map.size; y++) {
+        for (var x = 0; x < map.size; x++) {
+          if (map.tileAt(x, y) == MapTile.hollow) hollow++;
+        }
+      }
+      expect(hollow, greaterThan(40));
+      expect(map.floorAt(12, 10), MapFloor.plain);
+      expect(map.floorAt(13, 10), MapFloor.ice);
+      expect(map.floorAt(12, 6), MapFloor.ice);
+      final reached = map.reachableFrom(map.entry);
+      expect(map.markers['clearing']!.every(reached.contains), isTrue);
+    });
+
+    test('a plain ring is the same as before', () {
+      final plain = ringed(RingWall.terrain, MapFloor.plain, 0).copyWith(
+        terrain: [
+          const TerrainPiece.ring(
+            center: TilePos(12, 10),
+            radius: 7,
+            thickness: 2,
+            facing: TilePos(0, 1),
+            gap: 3,
+          ),
+        ],
+      );
+      final map = generate(1, recipe: plain);
+      expect(map.hasFloors, isFalse);
+      expect(map.tileAt(12, 17), MapTile.open, reason: 'the one entrance');
+      expect(map.tileAt(12, 3), MapTile.terrain);
+    });
+  });
+
   test('every exit and marker can be walked to from the entry', () {
     for (var seed = 0; seed < 40; seed++) {
       final map = generate(seed);

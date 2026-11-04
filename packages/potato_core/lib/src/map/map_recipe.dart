@@ -50,6 +50,19 @@ abstract class MapRecipe with _$MapRecipe {
       _$MapRecipeFromJson(json);
 }
 
+/// What a ring is made of.
+@JsonEnum(fieldRename: FieldRename.snake)
+enum RingWall {
+  /// Forest (or cave wall): stops walkers, shots and sight.
+  terrain,
+
+  /// High ground without ramps: walkers go round, shots fly over.
+  high,
+
+  /// Holes ([MapTile.hollow]): walkers go round, shots fly over.
+  hollow,
+}
+
 /// The map marker holding a ring's clearing: the boss area.
 const String bossAreaMarker = 'clearing';
 
@@ -93,12 +106,22 @@ sealed class TerrainPiece with _$TerrainPiece {
   /// A ring around an open clearing: outer [radius], [thickness] tiles
   /// thick, with one entrance [gap] tiles wide facing [facing] (a step of -1,
   /// 0 or 1 on each axis). The clearing's tiles are marked `clearing`.
+  ///
+  /// Zone boss areas (2026-11-04, 사용자) may ring it loosely instead: of
+  /// [wall] (forest, high ground or holes), with [gaps] openings [gap] wide
+  /// placed by the seed in place of the one entrance, and [floor] inside
+  /// it: [floorSpots] single tiles of it about the clearing, or with none,
+  /// every low tile inside the ring but the centre.
   const factory TerrainPiece.ring({
     required TilePos center,
     required int radius,
     required int thickness,
     required TilePos facing,
     required int gap,
+    @Default(RingWall.terrain) RingWall wall,
+    @Default(0) int gaps,
+    MapFloor? floor,
+    @Default(0) int floorSpots,
   }) = RingPiece;
 
   /// High ground of about [area] open tiles grown from [center] (its shape

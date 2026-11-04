@@ -831,12 +831,12 @@ return chunk(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( TilePos center,  int area)?  blob,TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult Function( TilePos center,  int area,  int ramps)?  plateau,TResult Function( TilePos center,  int area)?  hollow,TResult Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( TilePos center,  int area)?  blob,TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap,  RingWall wall,  int gaps,  MapFloor? floor,  int floorSpots)?  ring,TResult Function( TilePos center,  int area,  int ramps)?  plateau,TResult Function( TilePos center,  int area)?  hollow,TResult Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
 return blob(_that.center,_that.area);case WallPiece() when wall != null:
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece() when ring != null:
-return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece() when plateau != null:
+return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap,_that.wall,_that.gaps,_that.floor,_that.floorSpots);case PlateauPiece() when plateau != null:
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece() when hollow != null:
 return hollow(_that.center,_that.area);case FloorPiece() when floor != null:
 return floor(_that.center,_that.area,_that.floor);case ChunkPiece() when chunk != null:
@@ -858,12 +858,12 @@ return chunk(_that.chunk,_that.origin,_that.quarterTurns);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( TilePos center,  int area)  blob,required TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)  wall,required TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)  ring,required TResult Function( TilePos center,  int area,  int ramps)  plateau,required TResult Function( TilePos center,  int area)  hollow,required TResult Function( TilePos center,  int area,  MapFloor floor)  floor,required TResult Function( String chunk,  TilePos origin,  int quarterTurns)  chunk,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( TilePos center,  int area)  blob,required TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)  wall,required TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap,  RingWall wall,  int gaps,  MapFloor? floor,  int floorSpots)  ring,required TResult Function( TilePos center,  int area,  int ramps)  plateau,required TResult Function( TilePos center,  int area)  hollow,required TResult Function( TilePos center,  int area,  MapFloor floor)  floor,required TResult Function( String chunk,  TilePos origin,  int quarterTurns)  chunk,}) {final _that = this;
 switch (_that) {
 case BlobPiece():
 return blob(_that.center,_that.area);case WallPiece():
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece():
-return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece():
+return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap,_that.wall,_that.gaps,_that.floor,_that.floorSpots);case PlateauPiece():
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece():
 return hollow(_that.center,_that.area);case FloorPiece():
 return floor(_that.center,_that.area,_that.floor);case ChunkPiece():
@@ -881,12 +881,12 @@ return chunk(_that.chunk,_that.origin,_that.quarterTurns);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( TilePos center,  int area)?  blob,TResult? Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult? Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult? Function( TilePos center,  int area,  int ramps)?  plateau,TResult? Function( TilePos center,  int area)?  hollow,TResult? Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult? Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( TilePos center,  int area)?  blob,TResult? Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult? Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap,  RingWall wall,  int gaps,  MapFloor? floor,  int floorSpots)?  ring,TResult? Function( TilePos center,  int area,  int ramps)?  plateau,TResult? Function( TilePos center,  int area)?  hollow,TResult? Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult? Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,}) {final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
 return blob(_that.center,_that.area);case WallPiece() when wall != null:
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece() when ring != null:
-return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece() when plateau != null:
+return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap,_that.wall,_that.gaps,_that.floor,_that.floorSpots);case PlateauPiece() when plateau != null:
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece() when hollow != null:
 return hollow(_that.center,_that.area);case FloorPiece() when floor != null:
 return floor(_that.center,_that.area,_that.floor);case ChunkPiece() when chunk != null:
@@ -1087,7 +1087,7 @@ $TilePosCopyWith<$Res> get to {
 @JsonSerializable()
 
 class RingPiece implements TerrainPiece {
-  const RingPiece({required this.center, required this.radius, required this.thickness, required this.facing, required this.gap,  String? $type}): $type = $type ?? 'ring';
+  const RingPiece({required this.center, required this.radius, required this.thickness, required this.facing, required this.gap, this.wall = RingWall.terrain, this.gaps = 0, this.floor, this.floorSpots = 0,  String? $type}): $type = $type ?? 'ring';
   factory RingPiece.fromJson(Map<String, dynamic> json) => _$RingPieceFromJson(json);
 
  final  TilePos center;
@@ -1095,6 +1095,10 @@ class RingPiece implements TerrainPiece {
  final  int thickness;
  final  TilePos facing;
  final  int gap;
+@JsonKey() final  RingWall wall;
+@JsonKey() final  int gaps;
+ final  MapFloor? floor;
+@JsonKey() final  int floorSpots;
 
 @JsonKey(name: 'type')
 final String $type;
@@ -1113,18 +1117,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is RingPiece&&(identical(other.center, center) || other.center == center)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.thickness, thickness) || other.thickness == thickness)&&(identical(other.facing, facing) || other.facing == facing)&&(identical(other.gap, gap) || other.gap == gap));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is RingPiece&&(identical(other.center, center) || other.center == center)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.thickness, thickness) || other.thickness == thickness)&&(identical(other.facing, facing) || other.facing == facing)&&(identical(other.gap, gap) || other.gap == gap)&&(identical(other.wall, wall) || other.wall == wall)&&(identical(other.gaps, gaps) || other.gaps == gaps)&&(identical(other.floor, floor) || other.floor == floor)&&(identical(other.floorSpots, floorSpots) || other.floorSpots == floorSpots));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,center,radius,thickness,facing,gap);
+    return Object.hash(runtimeType,center,radius,thickness,facing,gap,wall,gaps,floor,floorSpots);
 }
 
 @override
 String toString() {
-    return 'TerrainPiece.ring(center: $center, radius: $radius, thickness: $thickness, facing: $facing, gap: $gap)';
+    return 'TerrainPiece.ring(center: $center, radius: $radius, thickness: $thickness, facing: $facing, gap: $gap, wall: $wall, gaps: $gaps, floor: $floor, floorSpots: $floorSpots)';
 }
 
 
@@ -1135,7 +1139,7 @@ abstract mixin class $RingPieceCopyWith<$Res> implements $TerrainPieceCopyWith<$
   factory $RingPieceCopyWith(RingPiece value, $Res Function(RingPiece) _then) = _$RingPieceCopyWithImpl;
 @useResult
 $Res call({
- TilePos center, int radius, int thickness, TilePos facing, int gap
+ TilePos center, int radius, int thickness, TilePos facing, int gap, RingWall wall, int gaps, MapFloor? floor, int floorSpots
 });
 
 
@@ -1152,13 +1156,17 @@ class _$RingPieceCopyWithImpl<$Res>
 
 /// Create a copy of TerrainPiece
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') $Res call({Object? center = null,Object? radius = null,Object? thickness = null,Object? facing = null,Object? gap = null,}) {
+@pragma('vm:prefer-inline') $Res call({Object? center = null,Object? radius = null,Object? thickness = null,Object? facing = null,Object? gap = null,Object? wall = null,Object? gaps = null,Object? floor = freezed,Object? floorSpots = null,}) {
   return _then(RingPiece(
 center: null == center ? _self.center : center // ignore: cast_nullable_to_non_nullable
 as TilePos,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
 as int,thickness: null == thickness ? _self.thickness : thickness // ignore: cast_nullable_to_non_nullable
 as int,facing: null == facing ? _self.facing : facing // ignore: cast_nullable_to_non_nullable
 as TilePos,gap: null == gap ? _self.gap : gap // ignore: cast_nullable_to_non_nullable
+as int,wall: null == wall ? _self.wall : wall // ignore: cast_nullable_to_non_nullable
+as RingWall,gaps: null == gaps ? _self.gaps : gaps // ignore: cast_nullable_to_non_nullable
+as int,floor: freezed == floor ? _self.floor : floor // ignore: cast_nullable_to_non_nullable
+as MapFloor?,floorSpots: null == floorSpots ? _self.floorSpots : floorSpots // ignore: cast_nullable_to_non_nullable
 as int,
   ));
 }

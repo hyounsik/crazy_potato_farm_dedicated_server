@@ -152,10 +152,23 @@ RingPiece _$RingPieceFromJson(Map<String, dynamic> json) =>
           (v) => TilePos.fromJson(v as Map<String, dynamic>),
         ),
         gap: $checkedConvert('gap', (v) => (v as num).toInt()),
+        wall: $checkedConvert(
+          'wall',
+          (v) => $enumDecodeNullable(_$RingWallEnumMap, v) ?? RingWall.terrain,
+        ),
+        gaps: $checkedConvert('gaps', (v) => (v as num?)?.toInt() ?? 0),
+        floor: $checkedConvert(
+          'floor',
+          (v) => $enumDecodeNullable(_$MapFloorEnumMap, v),
+        ),
+        floorSpots: $checkedConvert(
+          'floor_spots',
+          (v) => (v as num?)?.toInt() ?? 0,
+        ),
         $type: $checkedConvert('type', (v) => v as String?),
       );
       return val;
-    }, fieldKeyMap: const {r'$type': 'type'});
+    }, fieldKeyMap: const {'floorSpots': 'floor_spots', r'$type': 'type'});
 
 Map<String, dynamic> _$RingPieceToJson(RingPiece instance) => <String, dynamic>{
   'center': instance.center.toJson(),
@@ -163,7 +176,23 @@ Map<String, dynamic> _$RingPieceToJson(RingPiece instance) => <String, dynamic>{
   'thickness': instance.thickness,
   'facing': instance.facing.toJson(),
   'gap': instance.gap,
+  'wall': _$RingWallEnumMap[instance.wall]!,
+  'gaps': instance.gaps,
+  'floor': _$MapFloorEnumMap[instance.floor],
+  'floor_spots': instance.floorSpots,
   'type': instance.$type,
+};
+
+const _$RingWallEnumMap = {
+  RingWall.terrain: 'terrain',
+  RingWall.high: 'high',
+  RingWall.hollow: 'hollow',
+};
+
+const _$MapFloorEnumMap = {
+  MapFloor.plain: 'plain',
+  MapFloor.mud: 'mud',
+  MapFloor.ice: 'ice',
 };
 
 PlateauPiece _$PlateauPieceFromJson(Map<String, dynamic> json) =>
@@ -233,12 +262,6 @@ Map<String, dynamic> _$FloorPieceToJson(FloorPiece instance) =>
       'floor': _$MapFloorEnumMap[instance.floor]!,
       'type': instance.$type,
     };
-
-const _$MapFloorEnumMap = {
-  MapFloor.plain: 'plain',
-  MapFloor.mud: 'mud',
-  MapFloor.ice: 'ice',
-};
 
 ChunkPiece _$ChunkPieceFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ChunkPiece', json, ($checkedConvert) {

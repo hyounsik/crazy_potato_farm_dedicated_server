@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:potato_core/src/common/game_random.dart';
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/map/map_chunk.dart';
@@ -285,25 +287,95 @@ final class _Builder {
     final fy = piece.facing.y;
     final facingSquared = fx * fx + fy * fy;
     final clearing = markers.putIfAbsent('clearing', () => []);
+    final wall = <TilePos>[];
+    final within = <TilePos>[];
     for (var dy = -r; dy <= r; dy++) {
       for (var dx = -r; dx <= r; dx++) {
         final x = piece.center.x + dx;
         final y = piece.center.y + dy;
+        if (!_inside(x, y)) continue;
         final d = dx * dx + dy * dy;
-        if (clearR > 0 && d < clearR * clearR && _inside(x, y)) {
-          clearing.add(TilePos(x, y));
-        }
+        if (clearR > 0 && d < clearR * clearR) clearing.add(TilePos(x, y));
+        if (d < inner) within.add(TilePos(x, y));
         if (d > outer || d < inner) continue;
         // The entrance: ahead of the centre and within gap/2 of the facing
         // line, compared squared to stay in whole numbers.
         final ahead = dx * fx + dy * fy;
         final across = dx * fy - dy * fx;
-        if (ahead > 0 &&
+        if (piece.gaps == 0 &&
+            ahead > 0 &&
             4 * across * across <= piece.gap * piece.gap * facingSquared) {
           continue;
         }
-        _set(x, y, MapTile.terrain);
+        wall.add(TilePos(x, y));
       }
+    }
+    for (final opening in _ringGaps(piece, wall)) {
+      wall.removeWhere(
+        (t) =>
+            4 *
+                ((t.x - opening.x) * (t.x - opening.x) +
+                    (t.y - opening.y) * (t.y - opening.y)) <=
+            piece.gap * piece.gap,
+      );
+    }
+    for (final t in wall) {
+      switch (piece.wall) {
+        case RingWall.terrain:
+          _set(t.x, t.y, MapTile.terrain);
+        case RingWall.high:
+          if (_at(t.x, t.y) == MapTile.open) {
+            heights[t.y * size + t.x] = MapHeight.high;
+          }
+        case RingWall.hollow:
+          if (_at(t.x, t.y) == MapTile.open) _set(t.x, t.y, MapTile.hollow);
+      }
+    }
+    _ringFloor(piece, within, clearing);
+  }
+
+  /// [piece]'s openings: tiles of [wall] picked by the seed, spread round
+  /// it (2026-11-04, 사용자: loose, here and there, no single entrance).
+  List<TilePos> _ringGaps(RingPiece piece, List<TilePos> wall) {
+    if (piece.gaps <= 0 || wall.isEmpty) return const [];
+    final picked = <TilePos>[];
+    // Apart by about the ring's length shared out, at least two gaps' worth.
+    final spread = math.max(piece.gap * 2, 2 * piece.radius * 3 ~/ piece.gaps);
+    for (var tries = 0; picked.length < piece.gaps && tries < 200; tries++) {
+      final at = wall[random.nextInt(wall.length)];
+      final near = picked.any(
+        (p) =>
+            (p.x - at.x) * (p.x - at.x) + (p.y - at.y) * (p.y - at.y) <
+            spread * spread,
+      );
+      if (!near) picked.add(at);
+    }
+    return picked;
+  }
+
+  /// Lays [piece]'s floor inside the ring: single spots about the clearing,
+  /// or every low tile but the centre.
+  void _ringFloor(
+    RingPiece piece,
+    List<TilePos> within,
+    List<TilePos> clearing,
+  ) {
+    final floor = piece.floor;
+    if (floor == null) return;
+    bool free(TilePos t) =>
+        t != piece.center &&
+        _at(t.x, t.y) == MapTile.open &&
+        heights[t.y * size + t.x] == MapHeight.low;
+    if (piece.floorSpots <= 0) {
+      for (final t in within.where(free)) {
+        floors[t.y * size + t.x] = floor;
+      }
+      return;
+    }
+    final open = clearing.where(free).toList();
+    for (var i = 0; i < piece.floorSpots && open.isNotEmpty; i++) {
+      final t = open.removeAt(random.nextInt(open.length));
+      floors[t.y * size + t.x] = floor;
     }
   }
 

@@ -996,6 +996,8 @@ final class Catalog {
           check.positive('$at.ramps', ramps);
         case ChunkPiece():
           break;
+        case ChunkFromPiece(:final from):
+          if (from.isEmpty) check.issue('$at.from', 'must not be empty');
       }
     }
     check.atLeast('$path.map.exit_sites', map.exitSites, 0);
@@ -1319,6 +1321,18 @@ final class Catalog {
       final recipe = zone.map;
       if (recipe == null) continue;
       for (final (index, piece) in recipe.terrain.indexed) {
+        if (piece case ChunkFromPiece(:final from)) {
+          for (final name in from) {
+            if (!chunkMaps.containsKey(name)) {
+              missing(
+                'zones',
+                '${zone.id}.map.terrain[$index].from',
+                'chunk',
+                name,
+              );
+            }
+          }
+        }
         if (piece case ChunkPiece(:final chunk)
             when !chunkMaps.containsKey(chunk)) {
           missing(

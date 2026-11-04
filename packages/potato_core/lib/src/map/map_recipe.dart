@@ -180,6 +180,16 @@ sealed class TerrainPiece with _$TerrainPiece {
     @Default(0) int quarterTurns,
   }) = ChunkPiece;
 
+  /// One of the chunks named in [from], picked by the seed and turned as it
+  /// likes, its top-left at [origin]. For a place the map must always have,
+  /// such as a boss area (2026-11-04, 사용자): unlike a [ChunkPick] it is
+  /// never left out. Scatter stays off it. Give it square chunks.
+  @FreezedUnionValue('chunk_from')
+  const factory TerrainPiece.chunkFrom({
+    required List<String> from,
+    required TilePos origin,
+  }) = ChunkFromPiece;
+
   factory TerrainPiece.fromJson(Map<String, dynamic> json) =>
       _$TerrainPieceFromJson(json);
 }

@@ -26,6 +26,13 @@ MapData generateMap(
     if (piece is ChunkPiece && !chunks.containsKey(piece.chunk)) {
       throw ArgumentError.value(piece.chunk, 'chunks', 'missing chunk');
     }
+    if (piece is ChunkFromPiece) {
+      for (final name in piece.from) {
+        if (!chunks.containsKey(name)) {
+          throw ArgumentError.value(name, 'chunks', 'missing chunk');
+        }
+      }
+    }
   }
   for (final pick in recipe.chunkPicks) {
     for (final name in pick.from) {
@@ -97,6 +104,8 @@ final class _Builder {
           _ring(piece);
         case ChunkPiece():
           _chunk(piece);
+        case ChunkFromPiece():
+          _chunkFrom(piece);
         case PlateauPiece():
           _plateau(piece);
         case HollowPiece():
@@ -400,6 +409,16 @@ final class _Builder {
 
   void _chunk(ChunkPiece piece) =>
       _lay(chunks[piece.chunk]!, piece.origin, piece.quarterTurns);
+
+  void _chunkFrom(ChunkFromPiece piece) {
+    final chunk = chunks[piece.from[random.nextInt(piece.from.length)]]!;
+    _lay(chunk, piece.origin, random.nextInt(4));
+    for (var y = piece.origin.y; y < piece.origin.y + chunk.height; y++) {
+      for (var x = piece.origin.x; x < piece.origin.x + chunk.width; x++) {
+        chunkArea.add(TilePos(x, y));
+      }
+    }
+  }
 
   /// Lays [chunk] with its top-left at [origin], turned [quarterTurns] times
   /// clockwise.

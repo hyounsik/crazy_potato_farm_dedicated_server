@@ -312,3 +312,26 @@ Map<String, dynamic> _$ChunkPieceToJson(ChunkPiece instance) =>
       'quarter_turns': instance.quarterTurns,
       'type': instance.$type,
     };
+
+ChunkFromPiece _$ChunkFromPieceFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('ChunkFromPiece', json, ($checkedConvert) {
+      final val = ChunkFromPiece(
+        from: $checkedConvert(
+          'from',
+          (v) => (v as List<dynamic>).map((e) => e as String).toList(),
+        ),
+        origin: $checkedConvert(
+          'origin',
+          (v) => TilePos.fromJson(v as Map<String, dynamic>),
+        ),
+        $type: $checkedConvert('type', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'type'});
+
+Map<String, dynamic> _$ChunkFromPieceToJson(ChunkFromPiece instance) =>
+    <String, dynamic>{
+      'from': instance.from,
+      'origin': instance.origin.toJson(),
+      'type': instance.$type,
+    };

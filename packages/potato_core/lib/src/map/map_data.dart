@@ -95,6 +95,25 @@ enum MapHeight {
   final String symbol;
 }
 
+/// The way a ramp climbs, set by hand in the map editor (2026-11-04, 사용자).
+/// It only says how the ramp looks: bodies step on and off a ramp from any
+/// side. A ramp without one takes its way from the high ground next to it.
+enum RampWay {
+  up(0, -1),
+  right(1, 0),
+  down(0, 1),
+  left(-1, 0);
+
+  const RampWay(this.dx, this.dy);
+
+  final int dx;
+  final int dy;
+
+  /// This way after [quarterTurns] clockwise turns of the map.
+  RampWay turned(int quarterTurns) =>
+      values[(index + quarterTurns) % values.length];
+}
+
 /// What a walkable tile's ground does to those who walk on it (2026-11-03,
 /// 사용자): the swamp's mud slows them, the ice field's ice lets them slide.
 /// Flyers and dashes take no notice.
@@ -124,7 +143,9 @@ final class MapData {
     List<MapObject> objects = const [],
     List<MapHeight>? heights,
     List<MapFloor>? floors,
+    Map<TilePos, RampWay> rampWays = const {},
   }) : _tiles = List.unmodifiable(tiles),
+       rampWays = Map.unmodifiable(rampWays),
        _heights = List.unmodifiable(
          heights ?? List.filled(size * size, MapHeight.low),
        ),
@@ -198,6 +219,12 @@ final class MapData {
         ],
         _ => null,
       },
+      rampWays: {
+        for (final r in json['ramp_ways'] as List<Object?>? ?? const [])
+          TilePos.fromJson(r! as Map<String, dynamic>): RampWay.values.byName(
+            (r as Map<String, dynamic>)['way'] as String,
+          ),
+      },
       floors: switch (json['floors']) {
         final List<Object?> rows => [
           for (final row in rows.cast<String>())
@@ -227,6 +254,9 @@ final class MapData {
 
   /// Pictures placed by hand; generated scatter is in [obstacles].
   final List<MapObject> objects;
+
+  /// The ramps given a way by hand.
+  final Map<TilePos, RampWay> rampWays;
 
   MapTile tileAt(int x, int y) => _tiles[y * size + x];
 
@@ -300,6 +330,11 @@ final class MapData {
     },
     'obstacles': [for (final o in obstacles) o.toJson()],
     if (objects.isNotEmpty) 'objects': [for (final o in objects) o.toJson()],
+    if (rampWays.isNotEmpty)
+      'ramp_ways': [
+        for (final MapEntry(key: tile, value: way) in rampWays.entries)
+          {...tile.toJson(), 'way': way.name},
+      ],
     if (hasHeights)
       'heights': [
         for (var y = 0; y < size; y++)

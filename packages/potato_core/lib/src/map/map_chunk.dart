@@ -19,6 +19,7 @@ final class MapChunk {
     this.hollows = const {},
     this.heights = const {},
     this.floors = const {},
+    this.rampWays = const {},
     this.exits = const [],
     this.obstacles = const [],
     this.objects = const [],
@@ -54,6 +55,7 @@ final class MapChunk {
         for (final t in tiles)
           if (map.floorAt(t.x, t.y) != MapFloor.plain) t: map.floorAt(t.x, t.y),
       },
+      rampWays: map.rampWays,
       markers: map.markers,
       exits: map.exits,
       obstacles: map.obstacles,
@@ -107,6 +109,9 @@ final class MapChunk {
   /// The tiles that are not low ground, and those that are not plain.
   final Map<TilePos, MapHeight> heights;
   final Map<TilePos, MapFloor> floors;
+
+  /// The ramps given a way by hand.
+  final Map<TilePos, RampWay> rampWays;
   final List<TilePos> exits;
   final List<MapObstacle> obstacles;
   final List<MapObject> objects;

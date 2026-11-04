@@ -89,6 +89,9 @@ final class _Builder {
   /// Tiles of chunks picked by the seed, left as they were drawn.
   final Set<TilePos> chunkArea = {};
 
+  /// The ways of ramps drawn in chunks.
+  final Map<TilePos, RampWay> rampWays = {};
+
   /// Exits drawn in chunks.
   final List<TilePos> chunkExits = [];
 
@@ -438,6 +441,9 @@ final class _Builder {
       heights[at.y * size + at.x] = height;
       if (height == MapHeight.ramp) ramps.add(at);
     }
+    for (final MapEntry(key: tile, value: way) in chunk.rampWays.entries) {
+      rampWays[place(tile)] = way.turned(quarterTurns);
+    }
     for (final MapEntry(key: tile, value: floor) in chunk.floors.entries) {
       final at = place(tile);
       if (_inside(at.x, at.y)) floors[at.y * size + at.x] = floor;
@@ -670,6 +676,13 @@ final class _Builder {
       },
       obstacles: turnedObstacles,
       objects: turnedObjects,
+      rampWays: {
+        for (final MapEntry(key: tile, value: way) in rampWays.entries)
+          // Terrain laid later may have taken the ramp away.
+          if (_inside(tile.x, tile.y) &&
+              heights[tile.y * size + tile.x] == MapHeight.ramp)
+            turn(tile): way.turned(turns),
+      },
     );
   }
 

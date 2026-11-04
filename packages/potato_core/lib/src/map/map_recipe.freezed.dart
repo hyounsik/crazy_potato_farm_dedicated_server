@@ -686,6 +686,10 @@ TerrainPiece _$TerrainPieceFromJson(
           return HollowPiece.fromJson(
             json
           );
+                case 'floor':
+          return FloorPiece.fromJson(
+            json
+          );
                 case 'chunk':
           return ChunkPiece.fromJson(
             json
@@ -748,7 +752,7 @@ extension TerrainPiecePatterns on TerrainPiece {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( BlobPiece value)?  blob,TResult Function( WallPiece value)?  wall,TResult Function( RingPiece value)?  ring,TResult Function( PlateauPiece value)?  plateau,TResult Function( HollowPiece value)?  hollow,TResult Function( ChunkPiece value)?  chunk,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( BlobPiece value)?  blob,TResult Function( WallPiece value)?  wall,TResult Function( RingPiece value)?  ring,TResult Function( PlateauPiece value)?  plateau,TResult Function( HollowPiece value)?  hollow,TResult Function( FloorPiece value)?  floor,TResult Function( ChunkPiece value)?  chunk,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
@@ -756,7 +760,8 @@ return blob(_that);case WallPiece() when wall != null:
 return wall(_that);case RingPiece() when ring != null:
 return ring(_that);case PlateauPiece() when plateau != null:
 return plateau(_that);case HollowPiece() when hollow != null:
-return hollow(_that);case ChunkPiece() when chunk != null:
+return hollow(_that);case FloorPiece() when floor != null:
+return floor(_that);case ChunkPiece() when chunk != null:
 return chunk(_that);case _:
   return orElse();
 
@@ -775,7 +780,7 @@ return chunk(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( BlobPiece value)  blob,required TResult Function( WallPiece value)  wall,required TResult Function( RingPiece value)  ring,required TResult Function( PlateauPiece value)  plateau,required TResult Function( HollowPiece value)  hollow,required TResult Function( ChunkPiece value)  chunk,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( BlobPiece value)  blob,required TResult Function( WallPiece value)  wall,required TResult Function( RingPiece value)  ring,required TResult Function( PlateauPiece value)  plateau,required TResult Function( HollowPiece value)  hollow,required TResult Function( FloorPiece value)  floor,required TResult Function( ChunkPiece value)  chunk,}){
 final _that = this;
 switch (_that) {
 case BlobPiece():
@@ -783,7 +788,8 @@ return blob(_that);case WallPiece():
 return wall(_that);case RingPiece():
 return ring(_that);case PlateauPiece():
 return plateau(_that);case HollowPiece():
-return hollow(_that);case ChunkPiece():
+return hollow(_that);case FloorPiece():
+return floor(_that);case ChunkPiece():
 return chunk(_that);}
 }
 /// A variant of `map` that fallback to returning `null`.
@@ -798,7 +804,7 @@ return chunk(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( BlobPiece value)?  blob,TResult? Function( WallPiece value)?  wall,TResult? Function( RingPiece value)?  ring,TResult? Function( PlateauPiece value)?  plateau,TResult? Function( HollowPiece value)?  hollow,TResult? Function( ChunkPiece value)?  chunk,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( BlobPiece value)?  blob,TResult? Function( WallPiece value)?  wall,TResult? Function( RingPiece value)?  ring,TResult? Function( PlateauPiece value)?  plateau,TResult? Function( HollowPiece value)?  hollow,TResult? Function( FloorPiece value)?  floor,TResult? Function( ChunkPiece value)?  chunk,}){
 final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
@@ -806,7 +812,8 @@ return blob(_that);case WallPiece() when wall != null:
 return wall(_that);case RingPiece() when ring != null:
 return ring(_that);case PlateauPiece() when plateau != null:
 return plateau(_that);case HollowPiece() when hollow != null:
-return hollow(_that);case ChunkPiece() when chunk != null:
+return hollow(_that);case FloorPiece() when floor != null:
+return floor(_that);case ChunkPiece() when chunk != null:
 return chunk(_that);case _:
   return null;
 
@@ -824,14 +831,15 @@ return chunk(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( TilePos center,  int area)?  blob,TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult Function( TilePos center,  int area,  int ramps)?  plateau,TResult Function( TilePos center,  int area)?  hollow,TResult Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( TilePos center,  int area)?  blob,TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult Function( TilePos center,  int area,  int ramps)?  plateau,TResult Function( TilePos center,  int area)?  hollow,TResult Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
 return blob(_that.center,_that.area);case WallPiece() when wall != null:
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece() when ring != null:
 return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece() when plateau != null:
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece() when hollow != null:
-return hollow(_that.center,_that.area);case ChunkPiece() when chunk != null:
+return hollow(_that.center,_that.area);case FloorPiece() when floor != null:
+return floor(_that.center,_that.area,_that.floor);case ChunkPiece() when chunk != null:
 return chunk(_that.chunk,_that.origin,_that.quarterTurns);case _:
   return orElse();
 
@@ -850,14 +858,15 @@ return chunk(_that.chunk,_that.origin,_that.quarterTurns);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( TilePos center,  int area)  blob,required TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)  wall,required TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)  ring,required TResult Function( TilePos center,  int area,  int ramps)  plateau,required TResult Function( TilePos center,  int area)  hollow,required TResult Function( String chunk,  TilePos origin,  int quarterTurns)  chunk,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( TilePos center,  int area)  blob,required TResult Function( TilePos from,  TilePos to,  int thickness,  int gap)  wall,required TResult Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)  ring,required TResult Function( TilePos center,  int area,  int ramps)  plateau,required TResult Function( TilePos center,  int area)  hollow,required TResult Function( TilePos center,  int area,  MapFloor floor)  floor,required TResult Function( String chunk,  TilePos origin,  int quarterTurns)  chunk,}) {final _that = this;
 switch (_that) {
 case BlobPiece():
 return blob(_that.center,_that.area);case WallPiece():
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece():
 return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece():
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece():
-return hollow(_that.center,_that.area);case ChunkPiece():
+return hollow(_that.center,_that.area);case FloorPiece():
+return floor(_that.center,_that.area,_that.floor);case ChunkPiece():
 return chunk(_that.chunk,_that.origin,_that.quarterTurns);}
 }
 /// A variant of `when` that fallback to returning `null`
@@ -872,14 +881,15 @@ return chunk(_that.chunk,_that.origin,_that.quarterTurns);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( TilePos center,  int area)?  blob,TResult? Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult? Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult? Function( TilePos center,  int area,  int ramps)?  plateau,TResult? Function( TilePos center,  int area)?  hollow,TResult? Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( TilePos center,  int area)?  blob,TResult? Function( TilePos from,  TilePos to,  int thickness,  int gap)?  wall,TResult? Function( TilePos center,  int radius,  int thickness,  TilePos facing,  int gap)?  ring,TResult? Function( TilePos center,  int area,  int ramps)?  plateau,TResult? Function( TilePos center,  int area)?  hollow,TResult? Function( TilePos center,  int area,  MapFloor floor)?  floor,TResult? Function( String chunk,  TilePos origin,  int quarterTurns)?  chunk,}) {final _that = this;
 switch (_that) {
 case BlobPiece() when blob != null:
 return blob(_that.center,_that.area);case WallPiece() when wall != null:
 return wall(_that.from,_that.to,_that.thickness,_that.gap);case RingPiece() when ring != null:
 return ring(_that.center,_that.radius,_that.thickness,_that.facing,_that.gap);case PlateauPiece() when plateau != null:
 return plateau(_that.center,_that.area,_that.ramps);case HollowPiece() when hollow != null:
-return hollow(_that.center,_that.area);case ChunkPiece() when chunk != null:
+return hollow(_that.center,_that.area);case FloorPiece() when floor != null:
+return floor(_that.center,_that.area,_that.floor);case ChunkPiece() when chunk != null:
 return chunk(_that.chunk,_that.origin,_that.quarterTurns);case _:
   return null;
 
@@ -1333,6 +1343,94 @@ class _$HollowPieceCopyWithImpl<$Res>
 center: null == center ? _self.center : center // ignore: cast_nullable_to_non_nullable
 as TilePos,area: null == area ? _self.area : area // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+/// Create a copy of TerrainPiece
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$TilePosCopyWith<$Res> get center {
+  
+  return $TilePosCopyWith<$Res>(_self.center, (value) {
+    return _then(_self.copyWith(center: value));
+  });
+}
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class FloorPiece implements TerrainPiece {
+  const FloorPiece({required this.center, required this.area, required this.floor,  String? $type}): $type = $type ?? 'floor';
+  factory FloorPiece.fromJson(Map<String, dynamic> json) => _$FloorPieceFromJson(json);
+
+ final  TilePos center;
+ final  int area;
+ final  MapFloor floor;
+
+@JsonKey(name: 'type')
+final String $type;
+
+
+/// Create a copy of TerrainPiece
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$FloorPieceCopyWith<FloorPiece> get copyWith => _$FloorPieceCopyWithImpl<FloorPiece>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$FloorPieceToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is FloorPiece&&(identical(other.center, center) || other.center == center)&&(identical(other.area, area) || other.area == area)&&(identical(other.floor, floor) || other.floor == floor));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,center,area,floor);
+}
+
+@override
+String toString() {
+    return 'TerrainPiece.floor(center: $center, area: $area, floor: $floor)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $FloorPieceCopyWith<$Res> implements $TerrainPieceCopyWith<$Res> {
+  factory $FloorPieceCopyWith(FloorPiece value, $Res Function(FloorPiece) _then) = _$FloorPieceCopyWithImpl;
+@useResult
+$Res call({
+ TilePos center, int area, MapFloor floor
+});
+
+
+$TilePosCopyWith<$Res> get center;
+
+}
+/// @nodoc
+class _$FloorPieceCopyWithImpl<$Res>
+    implements $FloorPieceCopyWith<$Res> {
+  _$FloorPieceCopyWithImpl(this._self, this._then);
+
+  final FloorPiece _self;
+  final $Res Function(FloorPiece) _then;
+
+/// Create a copy of TerrainPiece
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? center = null,Object? area = null,Object? floor = null,}) {
+  return _then(FloorPiece(
+center: null == center ? _self.center : center // ignore: cast_nullable_to_non_nullable
+as TilePos,area: null == area ? _self.area : area // ignore: cast_nullable_to_non_nullable
+as int,floor: null == floor ? _self.floor : floor // ignore: cast_nullable_to_non_nullable
+as MapFloor,
   ));
 }
 

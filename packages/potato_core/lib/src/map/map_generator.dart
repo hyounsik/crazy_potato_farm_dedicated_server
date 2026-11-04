@@ -53,7 +53,8 @@ final class _Builder {
   _Builder(this.recipe, this.chunks, this.random)
     : size = recipe.size,
       tiles = List.filled(recipe.size * recipe.size, MapTile.open),
-      heights = List.filled(recipe.size * recipe.size, MapHeight.low);
+      heights = List.filled(recipe.size * recipe.size, MapHeight.low),
+      floors = List.filled(recipe.size * recipe.size, MapFloor.plain);
 
   final MapRecipe recipe;
   final Map<String, MapChunk> chunks;
@@ -61,6 +62,7 @@ final class _Builder {
   final int size;
   final List<MapTile> tiles;
   final List<MapHeight> heights;
+  final List<MapFloor> floors;
 
   /// Ramp tiles, kept clear of scattered obstacles.
   final List<TilePos> ramps = [];
@@ -83,6 +85,8 @@ final class _Builder {
           _plateau(piece);
         case HollowPiece():
           _hollow(piece);
+        case FloorPiece():
+          _floor(piece);
       }
     }
     _pickExitSites();
@@ -151,22 +155,35 @@ final class _Builder {
 
   /// Grows a pond or a pit over open low tiles like a blob.
   void _hollow(HollowPiece piece) {
+    for (final tile in _growLow(piece.center, piece.area)) {
+      _set(tile.x, tile.y, MapTile.hollow);
+    }
+  }
+
+  /// Grows mud or ice over open low tiles like a hollow.
+  void _floor(FloorPiece piece) {
+    for (final tile in _growLow(piece.center, piece.area)) {
+      floors[tile.y * size + tile.x] = piece.floor;
+    }
+  }
+
+  /// About [area] connected open low tiles grown from [center] like a
+  /// blob; none when [center] is not one.
+  List<TilePos> _growLow(TilePos center, int area) {
     bool free(TilePos t) =>
         _inside(t.x, t.y) &&
         _at(t.x, t.y) == MapTile.open &&
         heights[t.y * size + t.x] == MapHeight.low;
-    if (!free(piece.center)) return;
-    final grown = <TilePos>[piece.center];
-    final inside = {piece.center};
-    final limit = piece.area * 20;
-    for (var i = 0; i < limit && grown.length < piece.area; i++) {
+    if (!free(center)) return const [];
+    final grown = <TilePos>[center];
+    final inside = {center};
+    final limit = area * 20;
+    for (var i = 0; i < limit && grown.length < area; i++) {
       final from = grown[random.nextInt(grown.length)];
       final next = from.neighbors4[random.nextInt(4)];
       if (free(next) && inside.add(next)) grown.add(next);
     }
-    for (final tile in grown) {
-      _set(tile.x, tile.y, MapTile.hollow);
-    }
+    return grown;
   }
 
   /// Grows high ground over open tiles like a blob, then turns up to
@@ -359,11 +376,13 @@ final class _Builder {
     TilePos turn(TilePos tile) => turnInBox(tile, size, size, turns);
     final turned = List.filled(size * size, MapTile.open);
     final turnedHeights = List.filled(size * size, MapHeight.low);
+    final turnedFloors = List.filled(size * size, MapFloor.plain);
     for (var y = 0; y < size; y++) {
       for (var x = 0; x < size; x++) {
         final at = turn(TilePos(x, y));
         turned[at.y * size + at.x] = _at(x, y);
         turnedHeights[at.y * size + at.x] = heights[y * size + x];
+        turnedFloors[at.y * size + at.x] = floors[y * size + x];
       }
     }
     final turnedObstacles = [
@@ -395,6 +414,7 @@ final class _Builder {
       size: size,
       tiles: turned,
       heights: turnedHeights,
+      floors: turnedFloors,
       entry: turn(recipe.entry),
       exits: [for (final e in exits) turn(e)],
       markers: {

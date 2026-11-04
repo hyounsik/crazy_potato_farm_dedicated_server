@@ -1,5 +1,6 @@
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/common/tile.dart';
+import 'package:potato_core/src/map/map_data.dart';
 
 part 'map_recipe.freezed.dart';
 part 'map_recipe.g.dart';
@@ -116,6 +117,15 @@ sealed class TerrainPiece with _$TerrainPiece {
     required TilePos center,
     required int area,
   }) = HollowPiece;
+
+  /// Mud or ice ([MapFloor]) of about [area] tiles grown from [center] over
+  /// open low ground like a [TerrainPiece.hollow], but walkable; obstacles
+  /// may still be scattered on it. Place it with the hollows (2026-11-04).
+  const factory TerrainPiece.floor({
+    required TilePos center,
+    required int area,
+    required MapFloor floor,
+  }) = FloorPiece;
 
   /// A hand-made [MapChunk] named [chunk], its top-left at [origin], turned
   /// [quarterTurns] times clockwise.

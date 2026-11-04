@@ -245,7 +245,11 @@ final class FarmSimulation {
 
   /// Dishes open at the house table, by id (2026-11-03, 사용자).
   final Set<String> _mealsOpen;
-  Set<String> get mealsOpen => Set.unmodifiable(_mealsOpen);
+  Set<String> get mealsOpen => Set.unmodifiable({
+    for (final dish in _rules.meals.dishes)
+      if (dish.zone == null) dish.id,
+    ..._mealsOpen,
+  });
 
   /// What the farm's own player carries: worn gear, bag and truck bed
   /// (2026-10-28, 사용자: kept apart from the farm, so a shared farm can
@@ -1781,7 +1785,7 @@ final class FarmSimulation {
     if (!_rules.meals.dishes.any((d) => d.id == meal)) {
       return FarmRejection.mealLocked;
     }
-    if (!_mealsOpen.contains(meal)) return FarmRejection.mealLocked;
+    if (!mealsOpen.contains(meal)) return FarmRejection.mealLocked;
     if (mealSecondsLeft() > 0) return FarmRejection.stillFull;
     _actor.mealUntilTick =
         _tick + _rules.meals.seconds * 1000 ~/ _rules.farm.stepMillis;

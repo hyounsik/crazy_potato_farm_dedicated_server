@@ -37,6 +37,10 @@ sealed class RaidBody {
   final double maxHp;
   double hp;
 
+  /// Tiles per second it carries onto and over ice (2026-11-03, 사용자).
+  /// Only the simulation's own; snapshots and saves leave it out.
+  Vec2 glide = Vec2.zero;
+
   RaidSide get side;
 
   /// Bodies of one team never hurt each other: [playerTeam], [wildTeam],

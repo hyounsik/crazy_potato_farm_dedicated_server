@@ -564,6 +564,8 @@ final class Catalog {
       'raid.food.hungry_return_seconds',
       food.hungryReturnSeconds,
     );
+    check.probability('raid.floors.mud_speed', raid.floors.mudSpeed);
+    check.positiveNumber('raid.floors.ice_grip', raid.floors.iceGrip);
     final companion = raid.companion;
     check.positiveNumber('raid.companion.max_hp', companion.maxHp);
     check.positiveNumber('raid.companion.radius', companion.radius);
@@ -909,7 +911,9 @@ final class Catalog {
     for (final (index, piece) in map.terrain.indexed) {
       final at = '$path.map.terrain[$index]';
       switch (piece) {
-        case BlobPiece(:final area) || HollowPiece(:final area):
+        case BlobPiece(:final area) ||
+            HollowPiece(:final area) ||
+            FloorPiece(:final area):
           check.positive('$at.area', area);
         case WallPiece(:final thickness, :final gap):
           check.positive('$at.thickness', thickness);

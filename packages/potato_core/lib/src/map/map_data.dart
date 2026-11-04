@@ -67,6 +67,19 @@ enum MapHeight {
   final String symbol;
 }
 
+/// What a walkable tile's ground does to those who walk on it (2026-11-03,
+/// 사용자): the swamp's mud slows them, the ice field's ice lets them slide.
+/// Flyers and dashes take no notice.
+enum MapFloor {
+  plain('.'),
+  mud('m'),
+  ice('i');
+
+  const MapFloor(this.symbol);
+
+  final String symbol;
+}
+
 /// A finished exploration map, wherever it came from (generated or drawn).
 ///
 /// Game code only reads this. A run's save keeps the map itself rather than
@@ -81,9 +94,13 @@ final class MapData {
     Map<String, List<TilePos>> markers = const {},
     List<MapObstacle> obstacles = const [],
     List<MapHeight>? heights,
+    List<MapFloor>? floors,
   }) : _tiles = List.unmodifiable(tiles),
        _heights = List.unmodifiable(
          heights ?? List.filled(size * size, MapHeight.low),
+       ),
+       _floors = List.unmodifiable(
+         floors ?? List.filled(size * size, MapFloor.plain),
        ),
        exits = List.unmodifiable(exits),
        markers = UnmodifiableMapView({
@@ -96,6 +113,9 @@ final class MapData {
     }
     if (_heights.length != size * size) {
       throw ArgumentError.value(_heights.length, 'heights', 'must be size²');
+    }
+    if (_floors.length != size * size) {
+      throw ArgumentError.value(_floors.length, 'floors', 'must be size²');
     }
   }
 
@@ -144,12 +164,25 @@ final class MapData {
         ],
         _ => null,
       },
+      floors: switch (json['floors']) {
+        final List<Object?> rows => [
+          for (final row in rows.cast<String>())
+            for (final symbol in row.split(''))
+              MapFloor.values.firstWhere(
+                (f) => f.symbol == symbol,
+                orElse: () =>
+                    throw FormatException('Unknown map floor "$symbol"'),
+              ),
+        ],
+        _ => null,
+      },
     );
   }
 
   final int size;
   final List<MapTile> _tiles;
   final List<MapHeight> _heights;
+  final List<MapFloor> _floors;
   final TilePos entry;
   final List<TilePos> exits;
 
@@ -181,6 +214,13 @@ final class MapData {
 
   /// Whether the map has any high ground.
   bool get hasHeights => _heights.any((h) => h != MapHeight.low);
+
+  /// Outside the map counts as plain.
+  MapFloor floorAt(int x, int y) =>
+      isInside(x, y) ? _floors[y * size + x] : MapFloor.plain;
+
+  /// Whether the map has any mud or ice.
+  bool get hasFloors => _floors.any((f) => f != MapFloor.plain);
 
   /// Whether a walker may step from tile (fx, fy) to the open tile (tx, ty):
   /// on the same level, or onto or off a ramp.
@@ -226,6 +266,11 @@ final class MapData {
       'heights': [
         for (var y = 0; y < size; y++)
           [for (var x = 0; x < size; x++) heightAt(x, y).symbol].join(),
+      ],
+    if (hasFloors)
+      'floors': [
+        for (var y = 0; y < size; y++)
+          [for (var x = 0; x < size; x++) floorAt(x, y).symbol].join(),
       ],
   };
 }

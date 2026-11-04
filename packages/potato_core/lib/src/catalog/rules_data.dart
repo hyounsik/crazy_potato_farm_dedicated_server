@@ -770,7 +770,10 @@ abstract class GearLabRulesData with _$GearLabRulesData {
 abstract class MealData with _$MealData {
   const factory MealData({
     required String id,
-    required String zone,
+
+    /// The zone whose boss, felled and got out of, opens it; none for a
+    /// dish open from the start (2026-11-04, 사용자: steamed potatoes).
+    String? zone,
     @LocalizedTextConverter() required LocalizedText name,
   }) = _MealData;
 

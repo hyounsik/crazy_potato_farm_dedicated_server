@@ -325,10 +325,17 @@
     "dishes": [
       {
         "id": "steamed_potato",
-        "zone": "sample_danger",
         "name": {
           "en": "Steamed Potato",
           "ko": "찐 감자"
+        }
+      },
+      {
+        "id": "grilled_berries",
+        "zone": "sample_danger",
+        "name": {
+          "en": "Grilled Berries",
+          "ko": "열매 구이"
         }
       }
     ]

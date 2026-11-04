@@ -48,6 +48,36 @@ void main() {
     }
   });
 
+  test('mud grows over open low ground, stays walkable and survives a turn '
+      '(2026-11-03)', () {
+    final base = sampleRecipe();
+    final recipe = base.copyWith(
+      terrain: [
+        ...base.terrain,
+        const TerrainPiece.floor(
+          center: TilePos(8, 4),
+          area: 12,
+          floor: MapFloor.mud,
+        ),
+      ],
+    );
+    for (var seed = 0; seed < 20; seed++) {
+      final map = generate(seed, recipe: recipe);
+      var mud = 0;
+      for (var y = 0; y < map.size; y++) {
+        for (var x = 0; x < map.size; x++) {
+          if (map.floorAt(x, y) != MapFloor.mud) continue;
+          mud++;
+          expect(map.heightAt(x, y), MapHeight.low);
+          expect(map.tileAt(x, y), isNot(MapTile.terrain));
+        }
+      }
+      expect(mud, greaterThan(0), reason: 'seed $seed');
+      final again = MapData.fromJson(map.toJson());
+      expect(again.toJson(), map.toJson());
+    }
+  });
+
   test('every exit and marker can be walked to from the entry', () {
     for (var seed = 0; seed < 40; seed++) {
       final map = generate(seed);

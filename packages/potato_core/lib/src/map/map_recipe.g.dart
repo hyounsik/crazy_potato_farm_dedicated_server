@@ -208,6 +208,38 @@ Map<String, dynamic> _$HollowPieceToJson(HollowPiece instance) =>
       'type': instance.$type,
     };
 
+FloorPiece _$FloorPieceFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'FloorPiece',
+  json,
+  ($checkedConvert) {
+    final val = FloorPiece(
+      center: $checkedConvert(
+        'center',
+        (v) => TilePos.fromJson(v as Map<String, dynamic>),
+      ),
+      area: $checkedConvert('area', (v) => (v as num).toInt()),
+      floor: $checkedConvert('floor', (v) => $enumDecode(_$MapFloorEnumMap, v)),
+      $type: $checkedConvert('type', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {r'$type': 'type'},
+);
+
+Map<String, dynamic> _$FloorPieceToJson(FloorPiece instance) =>
+    <String, dynamic>{
+      'center': instance.center.toJson(),
+      'area': instance.area,
+      'floor': _$MapFloorEnumMap[instance.floor]!,
+      'type': instance.$type,
+    };
+
+const _$MapFloorEnumMap = {
+  MapFloor.plain: 'plain',
+  MapFloor.mud: 'mud',
+  MapFloor.ice: 'ice',
+};
+
 ChunkPiece _$ChunkPieceFromJson(Map<String, dynamic> json) =>
     $checkedCreate('ChunkPiece', json, ($checkedConvert) {
       final val = ChunkPiece(

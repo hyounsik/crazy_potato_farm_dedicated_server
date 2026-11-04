@@ -197,7 +197,7 @@ void main() {
   });
 
   group('house table', () {
-    const dish = 'steamed_potato';
+    const dish = 'grilled_berries';
 
     void open() => farm.apply(
       const FarmCommand.returnHome(
@@ -216,13 +216,29 @@ void main() {
       farm.apply(
         const FarmCommand.returnHome(food: 0, bossKilledIn: 'sample_danger'),
       );
-      expect(farm.mealsOpen, isEmpty, reason: 'killed it but did not escape');
+      expect(
+        farm.mealsOpen,
+        isNot(contains(dish)),
+        reason: 'killed it but did not escape',
+      );
       farm.apply(
         const FarmCommand.returnHome(food: 0, score: 5, zone: 'sample_danger'),
       );
-      expect(farm.mealsOpen, isEmpty, reason: 'escaped without the kill');
+      expect(
+        farm.mealsOpen,
+        isNot(contains(dish)),
+        reason: 'escaped without the kill',
+      );
       open();
       expect(farm.mealsOpen, contains(dish));
+    });
+
+    test('steamed potatoes are open from the start (2026-11-04)', () {
+      expect(farm.mealsOpen, {'steamed_potato'});
+      expect(
+        farm.apply(const FarmCommand.eatMeal(meal: 'steamed_potato')),
+        isNull,
+      );
     });
 
     test('eating lasts its hour, and eating again only fills the belly', () {

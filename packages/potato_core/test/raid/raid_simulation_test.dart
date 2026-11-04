@@ -49,6 +49,20 @@ void main() {
       ..['clones_at_start'] = 1
       ..['clones_max'] = 1;
     zones.add(cloneZone);
+    // The open map under mud, and under ice (2026-11-03).
+    for (final floor in ['mud', 'ice']) {
+      final zone = jsonDecode(jsonEncode(open)) as Map<String, dynamic>;
+      zone['id'] = '${floor}_open';
+      (zone['map'] as Map)['terrain'] = [
+        {
+          'type': 'floor',
+          'center': {'x': 10, 'y': 10},
+          'area': 400,
+          'floor': floor,
+        },
+      ];
+      zones.add(zone);
+    }
     // Combat seeds, which a fallen combat potato leaves.
     ((files['items']! as Map<String, dynamic>)['items'] as List<Object?>).add({
       'id': 'seed_combat_normal',
@@ -355,6 +369,56 @@ void main() {
     final speed = catalog.rules.raid.player.speed;
     expect(run.player.position.x - start.x, closeTo(speed, speed * 0.05));
     expect(run.player.position.y, start.y);
+  });
+
+  group('floors (2026-11-03)', () {
+    RaidSimulation floorRun(String floor) => RaidSimulation.start(
+      catalog: catalog,
+      zone: '${floor}_open',
+      seed: 1,
+      food: 100,
+    );
+    final floors = FloorRulesData();
+
+    test('mud slows the walk', () {
+      final run = floorRun('mud')..setMove(const Vec2(1, 0));
+      final start = run.player.position;
+      runFor(run, 1);
+      final speed = catalog.rules.raid.player.speed * floors.mudSpeed;
+      expect(
+        run.map.floorAt(start.x.floor() + 1, start.y.floor()),
+        MapFloor.mud,
+      );
+      expect(run.player.position.x - start.x, closeTo(speed, speed * 0.05));
+    });
+
+    test('ice slides on a little after letting go, then stops', () {
+      final run = floorRun('ice')..setMove(const Vec2(1, 0));
+      runFor(run, 1);
+      run.setMove(Vec2.zero);
+      final letGo = run.player.position;
+      runFor(run, 0.2);
+      final slid = run.player.position.x - letGo.x;
+      expect(slid, greaterThan(0.1));
+      runFor(run, 2);
+      final stopped = run.player.position;
+      runFor(run, 0.5);
+      expect(run.player.position.distanceTo(stopped), lessThan(0.01));
+    });
+
+    test('a dash goes as far on mud as anywhere', () {
+      final plain = openRun()..setMove(const Vec2(1, 0));
+      final mud = floorRun('mud')..setMove(const Vec2(1, 0));
+      final starts = [plain.player.position, mud.player.position];
+      for (final run in [plain, mud]) {
+        run.apply(const Dash());
+        runFor(run, catalog.rules.raid.player.dashSeconds);
+      }
+      expect(
+        mud.player.position.x - starts[1].x,
+        closeTo(plain.player.position.x - starts[0].x, 0.05),
+      );
+    });
   });
 
   test('food is eaten as time passes', () {
@@ -693,10 +757,13 @@ void main() {
       final sight = run.enemySight;
       expect(run.aggressiveSight, sight);
       run.apply(const Signal());
+      run.step();
+      // It starts 1.3 times as wide (2026-11-04).
+      expect(run.aggressiveSight, closeTo(sight * 1.3, sight * 0.02));
       runFor(run, 2.5);
-      // Halfway the growth is 3/8: under half, so faster later (2026-11-01),
-      // but well on its way (2026-11-02).
-      expect(run.aggressiveSight, closeTo(sight * 1.375, sight * 0.02));
+      // Halfway from 1.3 to 2 it is under half the way, so faster later
+      // (2026-11-01), but well on its way (2026-11-02, 2026-11-04).
+      expect(run.aggressiveSight, closeTo(sight * 1.6375, sight * 0.02));
     });
 
     test('hunger wears health down until everything is lost', () {
@@ -1127,7 +1194,7 @@ void main() {
       farClone(run);
       run.apply(const Signal());
       runFor(run, 2.5);
-      expect(run.cloneSight, closeTo(sight * 1.375, sight * 0.02));
+      expect(run.cloneSight, closeTo(sight * 1.6375, sight * 0.02));
     });
 
     test('clones and players hurt each other less '

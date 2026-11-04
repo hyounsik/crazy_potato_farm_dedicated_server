@@ -1297,7 +1297,7 @@ _MealData _$MealDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_MealData', json, ($checkedConvert) {
       final val = _MealData(
         id: $checkedConvert('id', (v) => v as String),
-        zone: $checkedConvert('zone', (v) => v as String),
+        zone: $checkedConvert('zone', (v) => v as String?),
         name: $checkedConvert(
           'name',
           (v) => const LocalizedTextConverter().fromJson(v as Object),

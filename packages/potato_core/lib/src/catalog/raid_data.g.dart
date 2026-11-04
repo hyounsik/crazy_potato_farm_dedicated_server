@@ -43,6 +43,18 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
                 ? const PartyRulesData()
                 : PartyRulesData.fromJson(v as Map<String, dynamic>),
           ),
+          floors: $checkedConvert(
+            'floors',
+            (v) => v == null
+                ? const FloorRulesData()
+                : FloorRulesData.fromJson(v as Map<String, dynamic>),
+          ),
+          signalSight: $checkedConvert(
+            'signal_sight',
+            (v) => v == null
+                ? const SignalSightRulesData()
+                : SignalSightRulesData.fromJson(v as Map<String, dynamic>),
+          ),
         );
         return val;
       },
@@ -50,6 +62,7 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
         'stepMillis': 'step_millis',
         'pickupRadius': 'pickup_radius',
         'enemyAlertSeconds': 'enemy_alert_seconds',
+        'signalSight': 'signal_sight',
       },
     );
 
@@ -63,6 +76,49 @@ Map<String, dynamic> _$RaidRulesDataToJson(_RaidRulesData instance) =>
       'companion': instance.companion.toJson(),
       'clones': instance.clones.toJson(),
       'party': instance.party.toJson(),
+      'floors': instance.floors.toJson(),
+      'signal_sight': instance.signalSight.toJson(),
+    };
+
+_SignalSightRulesData _$SignalSightRulesDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('_SignalSightRulesData', json, ($checkedConvert) {
+  final val = _SignalSightRulesData(
+    start: $checkedConvert('start', (v) => (v as num?)?.toDouble() ?? 1.3),
+    earlyPace: $checkedConvert(
+      'early_pace',
+      (v) => (v as num?)?.toDouble() ?? 1.3,
+    ),
+  );
+  return val;
+}, fieldKeyMap: const {'earlyPace': 'early_pace'});
+
+Map<String, dynamic> _$SignalSightRulesDataToJson(
+  _SignalSightRulesData instance,
+) => <String, dynamic>{
+  'start': instance.start,
+  'early_pace': instance.earlyPace,
+};
+
+_FloorRulesData _$FloorRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('_FloorRulesData', json, ($checkedConvert) {
+      final val = _FloorRulesData(
+        mudSpeed: $checkedConvert(
+          'mud_speed',
+          (v) => (v as num?)?.toDouble() ?? 0.6,
+        ),
+        iceGrip: $checkedConvert(
+          'ice_grip',
+          (v) => (v as num?)?.toDouble() ?? 5,
+        ),
+      );
+      return val;
+    }, fieldKeyMap: const {'mudSpeed': 'mud_speed', 'iceGrip': 'ice_grip'});
+
+Map<String, dynamic> _$FloorRulesDataToJson(_FloorRulesData instance) =>
+    <String, dynamic>{
+      'mud_speed': instance.mudSpeed,
+      'ice_grip': instance.iceGrip,
     };
 
 _PartyRulesData _$PartyRulesDataFromJson(Map<String, dynamic> json) =>
@@ -614,6 +670,7 @@ _EnemyData _$EnemyDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'bullet_speed',
         (v) => (v as num?)?.toDouble() ?? 0.0,
       ),
+      flies: $checkedConvert('flies', (v) => v as bool? ?? false),
       boss: $checkedConvert(
         'boss',
         (v) => v == null ? null : BossData.fromJson(v as Map<String, dynamic>),
@@ -640,6 +697,7 @@ Map<String, dynamic> _$EnemyDataToJson(_EnemyData instance) =>
       'reach': instance.reach,
       'range': instance.range,
       'bullet_speed': instance.bulletSpeed,
+      'flies': instance.flies,
       'boss': instance.boss?.toJson(),
     };
 

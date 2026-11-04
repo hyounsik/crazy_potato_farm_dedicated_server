@@ -702,26 +702,35 @@ final class RaidSimulation {
     return passed;
   }
 
-  /// How far a signal's sight has grown, 0 to 1: it grows from the start
-  /// (2026-11-02, 사용자: before, the wait was nearly over by the time it
-  /// mattered) and faster the wider it gets (2026-11-01, 사용자).
-  double get _waitGrowth {
+  /// Sight times [multiplier] at a signal's zero, as a share of the usual:
+  /// 1 with no signal up, [SignalSightRulesData.start] the moment one goes
+  /// up, then wider from the start (2026-11-02, 사용자: before, the wait was
+  /// nearly over by the time it mattered) and faster the wider it gets
+  /// (2026-11-01, 사용자).
+  double _signalSight(double multiplier) {
+    if (!_active.any((m) => m.signal != null)) return 1;
+    final rule = rules.signalSight;
+    final start = rule.start;
+    if (multiplier <= start) return multiplier;
+    // Growth a·p + (1 - a)·p², its first slope earlyPace times what it was
+    // from the usual sight, (multiplier - 1) / 2.
+    final a = (rule.earlyPace * (multiplier - 1) / 2 / (multiplier - start))
+        .clamp(0.0, 1.0);
     final passed = _waitPassed;
-    return (passed + passed * passed) / 2;
+    final growth = a * passed + (1 - a) * passed * passed;
+    return start + (multiplier - start) * growth;
   }
 
   /// How far aggressive enemies see now: wider during a signal's countdown,
   /// the more the closer it is to zero.
-  double get aggressiveSight {
-    final grow = (zone.danger?.waitSightMultiplier ?? 1) - 1;
-    return enemySight * (1 + grow * _waitGrowth);
-  }
+  double get aggressiveSight =>
+      enemySight * _signalSight(zone.danger?.waitSightMultiplier ?? 1);
 
   /// How far clones see now; it grows like [aggressiveSight].
   double get cloneSight {
     final clone = rules.clones;
     final base = rules.player.sight * clone.sightMultiplier;
-    return base * (1 + (clone.waitSightMultiplier - 1) * _waitGrowth);
+    return base * _signalSight(clone.waitSightMultiplier);
   }
 
   double get _cloneSpeed => rules.player.speed * rules.clones.speedMultiplier;
@@ -1085,6 +1094,9 @@ final class RaidSimulation {
       _updatePlayer(m, dt);
     }
     if (isOver) return;
+    // Players settle on their floor as they move, so a guest's prediction
+    // does the same; everyone else walking settles after moving.
+    final walkers = {for (final body in _floorWalkers) body: body.position};
     for (final m in _active) {
       for (final companion in m.companions) {
         if (!companion.isDown) _updateCompanion(companion, m.player, dt, m);
@@ -1097,6 +1109,7 @@ final class RaidSimulation {
     for (final enemy in enemies) {
       if (!enemy.isDown) _updateEnemy(enemy, dt);
     }
+    walkers.forEach((body, from) => _settle(body, from, dt));
     _updateBullets(dt);
     _updateClouds(dt);
     _pickUpFloorItems();
@@ -1285,6 +1298,7 @@ final class RaidSimulation {
     final player = member.player;
     if (player.isDown || member.isOut) return;
     final move = member.move;
+    final from = player.position;
     player.dashCooldown = math.max(0, player.dashCooldown - dt);
     if (player.isDashing) {
       player.dashLeft -= dt;
@@ -1305,6 +1319,55 @@ final class RaidSimulation {
         player.radius,
       );
     }
+    // A dash goes out the same on any floor, and carries its speed on.
+    if (player.isDashing) {
+      player.glide = (player.position - from) / dt;
+    } else {
+      _settle(player, from, dt);
+    }
+  }
+
+  /// Bodies other than players that walk on the floor now: companions,
+  /// clones and the wild, less flyers and bosses mid-move of their own.
+  Iterable<RaidBody> get _floorWalkers sync* {
+    if (!map.hasFloors) return;
+    for (final m in _active) {
+      yield* m.companions.where((c) => !c.isDown);
+    }
+    for (final clone in clones) {
+      if (!clone.isDown) yield clone;
+      yield* clone.companions.where((c) => !c.isDown);
+    }
+    for (final enemy in enemies) {
+      if (enemy.isDown || catalog.enemies[enemy.kind]!.flies) continue;
+      if (enemy.isCharging || enemy.isHidden) continue;
+      yield enemy;
+    }
+  }
+
+  /// Lets the floor under [body] change the step it just took from [from]
+  /// (2026-11-03, 사용자): mud shortens it; on ice it only eases toward the
+  /// step meant from the speed carried, so stopping or turning slides a
+  /// little.
+  void _settle(RaidBody body, Vec2 from, double dt) {
+    final meant = body.position - from;
+    // Longer than any walk: put somewhere, with nothing to carry.
+    if (meant.length > 1) {
+      body.glide = Vec2.zero;
+      return;
+    }
+    final floors = rules.floors;
+    switch (map.floorAt(from.x.floor(), from.y.floor())) {
+      case MapFloor.plain:
+        break;
+      case MapFloor.mud:
+        body.position = map.move(from, meant * floors.mudSpeed, body.radius);
+      case MapFloor.ice:
+        final grip = 1 - math.exp(-floors.iceGrip * dt);
+        final glide = body.glide + (meant / dt - body.glide) * grip;
+        body.position = map.move(from, glide * dt, body.radius);
+    }
+    body.glide = (body.position - from) / dt;
   }
 
   void _updatePlayer(RaidMember member, double dt) {

@@ -7792,7 +7792,9 @@ as Map<Grade, double>,
 /// @nodoc
 mixin _$MealData {
 
- String get id; String get zone;@LocalizedTextConverter() LocalizedText get name;
+ String get id;/// The zone whose boss, felled and got out of, opens it; none for a
+/// dish open from the start (2026-11-04, 사용자: steamed potatoes).
+ String? get zone;@LocalizedTextConverter() LocalizedText get name;
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -7830,7 +7832,7 @@ abstract mixin class $MealDataCopyWith<$Res>  {
   factory $MealDataCopyWith(MealData value, $Res Function(MealData) _then) = _$MealDataCopyWithImpl;
 @useResult
 $Res call({
- String id, String zone,@LocalizedTextConverter() LocalizedText name
+ String id, String? zone,@LocalizedTextConverter() LocalizedText name
 });
 
 
@@ -7847,11 +7849,11 @@ class _$MealDataCopyWithImpl<$Res>
 
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? zone = null,Object? name = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? zone = freezed,Object? name = null,}) {
   return _then(MealData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,zone: null == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
+as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as LocalizedText,
   ));
 }
@@ -7937,7 +7939,7 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String zone, @LocalizedTextConverter()  LocalizedText name)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _MealData() when $default != null:
 return $default(_that.id,_that.zone,_that.name);case _:
@@ -7958,7 +7960,7 @@ return $default(_that.id,_that.zone,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String zone, @LocalizedTextConverter()  LocalizedText name)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)  $default,) {final _that = this;
 switch (_that) {
 case _MealData():
 return $default(_that.id,_that.zone,_that.name);case _:
@@ -7978,7 +7980,7 @@ return $default(_that.id,_that.zone,_that.name);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String zone, @LocalizedTextConverter()  LocalizedText name)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String? zone, @LocalizedTextConverter()  LocalizedText name)?  $default,) {final _that = this;
 switch (_that) {
 case _MealData() when $default != null:
 return $default(_that.id,_that.zone,_that.name);case _:
@@ -7993,11 +7995,13 @@ return $default(_that.id,_that.zone,_that.name);case _:
 @JsonSerializable()
 
 class _MealData implements MealData {
-  const _MealData({required this.id, required this.zone, @LocalizedTextConverter() required this.name});
+  const _MealData({required this.id, this.zone, @LocalizedTextConverter() required this.name});
   factory _MealData.fromJson(Map<String, dynamic> json) => _$MealDataFromJson(json);
 
 @override final  String id;
-@override final  String zone;
+/// The zone whose boss, felled and got out of, opens it; none for a
+/// dish open from the start (2026-11-04, 사용자: steamed potatoes).
+@override final  String? zone;
 @override@LocalizedTextConverter() final  LocalizedText name;
 
 /// Create a copy of MealData
@@ -8035,7 +8039,7 @@ abstract mixin class _$MealDataCopyWith<$Res> implements $MealDataCopyWith<$Res>
   factory _$MealDataCopyWith(_MealData value, $Res Function(_MealData) _then) = __$MealDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String zone,@LocalizedTextConverter() LocalizedText name
+ String id, String? zone,@LocalizedTextConverter() LocalizedText name
 });
 
 
@@ -8052,11 +8056,11 @@ class __$MealDataCopyWithImpl<$Res>
 
 /// Create a copy of MealData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? zone = null,Object? name = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? zone = freezed,Object? name = null,}) {
   return _then(_MealData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
-as String,zone: null == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
-as String,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
+as String,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
+as String?,name: null == name ? _self.name : name // ignore: cast_nullable_to_non_nullable
 as LocalizedText,
   ));
 }

@@ -26,10 +26,44 @@ abstract class RaidRulesData with _$RaidRulesData {
     required CompanionRulesData companion,
     required CloneRulesData clones,
     @Default(PartyRulesData()) PartyRulesData party,
+    @Default(FloorRulesData()) FloorRulesData floors,
+    @Default(SignalSightRulesData()) SignalSightRulesData signalSight,
   }) = _RaidRulesData;
 
   factory RaidRulesData.fromJson(Map<String, dynamic> json) =>
       _$RaidRulesDataFromJson(json);
+}
+
+/// How sight widens round a signal: from [start] times the usual the
+/// moment it goes up, toward each zone's and the clones'
+/// `wait_sight_multiplier` at zero, widening at first [earlyPace] times as
+/// fast as it did from the usual sight (2026-11-04, 사용자: 1.3 and 1.3).
+@freezed
+abstract class SignalSightRulesData with _$SignalSightRulesData {
+  const factory SignalSightRulesData({
+    @Default(1.3) double start,
+    @Default(1.3) double earlyPace,
+  }) = _SignalSightRulesData;
+
+  factory SignalSightRulesData.fromJson(Map<String, dynamic> json) =>
+      _$SignalSightRulesDataFromJson(json);
+}
+
+/// What mud and ice do to walkers (`regions.md`, 2026-11-03, 사용자).
+/// Values are proposals until balance.
+@freezed
+abstract class FloorRulesData with _$FloorRulesData {
+  const factory FloorRulesData({
+    /// Share of the speed a walker keeps on mud.
+    @Default(0.6) double mudSpeed,
+
+    /// How fast a walker on ice catches up with where it means to go, per
+    /// second: lower slides further when stopping or turning.
+    @Default(5) double iceGrip,
+  }) = _FloorRulesData;
+
+  factory FloorRulesData.fromJson(Map<String, dynamic> json) =>
+      _$FloorRulesDataFromJson(json);
 }
 
 /// A party member who falls waits for teammates instead of leaving at once
@@ -308,6 +342,9 @@ abstract class EnemyData with _$EnemyData {
     /// Ranged: shooting distance.
     @Default(0.0) double range,
     @Default(0.0) double bulletSpeed,
+
+    /// Flies or floats over the ground, so mud and ice do nothing to it.
+    @Default(false) bool flies,
 
     /// Set for a boss: it guards the boss area and has extra attacks.
     BossData? boss,

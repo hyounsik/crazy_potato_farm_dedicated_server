@@ -134,7 +134,7 @@ void main() {
     expect(farm.progress, 3, reason: 'going home from a safe zone succeeds');
   });
 
-  test('a lost danger run brings nothing and the companions are gone', () {
+  test('a lost danger run brings nothing and the lost companions are gone', () {
     final id = growOne();
     farm.apply(
       FarmCommand.depart(zone: 'sample_zone', food: 40, potatoIds: [id]),
@@ -143,7 +143,7 @@ void main() {
     final result = RaidResult(
       outcome: RaidOutcome.fainted,
       items: [ItemStack('food', 30), ItemStack('material', 9)],
-      companions: [(potatoId: id, down: false, gone: false)],
+      companions: [(potatoId: id, down: false, gone: true)],
       score: 12,
       lost: true,
     );
@@ -158,6 +158,25 @@ void main() {
     final returned = farm.takeEvents().whereType<Returned>().single;
     expect(returned.lost, [id]);
     expect(returned.potatoIds, isEmpty);
+  });
+
+  test('a lost danger run brings home the companions it did not lose '
+      '(2026-11-05)', () {
+    final id = growOne();
+    farm.apply(
+      FarmCommand.depart(zone: 'sample_zone', food: 40, potatoIds: [id]),
+    );
+    farm.takeEvents();
+    final result = RaidResult(
+      outcome: RaidOutcome.fainted,
+      items: [ItemStack('food', 30)],
+      companions: [(potatoId: id, down: true, gone: false)],
+      score: 12,
+      lost: true,
+    );
+    expect(farm.apply(result.homecoming(catalog)), isNull);
+    expect(farm.potatoById(id), isNotNull);
+    expect(farm.progress, 0);
   });
 
   test('a companion that fell in a danger zone stays gone after leaving', () {

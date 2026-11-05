@@ -171,7 +171,9 @@ final class RaidResult {
   final List<ItemStack> items;
 
   /// Each companion's farm potato id, whether it was knocked down, and
-  /// whether it is gone: fallen in a danger zone, it left its seed instead.
+  /// whether it is gone: lost with a lost danger run, by its roll
+  /// (2026-11-05, 사용자; before, one fallen in a danger zone left its
+  /// seed instead).
   final List<({int potatoId, bool down, bool gone})> companions;
 
   Map<String, dynamic> toJson() => {
@@ -853,7 +855,11 @@ final class RaidSimulation {
       items: [for (final s in member.bag.slots) ?s],
       companions: [
         for (final c in member.companions)
-          (potatoId: c.potatoId, down: c.isDown, gone: isDanger && c.isDown),
+          (
+            potatoId: c.potatoId,
+            down: c.isDown,
+            gone: member.lostCompanions.contains(c.potatoId),
+          ),
       ],
       score: zone.score,
       zone: zone.id,
@@ -1303,6 +1309,14 @@ final class RaidSimulation {
         }
       }
       member.kept = kept;
+      // Each companion too, by the same chance as a worn piece; one that
+      // fainted, twice that (2026-11-05, 사용자).
+      for (final c in member.companions) {
+        final chance = _gear.rules.lossChance * (c.isDown ? 2 : 1);
+        if (_random.chance(math.min(1, chance))) {
+          member.lostCompanions.add(c.potatoId);
+        }
+      }
       // In a party, what a fallen member carried stays on the ground for
       // teammates to pick up; their own bag keeps the record of what was lost.
       if (members.length > 1) {
@@ -2433,42 +2447,15 @@ final class RaidSimulation {
             foe != null) {
           target.target = foe.id;
         }
+        // Down in either zone, it faints and comes home to recover
+        // (2026-11-05, 사용자: no more leaving its seed in a danger zone).
         if (target.isDown && target.team == playerTeam) {
           _events.add(CompanionDown(target.id));
-          if (isDanger) _leaveSeed(target);
         }
       case RaidEnemy():
         target.sinceHit = 0;
         if (foe != null) target.target = foe.id;
     }
-  }
-
-  /// A companion fallen in a danger zone leaves its seed in a bundle where
-  /// it fell, as the graveyard would: sometimes a grade lower, or higher
-  /// with an ability for it.
-  void _leaveSeed(RaidCompanion companion) {
-    if (companion.abilities.isEmpty) return;
-    var grade = companion.grade;
-    final upChance = _effects
-        .own(_traitsOf(companion))
-        .apply(FarmStat.deathSeedGradeUpChance, 0);
-    if (_random.chance(catalog.rules.potatoes.gradeDropChance)) {
-      grade = grade.lower ?? grade;
-    } else if (upChance > 0 && _random.chance(upChance)) {
-      grade = grade.higher ?? grade;
-    }
-    final seed = AbilityRoller(catalog)
-        .fill(companion.seed.copyWith(grade: grade), _random);
-    final item = catalog.seedItemOf(seed.type, seed.grade);
-    if (item == null) return;
-    piles.add(
-      RaidPile(
-        id: _newId(),
-        position: companion.position,
-        kind: PileKind.bundle,
-        loot: LootPile([ItemStack(item, 1, seed: seed)]),
-      ),
-    );
   }
 
   void _updateBullets(double dt) {

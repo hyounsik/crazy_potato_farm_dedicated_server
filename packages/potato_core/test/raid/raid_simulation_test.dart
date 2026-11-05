@@ -1028,7 +1028,7 @@ void main() {
       expect(rat.target, potato.id);
     });
 
-    test('fallen in a danger zone it leaves its seed and is gone', () {
+    test('fallen in a danger zone it faints and comes home (2026-11-05)', () {
       final run = unarmed([
         fighter(CombatStyle.melee, level: 4),
       ], zone: 'danger_open');
@@ -1038,20 +1038,45 @@ void main() {
       companion.hp = 1;
       runFor(run, 2);
       expect(companion.isDown, isTrue);
-      final pile = run.piles.single;
-      final seed = pile.loot.items.single.seed!;
-      expect(
-        (seed.type, seed.level, seed.style),
-        (PotatoType.combat, 4, CombatStyle.melee),
-      );
-      expect(pile.position, companion.position);
+      expect(run.piles.where((p) => p.kind == PileKind.bundle), isEmpty);
 
       final standIn = run.exits.first;
       run.player.position = standIn.position;
       run.apply(const Signal());
       runFor(run, 6);
       expect(run.outcome, RaidOutcome.extracted);
-      expect(run.result!.companions.single.gone, isTrue);
+      expect(run.result!.companions.single.gone, isFalse);
+      expect(run.result!.companions.single.down, isTrue);
+    });
+
+    test('a lost danger run loses each companion by the gear chance, twice '
+        'for a fainted one (2026-11-05)', () {
+      RaidResult fail(double chance, {required bool fainted}) {
+        final run = RaidSimulation.start(
+          catalog: sampleCatalogWith((files) {
+            (rulesOf(files)['gear'] as Map)['loss_chance'] = chance;
+          }),
+          zone: 'sample_danger',
+          seed: 1,
+          food: 100,
+          companions: [fighter(CombatStyle.melee)],
+        );
+        if (fainted) run.companions.single.hp = 0;
+        run
+          ..player.hp = 0
+          ..player.sinceHit = 0;
+        run.step();
+        return run.result!;
+      }
+
+      expect(fail(0, fainted: true).companions.single.gone, isFalse);
+      expect(fail(1, fainted: false).companions.single.gone, isTrue);
+      // Half the gear chance is a sure loss for a fainted one.
+      expect(fail(0.5, fainted: true).companions.single.gone, isTrue);
+      final kept = fail(0, fainted: false);
+      expect((kept.homecoming(catalog) as ReturnHome).potatoIds, [
+        kept.companions.single.potatoId,
+      ]);
     });
 
     test('fallen in a safe zone it only faints', () {

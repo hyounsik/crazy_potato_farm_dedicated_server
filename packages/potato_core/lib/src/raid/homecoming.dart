@@ -86,9 +86,9 @@ List<CompanionStart> companionsFor(
 extension RaidHomecoming on RaidResult {
   /// The farm command that brings this run home: food, seeds and materials
   /// from the bag, and every companion back to the farm, knocked down or not
-  /// (they recover at the farm). A lost danger run brings nothing and the
-  /// companions are gone; so are companions that fell in a danger zone
-  /// (their seed came home in the bag instead, if picked up). Gear in the
+  /// (they recover at the farm). A lost danger run brings nothing, and the
+  /// companions it lost by their rolls are gone (2026-11-05, 사용자); the
+  /// rest come home. Gear in the
   /// bag goes to the box, and the farm wears what the run ended wearing
   /// (after a lost run, only the pieces not lost).
   ///
@@ -98,7 +98,14 @@ extension RaidHomecoming on RaidResult {
     if (lost) {
       return FarmCommand.returnHome(
         food: 0,
-        lostPotatoIds: [for (final c in companions) c.potatoId],
+        potatoIds: [
+          for (final c in companions)
+            if (!c.gone) c.potatoId,
+        ],
+        lostPotatoIds: [
+          for (final c in companions)
+            if (c.gone) c.potatoId,
+        ],
         equipped: equipped,
         bag: toBag ? const [] : null,
         bossKilledIn: bossKilled ? zone : null,

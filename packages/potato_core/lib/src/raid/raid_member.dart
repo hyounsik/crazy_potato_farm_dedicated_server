@@ -117,7 +117,8 @@ final class RaidMember {
     this.revive = 0,
     this.bossKilled = false,
     this.meals = const [],
-  });
+    Set<int>? lostCompanions,
+  }) : lostCompanions = lostCompanions ?? {};
 
   factory RaidMember.fromJson(Map<String, dynamic> json, Catalog catalog) {
     final outcome = json['outcome'] as String?;
@@ -145,6 +146,10 @@ final class RaidMember {
       downLeft: (json['down_left'] as num?)?.toDouble(),
       revive: (json['revive'] as num?)?.toDouble() ?? 0,
       meals: RaidMeal.listFromJson(json['meals']),
+      lostCompanions: {
+        for (final id in json['lost_companions'] as List<Object?>? ?? const [])
+          id! as int,
+      },
     );
   }
 
@@ -163,6 +168,10 @@ final class RaidMember {
 
   /// After a lost danger run, the worn gear that was not lost.
   Equipped? kept;
+
+  /// After a lost danger run, the companions (potato ids) lost with it,
+  /// each by its own roll (2026-11-05, 사용자).
+  final Set<int> lostCompanions;
 
   /// Set once this member's run is over.
   RaidOutcome? outcome;
@@ -203,6 +212,7 @@ final class RaidMember {
     if (revive > 0) 'revive': revive,
     if (bossKilled) 'boss_killed': true,
     if (meals.isNotEmpty) 'meals': [for (final m in meals) m.toJson()],
+    if (lostCompanions.isNotEmpty) 'lost_companions': lostCompanions.toList(),
   };
 }
 

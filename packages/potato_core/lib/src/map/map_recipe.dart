@@ -19,6 +19,11 @@ abstract class MapRecipe with _$MapRecipe {
     /// Where the player starts.
     required TilePos entry,
 
+    /// Other places the player may start from: the seed picks one of these
+    /// or [entry] (2026-11-04, 사용자). The rest stay plain ground, with
+    /// nothing to give them away.
+    @Default(<TilePos>[]) List<TilePos> entries,
+
     /// Places the player may leave from, all reachable from [entry].
     @Default(<TilePos>[]) List<TilePos> exits,
 

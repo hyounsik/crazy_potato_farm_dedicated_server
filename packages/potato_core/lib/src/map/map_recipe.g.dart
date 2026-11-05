@@ -16,6 +16,14 @@ _MapRecipe _$MapRecipeFromJson(Map<String, dynamic> json) => $checkedCreate(
         'entry',
         (v) => TilePos.fromJson(v as Map<String, dynamic>),
       ),
+      entries: $checkedConvert(
+        'entries',
+        (v) =>
+            (v as List<dynamic>?)
+                ?.map((e) => TilePos.fromJson(e as Map<String, dynamic>))
+                .toList() ??
+            const <TilePos>[],
+      ),
       exits: $checkedConvert(
         'exits',
         (v) =>
@@ -74,6 +82,7 @@ Map<String, dynamic> _$MapRecipeToJson(_MapRecipe instance) =>
     <String, dynamic>{
       'size': instance.size,
       'entry': instance.entry.toJson(),
+      'entries': instance.entries.map((e) => e.toJson()).toList(),
       'exits': instance.exits.map((e) => e.toJson()).toList(),
       'exit_sites': instance.exitSites,
       'exit_spacing': instance.exitSpacing,

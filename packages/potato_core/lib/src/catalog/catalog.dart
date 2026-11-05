@@ -966,6 +966,11 @@ final class Catalog {
     if (!inside(map.entry.x, map.entry.y)) {
       check.issue('$path.map.entry', 'must lie inside the map');
     }
+    for (final (index, entry) in map.entries.indexed) {
+      if (!inside(entry.x, entry.y)) {
+        check.issue('$path.map.entries[$index]', 'must lie inside the map');
+      }
+    }
     for (final (index, exit) in map.exits.indexed) {
       if (!inside(exit.x, exit.y)) {
         check.issue('$path.map.exits[$index]', 'must lie inside the map');

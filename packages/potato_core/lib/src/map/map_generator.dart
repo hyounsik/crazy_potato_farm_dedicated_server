@@ -95,8 +95,17 @@ final class _Builder {
   /// Exits drawn in chunks.
   final List<TilePos> chunkExits = [];
 
+  /// Where the player starts on this map.
+  late final TilePos entry;
+
   MapData build(int scatterCount) {
     final turns = recipe.rotate ? random.nextInt(4) : 0;
+    // Drawn only when there is a choice, so other maps stay as they were.
+    entry = recipe.entries.isEmpty
+        ? recipe.entry
+        : [recipe.entry, ...recipe.entries][random.nextInt(
+            recipe.entries.length + 1,
+          )];
     for (final piece in recipe.terrain) {
       switch (piece) {
         case BlobPiece():
@@ -133,7 +142,7 @@ final class _Builder {
     exits
       ..addAll(recipe.exits)
       ..addAll(chunkExits);
-    final taken = [recipe.entry, ...exits];
+    final taken = [entry, ...exits];
     exits.addAll(_pickSites(recipe.exitSites, taken));
     if (recipe.cloneEntrySites > 0) {
       markers[cloneEntryMarker] = _pickSites(recipe.cloneEntrySites, taken);
@@ -526,7 +535,7 @@ final class _Builder {
 
   bool _freeBox(TilePos at, int across, int down) {
     final clear = recipe.clearRadius;
-    for (final p in [recipe.entry, ...recipe.exits, ...chunkExits]) {
+    for (final p in [entry, ...recipe.exits, ...chunkExits]) {
       if (p.x >= at.x - clear &&
           p.x < at.x + across + clear &&
           p.y >= at.y - clear &&
@@ -553,7 +562,7 @@ final class _Builder {
   /// the entry, exits and markers.
   void _scatter(int count) {
     final keepClear = [
-      recipe.entry,
+      entry,
       ...exits,
       ...ramps,
       for (final points in markers.values) ...points,
@@ -668,7 +677,7 @@ final class _Builder {
       tiles: turned,
       heights: turnedHeights,
       floors: turnedFloors,
-      entry: turn(recipe.entry),
+      entry: turn(entry),
       exits: [for (final e in exits) turn(e)],
       markers: {
         for (final MapEntry(:key, :value) in markers.entries)

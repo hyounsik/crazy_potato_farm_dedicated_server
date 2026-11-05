@@ -186,8 +186,13 @@ sealed class FarmCommand with _$FarmCommand {
   /// (2026-10-30, 사용자: "보내주기").
   const factory FarmCommand.release({required int potatoId}) = ReleasePotato;
 
-  /// Turns dead potato [potatoId] in a graveyard into its seed.
-  const factory FarmCommand.revive({required int potatoId}) = Revive;
+  /// Tries to turn dead potato [potatoId] in a graveyard into its seed, at
+  /// the graveyard or, with [atShrine], at a shrine (2026-11-05, 사용자). It
+  /// may fail; then the potato and the baby potatoes paid are gone.
+  const factory FarmCommand.revive({
+    required int potatoId,
+    @Default(false) bool atShrine,
+  }) = Revive;
 
   /// Lets dead potato [potatoId] go from the graveyard for good: no seed
   /// (2026-11-01, 사용자: "잘 가").
@@ -366,6 +371,9 @@ enum FarmRejection {
 
   /// No dead potato with that id in the graveyards.
   noGrave,
+
+  /// Reviving at a shrine with none on the farm.
+  noShrine,
   noPotato,
   nothingToHarvest,
 

@@ -31,6 +31,7 @@ _BuildingData _$BuildingDataFromJson(Map<String, dynamic> json) =>
           (v) =>
               v == null ? null : TotemData.fromJson(v as Map<String, dynamic>),
         ),
+        shrine: $checkedConvert('shrine', (v) => v as bool? ?? false),
         levels: $checkedConvert(
           'levels',
           (v) => (v as List<dynamic>)
@@ -53,6 +54,7 @@ Map<String, dynamic> _$BuildingDataToJson(_BuildingData instance) =>
       'needs_all': instance.needsAll,
       'needs': instance.needs,
       'totem': instance.totem?.toJson(),
+      'shrine': instance.shrine,
       'levels': instance.levels.map((e) => e.toJson()).toList(),
     };
 

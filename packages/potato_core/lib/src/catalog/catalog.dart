@@ -392,6 +392,33 @@ final class Catalog {
       'potatoes.release_grave_chance',
       potatoes.releaseGraveChance,
     );
+    for (final (name, chances) in [
+      ('revive_chance', potatoes.reviveChance),
+      ('shrine_revive_chance', potatoes.shrineReviveChance),
+    ]) {
+      for (final grade in Grade.values) {
+        final chance = chances[grade];
+        if (chance == null) {
+          check.issue('potatoes.$name', 'missing ${grade.name}');
+        } else {
+          check.probability('potatoes.$name.${grade.name}', chance);
+        }
+      }
+    }
+    for (final grade in Grade.values) {
+      final times = potatoes.shrineReviveCostTimes[grade];
+      if (times == null) {
+        check.issue(
+          'potatoes.shrine_revive_cost_times',
+          'missing ${grade.name}',
+        );
+      } else if (times <= 0) {
+        check.issue(
+          'potatoes.shrine_revive_cost_times.${grade.name}',
+          'must be above 0',
+        );
+      }
+    }
     for (final grade in Grade.values) {
       final food = potatoes.reviveFood[grade];
       if (food == null) {

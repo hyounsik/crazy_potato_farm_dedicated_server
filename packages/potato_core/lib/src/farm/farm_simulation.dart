@@ -782,7 +782,7 @@ final class FarmSimulation {
       buildingId,
     ),
     ReleasePotato(:final potatoId) => _release(potatoId),
-    Revive(:final potatoId) => _revive(potatoId),
+    Revive(:final potatoId, :final atShrine) => _revive(potatoId, atShrine),
     Farewell(:final potatoId) => _farewell(potatoId),
     Depart(:final food, :final potatoIds, :final zone) => _depart(
       food,
@@ -2781,10 +2781,24 @@ final class FarmSimulation {
     }
   }
 
-  /// Baby potatoes it costs to revive [potato] from a graveyard.
-  int reviveCost(Potato potato) =>
-      _rules.potatoes.reviveFood[potato.grade]! *
-      _rules.seedLab.band(potato.level);
+  /// Whether a shrine stands on the farm, to revive at.
+  bool get hasShrine => _buildings.values.any((b) => b.data.shrine);
+
+  /// Baby potatoes it costs to revive [potato] from a graveyard, or at a
+  /// shrine.
+  int reviveCost(Potato potato, {bool atShrine = false}) {
+    final cost =
+        _rules.potatoes.reviveFood[potato.grade]! *
+        _rules.seedLab.band(potato.level);
+    if (!atShrine) return cost;
+    return (cost * _rules.potatoes.shrineReviveCostTimes[potato.grade]!)
+        .round();
+  }
+
+  /// Chance that reviving [potato] works, at the graveyard or a shrine.
+  double reviveChance(Potato potato, {bool atShrine = false}) => (atShrine
+      ? _rules.potatoes.shrineReviveChance
+      : _rules.potatoes.reviveChance)[potato.grade]!;
 
   /// Baby potatoes widening the seed pouch costs now.
   int get pouchWidenFood => _rules.storage.pouchWidenFood(pouchSlots);
@@ -2801,35 +2815,37 @@ final class FarmSimulation {
     return null;
   }
 
-  FarmRejection? _revive(int potatoId) {
+  FarmRejection? _revive(int potatoId, bool atShrine) {
     final index = _graves.indexWhere((p) => p.id == potatoId);
     if (index < 0) return FarmRejection.noGrave;
-    final cost = reviveCost(_graves[index]);
+    if (atShrine && !hasShrine) return FarmRejection.noShrine;
+    final grave = _graves[index];
+    final cost = reviveCost(grave, atShrine: atShrine);
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
     final potato = _graves.removeAt(index);
+    final works = _random.chance(reviveChance(potato, atShrine: atShrine));
     _events.add(
       FarmEvent.revived(
         potatoId: potatoId,
         from: potato.grade,
-        seed: _leaveSeed(potato),
+        seed: works ? _leaveSeed(potato) : null,
+        atShrine: atShrine,
       ),
     );
     return null;
   }
 
-  /// The seed a dead potato leaves: its own kind, sometimes a grade lower.
+  /// The seed a revived potato leaves: its own kind and grade (2026-11-05,
+  /// 사용자: no more dropping a grade; a revive may fail instead).
   ///
-  /// An ability can give a chance of a grade higher instead.
+  /// An ability can give a chance of a grade higher.
   Seed _leaveSeed(Potato potato) {
     var grade = potato.grade;
-    final drops = _random.chance(_rules.potatoes.gradeDropChance);
     // Only its own abilities: it has left its field.
     final sums = _effects.own(potato);
     final upChance = sums.apply(FarmStat.deathSeedGradeUpChance, 0);
-    if (drops) {
-      grade = grade.lower ?? grade;
-    } else if (upChance > 0 && _random.chance(upChance)) {
+    if (upChance > 0 && _random.chance(upChance)) {
       grade = grade.higher ?? grade;
     }
     final seed = _roller.fill(potato.seed.copyWith(grade: grade), _random);

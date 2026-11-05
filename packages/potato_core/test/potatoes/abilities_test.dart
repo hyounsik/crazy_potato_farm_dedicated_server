@@ -331,7 +331,7 @@ void main() {
     final potato = plant(_seed(PotatoType.food, 'food.plenty', level: 7));
     farm.runSteps(120 + potato.lifespanMillis ~/ 1000);
     farm.apply(FarmCommand.revive(potatoId: potato.id));
-    final seed = farm.takeEvents().whereType<PotatoRevived>().single.seed;
+    final seed = farm.takeEvents().whereType<PotatoRevived>().single.seed!;
     expect(seed.ability, 'food.plenty');
     expect(seed.level, 7);
   });

@@ -46,12 +46,14 @@ sealed class FarmEvent with _$FarmEvent {
   /// The graveyards were full, so the oldest grave [potatoId] was lost.
   const factory FarmEvent.graveLost({required int potatoId}) = GraveLost;
 
-  /// Dead potato [potatoId] came back as [seed]. [from] was its grade; the
-  /// seed may be a grade lower (or, with an ability, higher).
+  /// Reviving dead potato [potatoId] came back as [seed], or failed (null:
+  /// the potato is gone, 2026-11-05, 사용자). [from] was its grade; the seed
+  /// keeps it (or, with an ability, goes a grade higher).
   const factory FarmEvent.revived({
     required int potatoId,
     required Grade from,
-    required Seed seed,
+    Seed? seed,
+    @Default(false) bool atShrine,
   }) = PotatoRevived;
 
   /// The seed lab turned [from] into [seed], a grade lower if it did not

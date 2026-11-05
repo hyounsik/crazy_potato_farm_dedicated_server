@@ -685,17 +685,27 @@ Map<String, dynamic> _$ReleasePotatoToJson(ReleasePotato instance) =>
       'runtimeType': instance.$type,
     };
 
-Revive _$ReviveFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('Revive', json, ($checkedConvert) {
-      final val = Revive(
-        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
-        $type: $checkedConvert('runtimeType', (v) => v as String?),
-      );
-      return val;
-    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+Revive _$ReviveFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'Revive',
+  json,
+  ($checkedConvert) {
+    final val = Revive(
+      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+      atShrine: $checkedConvert('at_shrine', (v) => v as bool? ?? false),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'potatoId': 'potato_id',
+    'atShrine': 'at_shrine',
+    r'$type': 'runtimeType',
+  },
+);
 
 Map<String, dynamic> _$ReviveToJson(Revive instance) => <String, dynamic>{
   'potato_id': instance.potatoId,
+  'at_shrine': instance.atShrine,
   'runtimeType': instance.$type,
 };
 

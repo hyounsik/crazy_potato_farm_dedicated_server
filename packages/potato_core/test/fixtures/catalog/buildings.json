@@ -205,6 +205,21 @@
           "cost": 500
         }
       ]
+    },
+    {
+      "id": "shrine",
+      "width": 2,
+      "height": 2,
+      "single": true,
+      "shrine": true,
+      "needs": [
+        "graveyard"
+      ],
+      "levels": [
+        {
+          "cost": 500
+        }
+      ]
     }
   ]
 }

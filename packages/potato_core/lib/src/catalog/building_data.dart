@@ -40,6 +40,11 @@ abstract class BuildingData with _$BuildingData {
     /// What it does when lit, for totems.
     TotemData? totem,
 
+    /// Whether dead potatoes may be revived here instead of at the
+    /// graveyard: likelier to work, dearer (2026-11-05, 사용자: the
+    /// shrine, 서낭당).
+    @Default(false) bool shrine,
+
     /// Level 1 first. Level 1's cost is the cost to build; each later
     /// level's cost is the cost to upgrade to it.
     required List<BuildingLevelData> levels,

@@ -121,8 +121,23 @@ abstract class FarmRulesData with _$FarmRulesData {
 @freezed
 abstract class PotatoRulesData with _$PotatoRulesData {
   const factory PotatoRulesData({
-    /// Chance that the seed a dead potato leaves is one grade lower.
+    /// Chance that the seed a potato fallen in a run leaves is one grade
+    /// lower. Reviving no longer drops it (2026-11-05, 사용자): a revive
+    /// works or fails instead ([reviveChance]).
     required double gradeDropChance,
+
+    /// Chance that reviving a dead potato at the graveyard works, by its
+    /// grade (2026-11-05, 사용자). A failed revive loses the potato and the
+    /// baby potatoes paid.
+    @Default({Grade.normal: 0.8, Grade.rare: 0.6, Grade.legendary: 0.4})
+    Map<Grade, double> reviveChance,
+
+    /// The same at a shrine (2026-11-05, 사용자: twice as likely, 100% for
+    /// normal potatoes), which costs [shrineReviveCostTimes] times as much.
+    @Default({Grade.normal: 1.0, Grade.rare: 0.8, Grade.legendary: 0.6})
+    Map<Grade, double> shrineReviveChance,
+    @Default({Grade.normal: 1.2, Grade.rare: 1.5, Grade.legendary: 2.5})
+    Map<Grade, double> shrineReviveCostTimes,
 
     /// Baby potatoes it costs to revive a dead potato as a seed, by its
     /// grade, per cost band of its level: the seed lab's bands, 1-9 the

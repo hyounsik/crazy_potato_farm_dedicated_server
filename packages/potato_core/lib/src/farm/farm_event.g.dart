@@ -133,24 +133,35 @@ Map<String, dynamic> _$GraveLostToJson(GraveLost instance) => <String, dynamic>{
 };
 
 PotatoRevived _$PotatoRevivedFromJson(Map<String, dynamic> json) =>
-    $checkedCreate('PotatoRevived', json, ($checkedConvert) {
-      final val = PotatoRevived(
-        potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
-        from: $checkedConvert('from', (v) => $enumDecode(_$GradeEnumMap, v)),
-        seed: $checkedConvert(
-          'seed',
-          (v) => Seed.fromJson(v as Map<String, dynamic>),
-        ),
-        $type: $checkedConvert('runtimeType', (v) => v as String?),
-      );
-      return val;
-    }, fieldKeyMap: const {'potatoId': 'potato_id', r'$type': 'runtimeType'});
+    $checkedCreate(
+      'PotatoRevived',
+      json,
+      ($checkedConvert) {
+        final val = PotatoRevived(
+          potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+          from: $checkedConvert('from', (v) => $enumDecode(_$GradeEnumMap, v)),
+          seed: $checkedConvert(
+            'seed',
+            (v) => v == null ? null : Seed.fromJson(v as Map<String, dynamic>),
+          ),
+          atShrine: $checkedConvert('at_shrine', (v) => v as bool? ?? false),
+          $type: $checkedConvert('runtimeType', (v) => v as String?),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'potatoId': 'potato_id',
+        'atShrine': 'at_shrine',
+        r'$type': 'runtimeType',
+      },
+    );
 
 Map<String, dynamic> _$PotatoRevivedToJson(PotatoRevived instance) =>
     <String, dynamic>{
       'potato_id': instance.potatoId,
       'from': _$GradeEnumMap[instance.from]!,
-      'seed': instance.seed.toJson(),
+      'seed': instance.seed?.toJson(),
+      'at_shrine': instance.atShrine,
       'runtimeType': instance.$type,
     };
 

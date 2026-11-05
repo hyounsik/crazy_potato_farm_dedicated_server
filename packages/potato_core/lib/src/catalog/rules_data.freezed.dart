@@ -997,8 +997,15 @@ $TileRectCopyWith<$Res> get openArea {
 /// @nodoc
 mixin _$PotatoRulesData {
 
-/// Chance that the seed a dead potato leaves is one grade lower.
- double get gradeDropChance;/// Baby potatoes it costs to revive a dead potato as a seed, by its
+/// Chance that the seed a potato fallen in a run leaves is one grade
+/// lower. Reviving no longer drops it (2026-11-05, 사용자): a revive
+/// works or fails instead ([reviveChance]).
+ double get gradeDropChance;/// Chance that reviving a dead potato at the graveyard works, by its
+/// grade (2026-11-05, 사용자). A failed revive loses the potato and the
+/// baby potatoes paid.
+ Map<Grade, double> get reviveChance;/// The same at a shrine (2026-11-05, 사용자: twice as likely, 100% for
+/// normal potatoes), which costs [shrineReviveCostTimes] times as much.
+ Map<Grade, double> get shrineReviveChance; Map<Grade, double> get shrineReviveCostTimes;/// Baby potatoes it costs to revive a dead potato as a seed, by its
 /// grade, per cost band of its level: the seed lab's bands, 1-9 the
 /// first (2026-11-01, 사용자: by level and grade, cheaper than the lab).
  Map<Grade, int> get reviveFood;/// Chance that a potato let go from the cellar goes to a graveyard (as
@@ -1032,20 +1039,20 @@ $PotatoRulesDataCopyWith<PotatoRulesData> get copyWith => _$PotatoRulesDataCopyW
 @override
 bool operator ==(Object other) {
   final _this = this as PotatoRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoRulesData&&(identical(other.gradeDropChance, _this.gradeDropChance) || other.gradeDropChance == _this.gradeDropChance)&&const DeepCollectionEquality().equals(other.reviveFood, _this.reviveFood)&&(identical(other.releaseGraveChance, _this.releaseGraveChance) || other.releaseGraveChance == _this.releaseGraveChance)&&const DeepCollectionEquality().equals(other.gradeAttackPercent, _this.gradeAttackPercent)&&const DeepCollectionEquality().equals(other.gradeBuffPercent, _this.gradeBuffPercent)&&const DeepCollectionEquality().equals(other.gradeUpPercent, _this.gradeUpPercent)&&(identical(other.upkeepEverySeconds, _this.upkeepEverySeconds) || other.upkeepEverySeconds == _this.upkeepEverySeconds)&&(identical(other.weakPercent, _this.weakPercent) || other.weakPercent == _this.weakPercent)&&(identical(other.breedingGradeUpChance, _this.breedingGradeUpChance) || other.breedingGradeUpChance == _this.breedingGradeUpChance)&&(identical(other.guards, _this.guards) || other.guards == _this.guards)&&(identical(other.fridge, _this.fridge) || other.fridge == _this.fridge)&&(identical(other.harvestRareChance, _this.harvestRareChance) || other.harvestRareChance == _this.harvestRareChance)&&(identical(other.level, _this.level) || other.level == _this.level)&&const DeepCollectionEquality().equals(other.combatStyles, _this.combatStyles));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PotatoRulesData&&(identical(other.gradeDropChance, _this.gradeDropChance) || other.gradeDropChance == _this.gradeDropChance)&&const DeepCollectionEquality().equals(other.reviveChance, _this.reviveChance)&&const DeepCollectionEquality().equals(other.shrineReviveChance, _this.shrineReviveChance)&&const DeepCollectionEquality().equals(other.shrineReviveCostTimes, _this.shrineReviveCostTimes)&&const DeepCollectionEquality().equals(other.reviveFood, _this.reviveFood)&&(identical(other.releaseGraveChance, _this.releaseGraveChance) || other.releaseGraveChance == _this.releaseGraveChance)&&const DeepCollectionEquality().equals(other.gradeAttackPercent, _this.gradeAttackPercent)&&const DeepCollectionEquality().equals(other.gradeBuffPercent, _this.gradeBuffPercent)&&const DeepCollectionEquality().equals(other.gradeUpPercent, _this.gradeUpPercent)&&(identical(other.upkeepEverySeconds, _this.upkeepEverySeconds) || other.upkeepEverySeconds == _this.upkeepEverySeconds)&&(identical(other.weakPercent, _this.weakPercent) || other.weakPercent == _this.weakPercent)&&(identical(other.breedingGradeUpChance, _this.breedingGradeUpChance) || other.breedingGradeUpChance == _this.breedingGradeUpChance)&&(identical(other.guards, _this.guards) || other.guards == _this.guards)&&(identical(other.fridge, _this.fridge) || other.fridge == _this.fridge)&&(identical(other.harvestRareChance, _this.harvestRareChance) || other.harvestRareChance == _this.harvestRareChance)&&(identical(other.level, _this.level) || other.level == _this.level)&&const DeepCollectionEquality().equals(other.combatStyles, _this.combatStyles));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PotatoRulesData;
-  return Object.hash(runtimeType,_this.gradeDropChance,const DeepCollectionEquality().hash(_this.reviveFood),_this.releaseGraveChance,const DeepCollectionEquality().hash(_this.gradeAttackPercent),const DeepCollectionEquality().hash(_this.gradeBuffPercent),const DeepCollectionEquality().hash(_this.gradeUpPercent),_this.upkeepEverySeconds,_this.weakPercent,_this.breedingGradeUpChance,_this.guards,_this.fridge,_this.harvestRareChance,_this.level,const DeepCollectionEquality().hash(_this.combatStyles));
+  return Object.hash(runtimeType,_this.gradeDropChance,const DeepCollectionEquality().hash(_this.reviveChance),const DeepCollectionEquality().hash(_this.shrineReviveChance),const DeepCollectionEquality().hash(_this.shrineReviveCostTimes),const DeepCollectionEquality().hash(_this.reviveFood),_this.releaseGraveChance,const DeepCollectionEquality().hash(_this.gradeAttackPercent),const DeepCollectionEquality().hash(_this.gradeBuffPercent),const DeepCollectionEquality().hash(_this.gradeUpPercent),_this.upkeepEverySeconds,_this.weakPercent,_this.breedingGradeUpChance,_this.guards,_this.fridge,_this.harvestRareChance,_this.level,const DeepCollectionEquality().hash(_this.combatStyles));
 }
 
 @override
 String toString() {
   final _this = this as PotatoRulesData;
-  return 'PotatoRulesData(gradeDropChance: ${_this.gradeDropChance}, reviveFood: ${_this.reviveFood}, releaseGraveChance: ${_this.releaseGraveChance}, gradeAttackPercent: ${_this.gradeAttackPercent}, gradeBuffPercent: ${_this.gradeBuffPercent}, gradeUpPercent: ${_this.gradeUpPercent}, upkeepEverySeconds: ${_this.upkeepEverySeconds}, weakPercent: ${_this.weakPercent}, breedingGradeUpChance: ${_this.breedingGradeUpChance}, guards: ${_this.guards}, fridge: ${_this.fridge}, harvestRareChance: ${_this.harvestRareChance}, level: ${_this.level}, combatStyles: ${_this.combatStyles})';
+  return 'PotatoRulesData(gradeDropChance: ${_this.gradeDropChance}, reviveChance: ${_this.reviveChance}, shrineReviveChance: ${_this.shrineReviveChance}, shrineReviveCostTimes: ${_this.shrineReviveCostTimes}, reviveFood: ${_this.reviveFood}, releaseGraveChance: ${_this.releaseGraveChance}, gradeAttackPercent: ${_this.gradeAttackPercent}, gradeBuffPercent: ${_this.gradeBuffPercent}, gradeUpPercent: ${_this.gradeUpPercent}, upkeepEverySeconds: ${_this.upkeepEverySeconds}, weakPercent: ${_this.weakPercent}, breedingGradeUpChance: ${_this.breedingGradeUpChance}, guards: ${_this.guards}, fridge: ${_this.fridge}, harvestRareChance: ${_this.harvestRareChance}, level: ${_this.level}, combatStyles: ${_this.combatStyles})';
 }
 
 
@@ -1056,7 +1063,7 @@ abstract mixin class $PotatoRulesDataCopyWith<$Res>  {
   factory $PotatoRulesDataCopyWith(PotatoRulesData value, $Res Function(PotatoRulesData) _then) = _$PotatoRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double gradeDropChance, Map<Grade, int> reviveFood, double releaseGraveChance, Map<Grade, int> gradeAttackPercent, Map<Grade, int> gradeBuffPercent, Map<Grade, int> gradeUpPercent, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge, double harvestRareChance, LevelRulesData level, Map<CombatStyle, CombatStyleData> combatStyles
+ double gradeDropChance, Map<Grade, double> reviveChance, Map<Grade, double> shrineReviveChance, Map<Grade, double> shrineReviveCostTimes, Map<Grade, int> reviveFood, double releaseGraveChance, Map<Grade, int> gradeAttackPercent, Map<Grade, int> gradeBuffPercent, Map<Grade, int> gradeUpPercent, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge, double harvestRareChance, LevelRulesData level, Map<CombatStyle, CombatStyleData> combatStyles
 });
 
 
@@ -1073,10 +1080,13 @@ class _$PotatoRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? gradeDropChance = null,Object? reviveFood = null,Object? releaseGraveChance = null,Object? gradeAttackPercent = null,Object? gradeBuffPercent = null,Object? gradeUpPercent = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,Object? harvestRareChance = null,Object? level = null,Object? combatStyles = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? gradeDropChance = null,Object? reviveChance = null,Object? shrineReviveChance = null,Object? shrineReviveCostTimes = null,Object? reviveFood = null,Object? releaseGraveChance = null,Object? gradeAttackPercent = null,Object? gradeBuffPercent = null,Object? gradeUpPercent = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,Object? harvestRareChance = null,Object? level = null,Object? combatStyles = null,}) {
   return _then(PotatoRulesData(
 gradeDropChance: null == gradeDropChance ? _self.gradeDropChance : gradeDropChance // ignore: cast_nullable_to_non_nullable
-as double,reviveFood: null == reviveFood ? _self.reviveFood : reviveFood // ignore: cast_nullable_to_non_nullable
+as double,reviveChance: null == reviveChance ? _self.reviveChance : reviveChance // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,shrineReviveChance: null == shrineReviveChance ? _self.shrineReviveChance : shrineReviveChance // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,shrineReviveCostTimes: null == shrineReviveCostTimes ? _self.shrineReviveCostTimes : shrineReviveCostTimes // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,reviveFood: null == reviveFood ? _self.reviveFood : reviveFood // ignore: cast_nullable_to_non_nullable
 as Map<Grade, int>,releaseGraveChance: null == releaseGraveChance ? _self.releaseGraveChance : releaseGraveChance // ignore: cast_nullable_to_non_nullable
 as double,gradeAttackPercent: null == gradeAttackPercent ? _self.gradeAttackPercent : gradeAttackPercent // ignore: cast_nullable_to_non_nullable
 as Map<Grade, int>,gradeBuffPercent: null == gradeBuffPercent ? _self.gradeBuffPercent : gradeBuffPercent // ignore: cast_nullable_to_non_nullable
@@ -1201,10 +1211,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double gradeDropChance,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double gradeDropChance,  Map<Grade, double> reviveChance,  Map<Grade, double> shrineReviveChance,  Map<Grade, double> shrineReviveCostTimes,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PotatoRulesData() when $default != null:
-return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
+return $default(_that.gradeDropChance,_that.reviveChance,_that.shrineReviveChance,_that.shrineReviveCostTimes,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
   return orElse();
 
 }
@@ -1222,10 +1232,10 @@ return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double gradeDropChance,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double gradeDropChance,  Map<Grade, double> reviveChance,  Map<Grade, double> shrineReviveChance,  Map<Grade, double> shrineReviveCostTimes,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)  $default,) {final _that = this;
 switch (_that) {
 case _PotatoRulesData():
-return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
+return $default(_that.gradeDropChance,_that.reviveChance,_that.shrineReviveChance,_that.shrineReviveCostTimes,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1242,10 +1252,10 @@ return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double gradeDropChance,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double gradeDropChance,  Map<Grade, double> reviveChance,  Map<Grade, double> shrineReviveChance,  Map<Grade, double> shrineReviveCostTimes,  Map<Grade, int> reviveFood,  double releaseGraveChance,  Map<Grade, int> gradeAttackPercent,  Map<Grade, int> gradeBuffPercent,  Map<Grade, int> gradeUpPercent,  int upkeepEverySeconds,  int weakPercent,  double breedingGradeUpChance,  GuardRulesData guards,  FridgeRulesData fridge,  double harvestRareChance,  LevelRulesData level,  Map<CombatStyle, CombatStyleData> combatStyles)?  $default,) {final _that = this;
 switch (_that) {
 case _PotatoRulesData() when $default != null:
-return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
+return $default(_that.gradeDropChance,_that.reviveChance,_that.shrineReviveChance,_that.shrineReviveCostTimes,_that.reviveFood,_that.releaseGraveChance,_that.gradeAttackPercent,_that.gradeBuffPercent,_that.gradeUpPercent,_that.upkeepEverySeconds,_that.weakPercent,_that.breedingGradeUpChance,_that.guards,_that.fridge,_that.harvestRareChance,_that.level,_that.combatStyles);case _:
   return null;
 
 }
@@ -1257,11 +1267,44 @@ return $default(_that.gradeDropChance,_that.reviveFood,_that.releaseGraveChance,
 @JsonSerializable()
 
 class _PotatoRulesData extends PotatoRulesData {
-  const _PotatoRulesData({required this.gradeDropChance, required  Map<Grade, int> reviveFood, this.releaseGraveChance = 0.7,  Map<Grade, int> gradeAttackPercent = const {Grade.normal : 0, Grade.rare : 10, Grade.legendary : 25},  Map<Grade, int> gradeBuffPercent = const {Grade.normal : 0, Grade.rare : 10, Grade.legendary : 25},  Map<Grade, int> gradeUpPercent = const {Grade.normal : 0, Grade.rare : 5, Grade.legendary : 10}, required this.upkeepEverySeconds, required this.weakPercent, required this.breedingGradeUpChance, required this.guards, required this.fridge, required this.harvestRareChance, required this.level, required  Map<CombatStyle, CombatStyleData> combatStyles}): _reviveFood = reviveFood,_gradeAttackPercent = gradeAttackPercent,_gradeBuffPercent = gradeBuffPercent,_gradeUpPercent = gradeUpPercent,_combatStyles = combatStyles,super._();
+  const _PotatoRulesData({required this.gradeDropChance,  Map<Grade, double> reviveChance = const {Grade.normal : 0.8, Grade.rare : 0.6, Grade.legendary : 0.4},  Map<Grade, double> shrineReviveChance = const {Grade.normal : 1.0, Grade.rare : 0.8, Grade.legendary : 0.6},  Map<Grade, double> shrineReviveCostTimes = const {Grade.normal : 1.2, Grade.rare : 1.5, Grade.legendary : 2.5}, required  Map<Grade, int> reviveFood, this.releaseGraveChance = 0.7,  Map<Grade, int> gradeAttackPercent = const {Grade.normal : 0, Grade.rare : 10, Grade.legendary : 25},  Map<Grade, int> gradeBuffPercent = const {Grade.normal : 0, Grade.rare : 10, Grade.legendary : 25},  Map<Grade, int> gradeUpPercent = const {Grade.normal : 0, Grade.rare : 5, Grade.legendary : 10}, required this.upkeepEverySeconds, required this.weakPercent, required this.breedingGradeUpChance, required this.guards, required this.fridge, required this.harvestRareChance, required this.level, required  Map<CombatStyle, CombatStyleData> combatStyles}): _reviveChance = reviveChance,_shrineReviveChance = shrineReviveChance,_shrineReviveCostTimes = shrineReviveCostTimes,_reviveFood = reviveFood,_gradeAttackPercent = gradeAttackPercent,_gradeBuffPercent = gradeBuffPercent,_gradeUpPercent = gradeUpPercent,_combatStyles = combatStyles,super._();
   factory _PotatoRulesData.fromJson(Map<String, dynamic> json) => _$PotatoRulesDataFromJson(json);
 
-/// Chance that the seed a dead potato leaves is one grade lower.
+/// Chance that the seed a potato fallen in a run leaves is one grade
+/// lower. Reviving no longer drops it (2026-11-05, 사용자): a revive
+/// works or fails instead ([reviveChance]).
 @override final  double gradeDropChance;
+/// Chance that reviving a dead potato at the graveyard works, by its
+/// grade (2026-11-05, 사용자). A failed revive loses the potato and the
+/// baby potatoes paid.
+ final  Map<Grade, double> _reviveChance;
+/// Chance that reviving a dead potato at the graveyard works, by its
+/// grade (2026-11-05, 사용자). A failed revive loses the potato and the
+/// baby potatoes paid.
+@override@JsonKey() Map<Grade, double> get reviveChance {
+  if (_reviveChance is EqualUnmodifiableMapView) return _reviveChance;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_reviveChance);
+}
+
+/// The same at a shrine (2026-11-05, 사용자: twice as likely, 100% for
+/// normal potatoes), which costs [shrineReviveCostTimes] times as much.
+ final  Map<Grade, double> _shrineReviveChance;
+/// The same at a shrine (2026-11-05, 사용자: twice as likely, 100% for
+/// normal potatoes), which costs [shrineReviveCostTimes] times as much.
+@override@JsonKey() Map<Grade, double> get shrineReviveChance {
+  if (_shrineReviveChance is EqualUnmodifiableMapView) return _shrineReviveChance;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_shrineReviveChance);
+}
+
+ final  Map<Grade, double> _shrineReviveCostTimes;
+@override@JsonKey() Map<Grade, double> get shrineReviveCostTimes {
+  if (_shrineReviveCostTimes is EqualUnmodifiableMapView) return _shrineReviveCostTimes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_shrineReviveCostTimes);
+}
+
 /// Baby potatoes it costs to revive a dead potato as a seed, by its
 /// grade, per cost band of its level: the seed lab's bands, 1-9 the
 /// first (2026-11-01, 사용자: by level and grade, cheaper than the lab).
@@ -1349,18 +1392,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoRulesData&&(identical(other.gradeDropChance, gradeDropChance) || other.gradeDropChance == gradeDropChance)&&const DeepCollectionEquality().equals(other.reviveFood, _reviveFood)&&(identical(other.releaseGraveChance, releaseGraveChance) || other.releaseGraveChance == releaseGraveChance)&&const DeepCollectionEquality().equals(other.gradeAttackPercent, _gradeAttackPercent)&&const DeepCollectionEquality().equals(other.gradeBuffPercent, _gradeBuffPercent)&&const DeepCollectionEquality().equals(other.gradeUpPercent, _gradeUpPercent)&&(identical(other.upkeepEverySeconds, upkeepEverySeconds) || other.upkeepEverySeconds == upkeepEverySeconds)&&(identical(other.weakPercent, weakPercent) || other.weakPercent == weakPercent)&&(identical(other.breedingGradeUpChance, breedingGradeUpChance) || other.breedingGradeUpChance == breedingGradeUpChance)&&(identical(other.guards, guards) || other.guards == guards)&&(identical(other.fridge, fridge) || other.fridge == fridge)&&(identical(other.harvestRareChance, harvestRareChance) || other.harvestRareChance == harvestRareChance)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.combatStyles, _combatStyles));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PotatoRulesData&&(identical(other.gradeDropChance, gradeDropChance) || other.gradeDropChance == gradeDropChance)&&const DeepCollectionEquality().equals(other.reviveChance, _reviveChance)&&const DeepCollectionEquality().equals(other.shrineReviveChance, _shrineReviveChance)&&const DeepCollectionEquality().equals(other.shrineReviveCostTimes, _shrineReviveCostTimes)&&const DeepCollectionEquality().equals(other.reviveFood, _reviveFood)&&(identical(other.releaseGraveChance, releaseGraveChance) || other.releaseGraveChance == releaseGraveChance)&&const DeepCollectionEquality().equals(other.gradeAttackPercent, _gradeAttackPercent)&&const DeepCollectionEquality().equals(other.gradeBuffPercent, _gradeBuffPercent)&&const DeepCollectionEquality().equals(other.gradeUpPercent, _gradeUpPercent)&&(identical(other.upkeepEverySeconds, upkeepEverySeconds) || other.upkeepEverySeconds == upkeepEverySeconds)&&(identical(other.weakPercent, weakPercent) || other.weakPercent == weakPercent)&&(identical(other.breedingGradeUpChance, breedingGradeUpChance) || other.breedingGradeUpChance == breedingGradeUpChance)&&(identical(other.guards, guards) || other.guards == guards)&&(identical(other.fridge, fridge) || other.fridge == fridge)&&(identical(other.harvestRareChance, harvestRareChance) || other.harvestRareChance == harvestRareChance)&&(identical(other.level, level) || other.level == level)&&const DeepCollectionEquality().equals(other.combatStyles, _combatStyles));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,gradeDropChance,const DeepCollectionEquality().hash(_reviveFood),releaseGraveChance,const DeepCollectionEquality().hash(_gradeAttackPercent),const DeepCollectionEquality().hash(_gradeBuffPercent),const DeepCollectionEquality().hash(_gradeUpPercent),upkeepEverySeconds,weakPercent,breedingGradeUpChance,guards,fridge,harvestRareChance,level,const DeepCollectionEquality().hash(_combatStyles));
+    return Object.hash(runtimeType,gradeDropChance,const DeepCollectionEquality().hash(_reviveChance),const DeepCollectionEquality().hash(_shrineReviveChance),const DeepCollectionEquality().hash(_shrineReviveCostTimes),const DeepCollectionEquality().hash(_reviveFood),releaseGraveChance,const DeepCollectionEquality().hash(_gradeAttackPercent),const DeepCollectionEquality().hash(_gradeBuffPercent),const DeepCollectionEquality().hash(_gradeUpPercent),upkeepEverySeconds,weakPercent,breedingGradeUpChance,guards,fridge,harvestRareChance,level,const DeepCollectionEquality().hash(_combatStyles));
 }
 
 @override
 String toString() {
-    return 'PotatoRulesData(gradeDropChance: $gradeDropChance, reviveFood: $reviveFood, releaseGraveChance: $releaseGraveChance, gradeAttackPercent: $gradeAttackPercent, gradeBuffPercent: $gradeBuffPercent, gradeUpPercent: $gradeUpPercent, upkeepEverySeconds: $upkeepEverySeconds, weakPercent: $weakPercent, breedingGradeUpChance: $breedingGradeUpChance, guards: $guards, fridge: $fridge, harvestRareChance: $harvestRareChance, level: $level, combatStyles: $combatStyles)';
+    return 'PotatoRulesData(gradeDropChance: $gradeDropChance, reviveChance: $reviveChance, shrineReviveChance: $shrineReviveChance, shrineReviveCostTimes: $shrineReviveCostTimes, reviveFood: $reviveFood, releaseGraveChance: $releaseGraveChance, gradeAttackPercent: $gradeAttackPercent, gradeBuffPercent: $gradeBuffPercent, gradeUpPercent: $gradeUpPercent, upkeepEverySeconds: $upkeepEverySeconds, weakPercent: $weakPercent, breedingGradeUpChance: $breedingGradeUpChance, guards: $guards, fridge: $fridge, harvestRareChance: $harvestRareChance, level: $level, combatStyles: $combatStyles)';
 }
 
 
@@ -1371,7 +1414,7 @@ abstract mixin class _$PotatoRulesDataCopyWith<$Res> implements $PotatoRulesData
   factory _$PotatoRulesDataCopyWith(_PotatoRulesData value, $Res Function(_PotatoRulesData) _then) = __$PotatoRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double gradeDropChance, Map<Grade, int> reviveFood, double releaseGraveChance, Map<Grade, int> gradeAttackPercent, Map<Grade, int> gradeBuffPercent, Map<Grade, int> gradeUpPercent, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge, double harvestRareChance, LevelRulesData level, Map<CombatStyle, CombatStyleData> combatStyles
+ double gradeDropChance, Map<Grade, double> reviveChance, Map<Grade, double> shrineReviveChance, Map<Grade, double> shrineReviveCostTimes, Map<Grade, int> reviveFood, double releaseGraveChance, Map<Grade, int> gradeAttackPercent, Map<Grade, int> gradeBuffPercent, Map<Grade, int> gradeUpPercent, int upkeepEverySeconds, int weakPercent, double breedingGradeUpChance, GuardRulesData guards, FridgeRulesData fridge, double harvestRareChance, LevelRulesData level, Map<CombatStyle, CombatStyleData> combatStyles
 });
 
 
@@ -1388,10 +1431,13 @@ class __$PotatoRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of PotatoRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? gradeDropChance = null,Object? reviveFood = null,Object? releaseGraveChance = null,Object? gradeAttackPercent = null,Object? gradeBuffPercent = null,Object? gradeUpPercent = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,Object? harvestRareChance = null,Object? level = null,Object? combatStyles = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? gradeDropChance = null,Object? reviveChance = null,Object? shrineReviveChance = null,Object? shrineReviveCostTimes = null,Object? reviveFood = null,Object? releaseGraveChance = null,Object? gradeAttackPercent = null,Object? gradeBuffPercent = null,Object? gradeUpPercent = null,Object? upkeepEverySeconds = null,Object? weakPercent = null,Object? breedingGradeUpChance = null,Object? guards = null,Object? fridge = null,Object? harvestRareChance = null,Object? level = null,Object? combatStyles = null,}) {
   return _then(_PotatoRulesData(
 gradeDropChance: null == gradeDropChance ? _self.gradeDropChance : gradeDropChance // ignore: cast_nullable_to_non_nullable
-as double,reviveFood: null == reviveFood ? _self._reviveFood : reviveFood // ignore: cast_nullable_to_non_nullable
+as double,reviveChance: null == reviveChance ? _self._reviveChance : reviveChance // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,shrineReviveChance: null == shrineReviveChance ? _self._shrineReviveChance : shrineReviveChance // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,shrineReviveCostTimes: null == shrineReviveCostTimes ? _self._shrineReviveCostTimes : shrineReviveCostTimes // ignore: cast_nullable_to_non_nullable
+as Map<Grade, double>,reviveFood: null == reviveFood ? _self._reviveFood : reviveFood // ignore: cast_nullable_to_non_nullable
 as Map<Grade, int>,releaseGraveChance: null == releaseGraveChance ? _self.releaseGraveChance : releaseGraveChance // ignore: cast_nullable_to_non_nullable
 as double,gradeAttackPercent: null == gradeAttackPercent ? _self._gradeAttackPercent : gradeAttackPercent // ignore: cast_nullable_to_non_nullable
 as Map<Grade, int>,gradeBuffPercent: null == gradeBuffPercent ? _self._gradeBuffPercent : gradeBuffPercent // ignore: cast_nullable_to_non_nullable

@@ -533,7 +533,7 @@ void main() {
       expect(farm.food, 15);
       final revived = farm.takeEvents().whereType<PotatoRevived>().single;
       expect(revived.from, Grade.normal);
-      expect(revived.seed.ability, 'food.plain');
+      expect(revived.seed!.ability, 'food.plain');
       expect(farm.seeds.count(_normal), before + 1);
       expect(farm.graves, isEmpty);
       expect(
@@ -591,30 +591,108 @@ void main() {
       );
     });
 
-    test('grade drops follow the farm random sequence', () {
-      // Plant the four tiles with legendary-free rare seeds, let them die,
-      // and expect the same drops for the same farm seed.
-      List<Grade> run(int seed) {
-        final farm = FarmSimulation.newFarm(catalog, seed: seed);
-        final rare = plainSeed(PotatoType.food, Grade.rare);
-        farm.seeds.add(rare, 3);
-        farm.food = 1000;
-        farm.apply(
-          FarmCommand.build(kind: 'graveyard', origin: const TilePos(8, 8)),
-        );
-        for (final tile in farm.field(1)!.rect.tiles.take(3)) {
-          farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: rare));
-        }
-        farm.runSteps(120 + 1800);
-        return [
-          for (final grave in farm.graves.toList())
-            if (farm.apply(FarmCommand.revive(potatoId: grave.id)) == null)
-              farm.takeEvents().whereType<PotatoRevived>().last.seed.grade,
-        ];
-      }
+    test('a revive works or fails by grade; a failed one loses the potato '
+        'and the food (2026-11-05)', () {
+      final farm = FarmSimulation.newFarm(
+        sampleCatalogWith((files) {
+          final potatoes = rulesOf(files)['potatoes'] as Map<String, dynamic>;
+          potatoes['revive_chance'] = {
+            'normal': 0.0,
+            'rare': 0.0,
+            'legendary': 0.0,
+          };
+        }),
+        seed: 1,
+      );
+      farm.food = 1000;
+      farm.apply(
+        FarmCommand.build(kind: 'graveyard', origin: const TilePos(8, 8)),
+      );
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+      farm.runSteps(120 + 1800);
+      final grave = farm.graves.single;
+      final seeds = farm.seeds.counts.values.fold(0, (a, b) => a + b);
+      final food = farm.food;
+      final cost = farm.reviveCost(grave);
+      expect(farm.apply(FarmCommand.revive(potatoId: grave.id)), isNull);
+      final revived = farm.takeEvents().whereType<PotatoRevived>().single;
+      expect(revived.seed, isNull);
+      expect(farm.graves, isEmpty);
+      expect(farm.food, food - cost);
+      expect(farm.seeds.counts.values.fold(0, (a, b) => a + b), seeds);
+    });
 
-      expect(run(5), run(5));
-      expect(run(5), isNotEmpty);
+    test('a shrine revives likelier at a dearer cost, once one stands '
+        '(2026-11-05)', () {
+      final farm = FarmSimulation.newFarm(
+        sampleCatalogWith((files) {
+          final potatoes = rulesOf(files)['potatoes'] as Map<String, dynamic>;
+          potatoes['revive_chance'] = {
+            'normal': 0.0,
+            'rare': 0.0,
+            'legendary': 0.0,
+          };
+        }),
+        seed: 1,
+      );
+      farm.food = 2000;
+      farm.apply(
+        FarmCommand.build(kind: 'graveyard', origin: const TilePos(8, 8)),
+      );
+      farm.apply(FarmCommand.plant(fieldId: 1, tile: _tile, seed: _normal));
+      farm.runSteps(120 + 1800);
+      final grave = farm.graves.single;
+      expect(farm.hasShrine, isFalse);
+      expect(
+        farm.apply(FarmCommand.revive(potatoId: grave.id, atShrine: true)),
+        FarmRejection.noShrine,
+      );
+      // Wherever a 2x2 first fits.
+      final built =
+          [
+            for (var y = 0; y < 20; y++)
+              for (var x = 0; x < 20; x++) TilePos(x, y),
+          ].any(
+            (origin) =>
+                farm.apply(FarmCommand.build(kind: 'shrine', origin: origin)) ==
+                null,
+          );
+      expect(built, isTrue);
+      expect(farm.hasShrine, isTrue);
+      expect(
+        farm.reviveCost(grave, atShrine: true),
+        (farm.reviveCost(grave) * 1.2).round(),
+      );
+      expect(farm.reviveChance(grave, atShrine: true), 1.0);
+      final food = farm.food;
+      expect(
+        farm.apply(FarmCommand.revive(potatoId: grave.id, atShrine: true)),
+        isNull,
+      );
+      final revived = farm.takeEvents().whereType<PotatoRevived>().single;
+      expect(revived.seed?.grade, Grade.normal);
+      expect(revived.atShrine, isTrue);
+      expect(farm.food, food - farm.reviveCost(grave, atShrine: true));
+    });
+
+    test('a revived seed keeps its grade (2026-11-05: no more drops)', () {
+      final rare = plainSeed(PotatoType.food, Grade.rare);
+      farm.seeds.add(rare, 3);
+      farm.food = 1000;
+      farm.apply(
+        FarmCommand.build(kind: 'graveyard', origin: const TilePos(8, 8)),
+      );
+      for (final tile in farm.field(1)!.rect.tiles.take(3)) {
+        farm.apply(FarmCommand.plant(fieldId: 1, tile: tile, seed: rare));
+      }
+      farm.runSteps(120 + 1800);
+      final grades = [
+        for (final grave in farm.graves.toList())
+          if (farm.apply(FarmCommand.revive(potatoId: grave.id)) == null)
+            farm.takeEvents().whereType<PotatoRevived>().last.seed!.grade,
+      ];
+      expect(grades, isNotEmpty);
+      expect(grades, everyElement(Grade.rare));
     });
   });
 }

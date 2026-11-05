@@ -209,6 +209,39 @@ _PotatoRulesData _$PotatoRulesDataFromJson(
         'grade_drop_chance',
         (v) => (v as num).toDouble(),
       ),
+      reviveChance: $checkedConvert(
+        'revive_chance',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(
+                $enumDecode(_$GradeEnumMap, k),
+                (e as num).toDouble(),
+              ),
+            ) ??
+            const {Grade.normal: 0.8, Grade.rare: 0.6, Grade.legendary: 0.4},
+      ),
+      shrineReviveChance: $checkedConvert(
+        'shrine_revive_chance',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(
+                $enumDecode(_$GradeEnumMap, k),
+                (e as num).toDouble(),
+              ),
+            ) ??
+            const {Grade.normal: 1.0, Grade.rare: 0.8, Grade.legendary: 0.6},
+      ),
+      shrineReviveCostTimes: $checkedConvert(
+        'shrine_revive_cost_times',
+        (v) =>
+            (v as Map<String, dynamic>?)?.map(
+              (k, e) => MapEntry(
+                $enumDecode(_$GradeEnumMap, k),
+                (e as num).toDouble(),
+              ),
+            ) ??
+            const {Grade.normal: 1.2, Grade.rare: 1.5, Grade.legendary: 2.5},
+      ),
       reviveFood: $checkedConvert(
         'revive_food',
         (v) => (v as Map<String, dynamic>).map(
@@ -286,6 +319,9 @@ _PotatoRulesData _$PotatoRulesDataFromJson(
   },
   fieldKeyMap: const {
     'gradeDropChance': 'grade_drop_chance',
+    'reviveChance': 'revive_chance',
+    'shrineReviveChance': 'shrine_revive_chance',
+    'shrineReviveCostTimes': 'shrine_revive_cost_times',
     'reviveFood': 'revive_food',
     'releaseGraveChance': 'release_grave_chance',
     'gradeAttackPercent': 'grade_attack_percent',
@@ -302,6 +338,15 @@ _PotatoRulesData _$PotatoRulesDataFromJson(
 Map<String, dynamic> _$PotatoRulesDataToJson(_PotatoRulesData instance) =>
     <String, dynamic>{
       'grade_drop_chance': instance.gradeDropChance,
+      'revive_chance': instance.reviveChance.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+      'shrine_revive_chance': instance.shrineReviveChance.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
+      'shrine_revive_cost_times': instance.shrineReviveCostTimes.map(
+        (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
+      ),
       'revive_food': instance.reviveFood.map(
         (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
       ),

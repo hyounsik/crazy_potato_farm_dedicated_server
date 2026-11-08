@@ -270,6 +270,28 @@ Map<String, dynamic> _$MailArrivedToJson(MailArrived instance) =>
       'runtimeType': instance.$type,
     };
 
+RegionCleared _$RegionClearedFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('RegionCleared', json, ($checkedConvert) {
+      final val = RegionCleared(
+        zone: $checkedConvert('zone', (v) => v as String),
+        opens: $checkedConvert(
+          'opens',
+          (v) =>
+              (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+              const <String>[],
+        ),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$RegionClearedToJson(RegionCleared instance) =>
+    <String, dynamic>{
+      'zone': instance.zone,
+      'opens': instance.opens,
+      'runtimeType': instance.$type,
+    };
+
 StoryDone _$StoryDoneFromJson(Map<String, dynamic> json) =>
     $checkedCreate('StoryDone', json, ($checkedConvert) {
       final val = StoryDone(

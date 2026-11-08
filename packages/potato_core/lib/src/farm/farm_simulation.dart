@@ -61,7 +61,7 @@ final class FarmSimulation {
     Iterable<Mail> mail = const [],
     Iterable<Gear> gear = const [],
     Equipped equipped = const Equipped(),
-    this.progress = 0,
+    int progress = 0,
     FarmTotals? totals,
     Map<String, int> storyDone = const {},
     this.storySkipped = false,
@@ -71,6 +71,7 @@ final class FarmSimulation {
     List<MealEffect> meals = const [],
     Iterable<String> mealsOpen = const [],
   }) : _gear = List.of(gear),
+       _savedProgress = progress,
        _mealsOpen = {...mealsOpen},
        kit = PlayerKit(
          catalog,
@@ -274,9 +275,42 @@ final class FarmSimulation {
 
   late final GearStats _gearStats = GearStats(catalog);
 
-  /// The highest zone score of a successful run: equipment and seeds up to
-  /// this plus a margin may be used. Never goes down.
-  int progress;
+  /// Progress kept from saves: before 2026-11-08 every successful run
+  /// raised it, now only cleared regions do (see [progress]).
+  int _savedProgress;
+
+  /// The highest score of a cleared story region (2026-11-08, 사용자):
+  /// equipment and seeds up to this plus a margin may be used, and danger
+  /// zones may be played up to it. Never goes down.
+  int get progress {
+    var best = _savedProgress;
+    for (final zone in clearedZones) {
+      final score = catalog.zones[zone]!.score;
+      if (score > best) best = score;
+    }
+    return best;
+  }
+
+  /// Story regions cleared: their safe zone's boss fell in one of this
+  /// farm's own runs, or the story cleared it (`clear:<id>`). A party
+  /// guest's runs never count (2026-11-08, 사용자: the host's world).
+  Iterable<String> get clearedZones sync* {
+    for (final zone in catalog.zones.values) {
+      if (zone.clearOpens == null) continue;
+      if ((totals.bossKills[zone.id] ?? 0) > 0 ||
+          _unlocked.contains(StoryUnlock.clear(zone.id))) {
+        yield zone.id;
+      }
+    }
+  }
+
+  /// The scores danger zone [zone] may be played at: from its own up to
+  /// [progress] (2026-11-08, 사용자). Null for a safe or unknown zone.
+  ({int min, int max})? dangerScores(String zone) {
+    final data = catalog.zones[zone];
+    if (data == null || data.danger == null) return null;
+    return (min: data.score, max: math.max(data.score, progress));
+  }
 
   /// Totems that may stand on the farm: a few to begin with and each giant
   /// totem's (2026-10-30, 사용자), as fields grow with field offices.
@@ -376,8 +410,11 @@ final class FarmSimulation {
     (b) => b.totem != null && canBuildKind(b.id),
   );
 
-  /// Whether runs may go to zone [zone].
-  bool zoneOpen(String zone) => isUnlocked(StoryUnlock.zone(zone));
+  /// Whether runs may go to zone [zone]: the story opened it, or a cleared
+  /// region opens it (2026-11-08, 사용자).
+  bool zoneOpen(String zone) =>
+      isUnlocked(StoryUnlock.zone(zone)) ||
+      clearedZones.any((id) => catalog.zones[id]!.clearOpens!.contains(zone));
 
   /// The story events that may happen now, in story order: not done, and
   /// every event before them done.
@@ -784,10 +821,11 @@ final class FarmSimulation {
     ReleasePotato(:final potatoId) => _release(potatoId),
     Revive(:final potatoId, :final atShrine) => _revive(potatoId, atShrine),
     Farewell(:final potatoId) => _farewell(potatoId),
-    Depart(:final food, :final potatoIds, :final zone) => _depart(
+    Depart(:final food, :final potatoIds, :final zone, :final score) => _depart(
       food,
       potatoIds,
       zone,
+      score: score,
     ),
     UnlockAll() => _unlockAll(),
     ReturnHome(
@@ -2192,9 +2230,16 @@ final class FarmSimulation {
     List<int> potatoIds,
     String zone, {
     bool checkZoneUnlock = true,
+    int? score,
   }) {
     if (!catalog.zones.containsKey(zone)) return FarmRejection.unknownZone;
     if (checkZoneUnlock && !zoneOpen(zone)) return FarmRejection.locked;
+    if (score != null && checkZoneUnlock) {
+      final range = dangerScores(zone);
+      if (range == null || score < range.min || score > range.max) {
+        return FarmRejection.locked;
+      }
+    }
     if (food < 0 || food > this.food) return FarmRejection.notEnoughFood;
     final going = <AwayPotato>[];
     for (final id in potatoIds.toSet()) {
@@ -2253,7 +2298,17 @@ final class FarmSimulation {
   ) {
     this.food += food;
     if (bossKilledIn != null) {
+      final wasCleared = clearedZones.contains(bossKilledIn);
       totals.bossKills.update(bossKilledIn, (n) => n + 1, ifAbsent: () => 1);
+      // Clearing opens before and apart from the story (2026-11-08, 사용자).
+      if (!wasCleared && clearedZones.contains(bossKilledIn)) {
+        _events.add(
+          FarmEvent.regionCleared(
+            zone: bossKilledIn,
+            opens: catalog.zones[bossKilledIn]!.clearOpens!,
+          ),
+        );
+      }
     }
     if (score != null && zone != null) {
       totals.escapes.update(zone, (n) => n + 1, ifAbsent: () => 1);
@@ -2267,7 +2322,6 @@ final class FarmSimulation {
     _gear.addAll(gear);
     if (equipped != null) _actor.equipped = equipped;
     if (bag != null) _actor.refillBag(bag);
-    if (score != null && score > progress) progress = score;
     final lost = [
       for (final id in lostPotatoIds)
         if (_away.remove(id) != null) id,

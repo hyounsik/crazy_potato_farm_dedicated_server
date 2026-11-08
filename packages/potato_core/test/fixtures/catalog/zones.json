@@ -4,6 +4,7 @@
   "zones": [
     {
       "id": "sample_zone",
+      "clear_opens": ["sample_danger"],
       "score": 3,
       "map": {
         "size": 40,

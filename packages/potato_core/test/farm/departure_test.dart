@@ -131,7 +131,7 @@ void main() {
     expect(farm.materials, {'material': 9});
     expect(farm.awayPotatoes, isEmpty);
     expect(farm.fieldSpotOf(id)!.tile, _tile);
-    expect(farm.progress, 3, reason: 'going home from a safe zone succeeds');
+    expect(farm.progress, 0, reason: 'only a cleared region raises it');
   });
 
   test('a lost danger run brings nothing and the lost companions are gone', () {
@@ -195,26 +195,116 @@ void main() {
     expect(farm.apply(result.homecoming(catalog)), isNull);
     expect(farm.potatoById(id), isNull);
     expect(farm.awayPotatoes, isEmpty);
-    expect(farm.progress, 12);
+    expect(farm.progress, 0, reason: 'escaping a danger zone clears nothing');
     expect(farm.takeEvents().whereType<Returned>().single.lost, [id]);
   });
 
-  test('progress follows the best successful run and never drops', () {
-    RaidResult run(RaidOutcome outcome, int score) => RaidResult(
-      outcome: outcome,
-      items: const [],
-      companions: const [],
-      score: score,
-      lost: false,
+  RaidResult bossRun(String zone, {RaidOutcome? outcome}) => RaidResult(
+    outcome: outcome ?? RaidOutcome.wentHome,
+    items: const [],
+    companions: const [],
+    score: 3,
+    zone: zone,
+    lost: false,
+    bossKilled: true,
+  );
+
+  /// The sample catalog with its danger zone shut until cleared.
+  FarmSimulation lockedFarm() {
+    final locked = sampleCatalogWith(
+      (files) => (files['story']! as Map<String, dynamic>)['locked'] = [
+        'zone:sample_danger',
+      ],
     );
-    farm.apply(run(RaidOutcome.extracted, 12).homecoming(catalog));
-    expect(farm.progress, 12);
-    farm.apply(run(RaidOutcome.wentHome, 3).homecoming(catalog));
-    expect(farm.progress, 12);
-    farm.apply(run(RaidOutcome.starved, 20).homecoming(catalog));
-    expect(farm.progress, 12, reason: 'starving home is not a success');
+    return FarmSimulation.newFarm(locked, seed: 1);
+  }
+
+  test('clearing a region opens its zones and raises progress '
+      '(2026-11-08)', () {
+    final farm = lockedFarm();
+    final catalog = farm.catalog;
+    expect(farm.zoneOpen('sample_danger'), isFalse);
+    expect(farm.dangerScores('sample_danger'), (min: 3, max: 3));
+    farm.apply(bossRun('sample_zone').homecoming(catalog));
+    expect(farm.takeEvents().whereType<RegionCleared>().single.opens, [
+      'sample_danger',
+    ]);
+    expect(farm.clearedZones, ['sample_zone']);
+    expect(farm.zoneOpen('sample_danger'), isTrue);
+    expect(farm.progress, 3);
+    expect(farm.dangerScores('sample_zone'), isNull, reason: 'a safe zone');
     final saved = FarmDocument.of(farm).toSimulation(catalog);
-    expect(saved.progress, 12);
+    expect(saved.progress, 3);
+    expect(saved.zoneOpen('sample_danger'), isTrue);
+  });
+
+  test('a boss falling in a danger zone clears nothing', () {
+    farm.apply(bossRun('sample_danger').homecoming(catalog));
+    expect(farm.clearedZones, isEmpty);
+    expect(farm.progress, 0);
+  });
+
+  test("a guest's run brings the haul home but clears nothing "
+      '(2026-11-08)', () {
+    final farm = lockedFarm();
+    final result = RaidResult(
+      outcome: RaidOutcome.wentHome,
+      items: [ItemStack('food', 5)],
+      companions: const [],
+      score: 3,
+      zone: 'sample_zone',
+      lost: false,
+      bossKilled: true,
+    );
+    final before = farm.food;
+    expect(farm.apply(result.homecoming(catalog, asGuest: true)), isNull);
+    expect(farm.food, before + 5);
+    expect(farm.clearedZones, isEmpty);
+    expect(farm.zoneOpen('sample_danger'), isFalse);
+    expect(farm.totals.escapes, isEmpty);
+    expect(farm.totals.bossKills, isEmpty);
+  });
+
+  test('a danger difficulty past progress is refused (2026-11-08)', () {
+    final open = sampleCatalogWith((files) {
+      final zones = (files['zones']! as Map<String, dynamic>)['zones']!;
+      for (final zone in zones as List<Object?>) {
+        final z = zone! as Map<String, dynamic>;
+        if (z['id'] == 'sample_zone') z['score'] = 9;
+      }
+    });
+    final cleared = FarmSimulation.newFarm(open, seed: 1)..food = 100;
+    cleared.apply(
+      RaidResult(
+        outcome: RaidOutcome.wentHome,
+        items: const [],
+        companions: const [],
+        score: 9,
+        zone: 'sample_zone',
+        lost: false,
+        bossKilled: true,
+      ).homecoming(open),
+    );
+    expect(cleared.dangerScores('sample_danger'), (min: 3, max: 9));
+    expect(
+      cleared.apply(
+        const FarmCommand.depart(zone: 'sample_danger', food: 0, score: 10),
+      ),
+      FarmRejection.locked,
+    );
+    expect(
+      cleared.apply(
+        const FarmCommand.depart(zone: 'sample_zone', food: 0, score: 9),
+      ),
+      FarmRejection.locked,
+      reason: 'a safe zone has no difficulty to pick',
+    );
+    expect(
+      cleared.apply(
+        const FarmCommand.depart(zone: 'sample_danger', food: 0, score: 9),
+      ),
+      isNull,
+    );
   });
 
   test('companions carry their farm potato over to the run', () {

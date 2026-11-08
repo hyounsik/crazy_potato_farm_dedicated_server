@@ -89,6 +89,28 @@ final class Catalog {
   final Map<String, EnemyData> enemies;
   final Map<String, ZoneData> zones;
 
+  /// Zone [id] played at [score] instead of its own (2026-11-08, 사용자: a
+  /// danger zone's difficulty is picked). Enemies, clones and loot follow
+  /// the score, and finds take the level range of the story region whose
+  /// range holds it, the zone's own when none does. Null for an unknown id.
+  ZoneData? zoneAt(String id, {int? score}) {
+    final zone = zones[id];
+    if (zone == null || score == null || score == zone.score) return zone;
+    final region = zones.values
+        .where(
+          (z) =>
+              z.clearOpens != null &&
+              (z.levelMin ?? z.score) <= score &&
+              score <= (z.levelMax ?? z.score),
+        )
+        .firstOrNull;
+    return zone.copyWith(
+      score: score,
+      levelMin: region == null ? score : region.levelMin ?? region.score,
+      levelMax: region == null ? score : region.levelMax ?? region.score,
+    );
+  }
+
   /// Hand-drawn maps by id, which zones name in `drawn_map`.
   final Map<String, DrawnMapData> maps;
 
@@ -1094,6 +1116,9 @@ final class Catalog {
 
   static void _checkZone(_FileCheck check, String path, ZoneData zone) {
     check.atLeast('$path.score', zone.score, 0);
+    if (zone.clearOpens != null && zone.danger != null) {
+      check.issue('$path.clear_opens', 'only a safe zone is cleared');
+    }
     if ((zone.map == null) == (zone.drawnMap == null)) {
       check.issue('$path.map', 'must have one of map and drawn_map');
     }
@@ -1175,6 +1200,12 @@ final class Catalog {
         if (!zones.containsKey(id)) check.issue(path, 'no zone "$id"');
         return;
       }
+      if (StoryUnlock.clearOf(key) case final id?) {
+        if (zones[id]?.clearOpens == null) {
+          check.issue(path, 'no zone "$id" to clear');
+        }
+        return;
+      }
       check.issue(path, 'unknown unlock "$key"');
     }
 
@@ -1182,7 +1213,12 @@ final class Catalog {
       checkKey('locked[$index]', key);
     }
     final seen = <String>{};
-    final opened = <String>{};
+    // Clearing a region opens zones apart from the story (2026-11-08).
+    final opened = <String>{
+      for (final zone in zones.values)
+        for (final id in zone.clearOpens ?? const <String>[])
+          StoryUnlock.zone(id),
+    };
     for (final (index, event) in story.events.indexed) {
       final path = 'events[$index]';
       if (!seen.add(event.id)) {
@@ -1346,6 +1382,13 @@ final class Catalog {
           if (!enemies.containsKey(kind)) {
             missing(file, '${map.id}.map.markers.$name', 'enemy', kind);
           }
+        }
+      }
+    }
+    for (final zone in zones.values) {
+      for (final (index, id) in (zone.clearOpens ?? const <String>[]).indexed) {
+        if (!zones.containsKey(id)) {
+          missing('zones', '${zone.id}.clear_opens[$index]', 'zone', id);
         }
       }
     }

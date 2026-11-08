@@ -82,6 +82,53 @@ void main() {
     }
   });
 
+  test('a picked danger difficulty plays the zone at that score and keeps '
+      'it through a save (2026-11-08)', () {
+    final catalog = sampleCatalogWith(
+      (files) => rulesOf(files)['zone_scaling'] = {'enemy_hp_permille': 30},
+    );
+    RaidSimulation run({int? score}) => RaidSimulation.start(
+      catalog: catalog,
+      zone: 'sample_danger',
+      seed: 3,
+      food: 30,
+      score: score,
+    );
+    final own = run();
+    final harder = run(score: 13);
+    expect(own.zone.score, 3);
+    expect(harder.zone.score, 13);
+    expect(harder.enemies, hasLength(own.enemies.length));
+    for (final (i, enemy) in own.enemies.indexed) {
+      expect(
+        harder.enemies[i].maxHp,
+        closeTo(enemy.maxHp * levelGrowth(30, 10), 1e-9),
+      );
+    }
+    final saved = RaidSimulation.fromJson(harder.toJson(), catalog);
+    expect(saved.zone.score, 13);
+  });
+
+  test('a picked score takes the level range of the region that holds it', () {
+    final catalog = sampleCatalogWith((files) {
+      final zones = (files['zones']! as Map<String, dynamic>)['zones']!;
+      for (final zone in zones as List<Object?>) {
+        final z = zone! as Map<String, dynamic>;
+        if (z['id'] == 'sample_zone') {
+          z
+            ..['level_min'] = 10
+            ..['level_max'] = 19;
+        }
+      }
+    });
+    final picked = catalog.zoneAt('sample_danger', score: 12)!;
+    expect(picked.score, 12);
+    expect((picked.levelMin, picked.levelMax), (10, 19));
+    final beyond = catalog.zoneAt('sample_danger', score: 40)!;
+    expect((beyond.levelMin, beyond.levelMax), (40, 40));
+    expect(catalog.zoneAt('sample_danger'), catalog.zones['sample_danger']);
+  });
+
   test('the recommended power grows with the score, compounding', () {
     final catalog = sampleCatalogWith((files) {
       rulesOf(files)['combat_power']

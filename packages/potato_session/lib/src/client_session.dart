@@ -239,6 +239,11 @@ final class ClientSession {
 
   /// The zone the host picked to set out for, or null.
   String? get partyZone => _partyZone;
+
+  /// The danger difficulty the host picked with [partyZone], null for the
+  /// zone's own score (2026-11-08, 사용자).
+  int? get partyScore => _partyScore;
+  int? _partyScore;
   Stream<String?> get partyZoneStream => _partyController.stream;
 
   /// When everyone sets out anyway, ready or not (null: no countdown).
@@ -268,9 +273,9 @@ final class ClientSession {
   /// party is open (2026-10-29, 사용자), and the server calls everyone on
   /// the farm to get ready ([partyZone], [departsAt]). The run begins with
   /// [RunStartedMessage] as in host mode, for those ready.
-  void requestStart(String zone) {
+  void requestStart(String zone, {int? score}) {
     if (_stage != ClientSessionStage.waiting || _partyZone != null) return;
-    _send(SessionChannel.reliable, StartRunMessage(zone));
+    _send(SessionChannel.reliable, StartRunMessage(zone, score: score));
   }
 
   /// The local mirror of the run, with `focusIndex` pointing at this guest's
@@ -615,8 +620,9 @@ final class ClientSession {
         } else {
           _send(SessionChannel.reliable, CatalogMessage({...files}));
         }
-      case PartyStateMessage(:final zone, :final left):
+      case PartyStateMessage(:final zone, :final left, :final score):
         _partyZone = zone;
+        _partyScore = score;
         _departsAt = left > Duration.zero ? DateTime.now().add(left) : null;
         if (!_partyController.isClosed) _partyController.add(zone);
       case FarmViewMessage(:final farm):
@@ -702,6 +708,7 @@ final class ClientSession {
         _walkers.clear();
         _chats.clear();
         _partyZone = null;
+        _partyScore = null;
         _departsAt = null;
         if (!_partyController.isClosed) _partyController.add(null);
         _setStage(ClientSessionStage.waiting);

@@ -202,11 +202,14 @@ sealed class FarmCommand with _$FarmCommand {
   /// potatoes [potatoIds] as companions. They leave the farm until
   /// [returnHome]. A zone the story keeps closed is refused, and so is one
   /// the catalog does not have (2026-10-18: required, so a command from
-  /// another player cannot skip the lock).
+  /// another player cannot skip the lock). [score] plays a danger zone at a
+  /// picked difficulty, refused outside [FarmSimulation.dangerScores]
+  /// (2026-11-08, 사용자).
   const factory FarmCommand.depart({
     required String zone,
     required int food,
     @Default(<int>[]) List<int> potatoIds,
+    int? score,
   }) = Depart;
 
   /// Opens every feature and stops story events. A developer tool: only
@@ -217,7 +220,7 @@ sealed class FarmCommand with _$FarmCommand {
   /// the companions [potatoIds] go back to where they were, or to the fridge
   /// when that place is gone or taken. Companions [lostPotatoIds] were lost
   /// in a failed danger run and leave the farm for good. A successful run
-  /// gives its zone [score], which raises the farm's progress.
+  /// gives its zone [score] (counted with [zone] for story goals).
   const factory FarmCommand.returnHome({
     required int food,
     @Default(<SeedCount>[]) List<SeedCount> seeds,

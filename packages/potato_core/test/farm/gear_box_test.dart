@@ -47,7 +47,7 @@ void main() {
       farm.apply(const FarmCommand.equipGear(index: 0)),
       FarmRejection.cannotWear,
     );
-    farm.progress = 1;
+    farm = FarmDocument.of(farm).copyWith(progress: 1).toSimulation(catalog);
     expect(farm.apply(const FarmCommand.equipGear(index: 0)), isNull);
   });
 

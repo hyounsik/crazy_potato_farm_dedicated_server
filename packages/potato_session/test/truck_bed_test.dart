@@ -32,6 +32,7 @@ Catalog _testCatalog() {
       (files['zones']! as Map<String, dynamic>)['zones'] as List<Object?>;
   final open = jsonDecode(jsonEncode(zones.first)) as Map<String, dynamic>;
   open['id'] = 'open';
+  open.remove('clear_opens');
   open['map'] = {
     'size': 20,
     'entry': {'x': 10, 'y': 10},

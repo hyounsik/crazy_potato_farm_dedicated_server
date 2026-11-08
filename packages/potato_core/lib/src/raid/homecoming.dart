@@ -32,7 +32,7 @@ RaidMemberStart memberStartFor(
 );
 
 /// Starts a run from [farm]: its worn gear and progress, and the potatoes
-/// [potatoIds] (combat ones in [modes]).
+/// [potatoIds] (combat ones in [modes]), at [score] when one was picked.
 RaidSimulation startRun(
   FarmSimulation farm, {
   required String zone,
@@ -40,10 +40,12 @@ RaidSimulation startRun(
   required int food,
   List<int> potatoIds = const [],
   Map<int, CompanionMode> modes = const {},
+  int? score,
 }) => RaidSimulation.start(
   catalog: farm.catalog,
   zone: zone,
   seed: seed,
+  score: score,
   food: food,
   equipped: farm.equipped,
   progress: farm.progress,
@@ -94,7 +96,26 @@ extension RaidHomecoming on RaidResult {
   ///
   /// With [toBag] the items stay in the bag instead, to sort at home or carry
   /// on to the next run (2026-10-28, 사용자); a lost run empties it.
-  FarmCommand homecoming(Catalog catalog, {bool toBag = false}) {
+  ///
+  /// [asGuest] brings home a friend's party run: the haul and companions
+  /// come back, but the run counts for nothing on this farm, no escape, no
+  /// boss and so no region cleared (2026-11-08, 사용자: that was the host's
+  /// world; to open a region a guest clears it on their own farm).
+  FarmCommand homecoming(
+    Catalog catalog, {
+    bool toBag = false,
+    bool asGuest = false,
+  }) {
+    final command = _homecoming(catalog, toBag: toBag);
+    if (!asGuest) return command;
+    return (command as ReturnHome).copyWith(
+      score: null,
+      zone: null,
+      bossKilledIn: null,
+    );
+  }
+
+  FarmCommand _homecoming(Catalog catalog, {required bool toBag}) {
     if (lost) {
       return FarmCommand.returnHome(
         food: 0,

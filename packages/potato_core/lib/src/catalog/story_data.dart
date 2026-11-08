@@ -38,8 +38,14 @@ abstract final class StoryUnlock {
   /// Runs may go to zone `<id>`.
   static String zone(String id) => 'zone:$id';
 
+  /// Story region `<id>` counts as cleared, as if its boss fell: the zones
+  /// in its [ZoneData.clearOpens] open and its score counts toward progress
+  /// (2026-11-08, 사용자: the story may clear a region on its own).
+  static String clear(String id) => 'clear:$id';
+
   static const String _buildingPrefix = 'building:';
   static const String _zonePrefix = 'zone:';
+  static const String _clearPrefix = 'clear:';
 
   /// The building id in a `building:` key, or null.
   static String? buildingOf(String key) => key.startsWith(_buildingPrefix)
@@ -49,6 +55,10 @@ abstract final class StoryUnlock {
   /// The zone id in a `zone:` key, or null.
   static String? zoneOf(String key) =>
       key.startsWith(_zonePrefix) ? key.substring(_zonePrefix.length) : null;
+
+  /// The zone id in a `clear:` key, or null.
+  static String? clearOf(String key) =>
+      key.startsWith(_clearPrefix) ? key.substring(_clearPrefix.length) : null;
 }
 
 /// One story event: done when every goal holds, after the events [after].

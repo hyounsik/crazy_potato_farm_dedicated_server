@@ -11,7 +11,7 @@ import 'package:potato_core/potato_core.dart';
 /// Bump it whenever a message, or the JSON of anything a message carries
 /// (runs, farms, items), changes. `test/protocol_test.dart` fails until it
 /// is bumped and its fingerprint updated.
-const int sessionProtocol = 17;
+const int sessionProtocol = 18;
 
 /// Why a guest could not join a host's session.
 enum SessionJoinRejection {
@@ -270,6 +270,7 @@ sealed class SessionMessage {
     'party_state' => PartyStateMessage(
       json['zone'] as String?,
       left: Duration(milliseconds: json['left'] as int? ?? 0),
+      score: json['score'] as int?,
     ),
     'ready' => ReadyMessage(
       ready: json['ready'] as bool,
@@ -293,7 +294,10 @@ sealed class SessionMessage {
           a! as String,
       ],
     )),
-    'start_run' => StartRunMessage(json['zone'] as String),
+    'start_run' => StartRunMessage(
+      json['zone'] as String,
+      score: json['score'] as int?,
+    ),
     'farm_view' => FarmViewMessage(json['farm'] as Map<String, dynamic>),
     'farm_command' => FarmCommandMessage(
       FarmCommand.fromJson(json['command'] as Map<String, dynamic>),
@@ -401,10 +405,11 @@ sealed class SessionMessage {
         if (accountId.isNotEmpty) 'account_id': accountId,
         if (bed.any((s) => s != null)) 'bed': _slotsToJson(bed),
       },
-    PartyStateMessage(:final zone, :final left) => {
+    PartyStateMessage(:final zone, :final left, :final score) => {
       'type': 'party_state',
       'zone': zone,
       if (left > Duration.zero) 'left': left.inMilliseconds,
+      'score': ?score,
     },
     ReadyMessage(:final ready, :final start) => {
       'type': 'ready',
@@ -422,7 +427,11 @@ sealed class SessionMessage {
       'you': lobby.you,
       if (lobby.accounts.any((a) => a.isNotEmpty)) 'accounts': lobby.accounts,
     },
-    StartRunMessage(:final zone) => {'type': 'start_run', 'zone': zone},
+    StartRunMessage(:final zone, :final score) => {
+      'type': 'start_run',
+      'zone': zone,
+      'score': ?score,
+    },
     FarmViewMessage(:final farm) => {'type': 'farm_view', 'farm': farm},
     FarmCommandMessage(:final command) => {
       'type': 'farm_command',
@@ -557,10 +566,14 @@ final class HelloMessage extends SessionMessage {
 /// (null: none yet), and how long until everyone sets out anyway ([left];
 /// zero: no countdown). Everyone's readiness starts over when it changes.
 final class PartyStateMessage extends SessionMessage {
-  const PartyStateMessage(this.zone, {this.left = Duration.zero});
+  const PartyStateMessage(this.zone, {this.left = Duration.zero, this.score});
 
   final String? zone;
   final Duration left;
+
+  /// The danger difficulty picked for [zone], null for its own score
+  /// (2026-11-08, 사용자).
+  final int? score;
 }
 
 /// Guest → host on reliable: ready to set out for the zone the host picked,
@@ -674,9 +687,13 @@ final class KitMessage extends SessionMessage {
 
 /// Leader guest → dedicated server on reliable: set out to [zone] now.
 final class StartRunMessage extends SessionMessage {
-  const StartRunMessage(this.zone);
+  const StartRunMessage(this.zone, {this.score});
 
   final String zone;
+
+  /// The danger difficulty asked for, null for the zone's own score
+  /// (2026-11-08, 사용자).
+  final int? score;
 }
 
 /// Host → guest on reliable: whether [HelloMessage] was accepted.

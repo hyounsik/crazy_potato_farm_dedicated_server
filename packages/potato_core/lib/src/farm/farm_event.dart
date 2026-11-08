@@ -80,6 +80,13 @@ sealed class FarmEvent with _$FarmEvent {
 
   const factory FarmEvent.mailArrived({required int mailId}) = MailArrived;
 
+  /// Story region [zone] was cleared for the first time, its boss killed,
+  /// and zones [opens] opened (2026-11-08, 사용자).
+  const factory FarmEvent.regionCleared({
+    required String zone,
+    @Default(<String>[]) List<String> opens,
+  }) = RegionCleared;
+
   /// Story event [event] is done and opened [unlocks]; its letter follows.
   const factory FarmEvent.storyDone({
     required String event,

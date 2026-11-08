@@ -1077,6 +1077,10 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         (v) =>
             v == null ? null : ZoneBossData.fromJson(v as Map<String, dynamic>),
       ),
+      clearOpens: $checkedConvert(
+        'clear_opens',
+        (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
+      ),
       look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
     );
     return val;
@@ -1085,6 +1089,7 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) => $checkedCreate(
     'levelMin': 'level_min',
     'levelMax': 'level_max',
     'drawnMap': 'drawn_map',
+    'clearOpens': 'clear_opens',
   },
 );
 
@@ -1104,6 +1109,7 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'drops': instance.drops.toJson(),
   'danger': instance.danger?.toJson(),
   'boss': instance.boss?.toJson(),
+  'clear_opens': instance.clearOpens,
   'look': instance.look,
 };
 

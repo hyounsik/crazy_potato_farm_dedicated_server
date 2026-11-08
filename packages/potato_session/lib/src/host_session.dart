@@ -119,6 +119,11 @@ final class HostSession {
   String? get partyZone => _partyZone;
   String? _partyZone;
 
+  /// The danger difficulty picked with [partyZone], null for its own score
+  /// (2026-11-08, 사용자).
+  int? get partyScore => _partyScore;
+  int? _partyScore;
+
   /// When everyone sets out anyway, ready or not (2026-10-22, 사용자: 30 s);
   /// null without a countdown. The owner sets out when it passes.
   DateTime? get departsAt => _departsAt;
@@ -133,7 +138,8 @@ final class HostSession {
   final List<HostedGuest> _guestOrder = [];
   final _guestsChanged = StreamController<List<HostedGuest>>.broadcast();
   // Sync, so a [ReadyMessage] right after the request finds the party open.
-  final _startRequests = StreamController<String>.broadcast(sync: true);
+  final _startRequests =
+      StreamController<({String zone, int? score})>.broadcast(sync: true);
   final _memberResults =
       StreamController<({HostedGuest guest, RaidResult result})>.broadcast(
         sync: true,
@@ -169,7 +175,8 @@ final class HostSession {
   /// Zones a guest asked to set out to while no party is open and no run
   /// is going (only when not [hostPlays]). The zone is known to [catalog];
   /// the owner opens the party ([openParty]) and later calls [startRun].
-  Stream<String> get startRequests => _startRequests.stream;
+  Stream<({String zone, int? score})> get startRequests =>
+      _startRequests.stream;
 
   /// Each guest's run result as it is sent to them, for whoever keeps the
   /// guest's things (a dedicated server's shared farm, 2026-10-28).
@@ -191,6 +198,7 @@ final class HostSession {
   RaidSimulation startRun({
     required String zone,
     required int seed,
+    int? score,
     RaidMemberStart? hostStart,
     Map<String, MapChunk> chunks = const {},
     RaidMemberStart Function(HostedGuest guest)? startOf,
@@ -219,6 +227,7 @@ final class HostSession {
       catalog: catalog,
       zone: zone,
       seed: seed,
+      score: score,
       chunks: chunks,
       members: starts,
     );
@@ -242,6 +251,7 @@ final class HostSession {
     // Those staying behind are on the farm with the party called off.
     if (going.length < _guestOrder.length) {
       _partyZone = null;
+      _partyScore = null;
       for (final g in _guestOrder) {
         g.ready = false;
       }
@@ -400,10 +410,16 @@ final class HostSession {
 
   /// Picks [zone] to set out for: everyone at the farm gets ready for it
   /// ([ReadyMessage]); readiness starts over. With a [countdown], everyone
-  /// sets out when it ends, ready or not ([departsAt]).
-  void openParty(String zone, {Duration countdown = Duration.zero}) {
+  /// sets out when it ends, ready or not ([departsAt]). [score] is the
+  /// danger difficulty picked, shown to everyone (2026-11-08, 사용자).
+  void openParty(
+    String zone, {
+    Duration countdown = Duration.zero,
+    int? score,
+  }) {
     if (_run != null || _closed) return;
     _partyZone = zone;
+    _partyScore = score;
     _departsAt = countdown > Duration.zero
         ? DateTime.now().add(countdown)
         : null;
@@ -418,6 +434,7 @@ final class HostSession {
     return PartyStateMessage(
       _partyZone,
       left: left.isNegative ? Duration.zero : left,
+      score: _partyScore,
     );
   }
 
@@ -431,6 +448,7 @@ final class HostSession {
     _run = null;
     _clock = null;
     _partyZone = null;
+    _partyScore = null;
     _departsAt = null;
     _overSent = false;
     _hostEvents.clear();
@@ -458,6 +476,7 @@ final class HostSession {
   void closeParty() {
     if (_run != null || _closed) return;
     _partyZone = null;
+    _partyScore = null;
     _departsAt = null;
     _setAllReady(false);
     _broadcast(SessionChannel.reliable, const PartyStateMessage(null));
@@ -774,8 +793,8 @@ final class HostSession {
         _onMove(packet.peerId, msg);
       case CommandMessage():
         _onCommand(packet.peerId, msg);
-      case StartRunMessage(:final zone):
-        _onStartRun(packet.peerId, zone);
+      case StartRunMessage(:final zone, :final score):
+        _onStartRun(packet.peerId, zone, score);
       case ReadyMessage(:final ready, :final start):
         _onReady(packet.peerId, ready, start);
       case QuickChatMessage(:final chat, :final text):
@@ -971,11 +990,11 @@ final class HostSession {
     _notifyGuests();
   }
 
-  void _onStartRun(String peerId, String zone) {
+  void _onStartRun(String peerId, String zone, int? score) {
     if (hostPlays || _run != null || _partyZone != null) return;
     if (!_guests.containsKey(peerId)) return;
     if (!catalog.zones.containsKey(zone)) return;
-    _startRequests.add(zone);
+    _startRequests.add((zone: zone, score: score));
   }
 
   void _onPeerDisconnected(String peerId) {

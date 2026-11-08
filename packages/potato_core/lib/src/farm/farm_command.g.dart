@@ -734,6 +734,7 @@ Depart _$DepartFromJson(Map<String, dynamic> json) =>
               (v as List<dynamic>?)?.map((e) => (e as num).toInt()).toList() ??
               const <int>[],
         ),
+        score: $checkedConvert('score', (v) => (v as num?)?.toInt()),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -743,6 +744,7 @@ Map<String, dynamic> _$DepartToJson(Depart instance) => <String, dynamic>{
   'zone': instance.zone,
   'food': instance.food,
   'potato_ids': instance.potatoIds,
+  'score': instance.score,
   'runtimeType': instance.$type,
 };
 

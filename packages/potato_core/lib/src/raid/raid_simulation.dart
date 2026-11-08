@@ -236,10 +236,12 @@ final class RaidSimulation {
     Map<PotatoType, int> seedLevels = const {},
     Map<GearKind, int> storedGearLevels = const {},
     List<RaidMeal> meals = const [],
+    int? score,
   }) => RaidSimulation.party(
     catalog: catalog,
     zone: zone,
     seed: seed,
+    score: score,
     chunks: chunks,
     members: [
       RaidMemberStart(
@@ -258,15 +260,18 @@ final class RaidSimulation {
   /// A run for a party of [members] (one to four) going in together. The
   /// first is the one [player], [bag] and the other single-player members
   /// read; all share a team and their buff potatoes reach everyone.
+  /// With [score] the zone is played at that difficulty instead of its own
+  /// ([Catalog.zoneAt], 2026-11-08: picked for a danger zone).
   factory RaidSimulation.party({
     required Catalog catalog,
     required String zone,
     required int seed,
     required List<RaidMemberStart> members,
     Map<String, MapChunk> chunks = const {},
+    int? score,
   }) {
     if (members.isEmpty) throw ArgumentError.value(members, 'members');
-    final zoneData = catalog.zones[zone];
+    final zoneData = catalog.zoneAt(zone, score: score);
     if (zoneData == null) throw ArgumentError.value(zone, 'zone', 'unknown');
     final rules = catalog.rules.raid;
     final map = switch (zoneData.drawnMap) {
@@ -488,7 +493,10 @@ final class RaidSimulation {
         'Run format ${json['format_version']} is not $formatVersion',
       );
     }
-    final zone = catalog.zones[json['zone'] as String];
+    final zone = catalog.zoneAt(
+      json['zone'] as String,
+      score: json['score'] as int?,
+    );
     if (zone == null) throw FormatException('Unknown zone ${json['zone']}');
     List<T> list<T>(String key, T Function(Map<String, dynamic>) read) => [
       for (final e in json[key] as List<Object?>)
@@ -535,7 +543,7 @@ final class RaidSimulation {
 
   /// Bumped whenever the saved run's shape changes. Runs are short, so an old
   /// format is not migrated: the client ends that run instead.
-  static const int formatVersion = 12;
+  static const int formatVersion = 13;
 
   final Catalog catalog;
   final ZoneData zone;
@@ -3208,6 +3216,7 @@ final class RaidSimulation {
   Map<String, dynamic> toJson() => {
     'format_version': formatVersion,
     'zone': zone.id,
+    'score': zone.score,
     'tick': _tick,
     'next_id': _nextId,
     'random_state': _random.state,

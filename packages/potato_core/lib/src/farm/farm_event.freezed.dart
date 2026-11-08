@@ -56,6 +56,10 @@ FarmEvent _$FarmEventFromJson(
           return MailArrived.fromJson(
             json
           );
+                case 'regionCleared':
+          return RegionCleared.fromJson(
+            json
+          );
                 case 'storyDone':
           return StoryDone.fromJson(
             json
@@ -222,7 +226,7 @@ extension FarmEventPatterns on FarmEvent {
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PotatoPlanted value)?  planted,TResult Function( PotatoGrown value)?  grown,TResult Function( PotatoDied value)?  died,TResult Function( GraveLost value)?  graveLost,TResult Function( PotatoRevived value)?  revived,TResult Function( SeedConverted value)?  seedConverted,TResult Function( SeedRerolled value)?  seedRerolled,TResult Function( SeedOverflowed value)?  seedOverflowed,TResult Function( OverflowExpired value)?  overflowExpired,TResult Function( MailArrived value)?  mailArrived,TResult Function( StoryDone value)?  storyDone,TResult Function( GearEnhanced value)?  gearEnhanced,TResult Function( GearRerolled value)?  gearRerolled,TResult Function( GearRepaired value)?  gearRepaired,TResult Function( GearDisassembled value)?  gearDisassembled,TResult Function( TotemLit value)?  totemLit,TResult Function( SeedMade value)?  seedMade,TResult Function( TotemOut value)?  totemOut,TResult Function( BlockOpened value)?  blockOpened,TResult Function( FieldMade value)?  fieldMade,TResult Function( FieldChanged value)?  fieldChanged,TResult Function( BuildingMoved value)?  buildingMoved,TResult Function( BuildingBuilt value)?  built,TResult Function( BuildingUpgraded value)?  upgraded,TResult Function( BuildingDemolished value)?  demolished,TResult Function( SeedTrained value)?  trained,TResult Function( PestAppeared value)?  pestAppeared,TResult Function( PestCleared value)?  pestCleared,TResult Function( PotatoesWeakened value)?  weakened,TResult Function( PotatoesRecovered value)?  recovered,TResult Function( PotatoUprooted value)?  uprooted,TResult Function( PotatoReleased value)?  released,TResult Function( PotatoMoved value)?  potatoMoved,TResult Function( PotatoTakenOut value)?  takenOut,TResult Function( FoodHarvested value)?  harvested,TResult Function( Departed value)?  departed,TResult Function( Returned value)?  returned,required TResult orElse(),}){
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>({TResult Function( PotatoPlanted value)?  planted,TResult Function( PotatoGrown value)?  grown,TResult Function( PotatoDied value)?  died,TResult Function( GraveLost value)?  graveLost,TResult Function( PotatoRevived value)?  revived,TResult Function( SeedConverted value)?  seedConverted,TResult Function( SeedRerolled value)?  seedRerolled,TResult Function( SeedOverflowed value)?  seedOverflowed,TResult Function( OverflowExpired value)?  overflowExpired,TResult Function( MailArrived value)?  mailArrived,TResult Function( RegionCleared value)?  regionCleared,TResult Function( StoryDone value)?  storyDone,TResult Function( GearEnhanced value)?  gearEnhanced,TResult Function( GearRerolled value)?  gearRerolled,TResult Function( GearRepaired value)?  gearRepaired,TResult Function( GearDisassembled value)?  gearDisassembled,TResult Function( TotemLit value)?  totemLit,TResult Function( SeedMade value)?  seedMade,TResult Function( TotemOut value)?  totemOut,TResult Function( BlockOpened value)?  blockOpened,TResult Function( FieldMade value)?  fieldMade,TResult Function( FieldChanged value)?  fieldChanged,TResult Function( BuildingMoved value)?  buildingMoved,TResult Function( BuildingBuilt value)?  built,TResult Function( BuildingUpgraded value)?  upgraded,TResult Function( BuildingDemolished value)?  demolished,TResult Function( SeedTrained value)?  trained,TResult Function( PestAppeared value)?  pestAppeared,TResult Function( PestCleared value)?  pestCleared,TResult Function( PotatoesWeakened value)?  weakened,TResult Function( PotatoesRecovered value)?  recovered,TResult Function( PotatoUprooted value)?  uprooted,TResult Function( PotatoReleased value)?  released,TResult Function( PotatoMoved value)?  potatoMoved,TResult Function( PotatoTakenOut value)?  takenOut,TResult Function( FoodHarvested value)?  harvested,TResult Function( Departed value)?  departed,TResult Function( Returned value)?  returned,required TResult orElse(),}){
 final _that = this;
 switch (_that) {
 case PotatoPlanted() when planted != null:
@@ -235,7 +239,8 @@ return seedConverted(_that);case SeedRerolled() when seedRerolled != null:
 return seedRerolled(_that);case SeedOverflowed() when seedOverflowed != null:
 return seedOverflowed(_that);case OverflowExpired() when overflowExpired != null:
 return overflowExpired(_that);case MailArrived() when mailArrived != null:
-return mailArrived(_that);case StoryDone() when storyDone != null:
+return mailArrived(_that);case RegionCleared() when regionCleared != null:
+return regionCleared(_that);case StoryDone() when storyDone != null:
 return storyDone(_that);case GearEnhanced() when gearEnhanced != null:
 return gearEnhanced(_that);case GearRerolled() when gearRerolled != null:
 return gearRerolled(_that);case GearRepaired() when gearRepaired != null:
@@ -280,7 +285,7 @@ return returned(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PotatoPlanted value)  planted,required TResult Function( PotatoGrown value)  grown,required TResult Function( PotatoDied value)  died,required TResult Function( GraveLost value)  graveLost,required TResult Function( PotatoRevived value)  revived,required TResult Function( SeedConverted value)  seedConverted,required TResult Function( SeedRerolled value)  seedRerolled,required TResult Function( SeedOverflowed value)  seedOverflowed,required TResult Function( OverflowExpired value)  overflowExpired,required TResult Function( MailArrived value)  mailArrived,required TResult Function( StoryDone value)  storyDone,required TResult Function( GearEnhanced value)  gearEnhanced,required TResult Function( GearRerolled value)  gearRerolled,required TResult Function( GearRepaired value)  gearRepaired,required TResult Function( GearDisassembled value)  gearDisassembled,required TResult Function( TotemLit value)  totemLit,required TResult Function( SeedMade value)  seedMade,required TResult Function( TotemOut value)  totemOut,required TResult Function( BlockOpened value)  blockOpened,required TResult Function( FieldMade value)  fieldMade,required TResult Function( FieldChanged value)  fieldChanged,required TResult Function( BuildingMoved value)  buildingMoved,required TResult Function( BuildingBuilt value)  built,required TResult Function( BuildingUpgraded value)  upgraded,required TResult Function( BuildingDemolished value)  demolished,required TResult Function( SeedTrained value)  trained,required TResult Function( PestAppeared value)  pestAppeared,required TResult Function( PestCleared value)  pestCleared,required TResult Function( PotatoesWeakened value)  weakened,required TResult Function( PotatoesRecovered value)  recovered,required TResult Function( PotatoUprooted value)  uprooted,required TResult Function( PotatoReleased value)  released,required TResult Function( PotatoMoved value)  potatoMoved,required TResult Function( PotatoTakenOut value)  takenOut,required TResult Function( FoodHarvested value)  harvested,required TResult Function( Departed value)  departed,required TResult Function( Returned value)  returned,}){
+@optionalTypeArgs TResult map<TResult extends Object?>({required TResult Function( PotatoPlanted value)  planted,required TResult Function( PotatoGrown value)  grown,required TResult Function( PotatoDied value)  died,required TResult Function( GraveLost value)  graveLost,required TResult Function( PotatoRevived value)  revived,required TResult Function( SeedConverted value)  seedConverted,required TResult Function( SeedRerolled value)  seedRerolled,required TResult Function( SeedOverflowed value)  seedOverflowed,required TResult Function( OverflowExpired value)  overflowExpired,required TResult Function( MailArrived value)  mailArrived,required TResult Function( RegionCleared value)  regionCleared,required TResult Function( StoryDone value)  storyDone,required TResult Function( GearEnhanced value)  gearEnhanced,required TResult Function( GearRerolled value)  gearRerolled,required TResult Function( GearRepaired value)  gearRepaired,required TResult Function( GearDisassembled value)  gearDisassembled,required TResult Function( TotemLit value)  totemLit,required TResult Function( SeedMade value)  seedMade,required TResult Function( TotemOut value)  totemOut,required TResult Function( BlockOpened value)  blockOpened,required TResult Function( FieldMade value)  fieldMade,required TResult Function( FieldChanged value)  fieldChanged,required TResult Function( BuildingMoved value)  buildingMoved,required TResult Function( BuildingBuilt value)  built,required TResult Function( BuildingUpgraded value)  upgraded,required TResult Function( BuildingDemolished value)  demolished,required TResult Function( SeedTrained value)  trained,required TResult Function( PestAppeared value)  pestAppeared,required TResult Function( PestCleared value)  pestCleared,required TResult Function( PotatoesWeakened value)  weakened,required TResult Function( PotatoesRecovered value)  recovered,required TResult Function( PotatoUprooted value)  uprooted,required TResult Function( PotatoReleased value)  released,required TResult Function( PotatoMoved value)  potatoMoved,required TResult Function( PotatoTakenOut value)  takenOut,required TResult Function( FoodHarvested value)  harvested,required TResult Function( Departed value)  departed,required TResult Function( Returned value)  returned,}){
 final _that = this;
 switch (_that) {
 case PotatoPlanted():
@@ -293,7 +298,8 @@ return seedConverted(_that);case SeedRerolled():
 return seedRerolled(_that);case SeedOverflowed():
 return seedOverflowed(_that);case OverflowExpired():
 return overflowExpired(_that);case MailArrived():
-return mailArrived(_that);case StoryDone():
+return mailArrived(_that);case RegionCleared():
+return regionCleared(_that);case StoryDone():
 return storyDone(_that);case GearEnhanced():
 return gearEnhanced(_that);case GearRerolled():
 return gearRerolled(_that);case GearRepaired():
@@ -334,7 +340,7 @@ return returned(_that);}
 /// }
 /// ```
 
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PotatoPlanted value)?  planted,TResult? Function( PotatoGrown value)?  grown,TResult? Function( PotatoDied value)?  died,TResult? Function( GraveLost value)?  graveLost,TResult? Function( PotatoRevived value)?  revived,TResult? Function( SeedConverted value)?  seedConverted,TResult? Function( SeedRerolled value)?  seedRerolled,TResult? Function( SeedOverflowed value)?  seedOverflowed,TResult? Function( OverflowExpired value)?  overflowExpired,TResult? Function( MailArrived value)?  mailArrived,TResult? Function( StoryDone value)?  storyDone,TResult? Function( GearEnhanced value)?  gearEnhanced,TResult? Function( GearRerolled value)?  gearRerolled,TResult? Function( GearRepaired value)?  gearRepaired,TResult? Function( GearDisassembled value)?  gearDisassembled,TResult? Function( TotemLit value)?  totemLit,TResult? Function( SeedMade value)?  seedMade,TResult? Function( TotemOut value)?  totemOut,TResult? Function( BlockOpened value)?  blockOpened,TResult? Function( FieldMade value)?  fieldMade,TResult? Function( FieldChanged value)?  fieldChanged,TResult? Function( BuildingMoved value)?  buildingMoved,TResult? Function( BuildingBuilt value)?  built,TResult? Function( BuildingUpgraded value)?  upgraded,TResult? Function( BuildingDemolished value)?  demolished,TResult? Function( SeedTrained value)?  trained,TResult? Function( PestAppeared value)?  pestAppeared,TResult? Function( PestCleared value)?  pestCleared,TResult? Function( PotatoesWeakened value)?  weakened,TResult? Function( PotatoesRecovered value)?  recovered,TResult? Function( PotatoUprooted value)?  uprooted,TResult? Function( PotatoReleased value)?  released,TResult? Function( PotatoMoved value)?  potatoMoved,TResult? Function( PotatoTakenOut value)?  takenOut,TResult? Function( FoodHarvested value)?  harvested,TResult? Function( Departed value)?  departed,TResult? Function( Returned value)?  returned,}){
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>({TResult? Function( PotatoPlanted value)?  planted,TResult? Function( PotatoGrown value)?  grown,TResult? Function( PotatoDied value)?  died,TResult? Function( GraveLost value)?  graveLost,TResult? Function( PotatoRevived value)?  revived,TResult? Function( SeedConverted value)?  seedConverted,TResult? Function( SeedRerolled value)?  seedRerolled,TResult? Function( SeedOverflowed value)?  seedOverflowed,TResult? Function( OverflowExpired value)?  overflowExpired,TResult? Function( MailArrived value)?  mailArrived,TResult? Function( RegionCleared value)?  regionCleared,TResult? Function( StoryDone value)?  storyDone,TResult? Function( GearEnhanced value)?  gearEnhanced,TResult? Function( GearRerolled value)?  gearRerolled,TResult? Function( GearRepaired value)?  gearRepaired,TResult? Function( GearDisassembled value)?  gearDisassembled,TResult? Function( TotemLit value)?  totemLit,TResult? Function( SeedMade value)?  seedMade,TResult? Function( TotemOut value)?  totemOut,TResult? Function( BlockOpened value)?  blockOpened,TResult? Function( FieldMade value)?  fieldMade,TResult? Function( FieldChanged value)?  fieldChanged,TResult? Function( BuildingMoved value)?  buildingMoved,TResult? Function( BuildingBuilt value)?  built,TResult? Function( BuildingUpgraded value)?  upgraded,TResult? Function( BuildingDemolished value)?  demolished,TResult? Function( SeedTrained value)?  trained,TResult? Function( PestAppeared value)?  pestAppeared,TResult? Function( PestCleared value)?  pestCleared,TResult? Function( PotatoesWeakened value)?  weakened,TResult? Function( PotatoesRecovered value)?  recovered,TResult? Function( PotatoUprooted value)?  uprooted,TResult? Function( PotatoReleased value)?  released,TResult? Function( PotatoMoved value)?  potatoMoved,TResult? Function( PotatoTakenOut value)?  takenOut,TResult? Function( FoodHarvested value)?  harvested,TResult? Function( Departed value)?  departed,TResult? Function( Returned value)?  returned,}){
 final _that = this;
 switch (_that) {
 case PotatoPlanted() when planted != null:
@@ -347,7 +353,8 @@ return seedConverted(_that);case SeedRerolled() when seedRerolled != null:
 return seedRerolled(_that);case SeedOverflowed() when seedOverflowed != null:
 return seedOverflowed(_that);case OverflowExpired() when overflowExpired != null:
 return overflowExpired(_that);case MailArrived() when mailArrived != null:
-return mailArrived(_that);case StoryDone() when storyDone != null:
+return mailArrived(_that);case RegionCleared() when regionCleared != null:
+return regionCleared(_that);case StoryDone() when storyDone != null:
 return storyDone(_that);case GearEnhanced() when gearEnhanced != null:
 return gearEnhanced(_that);case GearRerolled() when gearRerolled != null:
 return gearRerolled(_that);case GearRepaired() when gearRepaired != null:
@@ -391,7 +398,7 @@ return returned(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)?  planted,TResult Function( int? fieldId,  TilePos? tile,  int potatoId)?  grown,TResult Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)?  died,TResult Function( int potatoId)?  graveLost,TResult Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)?  revived,TResult Function( Seed from,  Seed seed)?  seedConverted,TResult Function( Seed from,  Seed seed)?  seedRerolled,TResult Function( Seed seed)?  seedOverflowed,TResult Function( Seed seed,  int food)?  overflowExpired,TResult Function( int mailId)?  mailArrived,TResult Function( String event,  List<String> unlocks)?  storyDone,TResult Function( GearKind kind,  int level,  bool worked)?  gearEnhanced,TResult Function( GearKind kind)?  gearRerolled,TResult Function( GearKind kind,  bool worked)?  gearRepaired,TResult Function( int materials)?  gearDisassembled,TResult Function( int buildingId)?  totemLit,TResult Function( int fieldId,  int potatoId,  Seed seed)?  seedMade,TResult Function( int buildingId)?  totemOut,TResult Function( TilePos block,  int food)?  blockOpened,TResult Function( int fieldId,  TileRect rect)?  fieldMade,TResult Function( int fieldId,  TileRect? rect)?  fieldChanged,TResult Function( int buildingId,  TilePos origin)?  buildingMoved,TResult Function( int buildingId,  String kind,  TilePos origin)?  built,TResult Function( int buildingId,  int level)?  upgraded,TResult Function( int buildingId,  List<int> toFridge)?  demolished,TResult Function( int buildingId,  int potatoId,  Seed seed)?  trained,TResult Function( int fieldId,  PestKind kind)?  pestAppeared,TResult Function( int fieldId,  PestKind kind,  bool byTap)?  pestCleared,TResult Function( List<int> potatoIds)?  weakened,TResult Function( List<int> potatoIds)?  recovered,TResult Function( int potatoId)?  uprooted,TResult Function( int potatoId,  bool buried)?  released,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  potatoMoved,TResult Function( int potatoId)?  takenOut,TResult Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)?  harvested,TResult Function( int food,  List<int> potatoIds)?  departed,TResult Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)?  returned,required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>({TResult Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)?  planted,TResult Function( int? fieldId,  TilePos? tile,  int potatoId)?  grown,TResult Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)?  died,TResult Function( int potatoId)?  graveLost,TResult Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)?  revived,TResult Function( Seed from,  Seed seed)?  seedConverted,TResult Function( Seed from,  Seed seed)?  seedRerolled,TResult Function( Seed seed)?  seedOverflowed,TResult Function( Seed seed,  int food)?  overflowExpired,TResult Function( int mailId)?  mailArrived,TResult Function( String zone,  List<String> opens)?  regionCleared,TResult Function( String event,  List<String> unlocks)?  storyDone,TResult Function( GearKind kind,  int level,  bool worked)?  gearEnhanced,TResult Function( GearKind kind)?  gearRerolled,TResult Function( GearKind kind,  bool worked)?  gearRepaired,TResult Function( int materials)?  gearDisassembled,TResult Function( int buildingId)?  totemLit,TResult Function( int fieldId,  int potatoId,  Seed seed)?  seedMade,TResult Function( int buildingId)?  totemOut,TResult Function( TilePos block,  int food)?  blockOpened,TResult Function( int fieldId,  TileRect rect)?  fieldMade,TResult Function( int fieldId,  TileRect? rect)?  fieldChanged,TResult Function( int buildingId,  TilePos origin)?  buildingMoved,TResult Function( int buildingId,  String kind,  TilePos origin)?  built,TResult Function( int buildingId,  int level)?  upgraded,TResult Function( int buildingId,  List<int> toFridge)?  demolished,TResult Function( int buildingId,  int potatoId,  Seed seed)?  trained,TResult Function( int fieldId,  PestKind kind)?  pestAppeared,TResult Function( int fieldId,  PestKind kind,  bool byTap)?  pestCleared,TResult Function( List<int> potatoIds)?  weakened,TResult Function( List<int> potatoIds)?  recovered,TResult Function( int potatoId)?  uprooted,TResult Function( int potatoId,  bool buried)?  released,TResult Function( int potatoId,  int fieldId,  TilePos tile)?  potatoMoved,TResult Function( int potatoId)?  takenOut,TResult Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)?  harvested,TResult Function( int food,  List<int> potatoIds)?  departed,TResult Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)?  returned,required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case PotatoPlanted() when planted != null:
 return planted(_that.fieldId,_that.tile,_that.potatoId,_that.seed);case PotatoGrown() when grown != null:
@@ -403,7 +410,8 @@ return seedConverted(_that.from,_that.seed);case SeedRerolled() when seedRerolle
 return seedRerolled(_that.from,_that.seed);case SeedOverflowed() when seedOverflowed != null:
 return seedOverflowed(_that.seed);case OverflowExpired() when overflowExpired != null:
 return overflowExpired(_that.seed,_that.food);case MailArrived() when mailArrived != null:
-return mailArrived(_that.mailId);case StoryDone() when storyDone != null:
+return mailArrived(_that.mailId);case RegionCleared() when regionCleared != null:
+return regionCleared(_that.zone,_that.opens);case StoryDone() when storyDone != null:
 return storyDone(_that.event,_that.unlocks);case GearEnhanced() when gearEnhanced != null:
 return gearEnhanced(_that.kind,_that.level,_that.worked);case GearRerolled() when gearRerolled != null:
 return gearRerolled(_that.kind);case GearRepaired() when gearRepaired != null:
@@ -448,7 +456,7 @@ return returned(_that.food,_that.seeds,_that.potatoIds,_that.toFridge,_that.lost
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)  planted,required TResult Function( int? fieldId,  TilePos? tile,  int potatoId)  grown,required TResult Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)  died,required TResult Function( int potatoId)  graveLost,required TResult Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)  revived,required TResult Function( Seed from,  Seed seed)  seedConverted,required TResult Function( Seed from,  Seed seed)  seedRerolled,required TResult Function( Seed seed)  seedOverflowed,required TResult Function( Seed seed,  int food)  overflowExpired,required TResult Function( int mailId)  mailArrived,required TResult Function( String event,  List<String> unlocks)  storyDone,required TResult Function( GearKind kind,  int level,  bool worked)  gearEnhanced,required TResult Function( GearKind kind)  gearRerolled,required TResult Function( GearKind kind,  bool worked)  gearRepaired,required TResult Function( int materials)  gearDisassembled,required TResult Function( int buildingId)  totemLit,required TResult Function( int fieldId,  int potatoId,  Seed seed)  seedMade,required TResult Function( int buildingId)  totemOut,required TResult Function( TilePos block,  int food)  blockOpened,required TResult Function( int fieldId,  TileRect rect)  fieldMade,required TResult Function( int fieldId,  TileRect? rect)  fieldChanged,required TResult Function( int buildingId,  TilePos origin)  buildingMoved,required TResult Function( int buildingId,  String kind,  TilePos origin)  built,required TResult Function( int buildingId,  int level)  upgraded,required TResult Function( int buildingId,  List<int> toFridge)  demolished,required TResult Function( int buildingId,  int potatoId,  Seed seed)  trained,required TResult Function( int fieldId,  PestKind kind)  pestAppeared,required TResult Function( int fieldId,  PestKind kind,  bool byTap)  pestCleared,required TResult Function( List<int> potatoIds)  weakened,required TResult Function( List<int> potatoIds)  recovered,required TResult Function( int potatoId)  uprooted,required TResult Function( int potatoId,  bool buried)  released,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  potatoMoved,required TResult Function( int potatoId)  takenOut,required TResult Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)  harvested,required TResult Function( int food,  List<int> potatoIds)  departed,required TResult Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)  returned,}) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>({required TResult Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)  planted,required TResult Function( int? fieldId,  TilePos? tile,  int potatoId)  grown,required TResult Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)  died,required TResult Function( int potatoId)  graveLost,required TResult Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)  revived,required TResult Function( Seed from,  Seed seed)  seedConverted,required TResult Function( Seed from,  Seed seed)  seedRerolled,required TResult Function( Seed seed)  seedOverflowed,required TResult Function( Seed seed,  int food)  overflowExpired,required TResult Function( int mailId)  mailArrived,required TResult Function( String zone,  List<String> opens)  regionCleared,required TResult Function( String event,  List<String> unlocks)  storyDone,required TResult Function( GearKind kind,  int level,  bool worked)  gearEnhanced,required TResult Function( GearKind kind)  gearRerolled,required TResult Function( GearKind kind,  bool worked)  gearRepaired,required TResult Function( int materials)  gearDisassembled,required TResult Function( int buildingId)  totemLit,required TResult Function( int fieldId,  int potatoId,  Seed seed)  seedMade,required TResult Function( int buildingId)  totemOut,required TResult Function( TilePos block,  int food)  blockOpened,required TResult Function( int fieldId,  TileRect rect)  fieldMade,required TResult Function( int fieldId,  TileRect? rect)  fieldChanged,required TResult Function( int buildingId,  TilePos origin)  buildingMoved,required TResult Function( int buildingId,  String kind,  TilePos origin)  built,required TResult Function( int buildingId,  int level)  upgraded,required TResult Function( int buildingId,  List<int> toFridge)  demolished,required TResult Function( int buildingId,  int potatoId,  Seed seed)  trained,required TResult Function( int fieldId,  PestKind kind)  pestAppeared,required TResult Function( int fieldId,  PestKind kind,  bool byTap)  pestCleared,required TResult Function( List<int> potatoIds)  weakened,required TResult Function( List<int> potatoIds)  recovered,required TResult Function( int potatoId)  uprooted,required TResult Function( int potatoId,  bool buried)  released,required TResult Function( int potatoId,  int fieldId,  TilePos tile)  potatoMoved,required TResult Function( int potatoId)  takenOut,required TResult Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)  harvested,required TResult Function( int food,  List<int> potatoIds)  departed,required TResult Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)  returned,}) {final _that = this;
 switch (_that) {
 case PotatoPlanted():
 return planted(_that.fieldId,_that.tile,_that.potatoId,_that.seed);case PotatoGrown():
@@ -460,7 +468,8 @@ return seedConverted(_that.from,_that.seed);case SeedRerolled():
 return seedRerolled(_that.from,_that.seed);case SeedOverflowed():
 return seedOverflowed(_that.seed);case OverflowExpired():
 return overflowExpired(_that.seed,_that.food);case MailArrived():
-return mailArrived(_that.mailId);case StoryDone():
+return mailArrived(_that.mailId);case RegionCleared():
+return regionCleared(_that.zone,_that.opens);case StoryDone():
 return storyDone(_that.event,_that.unlocks);case GearEnhanced():
 return gearEnhanced(_that.kind,_that.level,_that.worked);case GearRerolled():
 return gearRerolled(_that.kind);case GearRepaired():
@@ -501,7 +510,7 @@ return returned(_that.food,_that.seeds,_that.potatoIds,_that.toFridge,_that.lost
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)?  planted,TResult? Function( int? fieldId,  TilePos? tile,  int potatoId)?  grown,TResult? Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)?  died,TResult? Function( int potatoId)?  graveLost,TResult? Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)?  revived,TResult? Function( Seed from,  Seed seed)?  seedConverted,TResult? Function( Seed from,  Seed seed)?  seedRerolled,TResult? Function( Seed seed)?  seedOverflowed,TResult? Function( Seed seed,  int food)?  overflowExpired,TResult? Function( int mailId)?  mailArrived,TResult? Function( String event,  List<String> unlocks)?  storyDone,TResult? Function( GearKind kind,  int level,  bool worked)?  gearEnhanced,TResult? Function( GearKind kind)?  gearRerolled,TResult? Function( GearKind kind,  bool worked)?  gearRepaired,TResult? Function( int materials)?  gearDisassembled,TResult? Function( int buildingId)?  totemLit,TResult? Function( int fieldId,  int potatoId,  Seed seed)?  seedMade,TResult? Function( int buildingId)?  totemOut,TResult? Function( TilePos block,  int food)?  blockOpened,TResult? Function( int fieldId,  TileRect rect)?  fieldMade,TResult? Function( int fieldId,  TileRect? rect)?  fieldChanged,TResult? Function( int buildingId,  TilePos origin)?  buildingMoved,TResult? Function( int buildingId,  String kind,  TilePos origin)?  built,TResult? Function( int buildingId,  int level)?  upgraded,TResult? Function( int buildingId,  List<int> toFridge)?  demolished,TResult? Function( int buildingId,  int potatoId,  Seed seed)?  trained,TResult? Function( int fieldId,  PestKind kind)?  pestAppeared,TResult? Function( int fieldId,  PestKind kind,  bool byTap)?  pestCleared,TResult? Function( List<int> potatoIds)?  weakened,TResult? Function( List<int> potatoIds)?  recovered,TResult? Function( int potatoId)?  uprooted,TResult? Function( int potatoId,  bool buried)?  released,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  potatoMoved,TResult? Function( int potatoId)?  takenOut,TResult? Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)?  harvested,TResult? Function( int food,  List<int> potatoIds)?  departed,TResult? Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)?  returned,}) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>({TResult? Function( int fieldId,  TilePos tile,  int potatoId,  Seed seed)?  planted,TResult? Function( int? fieldId,  TilePos? tile,  int potatoId)?  grown,TResult? Function( int? fieldId,  TilePos? tile,  TilePos? at,  int potatoId,  PotatoType type,  bool buried)?  died,TResult? Function( int potatoId)?  graveLost,TResult? Function( int potatoId,  Grade from,  Seed? seed,  bool atShrine)?  revived,TResult? Function( Seed from,  Seed seed)?  seedConverted,TResult? Function( Seed from,  Seed seed)?  seedRerolled,TResult? Function( Seed seed)?  seedOverflowed,TResult? Function( Seed seed,  int food)?  overflowExpired,TResult? Function( int mailId)?  mailArrived,TResult? Function( String zone,  List<String> opens)?  regionCleared,TResult? Function( String event,  List<String> unlocks)?  storyDone,TResult? Function( GearKind kind,  int level,  bool worked)?  gearEnhanced,TResult? Function( GearKind kind)?  gearRerolled,TResult? Function( GearKind kind,  bool worked)?  gearRepaired,TResult? Function( int materials)?  gearDisassembled,TResult? Function( int buildingId)?  totemLit,TResult? Function( int fieldId,  int potatoId,  Seed seed)?  seedMade,TResult? Function( int buildingId)?  totemOut,TResult? Function( TilePos block,  int food)?  blockOpened,TResult? Function( int fieldId,  TileRect rect)?  fieldMade,TResult? Function( int fieldId,  TileRect? rect)?  fieldChanged,TResult? Function( int buildingId,  TilePos origin)?  buildingMoved,TResult? Function( int buildingId,  String kind,  TilePos origin)?  built,TResult? Function( int buildingId,  int level)?  upgraded,TResult? Function( int buildingId,  List<int> toFridge)?  demolished,TResult? Function( int buildingId,  int potatoId,  Seed seed)?  trained,TResult? Function( int fieldId,  PestKind kind)?  pestAppeared,TResult? Function( int fieldId,  PestKind kind,  bool byTap)?  pestCleared,TResult? Function( List<int> potatoIds)?  weakened,TResult? Function( List<int> potatoIds)?  recovered,TResult? Function( int potatoId)?  uprooted,TResult? Function( int potatoId,  bool buried)?  released,TResult? Function( int potatoId,  int fieldId,  TilePos tile)?  potatoMoved,TResult? Function( int potatoId)?  takenOut,TResult? Function( int fieldId,  int food,  Seed? seed,  List<Seed> seeds)?  harvested,TResult? Function( int food,  List<int> potatoIds)?  departed,TResult? Function( int food,  int seeds,  List<int> potatoIds,  List<int> toFridge,  List<int> lost)?  returned,}) {final _that = this;
 switch (_that) {
 case PotatoPlanted() when planted != null:
 return planted(_that.fieldId,_that.tile,_that.potatoId,_that.seed);case PotatoGrown() when grown != null:
@@ -513,7 +522,8 @@ return seedConverted(_that.from,_that.seed);case SeedRerolled() when seedRerolle
 return seedRerolled(_that.from,_that.seed);case SeedOverflowed() when seedOverflowed != null:
 return seedOverflowed(_that.seed);case OverflowExpired() when overflowExpired != null:
 return overflowExpired(_that.seed,_that.food);case MailArrived() when mailArrived != null:
-return mailArrived(_that.mailId);case StoryDone() when storyDone != null:
+return mailArrived(_that.mailId);case RegionCleared() when regionCleared != null:
+return regionCleared(_that.zone,_that.opens);case StoryDone() when storyDone != null:
 return storyDone(_that.event,_that.unlocks);case GearEnhanced() when gearEnhanced != null:
 return gearEnhanced(_that.kind,_that.level,_that.worked);case GearRerolled() when gearRerolled != null:
 return gearRerolled(_that.kind);case GearRepaired() when gearRepaired != null:
@@ -1444,6 +1454,89 @@ class _$MailArrivedCopyWithImpl<$Res>
   return _then(MailArrived(
 mailId: null == mailId ? _self.mailId : mailId // ignore: cast_nullable_to_non_nullable
 as int,
+  ));
+}
+
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class RegionCleared implements FarmEvent {
+  const RegionCleared({required this.zone,  List<String> opens = const <String>[],  String? $type}): _opens = opens,$type = $type ?? 'regionCleared';
+  factory RegionCleared.fromJson(Map<String, dynamic> json) => _$RegionClearedFromJson(json);
+
+ final  String zone;
+ final  List<String> _opens;
+@JsonKey() List<String> get opens {
+  if (_opens is EqualUnmodifiableListView) return _opens;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableListView(_opens);
+}
+
+
+@JsonKey(name: 'runtimeType')
+final String $type;
+
+
+/// Create a copy of FarmEvent
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$RegionClearedCopyWith<RegionCleared> get copyWith => _$RegionClearedCopyWithImpl<RegionCleared>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$RegionClearedToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is RegionCleared&&(identical(other.zone, zone) || other.zone == zone)&&const DeepCollectionEquality().equals(other.opens, _opens));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,zone,const DeepCollectionEquality().hash(_opens));
+}
+
+@override
+String toString() {
+    return 'FarmEvent.regionCleared(zone: $zone, opens: $opens)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $RegionClearedCopyWith<$Res> implements $FarmEventCopyWith<$Res> {
+  factory $RegionClearedCopyWith(RegionCleared value, $Res Function(RegionCleared) _then) = _$RegionClearedCopyWithImpl;
+@useResult
+$Res call({
+ String zone, List<String> opens
+});
+
+
+
+
+}
+/// @nodoc
+class _$RegionClearedCopyWithImpl<$Res>
+    implements $RegionClearedCopyWith<$Res> {
+  _$RegionClearedCopyWithImpl(this._self, this._then);
+
+  final RegionCleared _self;
+  final $Res Function(RegionCleared) _then;
+
+/// Create a copy of FarmEvent
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') $Res call({Object? zone = null,Object? opens = null,}) {
+  return _then(RegionCleared(
+zone: null == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
+as String,opens: null == opens ? _self._opens : opens // ignore: cast_nullable_to_non_nullable
+as List<String>,
   ));
 }
 

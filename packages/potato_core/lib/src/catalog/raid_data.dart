@@ -539,6 +539,14 @@ abstract class ZoneData with _$ZoneData {
     /// Who guards the map's clearing, if anyone.
     ZoneBossData? boss,
 
+    /// For a story region's safe zone: the zones that open when it is
+    /// cleared, its boss killed (2026-11-08, 사용자: clearing opens before
+    /// and apart from the story, which may also clear it with a
+    /// `clear:<id>` unlock). Its score then counts toward the farm's
+    /// progress, the highest danger difficulty to pick. Null for zones
+    /// that are never cleared (danger and test zones).
+    List<String>? clearOpens,
+
     /// Which region's pictures the map is drawn with (`grassland`,
     /// `desert`, ...): ground, high ground, trees and the like. Only the
     /// look; the rules are the same (2026-10-25, phase 8 drafts).

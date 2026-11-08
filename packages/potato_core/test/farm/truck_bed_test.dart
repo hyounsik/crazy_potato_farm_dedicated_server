@@ -130,7 +130,7 @@ void main() {
       'seed_food_rare',
       'material',
     ]);
-    expect(farm.progress, 3);
+    expect(farm.progress, 0, reason: 'only a cleared region raises it');
 
     expect(farm.apply(const FarmCommand.unloadBag(slot: 2)), null);
     expect(farm.materials, {'material': 9});

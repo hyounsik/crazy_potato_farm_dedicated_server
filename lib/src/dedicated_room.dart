@@ -119,7 +119,7 @@ final class DedicatedRoom {
   int _buildNumber = 0;
   HostSession? _session;
   _RoomTransport? _relay;
-  StreamSubscription<String>? _startSub;
+  StreamSubscription<({String zone, int? score})>? _startSub;
   Timer? _ticker;
   final Stopwatch _sinceTick = Stopwatch();
   Duration _emptyFor = Duration.zero;
@@ -371,7 +371,12 @@ final class DedicatedRoom {
   /// leave the farm until they come back (2026-10-28, 사용자: each goes with
   /// their own bag and gear). The app's own idea of its gear and bag is not
   /// trusted. Potatoes that cannot go stay home.
-  RaidMemberStart _startFromKit(FarmRoom room, HostedGuest guest, String zone) {
+  RaidMemberStart _startFromKit(
+    FarmRoom room,
+    HostedGuest guest,
+    String zone,
+    int? score,
+  ) {
     final player = guest.playerId.isEmpty ? guest.peerId : guest.playerId;
     final kit = room.kitOf(player);
     final asked = [for (final c in guest.start.companions) c.potatoId];
@@ -387,7 +392,7 @@ final class DedicatedRoom {
     );
     final departed = room.apply(
       player,
-      FarmCommand.depart(zone: zone, food: 0, potatoIds: going),
+      FarmCommand.depart(zone: zone, food: 0, potatoIds: going, score: score),
     );
     if (departed.rejection != null && going.isNotEmpty) {
       log?.call('${guest.start.name}: companions stay (${departed.rejection})');
@@ -398,7 +403,7 @@ final class DedicatedRoom {
         food: 0,
         kit: kit,
       );
-      room.apply(player, FarmCommand.depart(zone: zone, food: 0));
+      room.apply(player, FarmCommand.depart(zone: zone, food: 0, score: score));
     }
     return start;
   }
@@ -453,13 +458,18 @@ final class DedicatedRoom {
 
   /// A guest asked to set out to [zone]. With a farm, everyone on it is
   /// called to get ready; without one (exploring only), everyone goes now.
-  void _openParty(String zone) {
+  void _openParty(({String zone, int? score}) request) {
+    final (:zone, :score) = request;
     final session = _session;
     if (session == null || session.run != null) return;
-    if (world == null) return _startRun(zone);
+    if (score != null && !_scoreAllowed(zone, score)) {
+      log?.call('Refused $zone at $score');
+      return;
+    }
+    if (world == null) return _startRun(zone, score: score);
     if (session.partyZone != null) return;
-    session.openParty(zone, countdown: partyCountdown);
-    log?.call('Party for $zone');
+    session.openParty(zone, countdown: partyCountdown, score: score);
+    log?.call('Party for $zone${score == null ? '' : ' at $score'}');
     _departTimer?.cancel();
     _departTimer = Timer(partyCountdown, _depart);
   }
@@ -492,10 +502,21 @@ final class DedicatedRoom {
       log?.call('Nobody got ready for $zone');
       return session.closeParty();
     }
-    _startRun(zone, goers);
+    _startRun(zone, goers: goers, score: session.partyScore);
   }
 
-  void _startRun(String zone, [List<HostedGuest>? goers]) {
+  /// Whether danger zone [zone] may be played at [score]: on a world, up to
+  /// the shared farm's progress; exploring only, any score of the game
+  /// (2026-11-08, 사용자: danger zones only).
+  bool _scoreAllowed(String zone, int score) {
+    final data = _session?.catalog.zones[zone];
+    if (data?.danger == null) return false;
+    final range = world?.room?.farm.dangerScores(zone);
+    if (range == null) return score >= data!.score && score <= 99;
+    return score >= range.min && score <= range.max;
+  }
+
+  void _startRun(String zone, {List<HostedGuest>? goers, int? score}) {
     final session = _session;
     if (session == null || session.run != null) return;
     final seed = _random.nextInt(1 << 32);
@@ -503,9 +524,10 @@ final class DedicatedRoom {
     session.startRun(
       zone: zone,
       seed: seed,
+      score: score,
       startOf: farmRoom == null
           ? null
-          : (g) => _startFromKit(farmRoom, g, zone),
+          : (g) => _startFromKit(farmRoom, g, zone, score),
       goers: goers,
     );
     log?.call(

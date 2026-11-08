@@ -24,6 +24,7 @@ const Map<int, String> _fingerprints = {
   15: '55d25f8d',
   16: 'ff083947',
   17: 'ff083947',
+  18: '8cd1c413',
 };
 
 void main() {

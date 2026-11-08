@@ -33,6 +33,7 @@ Catalog _testCatalog() {
       (files['zones']! as Map<String, dynamic>)['zones'] as List<Object?>;
   final open = jsonDecode(jsonEncode(zones.first)) as Map<String, dynamic>;
   open['id'] = 'open';
+  open.remove('clear_opens');
   open['map'] = {
     'size': 20,
     'entry': {'x': 10, 'y': 10},
@@ -425,7 +426,7 @@ void main() {
         hostPlays: false,
       );
       final requests = <String>[];
-      host.startRequests.listen(requests.add);
+      host.startRequests.listen((r) => requests.add(r.zone));
       final leader = ClientSession(
         catalog: catalog,
         transport: net.connectClient('a'),
@@ -892,6 +893,39 @@ void main() {
 
       await a.close();
       await b.close();
+      await host.close();
+    });
+
+    test('the danger difficulty the host picks reaches everyone and the '
+        'run (2026-11-08)', () async {
+      final net = InMemorySessionNetwork();
+      final host = HostSession(
+        catalog: catalog,
+        transport: net.host,
+        hostName: 'Host',
+      );
+      final a = ClientSession(
+        catalog: catalog,
+        transport: net.connectClient('a'),
+        start: const RaidMemberStart(name: 'a'),
+      );
+      await _pumpMicrotasks();
+      host.openParty('danger_open', score: 20);
+      await _pumpMicrotasks();
+      expect(a.partyZone, 'danger_open');
+      expect(a.partyScore, 20);
+
+      host.startRun(
+        zone: 'danger_open',
+        seed: 1,
+        score: 20,
+        hostStart: const RaidMemberStart(name: 'Host'),
+      );
+      await _pumpMicrotasks();
+      expect(host.run!.zone.score, 20);
+      expect(a.run!.zone.score, 20, reason: 'the guest mirrors it');
+
+      await a.close();
       await host.close();
     });
 

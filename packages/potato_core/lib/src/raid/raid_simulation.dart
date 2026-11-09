@@ -3156,16 +3156,8 @@ final class RaidSimulation {
         scaling.gradeWeight(Grade.legendary, zone.score) == 1) {
       return null;
     }
-    return (item, weight) {
-      final data = catalog.items[item];
-      final grade = data?.seed?.grade ?? data?.gear?.grade;
-      if (grade == null || grade == Grade.normal) return weight;
-      final luck = data?.seed != null ? factor : 1.0;
-      return math.max(
-        1,
-        (weight * luck * scaling.gradeWeight(grade, zone.score)).round(),
-      );
-    };
+    return (item, weight) =>
+        catalog.lootWeight(item, weight, zone.score, luck: factor);
   }
 
   static List<RaidPile> _placeSpots(

@@ -1,3 +1,5 @@
+import 'dart:math' as math;
+
 import 'package:json_annotation/json_annotation.dart';
 import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/building_data.dart';
@@ -109,6 +111,42 @@ final class Catalog {
       levelMin: region == null ? score : region.levelMin ?? region.score,
       levelMax: region == null ? score : region.levelMax ?? region.score,
     );
+  }
+
+  /// What loot [item] of table weight [weight] weighs at [score]: rare and
+  /// legendary seeds and gear weigh more the higher the score, and [luck]
+  /// multiplies better seeds.
+  int lootWeight(String item, int weight, int score, {double luck = 1}) {
+    final data = items[item];
+    final grade = data?.seed?.grade ?? data?.gear?.grade;
+    if (grade == null || grade == Grade.normal) return weight;
+    final factor = data?.seed != null ? luck : 1.0;
+    return math.max(
+      1,
+      (weight * factor * rules.zoneScaling.gradeWeight(grade, score)).round(),
+    );
+  }
+
+  /// The chance one roll of zone [id]'s gathering spots gives a seed of each
+  /// type and grade, at [score] (its own when null), with no luck
+  /// (2026-11-09, 사용자: shown in the danger zone's difficulty popup).
+  Map<(PotatoType, Grade), double> seedChances(String id, {int? score}) {
+    final zone = zoneAt(id, score: score);
+    final table = zone == null ? null : lootTables[zone.gathering.loot];
+    if (zone == null || table == null) return const {};
+    int weigh(LootEntryData e) => lootWeight(e.item, e.weight, zone.score);
+    final total = table.entries.fold(0, (sum, e) => sum + weigh(e));
+    final chances = <(PotatoType, Grade), double>{};
+    for (final entry in table.entries) {
+      final seed = items[entry.item]?.seed;
+      if (seed == null) continue;
+      chances.update(
+        (seed.type, seed.grade),
+        (chance) => chance + weigh(entry) / total,
+        ifAbsent: () => weigh(entry) / total,
+      );
+    }
+    return chances;
   }
 
   /// Hand-drawn maps by id, which zones name in `drawn_map`.

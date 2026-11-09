@@ -294,22 +294,35 @@ final class FarmSimulation {
   /// Story regions cleared: their safe zone's boss fell in one of this
   /// farm's own runs, or the story cleared it (`clear:<id>`). A party
   /// guest's runs never count (2026-11-08, 사용자: the host's world).
+  ///
+  /// A later region cleared counts every region before it as cleared
+  /// (2026-11-09, 사용자): farms played under the old chapters may hold a
+  /// later boss without the earlier ones.
   Iterable<String> get clearedZones sync* {
+    var best = -1;
     for (final zone in catalog.zones.values) {
-      if (zone.clearOpens == null) continue;
+      if (zone.clearOpens == null || zone.score <= best) continue;
       if ((totals.bossKills[zone.id] ?? 0) > 0 ||
           _unlocked.contains(StoryUnlock.clear(zone.id))) {
-        yield zone.id;
+        best = zone.score;
       }
+    }
+    for (final zone in catalog.zones.values) {
+      if (zone.clearOpens != null && zone.score <= best) yield zone.id;
     }
   }
 
-  /// The scores danger zone [zone] may be played at: from its own up to
-  /// [progress] (2026-11-08, 사용자). Null for a safe or unknown zone.
+  /// The scores danger zone [zone] may be played at: from the first
+  /// region's up to [progress], whichever region it is (2026-11-09, 사용자:
+  /// 5 to the best cleared; before, from its own score). Null for a safe or
+  /// unknown zone.
   ({int min, int max})? dangerScores(String zone) {
     final data = catalog.zones[zone];
     if (data == null || data.danger == null) return null;
-    return (min: data.score, max: math.max(data.score, progress));
+    final lowest = catalog.zones.values
+        .where((z) => z.clearOpens != null)
+        .fold(data.score, (low, z) => math.min(low, z.score));
+    return (min: lowest, max: math.max(data.score, progress));
   }
 
   /// Totems that may stand on the farm: a few to begin with and each giant

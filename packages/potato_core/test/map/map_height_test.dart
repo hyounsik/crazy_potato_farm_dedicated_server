@@ -35,6 +35,23 @@ void main() {
     expect(down.x, greaterThan(5 + 0.19), reason: 'high off a cliff: no');
   });
 
+  test('stepping off a ramp beside a cliff does not wedge a walker '
+      '(2026-11-09, 사용자)', () {
+    // Leaves the ramp at (5, 2) by its top corner: the edge of the circle
+    // is still over the high tile (5, 1).
+    var at = map.move(const Vec2(5.05, 2.1), const Vec2(-0.1, 0), 0.22);
+    expect(at.x, lessThan(5), reason: 'off the ramp onto low ground');
+    final left = map.move(at, const Vec2(-0.05, 0), 0.22);
+    expect(left.x, lessThan(at.x), reason: 'walks away from the cliff');
+    final down = map.move(at, const Vec2(0, 0.05), 0.22);
+    expect(down.y, greaterThan(at.y), reason: 'walks away from the cliff');
+    // Still no way up the cliff from there.
+    for (var i = 0; i < 20; i++) {
+      at = map.move(at, const Vec2(0.03, -0.1), 0.22);
+    }
+    expect(at.x.floor() == 5 && at.y.floor() == 1, isFalse);
+  });
+
   test('paths and reach go over the ramp', () {
     final path = map.findPath(const Vec2(2.5, 7.5), const Vec2(8.5, 7.5));
     expect(path, isNotEmpty);

@@ -265,6 +265,72 @@ void main() {
     expect(farm.totals.bossKills, isEmpty);
   });
 
+  test('a later region cleared counts the ones before it (2026-11-09)', () {
+    final two = sampleCatalogWith((files) {
+      final zones = (files['zones']! as Map<String, dynamic>)['zones']!;
+      for (final zone in zones as List<Object?>) {
+        final z = zone! as Map<String, dynamic>;
+        if (z['id'] == 'sample_danger') {
+          z['score'] = 1;
+          z['clear_opens'] = <String>[];
+          z.remove('danger');
+        }
+      }
+    });
+    final farm = FarmSimulation.newFarm(two, seed: 1);
+    expect(farm.clearedZones, isEmpty);
+    farm.apply(
+      const FarmCommand.returnHome(food: 0, bossKilledIn: 'sample_zone'),
+    );
+    expect(farm.clearedZones, containsAll(['sample_zone', 'sample_danger']));
+  });
+
+  test('any danger zone may be played from the first region up '
+      '(2026-11-09)', () {
+    final raised = sampleCatalogWith((files) {
+      final zones = (files['zones']! as Map<String, dynamic>)['zones']!;
+      for (final zone in zones as List<Object?>) {
+        final z = zone! as Map<String, dynamic>;
+        if (z['id'] == 'sample_danger') z['score'] = 55;
+      }
+    });
+    final farm = FarmSimulation.newFarm(raised, seed: 1);
+    final lowest = raised.zones['sample_zone']!.score;
+    expect(farm.dangerScores('sample_danger'), (min: lowest, max: 55));
+  });
+
+  test('seed chances add up from the gathering table', () {
+    final chances = catalog.seedChances('sample_zone');
+    final table =
+        catalog.lootTables[catalog.zones['sample_zone']!.gathering.loot]!;
+    final seeds = table.entries.where(
+      (e) => catalog.items[e.item]?.seed != null,
+    );
+    final total = table.entries.fold(
+      0,
+      (sum, e) =>
+          sum +
+          catalog.lootWeight(
+            e.item,
+            e.weight,
+            catalog.zones['sample_zone']!.score,
+          ),
+    );
+    final expected =
+        seeds.fold(
+          0,
+          (sum, e) =>
+              sum +
+              catalog.lootWeight(
+                e.item,
+                e.weight,
+                catalog.zones['sample_zone']!.score,
+              ),
+        ) /
+        total;
+    expect(chances.values.fold(0.0, (a, b) => a + b), closeTo(expected, 1e-9));
+  });
+
   test('a danger difficulty past progress is refused (2026-11-08)', () {
     final open = sampleCatalogWith((files) {
       final zones = (files['zones']! as Map<String, dynamic>)['zones']!;

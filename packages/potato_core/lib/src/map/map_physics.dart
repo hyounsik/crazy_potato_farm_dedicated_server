@@ -47,13 +47,22 @@ extension MapPhysics on MapData {
 
   /// Moves a circle by [delta] one axis at a time, so it slides along walls
   /// (and cliffs, for the level it stands on) instead of sticking to them.
+  ///
+  /// On a ramp a body may lean over the cliff beside it, so it can step off
+  /// still overlapping that cliff. It then walks out freely, only kept from
+  /// crossing the cliff itself (2026-11-09, 사용자: walkers got stuck there).
   Vec2 move(Vec2 from, Vec2 delta, double radius) {
     final level = levelAt(from);
+    final wedged = level != null && overlapsCircle(from, radius, level: level);
+    bool free(Vec2 at, Vec2 to) => wedged
+        ? !overlapsCircle(to, radius) &&
+              canStep(at.x.floor(), at.y.floor(), to.x.floor(), to.y.floor())
+        : !overlapsCircle(to, radius, level: level);
     var next = from;
     final stepX = Vec2(next.x + delta.x, next.y);
-    if (!overlapsCircle(stepX, radius, level: level)) next = stepX;
+    if (free(next, stepX)) next = stepX;
     final stepY = Vec2(next.x, next.y + delta.y);
-    if (!overlapsCircle(stepY, radius, level: level)) next = stepY;
+    if (free(next, stepY)) next = stepY;
     return next;
   }
 

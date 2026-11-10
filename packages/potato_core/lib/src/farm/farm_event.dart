@@ -175,6 +175,15 @@ sealed class FarmEvent with _$FarmEvent {
     required PestKind kind,
   }) = PestAppeared;
 
+  /// A potato's active skill went off on the farm (2026-11-10, user): a
+  /// guard's lightning on [fieldId]'s pest, or a food potato's burst in
+  /// [fieldId]. [skill] is a `RaidSkill`.
+  const factory FarmEvent.skillUsed({
+    required int potatoId,
+    required String skill,
+    required int fieldId,
+  }) = SkillUsed;
+
   /// A pest was cleared, by taps or by guards.
   const factory FarmEvent.pestCleared({
     required int fieldId,

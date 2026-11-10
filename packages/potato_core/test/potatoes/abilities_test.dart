@@ -443,4 +443,88 @@ void main() {
       contains('potato_abilities: abilities: no ability in the breeding pool'),
     );
   });
+
+  group('active skills on the farm (2026-11-10)', () {
+    Catalog withSkills() => quietSampleCatalog((files) {
+      final abilities =
+          (files['potato_abilities']! as Map<String, dynamic>)['abilities']
+              as List<Object?>;
+      abilities.addAll([
+        {
+          'id': 'combat.storm',
+          'pool': 'combat',
+          'rarity': 'very_low',
+          'effects': [
+            {
+              'context': 'farm',
+              'target': 'self',
+              'kind': 'periodic',
+              'interval_sec': 7,
+              'action': 'lightning_pest',
+              'value': 2,
+            },
+          ],
+        },
+        {
+          'id': 'food.boom',
+          'pool': 'food',
+          'rarity': 'very_low',
+          'effects': [
+            {
+              'context': 'farm',
+              'target': 'self',
+              'kind': 'periodic',
+              'interval_sec': 60,
+              'action': 'burst_food',
+              'value': 5,
+            },
+          ],
+        },
+      ]);
+    });
+
+    /// Steps until [farm]'s field 1 has no pest, counting them.
+    int clearPest(Seed guardSeed) {
+      open(withSkills());
+      build('training_ground', const TilePos(8, 8));
+      farm.seeds.add(guardSeed);
+      farm.apply(
+        FarmCommand.train(buildingId: farm.buildings.last.id, seed: guardSeed),
+      );
+      plant(plainSeed(PotatoType.food));
+      farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+      farm.field(1)!.pest = Pest(kind: PestKind.blight);
+      farm.takeEvents();
+      var steps = 0;
+      while (farm.field(1)!.pest != null && steps < 100000) {
+        farm.step();
+        steps++;
+      }
+      return steps;
+    }
+
+    test('a guard\'s lightning strikes the pest and clears it sooner', () {
+      final plain = clearPest(plainSeed(PotatoType.combat));
+      final storm = clearPest(_seed(PotatoType.combat, 'combat.storm'));
+      expect(storm, lessThan(plain));
+      final strikes = farm.takeEvents().whereType<SkillUsed>().toList();
+      expect(strikes, isNotEmpty);
+      expect(strikes.first.skill, RaidSkill.lightning);
+      expect(strikes.first.fieldId, 1);
+    });
+
+    test('a food potato\'s burst adds to its field\'s harvest', () {
+      open(withSkills());
+      final potato = plant(_seed(PotatoType.food, 'food.boom', level: 12));
+      final field = farm.field(1)!;
+      farm.runSteps(catalog.potatoType(PotatoType.food).growSeconds);
+      expect(potato.isGrown(catalog.potatoType(PotatoType.food)), isTrue);
+      farm.takeEvents();
+      final before = field.leftover;
+      farm.runSteps(60);
+      // Five, and one more for its ten levels.
+      expect(field.leftover - before, 6);
+      expect(farm.takeEvents().whereType<SkillUsed>(), hasLength(1));
+    });
+  });
 }

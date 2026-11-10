@@ -947,6 +947,11 @@ final class RaidSimulation {
         if (stack == null) return RaidRejection.emptySlot;
         (found as RaidPile).loot.put(stack, catalog.stackOf);
         return null;
+      case UseSkill(:final companion):
+        for (final c in member.companions) {
+          if (c.id == companion) return _useSkill(c);
+        }
+        return RaidRejection.noSuchCompanion;
       case SetCompanionMode(:final companion, :final mode):
         for (final c in member.companions) {
           if (c.id != companion) continue;
@@ -1149,6 +1154,7 @@ final class RaidSimulation {
     if (isOver) return;
     _tick++;
     final dt = stepSeconds;
+    _tickSkillTimers(dt);
     _updateParty();
     for (final m in List.of(_active)) {
       _updatePlayer(m, dt);
@@ -1169,6 +1175,7 @@ final class RaidSimulation {
     for (final enemy in enemies) {
       if (!enemy.isDown) _updateEnemy(enemy, dt);
     }
+    _updateStrikes(dt);
     walkers.forEach((body, from) => _settle(body, from, dt));
     _updateBullets(dt);
     _updateClouds(dt);
@@ -1368,6 +1375,8 @@ final class RaidSimulation {
     final move = member.move;
     final from = player.position;
     player.dashCooldown = math.max(0, player.dashCooldown - dt);
+    // Stunned by lightning, it stands still (2026-11-10, user).
+    if (player.isStunned && !player.isDashing) return;
     if (player.isDashing) {
       player.dashLeft -= dt;
       final speed = spec.dashDistance / spec.dashSeconds;
@@ -1444,7 +1453,7 @@ final class RaidSimulation {
     player.sinceHit += dt;
     _stepMemberMove(member, dt);
     _eat(member, dt);
-    if (member.isOut || player.isDown) return;
+    if (member.isOut || player.isDown || player.isStunned) return;
     _fire(player, aimOf(member), shotDamageOf(member), dt, weaponOf(member));
   }
 
@@ -1573,6 +1582,187 @@ final class RaidSimulation {
   Iterable<RaidBody> _opponentsOf(int team) =>
       _bodies.where((b) => !b.isDown && b.team != team);
 
+  // Active skills ------------------------------------------------------------
+
+  /// Lightning from clones on its way: it falls when its warning runs out.
+  final List<_PendingStrike> _strikes = [];
+
+  /// [companion]'s active skill, if it has one (2026-11-10, user).
+  AbilityEffectData? skillOf(RaidCompanion companion) =>
+      _effects.active(_traitsOf(companion));
+
+  /// Whether [companion] could set its skill off now: it has one, stands,
+  /// is ready, and has something to use it on.
+  bool canUseSkill(RaidCompanion companion) => _skillProblem(companion) == null;
+
+  RaidRejection? _skillProblem(RaidCompanion companion) {
+    final skill = skillOf(companion);
+    if (skill == null || companion.isDown) {
+      return RaidRejection.noSuchCompanion;
+    }
+    if (companion.skillLeft > 0 || companion.isStunned) {
+      return RaidRejection.skillNotReady;
+    }
+    final found = switch (skill.action) {
+      RaidSkill.lightning => _inLightning(
+        companion.position,
+        companion.team,
+      ).isNotEmpty,
+      RaidSkill.revive => _downedBeside(companion).isNotEmpty,
+      _ => true,
+    };
+    return found ? null : RaidRejection.noSkillTarget;
+  }
+
+  RaidRejection? _useSkill(RaidCompanion companion) {
+    final problem = _skillProblem(companion);
+    if (problem != null) return problem;
+    final skill = skillOf(companion)!;
+    final value = skill.valueInUse ?? 0;
+    final spec = rules.companion.skills;
+    var targets = const <int>[];
+    var warning = 0.0;
+    switch (skill.action) {
+      case RaidSkill.lightning:
+        // A clone's lightning is shown first so it can be dodged; the
+        // player's falls at once (2026-11-10, user).
+        final strike = _PendingStrike(
+          at: companion.position,
+          from: companion.id,
+          team: companion.team,
+          damage: companionDamage(companion) * value,
+          left: companion.team == playerTeam ? 0 : spec.warningSeconds,
+        );
+        warning = strike.left;
+        if (warning > 0) {
+          _strikes.add(strike);
+        } else {
+          targets = _lightning(strike);
+        }
+      case RaidSkill.revive:
+        targets = [
+          for (final c in _downedBeside(companion))
+            (c
+                  ..hp = c.maxHp * value
+                  ..sinceHit = 0
+                  ..target = null
+                  ..guardLeft = spec.reviveGuardSeconds)
+                .id,
+        ];
+      case RaidSkill.burst:
+        final count =
+            value.floor() +
+            companion.level ~/ math.max(1, spec.burstLevelsPerExtra);
+        for (var i = 0; i < count; i++) {
+          final angle = _random.nextDouble() * 2 * math.pi;
+          final reach = spec.burstRadius * (0.4 + 0.6 * _random.nextDouble());
+          final offset = Vec2(math.cos(angle), math.sin(angle)) * reach;
+          floorItems.add(
+            RaidFloorItem(
+              id: _newId(),
+              position: map.move(companion.position, offset, 0.1),
+              stack: ItemStack(rules.food.item, 1),
+            ),
+          );
+        }
+    }
+    companion.skillLeft = (skill.intervalInUse ?? 0).toDouble();
+    _events.add(
+      CompanionSkill(
+        companion.id,
+        skill.action!,
+        companion.position,
+        targets: targets,
+        warning: warning,
+      ),
+    );
+    return null;
+  }
+
+  /// Opponents of [team] that lightning at [at] reaches.
+  Iterable<RaidBody> _inLightning(Vec2 at, int team) {
+    final reach = rules.companion.skills.lightningRadius;
+    return _opponentsOf(team)
+        .where((b) => b.position.distanceTo(at) <= reach + b.radius);
+  }
+
+  /// [companion]'s own side's downed potatoes: its member's or its
+  /// clone's, never the rest of the party's (2026-11-10, user).
+  List<RaidCompanion> _downedBeside(RaidCompanion companion) {
+    final side = [
+      for (final m in _active)
+        if (m.companions.contains(companion)) ...m.companions,
+      for (final clone in clones)
+        if (clone.companions.contains(companion)) ...clone.companions,
+    ];
+    return [
+      for (final c in side)
+        if (c.isDown) c,
+    ];
+  }
+
+  /// Lets [strike] fall: hurts and stuns everything in reach, players too
+  /// (2026-11-10, user), but not one dashing through. Returns who it hit.
+  List<int> _lightning(_PendingStrike strike) {
+    final spec = rules.companion.skills;
+    final hit = <int>[];
+    for (final body in _inLightning(strike.at, strike.team).toList()) {
+      if (body is RaidPlayer && body.isDashing) continue;
+      final versus = switch (body) {
+        RaidPlayer() => strike.team != playerTeam,
+        RaidClone() => strike.team == playerTeam,
+        _ => false,
+      };
+      _hurt(
+        body,
+        strike.damage * (versus ? rules.clones.versusPlayerDamage : 1),
+        _body(strike.from),
+      );
+      final boss =
+          body is RaidEnemy && catalog.enemies[body.kind]?.boss != null;
+      body.stunLeft = math.max(
+        body.stunLeft,
+        boss ? spec.bossStunSeconds : spec.stunSeconds,
+      );
+      hit.add(body.id);
+    }
+    return hit;
+  }
+
+  void _updateStrikes(double dt) {
+    _strikes.removeWhere((strike) {
+      strike.left -= dt;
+      if (strike.left > 0) return false;
+      _events.add(
+        CompanionSkill(
+          strike.from,
+          RaidSkill.lightning,
+          strike.at,
+          targets: _lightning(strike),
+        ),
+      );
+      return true;
+    });
+  }
+
+  /// Runs down stuns, skill cooldowns and revived potatoes' guard.
+  void _tickSkillTimers(double dt) {
+    for (final body in _bodies) {
+      if (body.stunLeft > 0) body.stunLeft = math.max(0, body.stunLeft - dt);
+    }
+    for (final companion in [
+      for (final m in _active) ...m.companions,
+      for (final clone in clones) ...clone.companions,
+    ]) {
+      if (companion.skillLeft > 0) {
+        companion.skillLeft = math.max(0, companion.skillLeft - dt);
+      }
+      if (companion.guardLeft > 0) {
+        companion.guardLeft = math.max(0, companion.guardLeft - dt);
+      }
+    }
+  }
+
   // Companions ---------------------------------------------------------------
 
   /// Where companion [slot] keeps from its owner walking toward [facing]
@@ -1637,6 +1827,7 @@ final class RaidSimulation {
         member.bag.remove(rules.food.item, whole);
       }
     }
+    if (companion.isStunned) return;
     final target = companion.type == PotatoType.combat
         ? _pickTarget(companion, owner)
         : null;
@@ -1898,6 +2089,7 @@ final class RaidSimulation {
   }
 
   void _updateEnemy(RaidEnemy enemy, double dt) {
+    if (enemy.isStunned) return;
     final spec = catalog.enemies[enemy.kind]!;
     if (spec.boss case final boss?) return _updateBoss(enemy, spec, boss, dt);
     enemy
@@ -2439,6 +2631,7 @@ final class RaidSimulation {
 
   void _hurt(RaidBody target, double amount, RaidBody? from) {
     if (target.isDown) return;
+    if (target is RaidCompanion && target.guardLeft > 0) return;
     if (target is RaidPlayer && target.isDashing) return;
     target.hp = math.max(0, target.hp - amount);
     _events.add(BodyHit(target.id, amount));
@@ -2746,6 +2939,11 @@ final class RaidSimulation {
       if (!companion.isDown) _updateCompanion(companion, clone, dt);
     }
     if (clone.isDown) return;
+    // Its potatoes' skills go off as soon as they can (2026-11-10, user).
+    for (final companion in clone.companions) {
+      if (canUseSkill(companion)) _useSkill(companion);
+    }
+    if (clone.isStunned) return;
     clone
       ..sinceHit += dt
       ..stayLeft -= dt
@@ -3235,4 +3433,21 @@ final class RaidSimulation {
         {for (final MapEntry(:key, :value) in levels.entries) key.name: value},
     ],
   };
+}
+
+/// A clone's lightning shown on the ground, falling when [left] runs out.
+final class _PendingStrike {
+  _PendingStrike({
+    required this.at,
+    required this.from,
+    required this.team,
+    required this.damage,
+    required this.left,
+  });
+
+  final Vec2 at;
+  final int from;
+  final int team;
+  final double damage;
+  double left;
 }

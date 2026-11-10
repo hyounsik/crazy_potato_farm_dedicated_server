@@ -90,6 +90,17 @@ final class RaidEffects {
     return sums;
   }
 
+  /// [potato]'s active skill on runs, if it has one (the first; a potato
+  /// shows one skill button).
+  AbilityEffectData? active(CompanionTraits potato) {
+    for (final target in EffectTarget.values) {
+      for (final effect in _effects(potato, target)) {
+        if (effect.kind == EffectKind.active) return effect;
+      }
+    }
+    return null;
+  }
+
   /// [potato]'s periodic effects (on itself or the party), each with how
   /// strong it is at the potato's level.
   Iterable<({AbilityEffectData effect, double power})> periodic(

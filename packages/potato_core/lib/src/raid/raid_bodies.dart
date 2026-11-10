@@ -21,6 +21,9 @@ const int wildTeam = -1;
 ///
 /// Mutable on purpose: a run changes hundreds of these many times a second.
 /// Saving turns them into JSON.
+double _stunOf(Map<String, dynamic> json) =>
+    (json['stun_left'] as num?)?.toDouble() ?? 0;
+
 sealed class RaidBody {
   RaidBody({
     required this.id,
@@ -40,6 +43,12 @@ sealed class RaidBody {
   /// Tiles per second it carries onto and over ice (2026-11-03, 사용자).
   /// Only the simulation's own; snapshots and saves leave it out.
   Vec2 glide = Vec2.zero;
+
+  /// Seconds it stays stunned by lightning (2026-11-10, user): it does not
+  /// move, shoot or strike.
+  double stunLeft = 0;
+
+  bool get isStunned => stunLeft > 0;
 
   RaidSide get side;
 
@@ -101,7 +110,10 @@ final class RaidPlayer extends RaidShooter {
     this.name = '',
   });
 
-  factory RaidPlayer.fromJson(Map<String, dynamic> json) => RaidPlayer(
+  factory RaidPlayer.fromJson(Map<String, dynamic> json) =>
+      _read(json)..stunLeft = _stunOf(json);
+
+  static RaidPlayer _read(Map<String, dynamic> json) => RaidPlayer(
     id: json['id'] as int,
     name: json['name'] as String? ?? '',
     position: Vec2.fromJson(json['position'] as List<Object?>),
@@ -148,6 +160,7 @@ final class RaidPlayer extends RaidShooter {
   int get team => playerTeam;
 
   Map<String, dynamic> toJson() => {
+    if (stunLeft > 0) 'stun_left': stunLeft,
     'id': id,
     if (name.isNotEmpty) 'name': name,
     'position': position.toJson(),
@@ -211,7 +224,10 @@ final class RaidEnemy extends RaidBody {
 
   /// Reads [toJson], or the lighter [toViewJson] with what only the host
   /// needs left out (it stands where it is, at rest).
-  factory RaidEnemy.fromJson(Map<String, dynamic> json) {
+  factory RaidEnemy.fromJson(Map<String, dynamic> json) =>
+      _read(json)..stunLeft = _stunOf(json);
+
+  static RaidEnemy _read(Map<String, dynamic> json) {
     final position = Vec2.fromJson(json['position'] as List<Object?>);
     double number(String key) => (json[key] as num?)?.toDouble() ?? 0;
     Vec2 at(String key, [Vec2 or = Vec2.zero]) => switch (json[key]) {
@@ -366,6 +382,7 @@ final class RaidEnemy extends RaidBody {
   int get team => wildTeam;
 
   Map<String, dynamic> toJson() => {
+    if (stunLeft > 0) 'stun_left': stunLeft,
     'id': id,
     'position': position.toJson(),
     'radius': radius,
@@ -421,6 +438,7 @@ final class RaidEnemy extends RaidBody {
       'max_hp': maxHp,
       'hp': r(hp),
       'kind': kind,
+      if (stunLeft > 0) 'stun_left': r(stunLeft),
       if (attackCooldown > 0) 'attack_cooldown': r(attackCooldown),
       if (telegraphLeft > 0) 'telegraph_left': r(telegraphLeft),
       if (chargeLeft > 0) 'charge_left': r(chargeLeft),
@@ -569,7 +587,11 @@ final class RaidCompanion extends RaidBody {
     this.beltBoost = 0,
   });
 
-  factory RaidCompanion.fromJson(Map<String, dynamic> json) => RaidCompanion(
+  factory RaidCompanion.fromJson(Map<String, dynamic> json) => _read(json)
+    ..stunLeft = _stunOf(json)
+    ..skillLeft = (json['skill_left'] as num?)?.toDouble() ?? 0;
+
+  static RaidCompanion _read(Map<String, dynamic> json) => RaidCompanion(
     id: json['id'] as int,
     position: Vec2.fromJson(json['position'] as List<Object?>),
     radius: (json['radius'] as num).toDouble(),
@@ -637,6 +659,13 @@ final class RaidCompanion extends RaidBody {
   /// How much stronger its belt slot makes it at its job (0.1 is +10%).
   final double beltBoost;
 
+  /// Seconds until its active skill can be used again; 0 when ready
+  /// (2026-11-10, user: ready from the start of a run).
+  double skillLeft = 0;
+
+  /// Seconds a revived companion cannot be hurt. Only the simulation's own.
+  double guardLeft = 0;
+
   /// Waypoints back to its owner while catching up. Not saved: it plans
   /// again after a load.
   List<Vec2> path = [];
@@ -650,6 +679,7 @@ final class RaidCompanion extends RaidBody {
   RaidSide get side => team == playerTeam ? RaidSide.player : RaidSide.clone;
 
   Map<String, dynamic> toJson() => {
+    if (stunLeft > 0) 'stun_left': stunLeft,
     'id': id,
     'position': position.toJson(),
     'radius': radius,
@@ -671,6 +701,7 @@ final class RaidCompanion extends RaidBody {
     'since_hit': _secondsJson(sinceHit),
     'target': target,
     'attack_cooldown': attackCooldown,
+    if (skillLeft > 0) 'skill_left': skillLeft,
   };
 }
 
@@ -722,6 +753,9 @@ final class RaidClone extends RaidShooter {
        path = path ?? [];
 
   factory RaidClone.fromJson(Map<String, dynamic> json, StackSize stackSize) =>
+      _read(json, stackSize)..stunLeft = _stunOf(json);
+
+  static RaidClone _read(Map<String, dynamic> json, StackSize stackSize) =>
       RaidClone(
         id: json['id'] as int,
         position: Vec2.fromJson(json['position'] as List<Object?>),
@@ -805,6 +839,7 @@ final class RaidClone extends RaidShooter {
   int get team => id;
 
   Map<String, dynamic> toJson() => {
+    if (stunLeft > 0) 'stun_left': stunLeft,
     'id': id,
     'position': position.toJson(),
     'radius': radius,

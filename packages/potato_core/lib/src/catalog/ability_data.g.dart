@@ -142,6 +142,7 @@ const _$EffectTargetEnumMap = {
 const _$EffectKindEnumMap = {
   EffectKind.stat: 'stat',
   EffectKind.periodic: 'periodic',
+  EffectKind.active: 'active',
 };
 
 const _$EffectOpEnumMap = {EffectOp.mul: 'mul', EffectOp.add: 'add'};

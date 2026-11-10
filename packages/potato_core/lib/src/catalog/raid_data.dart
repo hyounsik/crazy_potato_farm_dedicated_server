@@ -191,10 +191,45 @@ abstract class CompanionRulesData with _$CompanionRulesData {
 
     /// Enemies this close to a potato that calls them come for it.
     required double aggroPulseRange,
+
+    /// How the active skills reach (2026-11-10, user).
+    @Default(SkillRulesData()) SkillRulesData skills,
   }) = _CompanionRulesData;
 
   factory CompanionRulesData.fromJson(Map<String, dynamic> json) =>
       _$CompanionRulesDataFromJson(json);
+}
+
+/// The active skills' reach and timing (2026-11-10). The amounts (damage,
+/// health, count) are each ability's value.
+@freezed
+abstract class SkillRulesData with _$SkillRulesData {
+  const factory SkillRulesData({
+    /// Lightning falls on everything this close to the potato, in tiles.
+    @Default(2.5) double lightningRadius,
+
+    /// How long lightning stuns, and a boss.
+    @Default(1.0) double stunSeconds,
+    @Default(0.3) double bossStunSeconds,
+
+    /// A clone's lightning shows where it will fall this long first.
+    @Default(0.8) double warningSeconds,
+
+    /// A revived companion cannot be hurt for this long.
+    @Default(1.0) double reviveGuardSeconds,
+
+    /// Baby potatoes from a burst land this far round the potato at most.
+    @Default(1.5) double burstRadius,
+
+    /// A burst throws one more baby potato every this many levels.
+    @Default(10) int burstLevelsPerExtra,
+
+    /// On the farm, a guard's lightning reaches pests this many tiles off.
+    @Default(3) int farmLightningReach,
+  }) = _SkillRulesData;
+
+  factory SkillRulesData.fromJson(Map<String, dynamic> json) =>
+      _$SkillRulesDataFromJson(json);
 }
 
 /// Clones: competitors playing by the player's rules, a little slower and

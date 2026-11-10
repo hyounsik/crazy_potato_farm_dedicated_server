@@ -30,7 +30,14 @@ enum EffectTarget {
 }
 
 @JsonEnum(fieldRename: FieldRename.snake)
-enum EffectKind { stat, periodic }
+enum EffectKind {
+  stat,
+  periodic,
+
+  /// A skill the player sets off on runs (2026-11-10, user): [action] is
+  /// one of [RaidSkill], [AbilityEffectData.intervalSec] its cooldown.
+  active,
+}
 
 @JsonEnum(fieldRename: FieldRename.snake)
 enum EffectOp {
@@ -77,6 +84,33 @@ abstract final class FarmAction {
 
   /// Takes baby potatoes stored in a field into the farm.
   static const String harvestFood = 'harvest_food';
+}
+
+/// Periodic actions on the farm for the active skills' farm side
+/// (2026-11-10, user).
+abstract final class FarmSkillAction {
+  /// A guard strikes the nearest pest within reach with lightning: the
+  /// value times the clearing it does in the interval.
+  static const String lightningPest = 'lightning_pest';
+
+  /// A food potato bursts: the value plus one per ten levels of baby
+  /// potatoes go on its field's harvest.
+  static const String burstFood = 'burst_food';
+}
+
+/// Active skills on runs (2026-11-10, user), set off with `UseSkill`.
+abstract final class RaidSkill {
+  /// Lightning round the potato: every opponent in reach is hurt by the
+  /// value times its attack and stunned.
+  static const String lightning = 'lightning';
+
+  /// Stands every downed companion of its side up, at the value's share of
+  /// their health.
+  static const String revive = 'revive';
+
+  /// Scatters the value plus one per ten levels of baby potatoes round it
+  /// for anyone to pick up.
+  static const String burst = 'burst';
 }
 
 /// Stats a run reads (see also [FarmStat]).

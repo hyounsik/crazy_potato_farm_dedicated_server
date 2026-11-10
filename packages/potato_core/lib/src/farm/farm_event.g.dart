@@ -666,6 +666,32 @@ Map<String, dynamic> _$PestAppearedToJson(PestAppeared instance) =>
 
 const _$PestKindEnumMap = {PestKind.bug: 'bug', PestKind.blight: 'blight'};
 
+SkillUsed _$SkillUsedFromJson(Map<String, dynamic> json) => $checkedCreate(
+  'SkillUsed',
+  json,
+  ($checkedConvert) {
+    final val = SkillUsed(
+      potatoId: $checkedConvert('potato_id', (v) => (v as num).toInt()),
+      skill: $checkedConvert('skill', (v) => v as String),
+      fieldId: $checkedConvert('field_id', (v) => (v as num).toInt()),
+      $type: $checkedConvert('runtimeType', (v) => v as String?),
+    );
+    return val;
+  },
+  fieldKeyMap: const {
+    'potatoId': 'potato_id',
+    'fieldId': 'field_id',
+    r'$type': 'runtimeType',
+  },
+);
+
+Map<String, dynamic> _$SkillUsedToJson(SkillUsed instance) => <String, dynamic>{
+  'potato_id': instance.potatoId,
+  'skill': instance.skill,
+  'field_id': instance.fieldId,
+  'runtimeType': instance.$type,
+};
+
 PestCleared _$PestClearedFromJson(Map<String, dynamic> json) => $checkedCreate(
   'PestCleared',
   json,

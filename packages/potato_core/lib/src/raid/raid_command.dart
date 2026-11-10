@@ -1,3 +1,4 @@
+import 'package:potato_core/src/common/vec2.dart';
 import 'package:potato_core/src/items/bag.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/raid/raid_bodies.dart';
@@ -22,6 +23,7 @@ sealed class RaidCommand {
         'put_in_pile' => PutInPile(json['pile'] as int, json['slot'] as int),
         'take_loot' => TakeLoot(json['pile'] as int, json['index'] as int),
         'take_all_loot' => TakeAllLoot(json['pile'] as int),
+        'use_skill' => UseSkill(json['companion'] as int),
         'swap_loot' => SwapLoot(
           json['pile'] as int,
           json['index'] as int,
@@ -53,6 +55,7 @@ sealed class RaidCommand {
       'index': index,
     },
     TakeAllLoot(:final pile) => {'kind': 'take_all_loot', 'pile': pile},
+    UseSkill(:final companion) => {'kind': 'use_skill', 'companion': companion},
     SwapLoot(:final pile, :final index, :final slot) => {
       'kind': 'swap_loot',
       'pile': pile,
@@ -60,6 +63,13 @@ sealed class RaidCommand {
       'slot': slot,
     },
   };
+}
+
+/// Sets off companion [companion]'s active skill (2026-11-10, user).
+final class UseSkill extends RaidCommand {
+  const UseSkill(this.companion);
+
+  final int companion;
 }
 
 /// A short burst in the moving (or facing) direction, briefly unhurtable.
@@ -173,8 +183,16 @@ enum RaidRejection {
   /// The player is down, waiting for a teammate to revive them.
   downed,
 
-  /// No standing combat companion with that id.
+  /// No standing combat companion with that id (for a skill: none of the
+  /// player's standing companions with a skill).
   noSuchCompanion,
+
+  /// The skill is cooling down, or its potato is stunned.
+  skillNotReady,
+
+  /// Nothing to use the skill on: no opponent in reach of lightning, no
+  /// downed companion to revive.
+  noSkillTarget,
 
   /// Not gear, or nothing worn there.
   noGear,
@@ -210,6 +228,13 @@ sealed class RaidEvent {
         'companion_said' => CompanionSaid(
           json['companion'] as int,
           json['text'] as String,
+        ),
+        'companion_skill' => CompanionSkill(
+          json['companion'] as int,
+          json['skill'] as String,
+          Vec2.fromJson(json['at'] as List<Object?>),
+          targets: (json['targets'] as List<Object?>? ?? const []).cast<int>(),
+          warning: (json['warning'] as num?)?.toDouble() ?? 0,
         ),
         'clone_entered' => CloneEntered(json['clone'] as int),
         'clone_signalled' => CloneSignalled(
@@ -261,6 +286,21 @@ sealed class RaidEvent {
       'companion': companion,
       'text': text,
     },
+    CompanionSkill(
+      :final companion,
+      :final skill,
+      :final at,
+      :final targets,
+      :final warning,
+    ) =>
+      {
+        'kind': 'companion_skill',
+        'companion': companion,
+        'skill': skill,
+        'at': at.toJson(),
+        if (targets.isNotEmpty) 'targets': targets,
+        if (warning > 0) 'warning': warning,
+      },
     CloneEntered(:final clone) => {'kind': 'clone_entered', 'clone': clone},
     CloneSignalled(:final clone, :final exit) => {
       'kind': 'clone_signalled',
@@ -325,6 +365,27 @@ final class CompanionSaid extends RaidEvent {
 
   final int companion;
   final String text;
+}
+
+/// Companion [companion] set off its active [skill] (a `RaidSkill`) at
+/// [at] (2026-11-10, user). [targets] are the bodies it reached: hit by
+/// lightning, or stood up again. A clone's lightning first comes with a
+/// [warning] (seconds until it falls, nothing hit yet), then again as it
+/// lands.
+final class CompanionSkill extends RaidEvent {
+  const CompanionSkill(
+    this.companion,
+    this.skill,
+    this.at, {
+    this.targets = const [],
+    this.warning = 0,
+  });
+
+  final int companion;
+  final String skill;
+  final Vec2 at;
+  final List<int> targets;
+  final double warning;
 }
 
 /// Clone [clone] walked in. Screens say only that someone came in.

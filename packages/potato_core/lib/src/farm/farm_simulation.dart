@@ -960,7 +960,11 @@ final class FarmSimulation {
           ),
         );
       }
-      if (change.died) (dead ??= []).add(tile);
+      if (change.died) {
+        (dead ??= []).add(tile);
+      } else {
+        _burstFood(potato, field);
+      }
     }
     for (final tile in dead ?? const <TilePos>[]) {
       final potato = field._take(tile)!;
@@ -1022,6 +1026,7 @@ final class FarmSimulation {
       } else if (guard.potato.isGrown(data)) {
         _patrol(guard, millis);
         _sendToHarvest(guard);
+        _lightningPest(guard);
       }
     }
     for (final guard in dead ?? const <Guard>[]) {
@@ -1080,6 +1085,72 @@ final class FarmSimulation {
           .apply(speed, effort.toDouble())
           .floor();
     }
+  }
+
+  /// A guard with lightning (2026-11-10, user), when its time comes,
+  /// strikes the nearest pest in reach it can clear: twice (the ability's
+  /// value) the clearing it does in that time, whether it is there or not.
+  void _lightningPest(Guard guard) {
+    final effect = _effects.periodic(
+      guard.potato,
+      FarmSkillAction.lightningPest,
+    );
+    final interval = effect?.intervalInUse;
+    final times = effect?.valueInUse ?? 0;
+    if (interval == null || times <= 0 || !_isDue(interval)) return;
+    final reach = _rules.raid.companion.skills.farmLightningReach;
+    FarmField? nearest;
+    var nearestDistance = reach + 1;
+    for (final field in _fields.values) {
+      final pest = field.pest;
+      if (pest == null || !_clears(guard, pest.kind)) continue;
+      final distance = guard.at.manhattanDistanceTo(
+        _besideField(field, guard.at),
+      );
+      if (distance < nearestDistance) {
+        nearest = field;
+        nearestDistance = distance;
+      }
+    }
+    final pest = nearest?.pest;
+    if (nearest == null || pest == null) return;
+    final speed = switch (pest.kind) {
+      PestKind.bug => FarmStat.bugClearSpeed,
+      PestKind.blight => FarmStat.blightClearSpeed,
+    };
+    final effort =
+        _effort(guard.potato, interval * 1000) *
+        levelGrowth(_rules.potatoes.guards.levelPermille, guard.potato.level);
+    pest.clearedMillis +=
+        (_work(guard.potato).sums.apply(speed, effort.toDouble()) * times)
+            .floor();
+    _events.add(
+      FarmEvent.skillUsed(
+        potatoId: guard.potato.id,
+        skill: RaidSkill.lightning,
+        fieldId: nearest.id,
+      ),
+    );
+  }
+
+  /// A grown food potato with a burst (2026-11-10, user), when its time
+  /// comes, adds its value plus one per ten levels of baby potatoes to the
+  /// field's harvest: the farm has no picking up.
+  void _burstFood(Potato potato, FarmField field) {
+    final effect = _effects.periodic(potato, FarmSkillAction.burstFood);
+    final interval = effect?.intervalInUse;
+    final base = effect?.valueInUse ?? 0;
+    if (interval == null || base <= 0 || !_isDue(interval)) return;
+    if (!potato.isGrown(catalog.potatoType(potato.type))) return;
+    final per = _rules.raid.companion.skills.burstLevelsPerExtra;
+    field.leftover += base.floor() + potato.level ~/ math.max(1, per);
+    _events.add(
+      FarmEvent.skillUsed(
+        potatoId: potato.id,
+        skill: RaidSkill.burst,
+        fieldId: field.id,
+      ),
+    );
   }
 
   /// Sends each grown guard without a target to the pest with the fewest

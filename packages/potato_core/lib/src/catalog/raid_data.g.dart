@@ -351,6 +351,12 @@ _CompanionRulesData _$CompanionRulesDataFromJson(Map<String, dynamic> json) =>
             'aggro_pulse_range',
             (v) => (v as num).toDouble(),
           ),
+          skills: $checkedConvert(
+            'skills',
+            (v) => v == null
+                ? const SkillRulesData()
+                : SkillRulesData.fromJson(v as Map<String, dynamic>),
+          ),
         );
         return val;
       },
@@ -392,6 +398,7 @@ Map<String, dynamic> _$CompanionRulesDataToJson(_CompanionRulesData instance) =>
       'level_hp_permille': instance.levelHpPermille,
       'level_attack_permille': instance.levelAttackPermille,
       'aggro_pulse_range': instance.aggroPulseRange,
+      'skills': instance.skills.toJson(),
     };
 
 const _$CombatStyleEnumMap = {
@@ -399,6 +406,71 @@ const _$CombatStyleEnumMap = {
   CombatStyle.ranged: 'ranged',
   CombatStyle.escort: 'escort',
 };
+
+_SkillRulesData _$SkillRulesDataFromJson(Map<String, dynamic> json) =>
+    $checkedCreate(
+      '_SkillRulesData',
+      json,
+      ($checkedConvert) {
+        final val = _SkillRulesData(
+          lightningRadius: $checkedConvert(
+            'lightning_radius',
+            (v) => (v as num?)?.toDouble() ?? 2.5,
+          ),
+          stunSeconds: $checkedConvert(
+            'stun_seconds',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
+          bossStunSeconds: $checkedConvert(
+            'boss_stun_seconds',
+            (v) => (v as num?)?.toDouble() ?? 0.3,
+          ),
+          warningSeconds: $checkedConvert(
+            'warning_seconds',
+            (v) => (v as num?)?.toDouble() ?? 0.8,
+          ),
+          reviveGuardSeconds: $checkedConvert(
+            'revive_guard_seconds',
+            (v) => (v as num?)?.toDouble() ?? 1.0,
+          ),
+          burstRadius: $checkedConvert(
+            'burst_radius',
+            (v) => (v as num?)?.toDouble() ?? 1.5,
+          ),
+          burstLevelsPerExtra: $checkedConvert(
+            'burst_levels_per_extra',
+            (v) => (v as num?)?.toInt() ?? 10,
+          ),
+          farmLightningReach: $checkedConvert(
+            'farm_lightning_reach',
+            (v) => (v as num?)?.toInt() ?? 3,
+          ),
+        );
+        return val;
+      },
+      fieldKeyMap: const {
+        'lightningRadius': 'lightning_radius',
+        'stunSeconds': 'stun_seconds',
+        'bossStunSeconds': 'boss_stun_seconds',
+        'warningSeconds': 'warning_seconds',
+        'reviveGuardSeconds': 'revive_guard_seconds',
+        'burstRadius': 'burst_radius',
+        'burstLevelsPerExtra': 'burst_levels_per_extra',
+        'farmLightningReach': 'farm_lightning_reach',
+      },
+    );
+
+Map<String, dynamic> _$SkillRulesDataToJson(_SkillRulesData instance) =>
+    <String, dynamic>{
+      'lightning_radius': instance.lightningRadius,
+      'stun_seconds': instance.stunSeconds,
+      'boss_stun_seconds': instance.bossStunSeconds,
+      'warning_seconds': instance.warningSeconds,
+      'revive_guard_seconds': instance.reviveGuardSeconds,
+      'burst_radius': instance.burstRadius,
+      'burst_levels_per_extra': instance.burstLevelsPerExtra,
+      'farm_lightning_reach': instance.farmLightningReach,
+    };
 
 _CloneRulesData _$CloneRulesDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate(

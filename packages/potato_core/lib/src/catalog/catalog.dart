@@ -857,6 +857,24 @@ final class Catalog {
           }
           final interval = effect.intervalInUse;
           if (interval != null) check.positive('$at.interval_sec', interval);
+        case EffectKind.active:
+          const skills = [
+            RaidSkill.lightning,
+            RaidSkill.revive,
+            RaidSkill.burst,
+          ];
+          if (!skills.contains(effect.action)) {
+            check.issue('$at.action', 'active effects need one of $skills');
+          }
+          if (effect.context == EffectContext.farm) {
+            check.issue('$at.context', 'active skills are for runs');
+          }
+          final cooldown = effect.intervalInUse;
+          if (cooldown == null) {
+            check.issue('$at.interval_sec', 'active skills need a cooldown');
+          } else {
+            check.positive('$at.interval_sec', cooldown);
+          }
       }
       if (ability.pool != PotatoType.buff.name &&
           effect.target == EffectTarget.party) {

@@ -1924,7 +1924,8 @@ mixin _$CompanionRulesData {
 /// in thousandths over 1: 30 means ×1.03 per level, compounding (see
 /// `levelGrowth`).
  int get levelHpPermille; int get levelAttackPermille;/// Enemies this close to a potato that calls them come for it.
- double get aggroPulseRange;
+ double get aggroPulseRange;/// How the active skills reach (2026-11-10, user).
+ SkillRulesData get skills;
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1938,20 +1939,20 @@ $CompanionRulesDataCopyWith<CompanionRulesData> get copyWith => _$CompanionRules
 @override
 bool operator ==(Object other) {
   final _this = this as CompanionRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompanionRulesData&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.followDistance, _this.followDistance) || other.followDistance == _this.followDistance)&&(identical(other.catchUpDistance, _this.catchUpDistance) || other.catchUpDistance == _this.catchUpDistance)&&(identical(other.teleportDistance, _this.teleportDistance) || other.teleportDistance == _this.teleportDistance)&&(identical(other.regenDelaySeconds, _this.regenDelaySeconds) || other.regenDelaySeconds == _this.regenDelaySeconds)&&(identical(other.regenPercentPerSecond, _this.regenPercentPerSecond) || other.regenPercentPerSecond == _this.regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, _this.regenFoodPerSecond) || other.regenFoodPerSecond == _this.regenFoodPerSecond)&&(identical(other.producePerSecond, _this.producePerSecond) || other.producePerSecond == _this.producePerSecond)&&(identical(other.attackRange, _this.attackRange) || other.attackRange == _this.attackRange)&&(identical(other.defenseRange, _this.defenseRange) || other.defenseRange == _this.defenseRange)&&const DeepCollectionEquality().equals(other.styles, _this.styles)&&(identical(other.levelHpPermille, _this.levelHpPermille) || other.levelHpPermille == _this.levelHpPermille)&&(identical(other.levelAttackPermille, _this.levelAttackPermille) || other.levelAttackPermille == _this.levelAttackPermille)&&(identical(other.aggroPulseRange, _this.aggroPulseRange) || other.aggroPulseRange == _this.aggroPulseRange));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CompanionRulesData&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.followDistance, _this.followDistance) || other.followDistance == _this.followDistance)&&(identical(other.catchUpDistance, _this.catchUpDistance) || other.catchUpDistance == _this.catchUpDistance)&&(identical(other.teleportDistance, _this.teleportDistance) || other.teleportDistance == _this.teleportDistance)&&(identical(other.regenDelaySeconds, _this.regenDelaySeconds) || other.regenDelaySeconds == _this.regenDelaySeconds)&&(identical(other.regenPercentPerSecond, _this.regenPercentPerSecond) || other.regenPercentPerSecond == _this.regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, _this.regenFoodPerSecond) || other.regenFoodPerSecond == _this.regenFoodPerSecond)&&(identical(other.producePerSecond, _this.producePerSecond) || other.producePerSecond == _this.producePerSecond)&&(identical(other.attackRange, _this.attackRange) || other.attackRange == _this.attackRange)&&(identical(other.defenseRange, _this.defenseRange) || other.defenseRange == _this.defenseRange)&&const DeepCollectionEquality().equals(other.styles, _this.styles)&&(identical(other.levelHpPermille, _this.levelHpPermille) || other.levelHpPermille == _this.levelHpPermille)&&(identical(other.levelAttackPermille, _this.levelAttackPermille) || other.levelAttackPermille == _this.levelAttackPermille)&&(identical(other.aggroPulseRange, _this.aggroPulseRange) || other.aggroPulseRange == _this.aggroPulseRange)&&(identical(other.skills, _this.skills) || other.skills == _this.skills));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CompanionRulesData;
-  return Object.hash(runtimeType,_this.maxHp,_this.radius,_this.speedMultiplier,_this.followDistance,_this.catchUpDistance,_this.teleportDistance,_this.regenDelaySeconds,_this.regenPercentPerSecond,_this.regenFoodPerSecond,_this.producePerSecond,_this.attackRange,_this.defenseRange,const DeepCollectionEquality().hash(_this.styles),_this.levelHpPermille,_this.levelAttackPermille,_this.aggroPulseRange);
+  return Object.hash(runtimeType,_this.maxHp,_this.radius,_this.speedMultiplier,_this.followDistance,_this.catchUpDistance,_this.teleportDistance,_this.regenDelaySeconds,_this.regenPercentPerSecond,_this.regenFoodPerSecond,_this.producePerSecond,_this.attackRange,_this.defenseRange,const DeepCollectionEquality().hash(_this.styles),_this.levelHpPermille,_this.levelAttackPermille,_this.aggroPulseRange,_this.skills);
 }
 
 @override
 String toString() {
   final _this = this as CompanionRulesData;
-  return 'CompanionRulesData(maxHp: ${_this.maxHp}, radius: ${_this.radius}, speedMultiplier: ${_this.speedMultiplier}, followDistance: ${_this.followDistance}, catchUpDistance: ${_this.catchUpDistance}, teleportDistance: ${_this.teleportDistance}, regenDelaySeconds: ${_this.regenDelaySeconds}, regenPercentPerSecond: ${_this.regenPercentPerSecond}, regenFoodPerSecond: ${_this.regenFoodPerSecond}, producePerSecond: ${_this.producePerSecond}, attackRange: ${_this.attackRange}, defenseRange: ${_this.defenseRange}, styles: ${_this.styles}, levelHpPermille: ${_this.levelHpPermille}, levelAttackPermille: ${_this.levelAttackPermille}, aggroPulseRange: ${_this.aggroPulseRange})';
+  return 'CompanionRulesData(maxHp: ${_this.maxHp}, radius: ${_this.radius}, speedMultiplier: ${_this.speedMultiplier}, followDistance: ${_this.followDistance}, catchUpDistance: ${_this.catchUpDistance}, teleportDistance: ${_this.teleportDistance}, regenDelaySeconds: ${_this.regenDelaySeconds}, regenPercentPerSecond: ${_this.regenPercentPerSecond}, regenFoodPerSecond: ${_this.regenFoodPerSecond}, producePerSecond: ${_this.producePerSecond}, attackRange: ${_this.attackRange}, defenseRange: ${_this.defenseRange}, styles: ${_this.styles}, levelHpPermille: ${_this.levelHpPermille}, levelAttackPermille: ${_this.levelAttackPermille}, aggroPulseRange: ${_this.aggroPulseRange}, skills: ${_this.skills})';
 }
 
 
@@ -1962,11 +1963,11 @@ abstract mixin class $CompanionRulesDataCopyWith<$Res>  {
   factory $CompanionRulesDataCopyWith(CompanionRulesData value, $Res Function(CompanionRulesData) _then) = _$CompanionRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
+ double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange, SkillRulesData skills
 });
 
 
-
+$SkillRulesDataCopyWith<$Res> get skills;
 
 }
 /// @nodoc
@@ -1979,7 +1980,7 @@ class _$CompanionRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,Object? skills = null,}) {
   return _then(CompanionRulesData(
 maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
 as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
@@ -1997,10 +1998,20 @@ as double,styles: null == styles ? _self.styles : styles // ignore: cast_nullabl
 as Map<CombatStyle, CompanionStyleData>,levelHpPermille: null == levelHpPermille ? _self.levelHpPermille : levelHpPermille // ignore: cast_nullable_to_non_nullable
 as int,levelAttackPermille: null == levelAttackPermille ? _self.levelAttackPermille : levelAttackPermille // ignore: cast_nullable_to_non_nullable
 as int,aggroPulseRange: null == aggroPulseRange ? _self.aggroPulseRange : aggroPulseRange // ignore: cast_nullable_to_non_nullable
-as double,
+as double,skills: null == skills ? _self.skills : skills // ignore: cast_nullable_to_non_nullable
+as SkillRulesData,
   ));
 }
-
+/// Create a copy of CompanionRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SkillRulesDataCopyWith<$Res> get skills {
+  
+  return $SkillRulesDataCopyWith<$Res>(_self.skills, (value) {
+    return _then(_self.copyWith(skills: value));
+  });
+}
 }
 
 
@@ -2082,10 +2093,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange,  SkillRulesData skills)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CompanionRulesData() when $default != null:
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange,_that.skills);case _:
   return orElse();
 
 }
@@ -2103,10 +2114,10 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange,  SkillRulesData skills)  $default,) {final _that = this;
 switch (_that) {
 case _CompanionRulesData():
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange,_that.skills);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2123,10 +2134,10 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double maxHp,  double radius,  double speedMultiplier,  double followDistance,  double catchUpDistance,  double teleportDistance,  double regenDelaySeconds,  double regenPercentPerSecond,  double regenFoodPerSecond,  double producePerSecond,  double attackRange,  double defenseRange,  Map<CombatStyle, CompanionStyleData> styles,  int levelHpPermille,  int levelAttackPermille,  double aggroPulseRange,  SkillRulesData skills)?  $default,) {final _that = this;
 switch (_that) {
 case _CompanionRulesData() when $default != null:
-return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange);case _:
+return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDistance,_that.catchUpDistance,_that.teleportDistance,_that.regenDelaySeconds,_that.regenPercentPerSecond,_that.regenFoodPerSecond,_that.producePerSecond,_that.attackRange,_that.defenseRange,_that.styles,_that.levelHpPermille,_that.levelAttackPermille,_that.aggroPulseRange,_that.skills);case _:
   return null;
 
 }
@@ -2138,7 +2149,7 @@ return $default(_that.maxHp,_that.radius,_that.speedMultiplier,_that.followDista
 @JsonSerializable()
 
 class _CompanionRulesData implements CompanionRulesData {
-  const _CompanionRulesData({required this.maxHp, required this.radius, required this.speedMultiplier, required this.followDistance, required this.catchUpDistance, required this.teleportDistance, required this.regenDelaySeconds, required this.regenPercentPerSecond, required this.regenFoodPerSecond, required this.producePerSecond, required this.attackRange, required this.defenseRange, required  Map<CombatStyle, CompanionStyleData> styles, required this.levelHpPermille, required this.levelAttackPermille, required this.aggroPulseRange}): _styles = styles;
+  const _CompanionRulesData({required this.maxHp, required this.radius, required this.speedMultiplier, required this.followDistance, required this.catchUpDistance, required this.teleportDistance, required this.regenDelaySeconds, required this.regenPercentPerSecond, required this.regenFoodPerSecond, required this.producePerSecond, required this.attackRange, required this.defenseRange, required  Map<CombatStyle, CompanionStyleData> styles, required this.levelHpPermille, required this.levelAttackPermille, required this.aggroPulseRange, this.skills = const SkillRulesData()}): _styles = styles;
   factory _CompanionRulesData.fromJson(Map<String, dynamic> json) => _$CompanionRulesDataFromJson(json);
 
 @override final  double maxHp;
@@ -2180,6 +2191,8 @@ class _CompanionRulesData implements CompanionRulesData {
 @override final  int levelAttackPermille;
 /// Enemies this close to a potato that calls them come for it.
 @override final  double aggroPulseRange;
+/// How the active skills reach (2026-11-10, user).
+@override@JsonKey() final  SkillRulesData skills;
 
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -2194,18 +2207,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompanionRulesData&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.followDistance, followDistance) || other.followDistance == followDistance)&&(identical(other.catchUpDistance, catchUpDistance) || other.catchUpDistance == catchUpDistance)&&(identical(other.teleportDistance, teleportDistance) || other.teleportDistance == teleportDistance)&&(identical(other.regenDelaySeconds, regenDelaySeconds) || other.regenDelaySeconds == regenDelaySeconds)&&(identical(other.regenPercentPerSecond, regenPercentPerSecond) || other.regenPercentPerSecond == regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, regenFoodPerSecond) || other.regenFoodPerSecond == regenFoodPerSecond)&&(identical(other.producePerSecond, producePerSecond) || other.producePerSecond == producePerSecond)&&(identical(other.attackRange, attackRange) || other.attackRange == attackRange)&&(identical(other.defenseRange, defenseRange) || other.defenseRange == defenseRange)&&const DeepCollectionEquality().equals(other.styles, _styles)&&(identical(other.levelHpPermille, levelHpPermille) || other.levelHpPermille == levelHpPermille)&&(identical(other.levelAttackPermille, levelAttackPermille) || other.levelAttackPermille == levelAttackPermille)&&(identical(other.aggroPulseRange, aggroPulseRange) || other.aggroPulseRange == aggroPulseRange));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CompanionRulesData&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.followDistance, followDistance) || other.followDistance == followDistance)&&(identical(other.catchUpDistance, catchUpDistance) || other.catchUpDistance == catchUpDistance)&&(identical(other.teleportDistance, teleportDistance) || other.teleportDistance == teleportDistance)&&(identical(other.regenDelaySeconds, regenDelaySeconds) || other.regenDelaySeconds == regenDelaySeconds)&&(identical(other.regenPercentPerSecond, regenPercentPerSecond) || other.regenPercentPerSecond == regenPercentPerSecond)&&(identical(other.regenFoodPerSecond, regenFoodPerSecond) || other.regenFoodPerSecond == regenFoodPerSecond)&&(identical(other.producePerSecond, producePerSecond) || other.producePerSecond == producePerSecond)&&(identical(other.attackRange, attackRange) || other.attackRange == attackRange)&&(identical(other.defenseRange, defenseRange) || other.defenseRange == defenseRange)&&const DeepCollectionEquality().equals(other.styles, _styles)&&(identical(other.levelHpPermille, levelHpPermille) || other.levelHpPermille == levelHpPermille)&&(identical(other.levelAttackPermille, levelAttackPermille) || other.levelAttackPermille == levelAttackPermille)&&(identical(other.aggroPulseRange, aggroPulseRange) || other.aggroPulseRange == aggroPulseRange)&&(identical(other.skills, skills) || other.skills == skills));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,maxHp,radius,speedMultiplier,followDistance,catchUpDistance,teleportDistance,regenDelaySeconds,regenPercentPerSecond,regenFoodPerSecond,producePerSecond,attackRange,defenseRange,const DeepCollectionEquality().hash(_styles),levelHpPermille,levelAttackPermille,aggroPulseRange);
+    return Object.hash(runtimeType,maxHp,radius,speedMultiplier,followDistance,catchUpDistance,teleportDistance,regenDelaySeconds,regenPercentPerSecond,regenFoodPerSecond,producePerSecond,attackRange,defenseRange,const DeepCollectionEquality().hash(_styles),levelHpPermille,levelAttackPermille,aggroPulseRange,skills);
 }
 
 @override
 String toString() {
-    return 'CompanionRulesData(maxHp: $maxHp, radius: $radius, speedMultiplier: $speedMultiplier, followDistance: $followDistance, catchUpDistance: $catchUpDistance, teleportDistance: $teleportDistance, regenDelaySeconds: $regenDelaySeconds, regenPercentPerSecond: $regenPercentPerSecond, regenFoodPerSecond: $regenFoodPerSecond, producePerSecond: $producePerSecond, attackRange: $attackRange, defenseRange: $defenseRange, styles: $styles, levelHpPermille: $levelHpPermille, levelAttackPermille: $levelAttackPermille, aggroPulseRange: $aggroPulseRange)';
+    return 'CompanionRulesData(maxHp: $maxHp, radius: $radius, speedMultiplier: $speedMultiplier, followDistance: $followDistance, catchUpDistance: $catchUpDistance, teleportDistance: $teleportDistance, regenDelaySeconds: $regenDelaySeconds, regenPercentPerSecond: $regenPercentPerSecond, regenFoodPerSecond: $regenFoodPerSecond, producePerSecond: $producePerSecond, attackRange: $attackRange, defenseRange: $defenseRange, styles: $styles, levelHpPermille: $levelHpPermille, levelAttackPermille: $levelAttackPermille, aggroPulseRange: $aggroPulseRange, skills: $skills)';
 }
 
 
@@ -2216,11 +2229,11 @@ abstract mixin class _$CompanionRulesDataCopyWith<$Res> implements $CompanionRul
   factory _$CompanionRulesDataCopyWith(_CompanionRulesData value, $Res Function(_CompanionRulesData) _then) = __$CompanionRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange
+ double maxHp, double radius, double speedMultiplier, double followDistance, double catchUpDistance, double teleportDistance, double regenDelaySeconds, double regenPercentPerSecond, double regenFoodPerSecond, double producePerSecond, double attackRange, double defenseRange, Map<CombatStyle, CompanionStyleData> styles, int levelHpPermille, int levelAttackPermille, double aggroPulseRange, SkillRulesData skills
 });
 
 
-
+@override $SkillRulesDataCopyWith<$Res> get skills;
 
 }
 /// @nodoc
@@ -2233,7 +2246,7 @@ class __$CompanionRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CompanionRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? maxHp = null,Object? radius = null,Object? speedMultiplier = null,Object? followDistance = null,Object? catchUpDistance = null,Object? teleportDistance = null,Object? regenDelaySeconds = null,Object? regenPercentPerSecond = null,Object? regenFoodPerSecond = null,Object? producePerSecond = null,Object? attackRange = null,Object? defenseRange = null,Object? styles = null,Object? levelHpPermille = null,Object? levelAttackPermille = null,Object? aggroPulseRange = null,Object? skills = null,}) {
   return _then(_CompanionRulesData(
 maxHp: null == maxHp ? _self.maxHp : maxHp // ignore: cast_nullable_to_non_nullable
 as double,radius: null == radius ? _self.radius : radius // ignore: cast_nullable_to_non_nullable
@@ -2251,7 +2264,322 @@ as double,styles: null == styles ? _self._styles : styles // ignore: cast_nullab
 as Map<CombatStyle, CompanionStyleData>,levelHpPermille: null == levelHpPermille ? _self.levelHpPermille : levelHpPermille // ignore: cast_nullable_to_non_nullable
 as int,levelAttackPermille: null == levelAttackPermille ? _self.levelAttackPermille : levelAttackPermille // ignore: cast_nullable_to_non_nullable
 as int,aggroPulseRange: null == aggroPulseRange ? _self.aggroPulseRange : aggroPulseRange // ignore: cast_nullable_to_non_nullable
-as double,
+as double,skills: null == skills ? _self.skills : skills // ignore: cast_nullable_to_non_nullable
+as SkillRulesData,
+  ));
+}
+
+/// Create a copy of CompanionRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override
+@pragma('vm:prefer-inline')
+$SkillRulesDataCopyWith<$Res> get skills {
+  
+  return $SkillRulesDataCopyWith<$Res>(_self.skills, (value) {
+    return _then(_self.copyWith(skills: value));
+  });
+}
+}
+
+
+/// @nodoc
+mixin _$SkillRulesData {
+
+/// Lightning falls on everything this close to the potato, in tiles.
+ double get lightningRadius;/// How long lightning stuns, and a boss.
+ double get stunSeconds; double get bossStunSeconds;/// A clone's lightning shows where it will fall this long first.
+ double get warningSeconds;/// A revived companion cannot be hurt for this long.
+ double get reviveGuardSeconds;/// Baby potatoes from a burst land this far round the potato at most.
+ double get burstRadius;/// A burst throws one more baby potato every this many levels.
+ int get burstLevelsPerExtra;/// On the farm, a guard's lightning reaches pests this many tiles off.
+ int get farmLightningReach;
+/// Create a copy of SkillRulesData
+/// with the given fields replaced by the non-null parameter values.
+@JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+$SkillRulesDataCopyWith<SkillRulesData> get copyWith => _$SkillRulesDataCopyWithImpl<SkillRulesData>(this as SkillRulesData, _$identity);
+
+  /// Serializes this SkillRulesData to a JSON map.
+  Map<String, dynamic> toJson();
+
+
+@override
+bool operator ==(Object other) {
+  final _this = this as SkillRulesData;
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkillRulesData&&(identical(other.lightningRadius, _this.lightningRadius) || other.lightningRadius == _this.lightningRadius)&&(identical(other.stunSeconds, _this.stunSeconds) || other.stunSeconds == _this.stunSeconds)&&(identical(other.bossStunSeconds, _this.bossStunSeconds) || other.bossStunSeconds == _this.bossStunSeconds)&&(identical(other.warningSeconds, _this.warningSeconds) || other.warningSeconds == _this.warningSeconds)&&(identical(other.reviveGuardSeconds, _this.reviveGuardSeconds) || other.reviveGuardSeconds == _this.reviveGuardSeconds)&&(identical(other.burstRadius, _this.burstRadius) || other.burstRadius == _this.burstRadius)&&(identical(other.burstLevelsPerExtra, _this.burstLevelsPerExtra) || other.burstLevelsPerExtra == _this.burstLevelsPerExtra)&&(identical(other.farmLightningReach, _this.farmLightningReach) || other.farmLightningReach == _this.farmLightningReach));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+  final _this = this as SkillRulesData;
+  return Object.hash(runtimeType,_this.lightningRadius,_this.stunSeconds,_this.bossStunSeconds,_this.warningSeconds,_this.reviveGuardSeconds,_this.burstRadius,_this.burstLevelsPerExtra,_this.farmLightningReach);
+}
+
+@override
+String toString() {
+  final _this = this as SkillRulesData;
+  return 'SkillRulesData(lightningRadius: ${_this.lightningRadius}, stunSeconds: ${_this.stunSeconds}, bossStunSeconds: ${_this.bossStunSeconds}, warningSeconds: ${_this.warningSeconds}, reviveGuardSeconds: ${_this.reviveGuardSeconds}, burstRadius: ${_this.burstRadius}, burstLevelsPerExtra: ${_this.burstLevelsPerExtra}, farmLightningReach: ${_this.farmLightningReach})';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class $SkillRulesDataCopyWith<$Res>  {
+  factory $SkillRulesDataCopyWith(SkillRulesData value, $Res Function(SkillRulesData) _then) = _$SkillRulesDataCopyWithImpl;
+@useResult
+$Res call({
+ double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double reviveGuardSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
+});
+
+
+
+
+}
+/// @nodoc
+class _$SkillRulesDataCopyWithImpl<$Res>
+    implements $SkillRulesDataCopyWith<$Res> {
+  _$SkillRulesDataCopyWithImpl(this._self, this._then);
+
+  final SkillRulesData _self;
+  final $Res Function(SkillRulesData) _then;
+
+/// Create a copy of SkillRulesData
+/// with the given fields replaced by the non-null parameter values.
+@pragma('vm:prefer-inline') @override $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? reviveGuardSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
+  return _then(SkillRulesData(
+lightningRadius: null == lightningRadius ? _self.lightningRadius : lightningRadius // ignore: cast_nullable_to_non_nullable
+as double,stunSeconds: null == stunSeconds ? _self.stunSeconds : stunSeconds // ignore: cast_nullable_to_non_nullable
+as double,bossStunSeconds: null == bossStunSeconds ? _self.bossStunSeconds : bossStunSeconds // ignore: cast_nullable_to_non_nullable
+as double,warningSeconds: null == warningSeconds ? _self.warningSeconds : warningSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveGuardSeconds: null == reviveGuardSeconds ? _self.reviveGuardSeconds : reviveGuardSeconds // ignore: cast_nullable_to_non_nullable
+as double,burstRadius: null == burstRadius ? _self.burstRadius : burstRadius // ignore: cast_nullable_to_non_nullable
+as double,burstLevelsPerExtra: null == burstLevelsPerExtra ? _self.burstLevelsPerExtra : burstLevelsPerExtra // ignore: cast_nullable_to_non_nullable
+as int,farmLightningReach: null == farmLightningReach ? _self.farmLightningReach : farmLightningReach // ignore: cast_nullable_to_non_nullable
+as int,
+  ));
+}
+
+}
+
+
+/// Adds pattern-matching-related methods to [SkillRulesData].
+extension SkillRulesDataPatterns on SkillRulesData {
+/// A variant of `map` that fallback to returning `orElse`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _SkillRulesData value)?  $default,{required TResult orElse(),}){
+final _that = this;
+switch (_that) {
+case _SkillRulesData() when $default != null:
+return $default(_that);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// Callbacks receives the raw object, upcasted.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case final Subclass2 value:
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _SkillRulesData value)  $default,){
+final _that = this;
+switch (_that) {
+case _SkillRulesData():
+return $default(_that);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `map` that fallback to returning `null`.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case final Subclass value:
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _SkillRulesData value)?  $default,){
+final _that = this;
+switch (_that) {
+case _SkillRulesData() when $default != null:
+return $default(_that);case _:
+  return null;
+
+}
+}
+/// A variant of `when` that fallback to an `orElse` callback.
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return orElse();
+/// }
+/// ```
+
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,{required TResult orElse(),}) {final _that = this;
+switch (_that) {
+case _SkillRulesData() when $default != null:
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+  return orElse();
+
+}
+}
+/// A `switch`-like method, using callbacks.
+///
+/// As opposed to `map`, this offers destructuring.
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case Subclass2(:final field2):
+///     return ...;
+/// }
+/// ```
+
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)  $default,) {final _that = this;
+switch (_that) {
+case _SkillRulesData():
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+  throw StateError('Unexpected subclass');
+
+}
+}
+/// A variant of `when` that fallback to returning `null`
+///
+/// It is equivalent to doing:
+/// ```dart
+/// switch (sealedClass) {
+///   case Subclass(:final field):
+///     return ...;
+///   case _:
+///     return null;
+/// }
+/// ```
+
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,) {final _that = this;
+switch (_that) {
+case _SkillRulesData() when $default != null:
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+  return null;
+
+}
+}
+
+}
+
+/// @nodoc
+@JsonSerializable()
+
+class _SkillRulesData implements SkillRulesData {
+  const _SkillRulesData({this.lightningRadius = 2.5, this.stunSeconds = 1.0, this.bossStunSeconds = 0.3, this.warningSeconds = 0.8, this.reviveGuardSeconds = 1.0, this.burstRadius = 1.5, this.burstLevelsPerExtra = 10, this.farmLightningReach = 3});
+  factory _SkillRulesData.fromJson(Map<String, dynamic> json) => _$SkillRulesDataFromJson(json);
+
+/// Lightning falls on everything this close to the potato, in tiles.
+@override@JsonKey() final  double lightningRadius;
+/// How long lightning stuns, and a boss.
+@override@JsonKey() final  double stunSeconds;
+@override@JsonKey() final  double bossStunSeconds;
+/// A clone's lightning shows where it will fall this long first.
+@override@JsonKey() final  double warningSeconds;
+/// A revived companion cannot be hurt for this long.
+@override@JsonKey() final  double reviveGuardSeconds;
+/// Baby potatoes from a burst land this far round the potato at most.
+@override@JsonKey() final  double burstRadius;
+/// A burst throws one more baby potato every this many levels.
+@override@JsonKey() final  int burstLevelsPerExtra;
+/// On the farm, a guard's lightning reaches pests this many tiles off.
+@override@JsonKey() final  int farmLightningReach;
+
+/// Create a copy of SkillRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @JsonKey(includeFromJson: false, includeToJson: false)
+@pragma('vm:prefer-inline')
+_$SkillRulesDataCopyWith<_SkillRulesData> get copyWith => __$SkillRulesDataCopyWithImpl<_SkillRulesData>(this, _$identity);
+
+@override
+Map<String, dynamic> toJson() {
+  return _$SkillRulesDataToJson(this, );
+}
+
+@override
+bool operator ==(Object other) {
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkillRulesData&&(identical(other.lightningRadius, lightningRadius) || other.lightningRadius == lightningRadius)&&(identical(other.stunSeconds, stunSeconds) || other.stunSeconds == stunSeconds)&&(identical(other.bossStunSeconds, bossStunSeconds) || other.bossStunSeconds == bossStunSeconds)&&(identical(other.warningSeconds, warningSeconds) || other.warningSeconds == warningSeconds)&&(identical(other.reviveGuardSeconds, reviveGuardSeconds) || other.reviveGuardSeconds == reviveGuardSeconds)&&(identical(other.burstRadius, burstRadius) || other.burstRadius == burstRadius)&&(identical(other.burstLevelsPerExtra, burstLevelsPerExtra) || other.burstLevelsPerExtra == burstLevelsPerExtra)&&(identical(other.farmLightningReach, farmLightningReach) || other.farmLightningReach == farmLightningReach));
+}
+
+@JsonKey(includeFromJson: false, includeToJson: false)
+@override
+int get hashCode {
+    return Object.hash(runtimeType,lightningRadius,stunSeconds,bossStunSeconds,warningSeconds,reviveGuardSeconds,burstRadius,burstLevelsPerExtra,farmLightningReach);
+}
+
+@override
+String toString() {
+    return 'SkillRulesData(lightningRadius: $lightningRadius, stunSeconds: $stunSeconds, bossStunSeconds: $bossStunSeconds, warningSeconds: $warningSeconds, reviveGuardSeconds: $reviveGuardSeconds, burstRadius: $burstRadius, burstLevelsPerExtra: $burstLevelsPerExtra, farmLightningReach: $farmLightningReach)';
+}
+
+
+}
+
+/// @nodoc
+abstract mixin class _$SkillRulesDataCopyWith<$Res> implements $SkillRulesDataCopyWith<$Res> {
+  factory _$SkillRulesDataCopyWith(_SkillRulesData value, $Res Function(_SkillRulesData) _then) = __$SkillRulesDataCopyWithImpl;
+@override @useResult
+$Res call({
+ double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double reviveGuardSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
+});
+
+
+
+
+}
+/// @nodoc
+class __$SkillRulesDataCopyWithImpl<$Res>
+    implements _$SkillRulesDataCopyWith<$Res> {
+  __$SkillRulesDataCopyWithImpl(this._self, this._then);
+
+  final _SkillRulesData _self;
+  final $Res Function(_SkillRulesData) _then;
+
+/// Create a copy of SkillRulesData
+/// with the given fields replaced by the non-null parameter values.
+@override @pragma('vm:prefer-inline') $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? reviveGuardSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
+  return _then(_SkillRulesData(
+lightningRadius: null == lightningRadius ? _self.lightningRadius : lightningRadius // ignore: cast_nullable_to_non_nullable
+as double,stunSeconds: null == stunSeconds ? _self.stunSeconds : stunSeconds // ignore: cast_nullable_to_non_nullable
+as double,bossStunSeconds: null == bossStunSeconds ? _self.bossStunSeconds : bossStunSeconds // ignore: cast_nullable_to_non_nullable
+as double,warningSeconds: null == warningSeconds ? _self.warningSeconds : warningSeconds // ignore: cast_nullable_to_non_nullable
+as double,reviveGuardSeconds: null == reviveGuardSeconds ? _self.reviveGuardSeconds : reviveGuardSeconds // ignore: cast_nullable_to_non_nullable
+as double,burstRadius: null == burstRadius ? _self.burstRadius : burstRadius // ignore: cast_nullable_to_non_nullable
+as double,burstLevelsPerExtra: null == burstLevelsPerExtra ? _self.burstLevelsPerExtra : burstLevelsPerExtra // ignore: cast_nullable_to_non_nullable
+as int,farmLightningReach: null == farmLightningReach ? _self.farmLightningReach : farmLightningReach // ignore: cast_nullable_to_non_nullable
+as int,
   ));
 }
 

@@ -209,6 +209,43 @@ void main() {
       Map<String, Object?> rest,
     ) => {'context': 'explore', 'target': target, 'kind': kind, ...rest};
     abilities.addAll([
+      // Active skills (2026-11-10).
+      {
+        'id': 'combat.zap',
+        'pool': 'combat',
+        'rarity': 'very_low',
+        'effects': [
+          effect('self', 'active', {
+            'interval_sec': 20,
+            'action': 'lightning',
+            'value': 3,
+          }),
+        ],
+      },
+      {
+        'id': 'buff.raise',
+        'pool': 'buff',
+        'rarity': 'very_low',
+        'effects': [
+          effect('self', 'active', {
+            'interval_sec': 60,
+            'action': 'revive',
+            'value': 0.5,
+          }),
+        ],
+      },
+      {
+        'id': 'food.pop',
+        'pool': 'food',
+        'rarity': 'very_low',
+        'effects': [
+          effect('self', 'active', {
+            'interval_sec': 60,
+            'action': 'burst',
+            'value': 5,
+          }),
+        ],
+      },
       {
         'id': 'combat.fury',
         'pool': 'combat',
@@ -2163,6 +2200,167 @@ void main() {
       );
       expect(jsonEncode(restored.toJson()), jsonEncode(run.toJson()));
       expect(restored.clouds, hasLength(1));
+    });
+  });
+
+  group('active skills (2026-11-10)', () {
+    const zapper = CompanionStart(
+      potatoId: 1,
+      type: PotatoType.combat,
+      grade: Grade.legendary,
+      abilities: ['combat.zap'],
+      style: CombatStyle.melee,
+    );
+
+    test('lightning hurts and stuns every enemy round the potato', () {
+      final run = openRun(team: [zapper]);
+      final potato = run.companions.single;
+      final near = addEnemy(run, 'brute', potato.position + const Vec2(1.5, 0));
+      final far = addEnemy(run, 'brute', potato.position + const Vec2(6, 0));
+      expect(run.canUseSkill(potato), isTrue);
+
+      expect(run.apply(UseSkill(potato.id)), isNull);
+      expect(near.hp, lessThan(near.maxHp));
+      expect(near.isStunned, isTrue);
+      expect(far.hp, far.maxHp);
+      expect(potato.skillLeft, 20);
+      final cast = run.takeEvents().whereType<CompanionSkill>().single;
+      expect(cast.skill, RaidSkill.lightning);
+      expect(cast.targets, [near.id]);
+
+      // A stunned enemy stands still, then moves again.
+      final at = near.position;
+      near.target = run.player.id;
+      runFor(run, 0.5);
+      expect(near.position, at);
+      runFor(run, 1);
+      expect(near.isStunned, isFalse);
+      expect(run.apply(UseSkill(potato.id)), RaidRejection.skillNotReady);
+    });
+
+    test('with nothing in reach, lightning is refused and stays ready', () {
+      final run = openRun(team: [zapper]);
+      final potato = run.companions.single;
+      expect(run.apply(UseSkill(potato.id)), RaidRejection.noSkillTarget);
+      expect(potato.skillLeft, 0);
+    });
+
+    test('revive stands every downed potato of the player up', () {
+      final run = openRun(
+        team: const [
+          CompanionStart(
+            potatoId: 1,
+            type: PotatoType.buff,
+            grade: Grade.legendary,
+            abilities: ['buff.raise'],
+          ),
+          CompanionStart(
+            potatoId: 2,
+            type: PotatoType.food,
+            grade: Grade.normal,
+          ),
+          CompanionStart(
+            potatoId: 3,
+            type: PotatoType.food,
+            grade: Grade.normal,
+          ),
+        ],
+      );
+      final [healer, a, b] = run.companions;
+      expect(run.apply(UseSkill(healer.id)), RaidRejection.noSkillTarget);
+      a.hp = 0;
+      b.hp = 0;
+      expect(run.apply(UseSkill(healer.id)), isNull);
+      expect(a.hp, a.maxHp * 0.5);
+      expect(b.hp, b.maxHp * 0.5);
+      // Briefly out of harm's way once up.
+      expect(a.guardLeft, greaterThan(0));
+    });
+
+    test('a burst scatters baby potatoes for anyone to pick up', () {
+      final run = openRun(
+        food: 0,
+        team: const [
+          CompanionStart(
+            potatoId: 1,
+            type: PotatoType.food,
+            grade: Grade.normal,
+            level: 23,
+            abilities: ['food.pop'],
+          ),
+        ],
+      );
+      final potato = run.companions.single;
+      expect(run.apply(UseSkill(potato.id)), isNull);
+      // Five, and one more for each ten levels.
+      expect(run.floorItems, hasLength(7));
+      for (final item in run.floorItems) {
+        expect(item.stack.item, catalog.rules.raid.food.item);
+        expect(
+          item.position.distanceTo(potato.position),
+          lessThanOrEqualTo(catalog.rules.raid.companion.skills.burstRadius),
+        );
+      }
+    });
+
+    test('a clone\'s lightning warns first, then stuns the player', () {
+      final run = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'clone_open',
+        seed: 1,
+        food: 100,
+      )..step();
+      final clone = run.clones.single;
+      final potato = RaidCompanion(
+        id: 9000,
+        position: run.player.position + const Vec2(1, 0),
+        radius: 0.3,
+        maxHp: 50,
+        potatoId: 0,
+        type: PotatoType.combat,
+        grade: Grade.legendary,
+        level: 0,
+        abilities: const ['combat.zap'],
+        slot: 0,
+        lifeLeft: 1,
+        style: CombatStyle.melee,
+        team: clone.id,
+      );
+      clone.companions.add(potato);
+      run
+        ..takeEvents()
+        ..step();
+      final warned = run.takeEvents().whereType<CompanionSkill>().single;
+      expect(warned.warning, greaterThan(0));
+      expect(warned.targets, isEmpty);
+      final hp = run.player.hp;
+      runFor(run, catalog.rules.raid.companion.skills.warningSeconds + 0.05);
+      final landed = run.takeEvents().whereType<CompanionSkill>().single;
+      expect(landed.targets, contains(run.player.id));
+      expect(run.player.hp, lessThan(hp));
+      expect(run.player.isStunned, isTrue);
+
+      // Stunned, the stick does nothing.
+      final at = run.player.position;
+      run.setMove(const Vec2(1, 0));
+      runFor(run, 0.3);
+      expect(run.player.position, at);
+    });
+
+    test('a save keeps stuns and cooldowns', () {
+      final run = openRun(team: [zapper]);
+      final potato = run.companions.single;
+      final rat = addEnemy(run, 'brute', potato.position + const Vec2(1, 0));
+      run.apply(UseSkill(potato.id));
+      final restored = RaidSimulation.fromJson(
+        jsonDecode(jsonEncode(run.toJson())) as Map<String, dynamic>,
+        catalog,
+      );
+      expect(restored.companions.single.skillLeft, potato.skillLeft);
+      expect(
+        restored.enemies.singleWhere((e) => e.id == rat.id).stunLeft,
+        rat.stunLeft,
+      );
     });
   });
 }

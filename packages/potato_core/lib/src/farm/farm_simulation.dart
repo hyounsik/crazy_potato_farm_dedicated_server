@@ -2980,13 +2980,14 @@ final class FarmSimulation {
 
   /// A guard with a harvesting ability, when its time comes, walks to the
   /// field with the most baby potatoes stored to bring them in. Busy with a
-  /// pest, it lets that time pass.
+  /// pest, it keeps the turn and goes once free.
   void _sendToHarvest(Guard guard) {
-    if (guard.targetFieldId != null) return;
     final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
     final interval = effect?.intervalInUse;
     final amount = effect?.valueInUse?.floor() ?? 0;
-    if (interval == null || amount <= 0 || !_isDue(interval)) return;
+    if (interval == null || amount <= 0) return;
+    if (_isDue(interval)) guard.harvestsDue++;
+    if (guard.targetFieldId != null || guard.harvestsDue == 0) return;
     FarmField? richest;
     var most = 0;
     for (final field in _fields.values) {
@@ -3009,12 +3010,14 @@ final class FarmSimulation {
       );
   }
 
-  /// A harvesting guard beside [field] brings in its share: one baby potato
-  /// at a time from whichever potato has the most stored, so the field is
-  /// taken from evenly.
+  /// A harvesting guard beside [field] brings in its share for every turn
+  /// due: one baby potato at a time from whichever potato has the most
+  /// stored, so the field is taken from evenly.
   void _bringIn(FarmField field, Guard guard) {
     final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
-    final amount = effect == null ? 0 : _harvestAmount(guard, effect);
+    final turns = math.max(1, guard.harvestsDue);
+    guard.harvestsDue = 0;
+    final amount = effect == null ? 0 : _harvestAmount(guard, effect) * turns;
     final potatoes = field._potatoes.values.toList();
     var taken = math.min(amount, field.leftover);
     field.leftover -= taken;

@@ -283,6 +283,44 @@ void main() {
     expect(potatoes.map((p) => p.stored), everyElement(9));
   });
 
+  test('a harvesting guard busy with a pest keeps its turn and brings in '
+      'every turn due once free (2026-11-10)', () {
+    build('training_ground', const TilePos(8, 8));
+    final seed = _seed(PotatoType.combat, 'combat.gatherer');
+    farm.seeds.add(seed);
+    farm.apply(
+      FarmCommand.train(buildingId: farm.buildings.last.id, seed: seed),
+    );
+    final field = farm.field(1)!;
+    final potatoes = [
+      for (final tile in field.rect.tiles.take(3))
+        plant(plainSeed(PotatoType.food), tile),
+    ];
+    farm.runSteps(catalog.potatoType(PotatoType.combat).growSeconds);
+    final guard = farm.guards.single;
+    for (final potato in potatoes) {
+      potato.stored = 30;
+    }
+    // Held on its way to a pest through two harvest turns.
+    guard
+      ..targetFieldId = field.id
+      ..walk(guard.at, 1 << 30);
+    while (guard.harvestsDue < 2) {
+      farm.step();
+    }
+    guard.stop();
+    while (!guard.harvesting) {
+      farm.step();
+    }
+    final before = farm.totals.foodHarvestedByGuards;
+    while (guard.harvesting) {
+      farm.step();
+    }
+    // 3 (stand-in) a turn, for two turns.
+    expect(farm.totals.foodHarvestedByGuards - before, 6);
+    expect(guard.harvestsDue, 0);
+  });
+
   test('a harvesting guard brings in more the higher its level '
       '(2026-10-30)', () {
     build('training_ground', const TilePos(8, 8));

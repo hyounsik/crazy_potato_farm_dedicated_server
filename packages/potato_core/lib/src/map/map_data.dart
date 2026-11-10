@@ -1,4 +1,5 @@
 import 'dart:collection';
+import 'dart:math' as math;
 
 import 'package:freezed_annotation/freezed_annotation.dart';
 import 'package:potato_core/src/common/tile.dart';
@@ -48,6 +49,15 @@ abstract class MapObstacle with _$MapObstacle {
 
   /// Rows it blocks from [origin] down.
   int get blockedRows => rows ?? size;
+
+  /// The picture a rock draws in a zone of [look], as a placed object's id:
+  /// ours in grassland, the look's own sheet cell elsewhere (desert
+  /// sandstone and the rest). Null for trees, which fill their tiles.
+  String? pictureId(String look) {
+    if (kind != ObstacleKind.rock) return null;
+    if (look == 'grassland') return 'own:rock${size > 1 ? 2 : 1}';
+    return '$look:${size == 1 ? 3 + (origin.x + origin.y) % 2 : 7}';
+  }
 
   factory MapObstacle.fromJson(Map<String, dynamic> json) =>
       _$MapObstacleFromJson(json);
@@ -259,6 +269,82 @@ final class MapData {
   final Map<TilePos, RampWay> rampWays;
 
   MapTile tileAt(int x, int y) => _tiles[y * size + x];
+
+  /// The part of a blocked tile that keeps walkers off, by tile index, when
+  /// its picture is lower or narrower than the tile ([fitPictures]): left,
+  /// top, right, bottom in tile units. Empty means none of it.
+  final Map<int, (double, double, double, double)> _solid = {};
+
+  /// Least height a fitted picture keeps solid, in tiles.
+  static const double _leastSolid = 0.15;
+
+  /// How much lower than its picture a fitted obstacle's solid part is: a
+  /// walker's radius and a little, so one stopped above it stands behind
+  /// the picture rather than in front of a gap.
+  static const double _underTop = 0.25;
+
+  /// How much narrower than its picture, each side.
+  static const double _inside = 0.05;
+
+  /// Fits the solid part of placed objects and scattered rocks to their
+  /// pictures in a zone of [look] ([boxes] as in `RaidRulesData`): a stone
+  /// lower than its tile blocks only its lower part (2026-11-10, 사용자).
+  /// Paths, sight and shots still take the whole tiles.
+  void fitPictures(String look, Map<String, List<double>> boxes) {
+    _solid.clear();
+    if (boxes.isEmpty) return;
+    void fit(String? id, double middle, int top, int left, int w, int rows) {
+      final box = boxes[id];
+      if (box == null || box.length < 3) return;
+      final bottom = (top + rows).toDouble();
+      final solid = (
+        middle + box[0] + _inside,
+        bottom - math.max(_leastSolid, box[2] - _underTop),
+        middle + box[1] - _inside,
+        bottom,
+      );
+      for (var y = top; y < top + rows; y++) {
+        for (var x = left; x < left + w; x++) {
+          if (!isInside(x, y)) continue;
+          _solid[y * size + x] = (
+            math.max(x.toDouble(), solid.$1),
+            math.max(y.toDouble(), solid.$2),
+            math.min(x + 1.0, solid.$3),
+            math.min(y + 1.0, solid.$4),
+          );
+        }
+      }
+    }
+
+    for (final o in obstacles) {
+      fit(
+        o.pictureId(look),
+        o.origin.x + o.size / 2,
+        o.origin.y + o.size - o.blockedRows,
+        o.origin.x,
+        o.size,
+        o.blockedRows,
+      );
+    }
+    for (final o in objects) {
+      fit(
+        o.id,
+        o.origin.x + o.width / 2,
+        o.origin.y,
+        o.origin.x,
+        o.width,
+        o.rows,
+      );
+    }
+  }
+
+  /// What keeps walkers off blocked tile ([x], [y]): the whole tile, or the
+  /// part [fitPictures] left; null when nothing does.
+  (double, double, double, double)? solidOf(int x, int y) {
+    final part = isInside(x, y) ? _solid[y * size + x] : null;
+    if (part == null) return (x.toDouble(), y.toDouble(), x + 1.0, y + 1.0);
+    return part.$1 < part.$3 && part.$2 < part.$4 ? part : null;
+  }
 
   bool isInside(int x, int y) => x >= 0 && y >= 0 && x < size && y < size;
 

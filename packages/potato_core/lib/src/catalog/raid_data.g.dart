@@ -55,6 +55,19 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
                 ? const SignalSightRulesData()
                 : SignalSightRulesData.fromJson(v as Map<String, dynamic>),
           ),
+          pictureBoxes: $checkedConvert(
+            'picture_boxes',
+            (v) =>
+                (v as Map<String, dynamic>?)?.map(
+                  (k, e) => MapEntry(
+                    k,
+                    (e as List<dynamic>)
+                        .map((e) => (e as num).toDouble())
+                        .toList(),
+                  ),
+                ) ??
+                const <String, List<double>>{},
+          ),
         );
         return val;
       },
@@ -63,6 +76,7 @@ _RaidRulesData _$RaidRulesDataFromJson(Map<String, dynamic> json) =>
         'pickupRadius': 'pickup_radius',
         'enemyAlertSeconds': 'enemy_alert_seconds',
         'signalSight': 'signal_sight',
+        'pictureBoxes': 'picture_boxes',
       },
     );
 
@@ -78,6 +92,7 @@ Map<String, dynamic> _$RaidRulesDataToJson(_RaidRulesData instance) =>
       'party': instance.party.toJson(),
       'floors': instance.floors.toJson(),
       'signal_sight': instance.signalSight.toJson(),
+      'picture_boxes': instance.pictureBoxes,
     };
 
 _SignalSightRulesData _$SignalSightRulesDataFromJson(

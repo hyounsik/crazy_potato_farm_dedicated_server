@@ -218,7 +218,9 @@ final class RaidSimulation {
     this._revealed = false,
     this._clonesIn = 0,
     this._nextCloneAt = 0,
-  }) : clouds = clouds ?? [];
+  }) : clouds = clouds ?? [] {
+    map.fitPictures(zone.look, catalog.rules.raid.pictureBoxes);
+  }
 
   /// Builds zone [zone]'s map from [seed] and fills it: enemies, gathering
   /// spots, the player at the entry with [food] in the bag, and
@@ -463,7 +465,9 @@ final class RaidSimulation {
       catalog.rules.zoneScaling.enemyDamage(zone.score);
 
   /// A companion's max health at the start: its style's (or the plain
-  /// companion's), raised by level for combat potatoes, then abilities.
+  /// companion's), raised by level for every potato (2026-11-10, 사용자:
+  /// food and buff potatoes stayed at the plain health and fell too often),
+  /// by the belt for combat potatoes, then abilities.
   static double _startHp(
     Catalog catalog,
     CompanionStart start,
@@ -474,12 +478,10 @@ final class RaidSimulation {
     final style = start.type == PotatoType.combat
         ? rules.styles[start.style]
         : null;
-    var hp = style?.maxHp ?? rules.maxHp;
-    if (style != null) {
-      hp *=
-          levelGrowth(rules.levelHpPermille, start.level) *
-          (1 + start.beltBoost);
-    }
+    var hp =
+        (style?.maxHp ?? rules.maxHp) *
+        levelGrowth(rules.levelHpPermille, start.level);
+    if (style != null) hp *= 1 + start.beltBoost;
     final sums = <String, StatSum>{}
       ..addAll(own)
       ..addAll(party);

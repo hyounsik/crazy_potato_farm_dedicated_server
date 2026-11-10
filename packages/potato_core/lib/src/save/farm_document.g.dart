@@ -399,6 +399,10 @@ _GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>
             'walk_total_millis',
             (v) => (v as num?)?.toInt() ?? 0,
           ),
+          harvestsDue: $checkedConvert(
+            'harvests_due',
+            (v) => (v as num?)?.toInt() ?? 0,
+          ),
         );
         return val;
       },
@@ -408,6 +412,7 @@ _GuardDocument _$GuardDocumentFromJson(Map<String, dynamic> json) =>
         'walkTo': 'walk_to',
         'walkMillis': 'walk_millis',
         'walkTotalMillis': 'walk_total_millis',
+        'harvestsDue': 'harvests_due',
       },
     );
 
@@ -421,6 +426,7 @@ Map<String, dynamic> _$GuardDocumentToJson(_GuardDocument instance) =>
       'walk_to': instance.walkTo?.toJson(),
       'walk_millis': instance.walkMillis,
       'walk_total_millis': instance.walkTotalMillis,
+      'harvests_due': instance.harvestsDue,
     };
 
 _AwayDocument _$AwayDocumentFromJson(Map<String, dynamic> json) =>

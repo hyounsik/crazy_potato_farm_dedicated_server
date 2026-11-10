@@ -879,6 +879,22 @@ void main() {
       expect(high.maxHp, closeTo(style.maxHp * growth * 1.05, 1e-9));
     });
 
+    test('a food potato\'s health is raised by level too (2026-11-10)', () {
+      final rules = catalog.rules.raid.companion;
+      final potato = unarmed([
+        const CompanionStart(
+          potatoId: 2,
+          type: PotatoType.food,
+          grade: Grade.normal,
+          level: 10,
+        ),
+      ]).companions.single;
+      expect(
+        potato.maxHp,
+        closeTo(rules.maxHp * levelGrowth(rules.levelHpPermille, 10), 1e-9),
+      );
+    });
+
     test('in attack mode a melee potato runs at a calm enemy and hits it', () {
       final run = unarmed([fighter(CombatStyle.melee)]);
       final brute = addEnemy(

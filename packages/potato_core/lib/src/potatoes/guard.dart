@@ -18,6 +18,7 @@ final class Guard {
     this.walkTo,
     this.walkMillis = 0,
     this.walkTotalMillis = 0,
+    this.harvestsDue = 0,
   });
 
   final Potato potato;
@@ -45,6 +46,11 @@ final class Guard {
 
   /// The whole walk's time, for drawing how far along it is.
   int walkTotalMillis;
+
+  /// Harvest turns that came while it was busy (2026-11-10, 사용자: guards
+  /// clearing pests used to let them pass, so fields brought in far less
+  /// than shown). Its next harvest brings them all in.
+  int harvestsDue;
 
   /// Standing next to its target field and working on the pest.
   bool get working => targetFieldId != null && !harvesting && walkMillis == 0;

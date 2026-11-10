@@ -28,6 +28,15 @@ abstract class RaidRulesData with _$RaidRulesData {
     @Default(PartyRulesData()) PartyRulesData party,
     @Default(FloorRulesData()) FloorRulesData floors,
     @Default(SignalSightRulesData()) SignalSightRulesData signalSight,
+
+    /// How far each obstacle picture reaches, by picture id
+    /// ([MapObject.id], or [MapObstacle.pictureId] for scattered rocks), in
+    /// tiles from where it stands (its bottom middle): left, right (from the
+    /// middle) and height. A picture lower or narrower than the tiles it
+    /// blocks keeps walkers off only its own shape, so nobody stops at an
+    /// invisible wall (2026-11-10, 사용자). Written by
+    /// `scripts/picture_boxes.py` from the drawn sheets.
+    @Default(<String, List<double>>{}) Map<String, List<double>> pictureBoxes,
   }) = _RaidRulesData;
 
   factory RaidRulesData.fromJson(Map<String, dynamic> json) =>

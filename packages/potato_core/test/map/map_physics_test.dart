@@ -72,4 +72,44 @@ void main() {
       expect(path.any((p) => p.y > 5), isTrue);
     });
   });
+
+  group('a low picture keeps walkers off only its own shape (2026-11-10)', () {
+    // A stone half a tile tall and narrower than its tile at (3, 3).
+    MapData stone() => MapData(
+      size: 8,
+      tiles: [
+        for (var y = 0; y < 8; y++)
+          for (var x = 0; x < 8; x++)
+            x == 3 && y == 3 ? MapTile.obstacle : MapTile.open,
+      ],
+      entry: const TilePos(1, 1),
+      objects: const [MapObject(id: 'look:1', origin: TilePos(3, 3))],
+    );
+
+    // Walks down from above in small steps until it stops.
+    double stopFromAbove(MapData map) {
+      var at = const Vec2(3.5, 2);
+      for (var i = 0; i < 600; i++) {
+        at = map.move(at, const Vec2(0, 0.005), 0.22);
+      }
+      return at.y;
+    }
+
+    test('without its box the whole tile blocks', () {
+      expect(stopFromAbove(stone()), closeTo(3 - 0.22, 0.01));
+    });
+
+    test('with it a walker from above comes down to the picture', () {
+      final map = stone()
+        ..fitPictures('grassland', const {
+          'look:1': [-0.3, 0.3, 0.5],
+        });
+      // Solid from 0.25 below the picture's top: 4 - (0.5 - 0.25).
+      expect(stopFromAbove(map), closeTo(4 - 0.25 - 0.22, 0.01));
+      // Beside the narrower stone there is room to pass.
+      expect(map.overlapsCircle(const Vec2(3.08, 3.9), 0.06), isFalse);
+      // Sight and paths still take the whole tile.
+      expect(map.isBlocked(3, 3), isTrue);
+    });
+  });
 }

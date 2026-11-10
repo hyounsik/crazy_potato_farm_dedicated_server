@@ -19,7 +19,14 @@ mixin _$RaidRulesData {
 /// Game time one run `step` covers.
  int get stepMillis; PlayerRulesData get player;/// How close the player must stand to open a pile or a gathering spot.
  double get pickupRadius; FoodRulesData get food;/// How long an enemy keeps chasing whoever hit it, even out of sight.
- double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones; PartyRulesData get party; FloorRulesData get floors; SignalSightRulesData get signalSight;
+ double get enemyAlertSeconds; CompanionRulesData get companion; CloneRulesData get clones; PartyRulesData get party; FloorRulesData get floors; SignalSightRulesData get signalSight;/// How far each obstacle picture reaches, by picture id
+/// ([MapObject.id], or [MapObstacle.pictureId] for scattered rocks), in
+/// tiles from where it stands (its bottom middle): left, right (from the
+/// middle) and height. A picture lower or narrower than the tiles it
+/// blocks keeps walkers off only its own shape, so nobody stops at an
+/// invisible wall (2026-11-10, 사용자). Written by
+/// `scripts/picture_boxes.py` from the drawn sheets.
+ Map<String, List<double>> get pictureBoxes;
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -33,20 +40,20 @@ $RaidRulesDataCopyWith<RaidRulesData> get copyWith => _$RaidRulesDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as RaidRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones)&&(identical(other.party, _this.party) || other.party == _this.party)&&(identical(other.floors, _this.floors) || other.floors == _this.floors)&&(identical(other.signalSight, _this.signalSight) || other.signalSight == _this.signalSight));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is RaidRulesData&&(identical(other.stepMillis, _this.stepMillis) || other.stepMillis == _this.stepMillis)&&(identical(other.player, _this.player) || other.player == _this.player)&&(identical(other.pickupRadius, _this.pickupRadius) || other.pickupRadius == _this.pickupRadius)&&(identical(other.food, _this.food) || other.food == _this.food)&&(identical(other.enemyAlertSeconds, _this.enemyAlertSeconds) || other.enemyAlertSeconds == _this.enemyAlertSeconds)&&(identical(other.companion, _this.companion) || other.companion == _this.companion)&&(identical(other.clones, _this.clones) || other.clones == _this.clones)&&(identical(other.party, _this.party) || other.party == _this.party)&&(identical(other.floors, _this.floors) || other.floors == _this.floors)&&(identical(other.signalSight, _this.signalSight) || other.signalSight == _this.signalSight)&&const DeepCollectionEquality().equals(other.pictureBoxes, _this.pictureBoxes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as RaidRulesData;
-  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.pickupRadius,_this.food,_this.enemyAlertSeconds,_this.companion,_this.clones,_this.party,_this.floors,_this.signalSight);
+  return Object.hash(runtimeType,_this.stepMillis,_this.player,_this.pickupRadius,_this.food,_this.enemyAlertSeconds,_this.companion,_this.clones,_this.party,_this.floors,_this.signalSight,const DeepCollectionEquality().hash(_this.pictureBoxes));
 }
 
 @override
 String toString() {
   final _this = this as RaidRulesData;
-  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones}, party: ${_this.party}, floors: ${_this.floors}, signalSight: ${_this.signalSight})';
+  return 'RaidRulesData(stepMillis: ${_this.stepMillis}, player: ${_this.player}, pickupRadius: ${_this.pickupRadius}, food: ${_this.food}, enemyAlertSeconds: ${_this.enemyAlertSeconds}, companion: ${_this.companion}, clones: ${_this.clones}, party: ${_this.party}, floors: ${_this.floors}, signalSight: ${_this.signalSight}, pictureBoxes: ${_this.pictureBoxes})';
 }
 
 
@@ -57,7 +64,7 @@ abstract mixin class $RaidRulesDataCopyWith<$Res>  {
   factory $RaidRulesDataCopyWith(RaidRulesData value, $Res Function(RaidRulesData) _then) = _$RaidRulesDataCopyWithImpl;
 @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party, FloorRulesData floors, SignalSightRulesData signalSight
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party, FloorRulesData floors, SignalSightRulesData signalSight, Map<String, List<double>> pictureBoxes
 });
 
 
@@ -74,7 +81,7 @@ class _$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,Object? floors = null,Object? signalSight = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,Object? floors = null,Object? signalSight = null,Object? pictureBoxes = null,}) {
   return _then(RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -86,7 +93,8 @@ as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: 
 as CloneRulesData,party: null == party ? _self.party : party // ignore: cast_nullable_to_non_nullable
 as PartyRulesData,floors: null == floors ? _self.floors : floors // ignore: cast_nullable_to_non_nullable
 as FloorRulesData,signalSight: null == signalSight ? _self.signalSight : signalSight // ignore: cast_nullable_to_non_nullable
-as SignalSightRulesData,
+as SignalSightRulesData,pictureBoxes: null == pictureBoxes ? _self.pictureBoxes : pictureBoxes // ignore: cast_nullable_to_non_nullable
+as Map<String, List<double>>,
   ));
 }
 /// Create a copy of RaidRulesData
@@ -234,10 +242,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight,  Map<String, List<double>> pictureBoxes)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight,_that.pictureBoxes);case _:
   return orElse();
 
 }
@@ -255,10 +263,10 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight,  Map<String, List<double>> pictureBoxes)  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData():
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight,_that.pictureBoxes);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -275,10 +283,10 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int stepMillis,  PlayerRulesData player,  double pickupRadius,  FoodRulesData food,  double enemyAlertSeconds,  CompanionRulesData companion,  CloneRulesData clones,  PartyRulesData party,  FloorRulesData floors,  SignalSightRulesData signalSight,  Map<String, List<double>> pictureBoxes)?  $default,) {final _that = this;
 switch (_that) {
 case _RaidRulesData() when $default != null:
-return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight);case _:
+return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_that.enemyAlertSeconds,_that.companion,_that.clones,_that.party,_that.floors,_that.signalSight,_that.pictureBoxes);case _:
   return null;
 
 }
@@ -290,7 +298,7 @@ return $default(_that.stepMillis,_that.player,_that.pickupRadius,_that.food,_tha
 @JsonSerializable()
 
 class _RaidRulesData implements RaidRulesData {
-  const _RaidRulesData({required this.stepMillis, required this.player, required this.pickupRadius, required this.food, required this.enemyAlertSeconds, required this.companion, required this.clones, this.party = const PartyRulesData(), this.floors = const FloorRulesData(), this.signalSight = const SignalSightRulesData()});
+  const _RaidRulesData({required this.stepMillis, required this.player, required this.pickupRadius, required this.food, required this.enemyAlertSeconds, required this.companion, required this.clones, this.party = const PartyRulesData(), this.floors = const FloorRulesData(), this.signalSight = const SignalSightRulesData(),  Map<String, List<double>> pictureBoxes = const <String, List<double>>{}}): _pictureBoxes = pictureBoxes;
   factory _RaidRulesData.fromJson(Map<String, dynamic> json) => _$RaidRulesDataFromJson(json);
 
 /// Game time one run `step` covers.
@@ -306,6 +314,27 @@ class _RaidRulesData implements RaidRulesData {
 @override@JsonKey() final  PartyRulesData party;
 @override@JsonKey() final  FloorRulesData floors;
 @override@JsonKey() final  SignalSightRulesData signalSight;
+/// How far each obstacle picture reaches, by picture id
+/// ([MapObject.id], or [MapObstacle.pictureId] for scattered rocks), in
+/// tiles from where it stands (its bottom middle): left, right (from the
+/// middle) and height. A picture lower or narrower than the tiles it
+/// blocks keeps walkers off only its own shape, so nobody stops at an
+/// invisible wall (2026-11-10, 사용자). Written by
+/// `scripts/picture_boxes.py` from the drawn sheets.
+ final  Map<String, List<double>> _pictureBoxes;
+/// How far each obstacle picture reaches, by picture id
+/// ([MapObject.id], or [MapObstacle.pictureId] for scattered rocks), in
+/// tiles from where it stands (its bottom middle): left, right (from the
+/// middle) and height. A picture lower or narrower than the tiles it
+/// blocks keeps walkers off only its own shape, so nobody stops at an
+/// invisible wall (2026-11-10, 사용자). Written by
+/// `scripts/picture_boxes.py` from the drawn sheets.
+@override@JsonKey() Map<String, List<double>> get pictureBoxes {
+  if (_pictureBoxes is EqualUnmodifiableMapView) return _pictureBoxes;
+  // ignore: implicit_dynamic_type
+  return EqualUnmodifiableMapView(_pictureBoxes);
+}
+
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -320,18 +349,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones)&&(identical(other.party, party) || other.party == party)&&(identical(other.floors, floors) || other.floors == floors)&&(identical(other.signalSight, signalSight) || other.signalSight == signalSight));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _RaidRulesData&&(identical(other.stepMillis, stepMillis) || other.stepMillis == stepMillis)&&(identical(other.player, player) || other.player == player)&&(identical(other.pickupRadius, pickupRadius) || other.pickupRadius == pickupRadius)&&(identical(other.food, food) || other.food == food)&&(identical(other.enemyAlertSeconds, enemyAlertSeconds) || other.enemyAlertSeconds == enemyAlertSeconds)&&(identical(other.companion, companion) || other.companion == companion)&&(identical(other.clones, clones) || other.clones == clones)&&(identical(other.party, party) || other.party == party)&&(identical(other.floors, floors) || other.floors == floors)&&(identical(other.signalSight, signalSight) || other.signalSight == signalSight)&&const DeepCollectionEquality().equals(other.pictureBoxes, _pictureBoxes));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,stepMillis,player,pickupRadius,food,enemyAlertSeconds,companion,clones,party,floors,signalSight);
+    return Object.hash(runtimeType,stepMillis,player,pickupRadius,food,enemyAlertSeconds,companion,clones,party,floors,signalSight,const DeepCollectionEquality().hash(_pictureBoxes));
 }
 
 @override
 String toString() {
-    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, pickupRadius: $pickupRadius, food: $food, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones, party: $party, floors: $floors, signalSight: $signalSight)';
+    return 'RaidRulesData(stepMillis: $stepMillis, player: $player, pickupRadius: $pickupRadius, food: $food, enemyAlertSeconds: $enemyAlertSeconds, companion: $companion, clones: $clones, party: $party, floors: $floors, signalSight: $signalSight, pictureBoxes: $pictureBoxes)';
 }
 
 
@@ -342,7 +371,7 @@ abstract mixin class _$RaidRulesDataCopyWith<$Res> implements $RaidRulesDataCopy
   factory _$RaidRulesDataCopyWith(_RaidRulesData value, $Res Function(_RaidRulesData) _then) = __$RaidRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party, FloorRulesData floors, SignalSightRulesData signalSight
+ int stepMillis, PlayerRulesData player, double pickupRadius, FoodRulesData food, double enemyAlertSeconds, CompanionRulesData companion, CloneRulesData clones, PartyRulesData party, FloorRulesData floors, SignalSightRulesData signalSight, Map<String, List<double>> pictureBoxes
 });
 
 
@@ -359,7 +388,7 @@ class __$RaidRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of RaidRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,Object? floors = null,Object? signalSight = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? stepMillis = null,Object? player = null,Object? pickupRadius = null,Object? food = null,Object? enemyAlertSeconds = null,Object? companion = null,Object? clones = null,Object? party = null,Object? floors = null,Object? signalSight = null,Object? pictureBoxes = null,}) {
   return _then(_RaidRulesData(
 stepMillis: null == stepMillis ? _self.stepMillis : stepMillis // ignore: cast_nullable_to_non_nullable
 as int,player: null == player ? _self.player : player // ignore: cast_nullable_to_non_nullable
@@ -371,7 +400,8 @@ as CompanionRulesData,clones: null == clones ? _self.clones : clones // ignore: 
 as CloneRulesData,party: null == party ? _self.party : party // ignore: cast_nullable_to_non_nullable
 as PartyRulesData,floors: null == floors ? _self.floors : floors // ignore: cast_nullable_to_non_nullable
 as FloorRulesData,signalSight: null == signalSight ? _self.signalSight : signalSight // ignore: cast_nullable_to_non_nullable
-as SignalSightRulesData,
+as SignalSightRulesData,pictureBoxes: null == pictureBoxes ? _self._pictureBoxes : pictureBoxes // ignore: cast_nullable_to_non_nullable
+as Map<String, List<double>>,
   ));
 }
 

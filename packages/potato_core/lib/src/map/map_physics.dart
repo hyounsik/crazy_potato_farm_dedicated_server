@@ -37,8 +37,15 @@ extension MapPhysics on MapData {
             heightAt(x, y) != level &&
             heightAt(x, y) != MapHeight.ramp;
         if (!isBlocked(x, y) && !cliff) continue;
-        final dx = center.x - center.x.clamp(x.toDouble(), x + 1.0);
-        final dy = center.y - center.y.clamp(y.toDouble(), y + 1.0);
+        // A low picture keeps walkers off only its own shape; a cliff the
+        // whole tile.
+        final part = cliff
+            ? (x.toDouble(), y.toDouble(), x + 1.0, y + 1.0)
+            : solidOf(x, y);
+        if (part == null) continue;
+        final (left, top, right, bottom) = part;
+        final dx = center.x - center.x.clamp(left, right);
+        final dy = center.y - center.y.clamp(top, bottom);
         if (dx * dx + dy * dy < radius * radius) return true;
       }
     }

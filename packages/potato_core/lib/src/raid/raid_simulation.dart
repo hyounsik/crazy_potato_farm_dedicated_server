@@ -3354,26 +3354,16 @@ final class RaidSimulation {
     LootLevels levels,
     GameRandom random,
   ) {
-    const types = [PotatoType.food, PotatoType.combat, PotatoType.buff];
+    final stats = GearStats(catalog);
     return (item) {
       final kind = catalog.items[item]?.gear;
       if (kind == null) return null;
-      final slots = kind.kind == GearKind.belt
-          ? [
-              for (
-                var i = 0;
-                i < (catalog.rules.gear.beltSlots[kind.grade] ?? 1);
-                i++
-              )
-                types[random.nextInt(types.length)],
-            ]
-          : const <PotatoType>[];
       return Gear(
         kind: kind.kind,
         family: kind.family,
         grade: kind.grade,
         level: levels.gear(kind.kind, random),
-        slots: slots,
+        slots: stats.rollSlots(kind.kind, kind.grade, random),
         abilities: GearStats(catalog)
             .rollAbilities(kind.kind, kind.family, kind.grade, random),
       );

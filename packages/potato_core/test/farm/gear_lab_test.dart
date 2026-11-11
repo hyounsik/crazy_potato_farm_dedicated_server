@@ -162,6 +162,30 @@ void main() {
       expect(farm.gear[index].level, 5);
       expect(farm.gear[index].wear, 500);
     });
+
+    test(
+      'a belt rolls its potato slots too, even a normal one (2026-11-11)',
+      () {
+        buildAll('gear_lab');
+        farm.food = 1000000;
+        const belt = Gear(
+          kind: GearKind.belt,
+          grade: Grade.normal,
+          level: 5,
+          slots: [PotatoType.food],
+        );
+        farm.apply(const FarmCommand.returnHome(food: 0, gear: [belt]));
+        final index = farm.gear.length - 1;
+        final seen = <PotatoType>{};
+        for (var i = 0; i < 40; i++) {
+          expect(farm.apply(FarmCommand.rerollGear(index: index)), isNull);
+          final slots = farm.gear[index].slots;
+          expect(slots, hasLength(1), reason: 'a normal belt keeps one slot');
+          seen.addAll(slots);
+        }
+        expect(seen, {PotatoType.food, PotatoType.combat, PotatoType.buff});
+      },
+    );
   });
 
   group('warehouse', () {

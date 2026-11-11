@@ -118,6 +118,19 @@ final class GearStats {
   /// The stat [ability] changes, or null if the catalog lost it.
   GearStat? statOf(GearAbility ability) => rules.ability(ability.id)?.stat;
 
+  /// The potato types a belt of [grade] takes, one a slot (as many as its
+  /// grade gives), each food, combat or buff at random; other kinds have
+  /// none. Found belts and the gear lab's roll both use it (2026-11-11,
+  /// 사용자: rolling a belt rolls its slots too).
+  List<PotatoType> rollSlots(GearKind kind, Grade grade, GameRandom random) {
+    if (kind != GearKind.belt) return const [];
+    const types = [PotatoType.food, PotatoType.combat, PotatoType.buff];
+    return [
+      for (var i = 0; i < (rules.beltSlots[grade] ?? 1); i++)
+        types[random.nextInt(types.length)],
+    ];
+  }
+
   /// Abilities a new piece of [kind], [family] and [grade] rolls: one pool
   /// of every tier of every ability that fits, weighed by its rarity; an
   /// ability comes once a piece.

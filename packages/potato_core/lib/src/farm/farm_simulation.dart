@@ -1831,7 +1831,11 @@ final class FarmSimulation {
     if (!hasGearLab) return FarmRejection.noGearLab;
     final piece = _gearAt(worn, index);
     if (piece == null) return FarmRejection.noSuchGear;
-    if (piece.abilities.isEmpty) return FarmRejection.noAbilities;
+    // A belt rolls its potato slots too, so even a normal one (no
+    // abilities) has something to roll (2026-11-11, 사용자).
+    if (piece.abilities.isEmpty && piece.slots.isEmpty) {
+      return FarmRejection.noAbilities;
+    }
     final cost = gearRerollFood(piece);
     if (food < cost) return FarmRejection.notEnoughFood;
     food -= cost;
@@ -1845,6 +1849,9 @@ final class FarmSimulation {
           piece.grade,
           _random,
         ),
+        slots: piece.slots.isEmpty
+            ? piece.slots
+            : _gearStats.rollSlots(piece.kind, piece.grade, _random),
       ),
     );
     _events.add(FarmEvent.gearRerolled(kind: piece.kind));

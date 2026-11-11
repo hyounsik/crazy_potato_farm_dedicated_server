@@ -709,6 +709,10 @@ enum CloneMode {
   /// Walking to gathering spots and emptying them.
   gather,
 
+  /// Standing at a gathering spot going through it (2026-11-11, 사용자: as
+  /// a player with a loot window open): no shooting, and a hit stops it.
+  searching,
+
   /// Heading for the nearest open exit.
   extract,
 
@@ -745,6 +749,7 @@ final class RaidClone extends RaidShooter {
     this.goalTimer = 0,
     this.exit,
     this.waitLeft = 0,
+    this.searchLeft = 0,
     List<Vec2>? path,
     this.pathGoal,
     this.repath = 0,
@@ -787,6 +792,7 @@ final class RaidClone extends RaidShooter {
         goalTimer: (json['goal_timer'] as num).toDouble(),
         exit: json['exit'] as int?,
         waitLeft: (json['wait_left'] as num).toDouble(),
+        searchLeft: (json['search_left'] as num?)?.toDouble() ?? 0,
         path: [
           for (final p in json['path'] as List<Object?>)
             Vec2.fromJson(p! as List<Object?>),
@@ -827,6 +833,9 @@ final class RaidClone extends RaidShooter {
   int? exit;
   double waitLeft;
 
+  /// How long it still goes through its spot while [CloneMode.searching].
+  double searchLeft;
+
   /// Waypoints toward [pathGoal], planned again every so often.
   List<Vec2> path;
   Vec2? pathGoal;
@@ -864,6 +873,7 @@ final class RaidClone extends RaidShooter {
     'goal_timer': goalTimer,
     'exit': exit,
     'wait_left': waitLeft,
+    if (searchLeft > 0) 'search_left': searchLeft,
     'path': [for (final p in path) p.toJson()],
     'path_goal': pathGoal?.toJson(),
     'repath': repath,

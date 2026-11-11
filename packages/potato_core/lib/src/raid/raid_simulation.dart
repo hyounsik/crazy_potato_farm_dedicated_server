@@ -2643,6 +2643,13 @@ final class RaidSimulation {
       case RaidClone():
         target.sinceHit = 0;
         if (foe != null) target.target = foe.id;
+        // A hit stops its looting: it turns to fight, and goes through the
+        // spot again later (2026-11-11, 사용자).
+        if (target.mode == CloneMode.searching) {
+          target
+            ..mode = CloneMode.gather
+            ..searchLeft = 0;
+        }
       case RaidCompanion():
         target.sinceHit = 0;
         // Being hit counts as "going for us" in either mode.
@@ -2976,6 +2983,11 @@ final class RaidSimulation {
       }
       return;
     }
+    if (clone.mode == CloneMode.searching) {
+      clone.searchLeft -= dt;
+      if (clone.searchLeft <= 0) _finishSearch(clone);
+      return;
+    }
 
     final target = _cloneTarget(clone);
     if (target != null) {
@@ -3054,9 +3066,10 @@ final class RaidSimulation {
     }
     clone.goalTimer -= dt;
     if (spot.position.distanceTo(clone.position) <= rules.pickupRadius) {
-      spot.loot.takeAllInto(clone.bag);
-      if (!spot.loot.isEmpty) clone.mode = CloneMode.extract;
-      clone.spot = null;
+      clone
+        ..mode = CloneMode.searching
+        ..searchLeft = rules.clones.searchSeconds;
+      if (clone.searchLeft <= 0) _finishSearch(clone);
       return;
     }
     if (!_walkPath(clone, spot.position, speed, dt)) {
@@ -3064,6 +3077,22 @@ final class RaidSimulation {
         ..skipped.add(spot.id)
         ..spot = null;
     }
+  }
+
+  /// Done going through its spot: takes all it can; one it cannot empty
+  /// means the bag is full.
+  void _finishSearch(RaidClone clone) {
+    RaidPile? spot;
+    for (final pile in piles) {
+      if (pile.id == clone.spot) spot = pile;
+    }
+    clone
+      ..mode = CloneMode.gather
+      ..searchLeft = 0
+      ..spot = null;
+    if (spot == null) return;
+    spot.loot.takeAllInto(clone.bag);
+    if (!spot.loot.isEmpty) clone.mode = CloneMode.extract;
   }
 
   RaidPile? _nearestSpot(RaidClone clone) {

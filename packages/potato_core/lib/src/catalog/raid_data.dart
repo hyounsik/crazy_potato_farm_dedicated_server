@@ -258,6 +258,11 @@ abstract class CloneRulesData with _$CloneRulesData {
     /// The most one such hit takes, as a share of the target's most health,
     /// so none kills at once from full (2026-11-11, 사용자: 0.9).
     @Default(1.0) double versusMaxHit,
+
+    /// How long going through a gathering spot takes, standing still and
+    /// not shooting (2026-11-11, 사용자: players are open to attack while
+    /// looting, clones were not). The number is a proposal.
+    @Default(3.0) double searchSeconds,
   }) = _CloneRulesData;
 
   factory CloneRulesData.fromJson(Map<String, dynamic> json) =>

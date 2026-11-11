@@ -1243,10 +1243,38 @@ void main() {
         loot: LootPile([ItemStack('food', 10)]),
       );
       run.piles.add(spot);
-      runFor(run, 3);
+      // Walking there, then going through it (2026-11-11).
+      runFor(run, 3 + run.rules.clones.searchSeconds);
       expect(spot.loot.isEmpty, isTrue);
       expect(clone.bag.countOf('food'), 10);
       expect(run.bag.countOf('food'), lessThan(100), reason: 'not the player');
+    });
+
+    test('stand still going through a spot; a hit stops it (2026-11-11)', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      final spot = RaidPile(
+        id: 7001,
+        position: clone.position,
+        kind: PileKind.spot,
+        loot: LootPile([ItemStack('food', 10)]),
+      );
+      run.piles.add(spot);
+      runFor(run, 0.2);
+      expect(clone.mode, CloneMode.searching);
+      final at = clone.position;
+      runFor(run, run.rules.clones.searchSeconds / 2);
+      expect(clone.position, at, reason: 'it stands still');
+      expect(spot.loot.isEmpty, isFalse, reason: 'not yet taken');
+
+      final brute = addEnemy(run, 'brute', clone.position + const Vec2(0.8, 0))
+        ..target = clone.id;
+      runFor(run, 0.5);
+      expect(clone.hp, lessThan(clone.maxHp));
+      expect(clone.mode, isNot(CloneMode.searching));
+      expect(clone.target, brute.id, reason: 'it turns to fight');
+      expect(brute.hp, lessThan(brute.maxHp));
+      expect(clone.bag.countOf('food'), 0, reason: 'the search was cut');
     });
 
     test('fight wild enemies in their sight', () {

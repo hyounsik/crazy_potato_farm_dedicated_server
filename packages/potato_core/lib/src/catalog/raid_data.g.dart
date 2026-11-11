@@ -506,6 +506,10 @@ _CloneRulesData _$CloneRulesDataFromJson(Map<String, dynamic> json) =>
             'versus_max_hit',
             (v) => (v as num?)?.toDouble() ?? 1.0,
           ),
+          searchSeconds: $checkedConvert(
+            'search_seconds',
+            (v) => (v as num?)?.toDouble() ?? 3.0,
+          ),
         );
         return val;
       },
@@ -519,6 +523,7 @@ _CloneRulesData _$CloneRulesDataFromJson(Map<String, dynamic> json) =>
         'waitSightMultiplier': 'wait_sight_multiplier',
         'versusPlayerDamage': 'versus_player_damage',
         'versusMaxHit': 'versus_max_hit',
+        'searchSeconds': 'search_seconds',
       },
     );
 
@@ -534,6 +539,7 @@ Map<String, dynamic> _$CloneRulesDataToJson(_CloneRulesData instance) =>
       'wait_sight_multiplier': instance.waitSightMultiplier,
       'versus_player_damage': instance.versusPlayerDamage,
       'versus_max_hit': instance.versusMaxHit,
+      'search_seconds': instance.searchSeconds,
     };
 
 _DefaultCloneData _$DefaultCloneDataFromJson(Map<String, dynamic> json) =>

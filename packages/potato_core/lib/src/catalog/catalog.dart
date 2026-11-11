@@ -858,11 +858,7 @@ final class Catalog {
           final interval = effect.intervalInUse;
           if (interval != null) check.positive('$at.interval_sec', interval);
         case EffectKind.active:
-          const skills = [
-            RaidSkill.lightning,
-            RaidSkill.revive,
-            RaidSkill.burst,
-          ];
+          const skills = [RaidSkill.lightning, RaidSkill.heal, RaidSkill.burst];
           if (!skills.contains(effect.action)) {
             check.issue('$at.action', 'active effects need one of $skills');
           }

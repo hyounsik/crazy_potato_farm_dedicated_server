@@ -1608,7 +1608,7 @@ final class RaidSimulation {
         companion.position,
         companion.team,
       ).isNotEmpty,
-      RaidSkill.revive => _downedBeside(companion).isNotEmpty,
+      RaidSkill.heal => _sideOf(companion).any((b) => b.hp < b.maxHp),
       _ => true,
     };
     return found ? null : RaidRejection.noSkillTarget;
@@ -1639,15 +1639,12 @@ final class RaidSimulation {
         } else {
           targets = _lightning(strike);
         }
-      case RaidSkill.revive:
+      case RaidSkill.heal:
         targets = [
-          for (final c in _downedBeside(companion))
-            (c
-                  ..hp = c.maxHp * value
-                  ..sinceHit = 0
-                  ..target = null
-                  ..guardLeft = spec.reviveGuardSeconds)
-                .id,
+          for (final body in _sideOf(companion))
+            if (body.hp < body.maxHp)
+              (body..hp = math.min(body.maxHp, body.hp + body.maxHp * value))
+                  .id,
         ];
       case RaidSkill.burst:
         final count =
@@ -1686,18 +1683,22 @@ final class RaidSimulation {
         .where((b) => b.position.distanceTo(at) <= reach + b.radius);
   }
 
-  /// [companion]'s own side's downed potatoes: its member's or its
-  /// clone's, never the rest of the party's (2026-11-10, user).
-  List<RaidCompanion> _downedBeside(RaidCompanion companion) {
-    final side = [
+  /// [companion]'s own side still standing: its member's player and
+  /// potatoes, or its clone and the clone's potatoes; never the rest of the
+  /// party (2026-11-10, user).
+  List<RaidBody> _sideOf(RaidCompanion companion) {
+    final side = <RaidBody>[
       for (final m in _active)
-        if (m.companions.contains(companion)) ...m.companions,
+        if (m.companions.contains(companion)) ...[m.player, ...m.companions],
       for (final clone in clones)
-        if (clone.companions.contains(companion)) ...clone.companions,
+        if (clone.companions.contains(companion)) ...[
+          clone,
+          ...clone.companions,
+        ],
     ];
     return [
-      for (final c in side)
-        if (c.isDown) c,
+      for (final body in side)
+        if (!body.isDown) body,
     ];
   }
 
@@ -1715,7 +1716,7 @@ final class RaidSimulation {
       };
       _hurt(
         body,
-        strike.damage * (versus ? rules.clones.versusPlayerDamage : 1),
+        versus ? _versusHit(strike.damage, body) : strike.damage,
         _body(strike.from),
       );
       final boss =
@@ -2682,7 +2683,9 @@ final class RaidSimulation {
             target.radius + 0.05) {
           _hurt(
             target,
-            bullet.damage * _versusScale(bullet, target),
+            _isVersus(bullet, target)
+                ? _versusHit(bullet.damage, target)
+                : bullet.damage,
             _body(bullet.owner),
           );
           return true;
@@ -2692,17 +2695,22 @@ final class RaidSimulation {
     });
   }
 
-  /// Clones and players hurt each other less (2026-11-02, 사용자): guns grow
-  /// with the zone and gear while a player's health barely does, so a clone
-  /// killed in one shot. Told by the bullet, as its shooter may be gone.
-  double _versusScale(RaidBullet bullet, RaidBody target) {
-    final versus = switch (target) {
-      RaidPlayer() => bullet.side == RaidSide.clone,
-      RaidClone() => memberOf(bullet.owner) != null,
-      _ => false,
-    };
-    return versus ? rules.clones.versusPlayerDamage : 1;
-  }
+  /// Whether [bullet] is a clone's hitting a player or a player's hitting
+  /// a clone. Told by the bullet, as its shooter may be gone.
+  bool _isVersus(RaidBullet bullet, RaidBody target) => switch (target) {
+    RaidPlayer() => bullet.side == RaidSide.clone,
+    RaidClone() => memberOf(bullet.owner) != null,
+    _ => false,
+  };
+
+  /// What [damage] does between a clone and a player (2026-11-02, 사용자):
+  /// guns grow with the zone and gear while a player's health barely does,
+  /// so a clone killed in one shot. Scaled down, and never more than a share
+  /// of [target]'s most health in one hit (2026-11-11, 사용자).
+  double _versusHit(double damage, RaidBody target) => math.min(
+    damage * rules.clones.versusPlayerDamage,
+    target.maxHp * rules.clones.versusMaxHit,
+  );
 
   void _pickUpFloorItems() {
     floorItems.removeWhere((item) {

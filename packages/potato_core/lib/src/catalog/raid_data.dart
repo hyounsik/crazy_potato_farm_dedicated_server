@@ -215,9 +215,6 @@ abstract class SkillRulesData with _$SkillRulesData {
     /// A clone's lightning shows where it will fall this long first.
     @Default(0.8) double warningSeconds,
 
-    /// A revived companion cannot be hurt for this long.
-    @Default(1.0) double reviveGuardSeconds,
-
     /// Baby potatoes from a burst land this far round the potato at most.
     @Default(1.5) double burstRadius,
 
@@ -257,6 +254,10 @@ abstract class CloneRulesData with _$CloneRulesData {
     /// What a clone's shots do to a player, and a player's to a clone, as a
     /// share of their damage (2026-11-02, 사용자).
     @Default(1.0) double versusPlayerDamage,
+
+    /// The most one such hit takes, as a share of the target's most health,
+    /// so none kills at once from full (2026-11-11, 사용자: 0.9).
+    @Default(1.0) double versusMaxHit,
   }) = _CloneRulesData;
 
   factory CloneRulesData.fromJson(Map<String, dynamic> json) =>

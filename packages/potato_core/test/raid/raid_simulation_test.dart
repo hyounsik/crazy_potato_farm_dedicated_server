@@ -229,7 +229,7 @@ void main() {
         'effects': [
           effect('self', 'active', {
             'interval_sec': 60,
-            'action': 'revive',
+            'action': 'heal',
             'value': 0.5,
           }),
         ],
@@ -294,8 +294,9 @@ void main() {
       },
     ]);
     (((files['rules']! as Map<String, dynamic>)['raid'] as Map)['clones']
-            as Map)['versus_player_damage'] =
-        0.25;
+          as Map)
+      ..['versus_player_damage'] = 0.25
+      ..['versus_max_hit'] = 0.9;
     final result = Catalog.load(files);
     expect(result.issues, isEmpty);
     catalog = result.catalog!;
@@ -1300,6 +1301,28 @@ void main() {
       expect(clone.hp, closeTo(cloneHp - 10, 0.5));
     });
 
+    test('no hit between clones and players takes more than a share of '
+        'the most health (2026-11-11)', () {
+      final run = cloneRun();
+      final clone = farClone(run);
+      clone.weapon = 'blank';
+      RaidBullet shot(RaidBody from, RaidSide side, Vec2 at) => RaidBullet(
+        id: 9000 + run.bullets.length,
+        position: at,
+        velocity: Vec2.zero,
+        damage: 4000,
+        owner: from.id,
+        side: side,
+        team: from.team,
+        remaining: 5,
+      );
+      run.bullets.add(shot(clone, RaidSide.clone, run.player.position));
+      run.bullets.add(shot(run.player, RaidSide.player, clone.position));
+      run.step();
+      expect(run.player.hp, closeTo(run.player.maxHp * 0.1, 0.5));
+      expect(clone.hp, closeTo(clone.maxHp * 0.1, 0.5));
+    });
+
     test('leave through an exit when their stay runs out', () {
       final run = cloneRun();
       final clone = farClone(run)..stayLeft = 0;
@@ -2245,7 +2268,8 @@ void main() {
       expect(potato.skillLeft, 0);
     });
 
-    test('revive stands every downed potato of the player up', () {
+    test('a heal mends the player and their standing potatoes by half their '
+        'health, never a fallen one (2026-11-11)', () {
       final run = openRun(
         team: const [
           CompanionStart(
@@ -2267,14 +2291,16 @@ void main() {
         ],
       );
       final [healer, a, b] = run.companions;
+      final player = run.player;
       expect(run.apply(UseSkill(healer.id)), RaidRejection.noSkillTarget);
-      a.hp = 0;
+      player.hp = player.maxHp * 0.2;
+      a.hp = a.maxHp * 0.8;
       b.hp = 0;
       expect(run.apply(UseSkill(healer.id)), isNull);
-      expect(a.hp, a.maxHp * 0.5);
-      expect(b.hp, b.maxHp * 0.5);
-      // Briefly out of harm's way once up.
-      expect(a.guardLeft, greaterThan(0));
+      expect(player.hp, closeTo(player.maxHp * 0.7, 1e-9));
+      expect(a.hp, a.maxHp, reason: 'never above its most health');
+      expect(b.hp, 0, reason: 'a fallen potato stays down');
+      expect(run.apply(UseSkill(healer.id)), RaidRejection.skillNotReady);
     });
 
     test('a burst scatters baby potatoes for anyone to pick up', () {

@@ -2288,8 +2288,7 @@ mixin _$SkillRulesData {
 /// Lightning falls on everything this close to the potato, in tiles.
  double get lightningRadius;/// How long lightning stuns, and a boss.
  double get stunSeconds; double get bossStunSeconds;/// A clone's lightning shows where it will fall this long first.
- double get warningSeconds;/// A revived companion cannot be hurt for this long.
- double get reviveGuardSeconds;/// Baby potatoes from a burst land this far round the potato at most.
+ double get warningSeconds;/// Baby potatoes from a burst land this far round the potato at most.
  double get burstRadius;/// A burst throws one more baby potato every this many levels.
  int get burstLevelsPerExtra;/// On the farm, a guard's lightning reaches pests this many tiles off.
  int get farmLightningReach;
@@ -2306,20 +2305,20 @@ $SkillRulesDataCopyWith<SkillRulesData> get copyWith => _$SkillRulesDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as SkillRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkillRulesData&&(identical(other.lightningRadius, _this.lightningRadius) || other.lightningRadius == _this.lightningRadius)&&(identical(other.stunSeconds, _this.stunSeconds) || other.stunSeconds == _this.stunSeconds)&&(identical(other.bossStunSeconds, _this.bossStunSeconds) || other.bossStunSeconds == _this.bossStunSeconds)&&(identical(other.warningSeconds, _this.warningSeconds) || other.warningSeconds == _this.warningSeconds)&&(identical(other.reviveGuardSeconds, _this.reviveGuardSeconds) || other.reviveGuardSeconds == _this.reviveGuardSeconds)&&(identical(other.burstRadius, _this.burstRadius) || other.burstRadius == _this.burstRadius)&&(identical(other.burstLevelsPerExtra, _this.burstLevelsPerExtra) || other.burstLevelsPerExtra == _this.burstLevelsPerExtra)&&(identical(other.farmLightningReach, _this.farmLightningReach) || other.farmLightningReach == _this.farmLightningReach));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is SkillRulesData&&(identical(other.lightningRadius, _this.lightningRadius) || other.lightningRadius == _this.lightningRadius)&&(identical(other.stunSeconds, _this.stunSeconds) || other.stunSeconds == _this.stunSeconds)&&(identical(other.bossStunSeconds, _this.bossStunSeconds) || other.bossStunSeconds == _this.bossStunSeconds)&&(identical(other.warningSeconds, _this.warningSeconds) || other.warningSeconds == _this.warningSeconds)&&(identical(other.burstRadius, _this.burstRadius) || other.burstRadius == _this.burstRadius)&&(identical(other.burstLevelsPerExtra, _this.burstLevelsPerExtra) || other.burstLevelsPerExtra == _this.burstLevelsPerExtra)&&(identical(other.farmLightningReach, _this.farmLightningReach) || other.farmLightningReach == _this.farmLightningReach));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as SkillRulesData;
-  return Object.hash(runtimeType,_this.lightningRadius,_this.stunSeconds,_this.bossStunSeconds,_this.warningSeconds,_this.reviveGuardSeconds,_this.burstRadius,_this.burstLevelsPerExtra,_this.farmLightningReach);
+  return Object.hash(runtimeType,_this.lightningRadius,_this.stunSeconds,_this.bossStunSeconds,_this.warningSeconds,_this.burstRadius,_this.burstLevelsPerExtra,_this.farmLightningReach);
 }
 
 @override
 String toString() {
   final _this = this as SkillRulesData;
-  return 'SkillRulesData(lightningRadius: ${_this.lightningRadius}, stunSeconds: ${_this.stunSeconds}, bossStunSeconds: ${_this.bossStunSeconds}, warningSeconds: ${_this.warningSeconds}, reviveGuardSeconds: ${_this.reviveGuardSeconds}, burstRadius: ${_this.burstRadius}, burstLevelsPerExtra: ${_this.burstLevelsPerExtra}, farmLightningReach: ${_this.farmLightningReach})';
+  return 'SkillRulesData(lightningRadius: ${_this.lightningRadius}, stunSeconds: ${_this.stunSeconds}, bossStunSeconds: ${_this.bossStunSeconds}, warningSeconds: ${_this.warningSeconds}, burstRadius: ${_this.burstRadius}, burstLevelsPerExtra: ${_this.burstLevelsPerExtra}, farmLightningReach: ${_this.farmLightningReach})';
 }
 
 
@@ -2330,7 +2329,7 @@ abstract mixin class $SkillRulesDataCopyWith<$Res>  {
   factory $SkillRulesDataCopyWith(SkillRulesData value, $Res Function(SkillRulesData) _then) = _$SkillRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double reviveGuardSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
+ double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
 });
 
 
@@ -2347,13 +2346,12 @@ class _$SkillRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of SkillRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? reviveGuardSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
   return _then(SkillRulesData(
 lightningRadius: null == lightningRadius ? _self.lightningRadius : lightningRadius // ignore: cast_nullable_to_non_nullable
 as double,stunSeconds: null == stunSeconds ? _self.stunSeconds : stunSeconds // ignore: cast_nullable_to_non_nullable
 as double,bossStunSeconds: null == bossStunSeconds ? _self.bossStunSeconds : bossStunSeconds // ignore: cast_nullable_to_non_nullable
 as double,warningSeconds: null == warningSeconds ? _self.warningSeconds : warningSeconds // ignore: cast_nullable_to_non_nullable
-as double,reviveGuardSeconds: null == reviveGuardSeconds ? _self.reviveGuardSeconds : reviveGuardSeconds // ignore: cast_nullable_to_non_nullable
 as double,burstRadius: null == burstRadius ? _self.burstRadius : burstRadius // ignore: cast_nullable_to_non_nullable
 as double,burstLevelsPerExtra: null == burstLevelsPerExtra ? _self.burstLevelsPerExtra : burstLevelsPerExtra // ignore: cast_nullable_to_non_nullable
 as int,farmLightningReach: null == farmLightningReach ? _self.farmLightningReach : farmLightningReach // ignore: cast_nullable_to_non_nullable
@@ -2442,10 +2440,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _SkillRulesData() when $default != null:
-return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
   return orElse();
 
 }
@@ -2463,10 +2461,10 @@ return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)  $default,) {final _that = this;
 switch (_that) {
 case _SkillRulesData():
-return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2483,10 +2481,10 @@ return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double reviveGuardSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double lightningRadius,  double stunSeconds,  double bossStunSeconds,  double warningSeconds,  double burstRadius,  int burstLevelsPerExtra,  int farmLightningReach)?  $default,) {final _that = this;
 switch (_that) {
 case _SkillRulesData() when $default != null:
-return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.reviveGuardSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
+return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_that.warningSeconds,_that.burstRadius,_that.burstLevelsPerExtra,_that.farmLightningReach);case _:
   return null;
 
 }
@@ -2498,7 +2496,7 @@ return $default(_that.lightningRadius,_that.stunSeconds,_that.bossStunSeconds,_t
 @JsonSerializable()
 
 class _SkillRulesData implements SkillRulesData {
-  const _SkillRulesData({this.lightningRadius = 2.5, this.stunSeconds = 1.0, this.bossStunSeconds = 0.3, this.warningSeconds = 0.8, this.reviveGuardSeconds = 1.0, this.burstRadius = 1.5, this.burstLevelsPerExtra = 10, this.farmLightningReach = 3});
+  const _SkillRulesData({this.lightningRadius = 2.5, this.stunSeconds = 1.0, this.bossStunSeconds = 0.3, this.warningSeconds = 0.8, this.burstRadius = 1.5, this.burstLevelsPerExtra = 10, this.farmLightningReach = 3});
   factory _SkillRulesData.fromJson(Map<String, dynamic> json) => _$SkillRulesDataFromJson(json);
 
 /// Lightning falls on everything this close to the potato, in tiles.
@@ -2508,8 +2506,6 @@ class _SkillRulesData implements SkillRulesData {
 @override@JsonKey() final  double bossStunSeconds;
 /// A clone's lightning shows where it will fall this long first.
 @override@JsonKey() final  double warningSeconds;
-/// A revived companion cannot be hurt for this long.
-@override@JsonKey() final  double reviveGuardSeconds;
 /// Baby potatoes from a burst land this far round the potato at most.
 @override@JsonKey() final  double burstRadius;
 /// A burst throws one more baby potato every this many levels.
@@ -2530,18 +2526,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkillRulesData&&(identical(other.lightningRadius, lightningRadius) || other.lightningRadius == lightningRadius)&&(identical(other.stunSeconds, stunSeconds) || other.stunSeconds == stunSeconds)&&(identical(other.bossStunSeconds, bossStunSeconds) || other.bossStunSeconds == bossStunSeconds)&&(identical(other.warningSeconds, warningSeconds) || other.warningSeconds == warningSeconds)&&(identical(other.reviveGuardSeconds, reviveGuardSeconds) || other.reviveGuardSeconds == reviveGuardSeconds)&&(identical(other.burstRadius, burstRadius) || other.burstRadius == burstRadius)&&(identical(other.burstLevelsPerExtra, burstLevelsPerExtra) || other.burstLevelsPerExtra == burstLevelsPerExtra)&&(identical(other.farmLightningReach, farmLightningReach) || other.farmLightningReach == farmLightningReach));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _SkillRulesData&&(identical(other.lightningRadius, lightningRadius) || other.lightningRadius == lightningRadius)&&(identical(other.stunSeconds, stunSeconds) || other.stunSeconds == stunSeconds)&&(identical(other.bossStunSeconds, bossStunSeconds) || other.bossStunSeconds == bossStunSeconds)&&(identical(other.warningSeconds, warningSeconds) || other.warningSeconds == warningSeconds)&&(identical(other.burstRadius, burstRadius) || other.burstRadius == burstRadius)&&(identical(other.burstLevelsPerExtra, burstLevelsPerExtra) || other.burstLevelsPerExtra == burstLevelsPerExtra)&&(identical(other.farmLightningReach, farmLightningReach) || other.farmLightningReach == farmLightningReach));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,lightningRadius,stunSeconds,bossStunSeconds,warningSeconds,reviveGuardSeconds,burstRadius,burstLevelsPerExtra,farmLightningReach);
+    return Object.hash(runtimeType,lightningRadius,stunSeconds,bossStunSeconds,warningSeconds,burstRadius,burstLevelsPerExtra,farmLightningReach);
 }
 
 @override
 String toString() {
-    return 'SkillRulesData(lightningRadius: $lightningRadius, stunSeconds: $stunSeconds, bossStunSeconds: $bossStunSeconds, warningSeconds: $warningSeconds, reviveGuardSeconds: $reviveGuardSeconds, burstRadius: $burstRadius, burstLevelsPerExtra: $burstLevelsPerExtra, farmLightningReach: $farmLightningReach)';
+    return 'SkillRulesData(lightningRadius: $lightningRadius, stunSeconds: $stunSeconds, bossStunSeconds: $bossStunSeconds, warningSeconds: $warningSeconds, burstRadius: $burstRadius, burstLevelsPerExtra: $burstLevelsPerExtra, farmLightningReach: $farmLightningReach)';
 }
 
 
@@ -2552,7 +2548,7 @@ abstract mixin class _$SkillRulesDataCopyWith<$Res> implements $SkillRulesDataCo
   factory _$SkillRulesDataCopyWith(_SkillRulesData value, $Res Function(_SkillRulesData) _then) = __$SkillRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double reviveGuardSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
+ double lightningRadius, double stunSeconds, double bossStunSeconds, double warningSeconds, double burstRadius, int burstLevelsPerExtra, int farmLightningReach
 });
 
 
@@ -2569,13 +2565,12 @@ class __$SkillRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of SkillRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? reviveGuardSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? lightningRadius = null,Object? stunSeconds = null,Object? bossStunSeconds = null,Object? warningSeconds = null,Object? burstRadius = null,Object? burstLevelsPerExtra = null,Object? farmLightningReach = null,}) {
   return _then(_SkillRulesData(
 lightningRadius: null == lightningRadius ? _self.lightningRadius : lightningRadius // ignore: cast_nullable_to_non_nullable
 as double,stunSeconds: null == stunSeconds ? _self.stunSeconds : stunSeconds // ignore: cast_nullable_to_non_nullable
 as double,bossStunSeconds: null == bossStunSeconds ? _self.bossStunSeconds : bossStunSeconds // ignore: cast_nullable_to_non_nullable
 as double,warningSeconds: null == warningSeconds ? _self.warningSeconds : warningSeconds // ignore: cast_nullable_to_non_nullable
-as double,reviveGuardSeconds: null == reviveGuardSeconds ? _self.reviveGuardSeconds : reviveGuardSeconds // ignore: cast_nullable_to_non_nullable
 as double,burstRadius: null == burstRadius ? _self.burstRadius : burstRadius // ignore: cast_nullable_to_non_nullable
 as double,burstLevelsPerExtra: null == burstLevelsPerExtra ? _self.burstLevelsPerExtra : burstLevelsPerExtra // ignore: cast_nullable_to_non_nullable
 as int,farmLightningReach: null == farmLightningReach ? _self.farmLightningReach : farmLightningReach // ignore: cast_nullable_to_non_nullable
@@ -2597,7 +2592,9 @@ mixin _$CloneRulesData {
 /// share at zero.
  double get waitSightMultiplier;/// What a clone's shots do to a player, and a player's to a clone, as a
 /// share of their damage (2026-11-02, 사용자).
- double get versusPlayerDamage;
+ double get versusPlayerDamage;/// The most one such hit takes, as a share of the target's most health,
+/// so none kills at once from full (2026-11-11, 사용자: 0.9).
+ double get versusMaxHit;
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -2611,20 +2608,20 @@ $CloneRulesDataCopyWith<CloneRulesData> get copyWith => _$CloneRulesDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as CloneRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneRulesData&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.lowHpRatio, _this.lowHpRatio) || other.lowHpRatio == _this.lowHpRatio)&&(identical(other.staySecondsMin, _this.staySecondsMin) || other.staySecondsMin == _this.staySecondsMin)&&(identical(other.staySecondsMax, _this.staySecondsMax) || other.staySecondsMax == _this.staySecondsMax)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.versusPlayerDamage, _this.versusPlayerDamage) || other.versusPlayerDamage == _this.versusPlayerDamage));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is CloneRulesData&&(identical(other.sightMultiplier, _this.sightMultiplier) || other.sightMultiplier == _this.sightMultiplier)&&(identical(other.speedMultiplier, _this.speedMultiplier) || other.speedMultiplier == _this.speedMultiplier)&&(identical(other.maxHp, _this.maxHp) || other.maxHp == _this.maxHp)&&(identical(other.radius, _this.radius) || other.radius == _this.radius)&&(identical(other.lowHpRatio, _this.lowHpRatio) || other.lowHpRatio == _this.lowHpRatio)&&(identical(other.staySecondsMin, _this.staySecondsMin) || other.staySecondsMin == _this.staySecondsMin)&&(identical(other.staySecondsMax, _this.staySecondsMax) || other.staySecondsMax == _this.staySecondsMax)&&(identical(other.waitSightMultiplier, _this.waitSightMultiplier) || other.waitSightMultiplier == _this.waitSightMultiplier)&&(identical(other.versusPlayerDamage, _this.versusPlayerDamage) || other.versusPlayerDamage == _this.versusPlayerDamage)&&(identical(other.versusMaxHit, _this.versusMaxHit) || other.versusMaxHit == _this.versusMaxHit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as CloneRulesData;
-  return Object.hash(runtimeType,_this.sightMultiplier,_this.speedMultiplier,_this.maxHp,_this.radius,_this.lowHpRatio,_this.staySecondsMin,_this.staySecondsMax,_this.waitSightMultiplier,_this.versusPlayerDamage);
+  return Object.hash(runtimeType,_this.sightMultiplier,_this.speedMultiplier,_this.maxHp,_this.radius,_this.lowHpRatio,_this.staySecondsMin,_this.staySecondsMax,_this.waitSightMultiplier,_this.versusPlayerDamage,_this.versusMaxHit);
 }
 
 @override
 String toString() {
   final _this = this as CloneRulesData;
-  return 'CloneRulesData(sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, lowHpRatio: ${_this.lowHpRatio}, staySecondsMin: ${_this.staySecondsMin}, staySecondsMax: ${_this.staySecondsMax}, waitSightMultiplier: ${_this.waitSightMultiplier}, versusPlayerDamage: ${_this.versusPlayerDamage})';
+  return 'CloneRulesData(sightMultiplier: ${_this.sightMultiplier}, speedMultiplier: ${_this.speedMultiplier}, maxHp: ${_this.maxHp}, radius: ${_this.radius}, lowHpRatio: ${_this.lowHpRatio}, staySecondsMin: ${_this.staySecondsMin}, staySecondsMax: ${_this.staySecondsMax}, waitSightMultiplier: ${_this.waitSightMultiplier}, versusPlayerDamage: ${_this.versusPlayerDamage}, versusMaxHit: ${_this.versusMaxHit})';
 }
 
 
@@ -2635,7 +2632,7 @@ abstract mixin class $CloneRulesDataCopyWith<$Res>  {
   factory $CloneRulesDataCopyWith(CloneRulesData value, $Res Function(CloneRulesData) _then) = _$CloneRulesDataCopyWithImpl;
 @useResult
 $Res call({
- double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage, double versusMaxHit
 });
 
 
@@ -2652,7 +2649,7 @@ class _$CloneRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,Object? versusMaxHit = null,}) {
   return _then(CloneRulesData(
 sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
@@ -2663,6 +2660,7 @@ as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySe
 as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,versusPlayerDamage: null == versusPlayerDamage ? _self.versusPlayerDamage : versusPlayerDamage // ignore: cast_nullable_to_non_nullable
+as double,versusMaxHit: null == versusMaxHit ? _self.versusMaxHit : versusMaxHit // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }
@@ -2748,10 +2746,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage,  double versusMaxHit)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _CloneRulesData() when $default != null:
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage,_that.versusMaxHit);case _:
   return orElse();
 
 }
@@ -2769,10 +2767,10 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage,  double versusMaxHit)  $default,) {final _that = this;
 switch (_that) {
 case _CloneRulesData():
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage,_that.versusMaxHit);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -2789,10 +2787,10 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( double sightMultiplier,  double speedMultiplier,  double maxHp,  double radius,  double lowHpRatio,  double staySecondsMin,  double staySecondsMax,  double waitSightMultiplier,  double versusPlayerDamage,  double versusMaxHit)?  $default,) {final _that = this;
 switch (_that) {
 case _CloneRulesData() when $default != null:
-return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage);case _:
+return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.radius,_that.lowHpRatio,_that.staySecondsMin,_that.staySecondsMax,_that.waitSightMultiplier,_that.versusPlayerDamage,_that.versusMaxHit);case _:
   return null;
 
 }
@@ -2804,7 +2802,7 @@ return $default(_that.sightMultiplier,_that.speedMultiplier,_that.maxHp,_that.ra
 @JsonSerializable()
 
 class _CloneRulesData implements CloneRulesData {
-  const _CloneRulesData({required this.sightMultiplier, required this.speedMultiplier, required this.maxHp, required this.radius, required this.lowHpRatio, required this.staySecondsMin, required this.staySecondsMax, required this.waitSightMultiplier, this.versusPlayerDamage = 1.0});
+  const _CloneRulesData({required this.sightMultiplier, required this.speedMultiplier, required this.maxHp, required this.radius, required this.lowHpRatio, required this.staySecondsMin, required this.staySecondsMax, required this.waitSightMultiplier, this.versusPlayerDamage = 1.0, this.versusMaxHit = 1.0});
   factory _CloneRulesData.fromJson(Map<String, dynamic> json) => _$CloneRulesDataFromJson(json);
 
 /// Shares of the player's sight and speed.
@@ -2823,6 +2821,9 @@ class _CloneRulesData implements CloneRulesData {
 /// What a clone's shots do to a player, and a player's to a clone, as a
 /// share of their damage (2026-11-02, 사용자).
 @override@JsonKey() final  double versusPlayerDamage;
+/// The most one such hit takes, as a share of the target's most health,
+/// so none kills at once from full (2026-11-11, 사용자: 0.9).
+@override@JsonKey() final  double versusMaxHit;
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
@@ -2837,18 +2838,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneRulesData&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.lowHpRatio, lowHpRatio) || other.lowHpRatio == lowHpRatio)&&(identical(other.staySecondsMin, staySecondsMin) || other.staySecondsMin == staySecondsMin)&&(identical(other.staySecondsMax, staySecondsMax) || other.staySecondsMax == staySecondsMax)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.versusPlayerDamage, versusPlayerDamage) || other.versusPlayerDamage == versusPlayerDamage));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _CloneRulesData&&(identical(other.sightMultiplier, sightMultiplier) || other.sightMultiplier == sightMultiplier)&&(identical(other.speedMultiplier, speedMultiplier) || other.speedMultiplier == speedMultiplier)&&(identical(other.maxHp, maxHp) || other.maxHp == maxHp)&&(identical(other.radius, radius) || other.radius == radius)&&(identical(other.lowHpRatio, lowHpRatio) || other.lowHpRatio == lowHpRatio)&&(identical(other.staySecondsMin, staySecondsMin) || other.staySecondsMin == staySecondsMin)&&(identical(other.staySecondsMax, staySecondsMax) || other.staySecondsMax == staySecondsMax)&&(identical(other.waitSightMultiplier, waitSightMultiplier) || other.waitSightMultiplier == waitSightMultiplier)&&(identical(other.versusPlayerDamage, versusPlayerDamage) || other.versusPlayerDamage == versusPlayerDamage)&&(identical(other.versusMaxHit, versusMaxHit) || other.versusMaxHit == versusMaxHit));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,sightMultiplier,speedMultiplier,maxHp,radius,lowHpRatio,staySecondsMin,staySecondsMax,waitSightMultiplier,versusPlayerDamage);
+    return Object.hash(runtimeType,sightMultiplier,speedMultiplier,maxHp,radius,lowHpRatio,staySecondsMin,staySecondsMax,waitSightMultiplier,versusPlayerDamage,versusMaxHit);
 }
 
 @override
 String toString() {
-    return 'CloneRulesData(sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, maxHp: $maxHp, radius: $radius, lowHpRatio: $lowHpRatio, staySecondsMin: $staySecondsMin, staySecondsMax: $staySecondsMax, waitSightMultiplier: $waitSightMultiplier, versusPlayerDamage: $versusPlayerDamage)';
+    return 'CloneRulesData(sightMultiplier: $sightMultiplier, speedMultiplier: $speedMultiplier, maxHp: $maxHp, radius: $radius, lowHpRatio: $lowHpRatio, staySecondsMin: $staySecondsMin, staySecondsMax: $staySecondsMax, waitSightMultiplier: $waitSightMultiplier, versusPlayerDamage: $versusPlayerDamage, versusMaxHit: $versusMaxHit)';
 }
 
 
@@ -2859,7 +2860,7 @@ abstract mixin class _$CloneRulesDataCopyWith<$Res> implements $CloneRulesDataCo
   factory _$CloneRulesDataCopyWith(_CloneRulesData value, $Res Function(_CloneRulesData) _then) = __$CloneRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage
+ double sightMultiplier, double speedMultiplier, double maxHp, double radius, double lowHpRatio, double staySecondsMin, double staySecondsMax, double waitSightMultiplier, double versusPlayerDamage, double versusMaxHit
 });
 
 
@@ -2876,7 +2877,7 @@ class __$CloneRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of CloneRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? sightMultiplier = null,Object? speedMultiplier = null,Object? maxHp = null,Object? radius = null,Object? lowHpRatio = null,Object? staySecondsMin = null,Object? staySecondsMax = null,Object? waitSightMultiplier = null,Object? versusPlayerDamage = null,Object? versusMaxHit = null,}) {
   return _then(_CloneRulesData(
 sightMultiplier: null == sightMultiplier ? _self.sightMultiplier : sightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,speedMultiplier: null == speedMultiplier ? _self.speedMultiplier : speedMultiplier // ignore: cast_nullable_to_non_nullable
@@ -2887,6 +2888,7 @@ as double,staySecondsMin: null == staySecondsMin ? _self.staySecondsMin : staySe
 as double,staySecondsMax: null == staySecondsMax ? _self.staySecondsMax : staySecondsMax // ignore: cast_nullable_to_non_nullable
 as double,waitSightMultiplier: null == waitSightMultiplier ? _self.waitSightMultiplier : waitSightMultiplier // ignore: cast_nullable_to_non_nullable
 as double,versusPlayerDamage: null == versusPlayerDamage ? _self.versusPlayerDamage : versusPlayerDamage // ignore: cast_nullable_to_non_nullable
+as double,versusMaxHit: null == versusMaxHit ? _self.versusMaxHit : versusMaxHit // ignore: cast_nullable_to_non_nullable
 as double,
   ));
 }

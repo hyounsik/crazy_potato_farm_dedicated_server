@@ -104,9 +104,10 @@ abstract final class RaidSkill {
   /// value times its attack and stunned.
   static const String lightning = 'lightning';
 
-  /// Stands every downed companion of its side up, at the value's share of
-  /// their health.
-  static const String revive = 'revive';
+  /// Heals its side, the player or clone and their companions still up, by
+  /// the value's share of their most health (2026-11-11, user: in place of
+  /// standing fallen potatoes up).
+  static const String heal = 'heal';
 
   /// Scatters the value plus one per ten levels of baby potatoes round it
   /// for anyone to pick up.

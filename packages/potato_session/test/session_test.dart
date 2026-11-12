@@ -982,12 +982,16 @@ void main() {
         await _pumpMicrotasks();
 
         host.sendWalk(const FarmWalk(at: Vec2(3, 4)));
-        a.sendWalk(const FarmWalk(at: Vec2(5, 6), moving: true));
+        a.sendWalk(
+          const FarmWalk(at: Vec2(5, 6), moving: true, watching: true),
+        );
         await _pumpMicrotasks();
         expect(b.walkers.keys, unorderedEquals([0, 1]));
         expect(b.walkers[0]!.at, const Vec2(3, 4));
         expect(b.walkers[1]!.at, const Vec2(5, 6));
         expect(b.walkers[1]!.moving, isTrue);
+        expect(b.walkers[1]!.watching, isTrue, reason: 'still in a scene');
+        expect(b.walkers[0]!.watching, isFalse);
         expect(a.walkers.keys, [0], reason: 'not its own walk back');
         expect(host.walkers.keys, [1]);
 

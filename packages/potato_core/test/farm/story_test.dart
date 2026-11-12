@@ -316,6 +316,41 @@ void main() {
       );
     });
 
+    test('notes are read and ignored; a misspelt key is an error', () {
+      expect(
+        issuesWith({
+          'version': 1,
+          'note': 'for people',
+          'events': [
+            {'id': 'a', 'note': 'why this event is here'},
+          ],
+        }),
+        isEmpty,
+      );
+      final typo = issuesWith({
+        'version': 1,
+        'events': [
+          {
+            'id': 'a',
+            'unlock': ['pests'],
+          },
+        ],
+      });
+      expect(typo.single, contains('unlock'));
+      final goalTypo = issuesWith({
+        'version': 1,
+        'events': [
+          {
+            'id': 'a',
+            'goals': [
+              {'kind': 'fields', 'cout': 3},
+            ],
+          },
+        ],
+      });
+      expect(goalTypo.single, contains('cout'));
+    });
+
     test('an event may only follow earlier ones', () {
       expect(
         issuesWith({

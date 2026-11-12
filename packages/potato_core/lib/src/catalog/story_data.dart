@@ -10,9 +10,24 @@ part 'story_data.g.dart';
 /// A feature listed in [locked] stays closed until an event that unlocks it
 /// is done; anything not listed is open from the start. The story's words
 /// (letters, scenes) are the app's; this file only holds the rules.
+///
+/// JSON has no comments, so the file and each event carry a [note] for
+/// people. A key the file does not know is an error, not ignored: a typo
+/// such as `unlock` for `unlocks` would otherwise leave an event that opens
+/// nothing (2026-11-12, 사용자).
 @freezed
 abstract class StoryData with _$StoryData {
+  // Freezed passes this on to the generated class (its documented way).
+  // ignore: invalid_annotation_target
+  @JsonSerializable(disallowUnrecognizedKeys: true)
   const factory StoryData({
+    /// The file's format version (`Catalog` checks it against the one it
+    /// reads).
+    @Default(1) int version,
+
+    /// For people reading the file; the game ignores it.
+    @Default('') String note,
+
     /// Unlock keys closed on a new farm. See [StoryUnlock] for the forms.
     @Default(<String>[]) List<String> locked,
 
@@ -64,11 +79,18 @@ abstract final class StoryUnlock {
 /// One story event: done when every goal holds, after the events [after].
 @freezed
 abstract class StoryEventData with _$StoryEventData {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(disallowUnrecognizedKeys: true)
   const factory StoryEventData({
     required String id,
 
     /// A working name for developers; players see the app's words.
     @Default('') String title,
+
+    /// Why the event is there, for people: which part of the story it
+    /// follows and what it is meant to teach. What it counts and opens the
+    /// other fields already say. The game ignores it.
+    @Default('') String note,
 
     /// Events that must be done first. Null means the event before this one
     /// in the file (none for the first); an empty list means none.
@@ -140,6 +162,8 @@ enum StoryGoalKind {
 /// event could start, except [StoryGoalKind.wait].
 @freezed
 abstract class StoryGoalData with _$StoryGoalData {
+  // ignore: invalid_annotation_target
+  @JsonSerializable(disallowUnrecognizedKeys: true)
   const factory StoryGoalData({
     required StoryGoalKind kind,
     @Default(1) int count,

@@ -6,32 +6,35 @@ part of 'story_data.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
-_StoryData _$StoryDataFromJson(Map<String, dynamic> json) => $checkedCreate(
-  '_StoryData',
-  json,
-  ($checkedConvert) {
-    final val = _StoryData(
-      locked: $checkedConvert(
-        'locked',
-        (v) =>
-            (v as List<dynamic>?)?.map((e) => e as String).toList() ??
-            const <String>[],
-      ),
-      events: $checkedConvert(
-        'events',
-        (v) =>
-            (v as List<dynamic>?)
-                ?.map((e) => StoryEventData.fromJson(e as Map<String, dynamic>))
-                .toList() ??
-            const <StoryEventData>[],
-      ),
-    );
-    return val;
-  },
-);
+_StoryData _$StoryDataFromJson(
+  Map<String, dynamic> json,
+) => $checkedCreate('_StoryData', json, ($checkedConvert) {
+  $checkKeys(json, allowedKeys: const ['version', 'note', 'locked', 'events']);
+  final val = _StoryData(
+    version: $checkedConvert('version', (v) => (v as num?)?.toInt() ?? 1),
+    note: $checkedConvert('note', (v) => v as String? ?? ''),
+    locked: $checkedConvert(
+      'locked',
+      (v) =>
+          (v as List<dynamic>?)?.map((e) => e as String).toList() ??
+          const <String>[],
+    ),
+    events: $checkedConvert(
+      'events',
+      (v) =>
+          (v as List<dynamic>?)
+              ?.map((e) => StoryEventData.fromJson(e as Map<String, dynamic>))
+              .toList() ??
+          const <StoryEventData>[],
+    ),
+  );
+  return val;
+});
 
 Map<String, dynamic> _$StoryDataToJson(_StoryData instance) =>
     <String, dynamic>{
+      'version': instance.version,
+      'note': instance.note,
       'locked': instance.locked,
       'events': instance.events.map((e) => e.toJson()).toList(),
     };
@@ -39,9 +42,23 @@ Map<String, dynamic> _$StoryDataToJson(_StoryData instance) =>
 _StoryEventData _$StoryEventDataFromJson(
   Map<String, dynamic> json,
 ) => $checkedCreate('_StoryEventData', json, ($checkedConvert) {
+  $checkKeys(
+    json,
+    allowedKeys: const [
+      'id',
+      'title',
+      'note',
+      'after',
+      'goals',
+      'unlocks',
+      'food',
+      'seeds',
+    ],
+  );
   final val = _StoryEventData(
     id: $checkedConvert('id', (v) => v as String),
     title: $checkedConvert('title', (v) => v as String? ?? ''),
+    note: $checkedConvert('note', (v) => v as String? ?? ''),
     after: $checkedConvert(
       'after',
       (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
@@ -77,6 +94,7 @@ Map<String, dynamic> _$StoryEventDataToJson(_StoryEventData instance) =>
     <String, dynamic>{
       'id': instance.id,
       'title': instance.title,
+      'note': instance.note,
       'after': instance.after,
       'goals': instance.goals.map((e) => e.toJson()).toList(),
       'unlocks': instance.unlocks,
@@ -86,6 +104,17 @@ Map<String, dynamic> _$StoryEventDataToJson(_StoryEventData instance) =>
 
 _StoryGoalData _$StoryGoalDataFromJson(Map<String, dynamic> json) =>
     $checkedCreate('_StoryGoalData', json, ($checkedConvert) {
+      $checkKeys(
+        json,
+        allowedKeys: const [
+          'kind',
+          'count',
+          'building',
+          'type',
+          'zone',
+          'danger',
+        ],
+      );
       final val = _StoryGoalData(
         kind: $checkedConvert(
           'kind',

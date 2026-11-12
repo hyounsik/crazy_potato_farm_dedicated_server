@@ -11,7 +11,7 @@ import 'package:potato_core/potato_core.dart';
 /// Bump it whenever a message, or the JSON of anything a message carries
 /// (runs, farms, items), changes. `test/protocol_test.dart` fails until it
 /// is bumped and its fingerprint updated.
-const int sessionProtocol = 23;
+const int sessionProtocol = 24;
 
 /// Why a guest could not join a host's session.
 enum SessionJoinRejection {
@@ -74,22 +74,30 @@ final class FarmWalk {
     required this.at,
     this.facing = const Vec2(0, 1),
     this.moving = false,
+    this.watching = false,
   });
 
   factory FarmWalk.fromJson(Map<String, dynamic> json) => FarmWalk(
     at: Vec2.fromJson(json['at'] as List<Object?>),
     facing: Vec2.fromJson(json['face'] as List<Object?>),
     moving: json['moving'] as bool? ?? false,
+    watching: json['watching'] as bool? ?? false,
   );
 
   final Vec2 at;
   final Vec2 facing;
   final bool moving;
 
+  /// Still watching a story scene: the others see "…" over this character
+  /// (2026-11-12, 사용자), so whoever skipped first knows to wait. Builds
+  /// without it read false.
+  final bool watching;
+
   Map<String, dynamic> toJson() => {
     'at': at.toJson(),
     'face': facing.toJson(),
     if (moving) 'moving': true,
+    if (watching) 'watching': true,
   };
 }
 

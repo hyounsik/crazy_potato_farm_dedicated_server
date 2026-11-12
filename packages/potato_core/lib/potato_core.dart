@@ -35,6 +35,8 @@ export 'src/map/map_data.dart';
 export 'src/map/map_generator.dart';
 export 'src/map/map_physics.dart';
 export 'src/map/map_recipe.dart';
+export 'src/map/map_script.dart';
+export 'src/map/map_script_run.dart';
 export 'src/potatoes/ability_roller.dart';
 export 'src/potatoes/guard.dart';
 export 'src/potatoes/potato.dart';

@@ -221,6 +221,12 @@ sealed class FarmCommand with _$FarmCommand {
   /// development builds send it.
   const factory FarmCommand.unlockAll() = UnlockAll;
 
+  /// Finishes story event [event] now, whatever its goals and the events
+  /// before it: its unlocks, letter and scene follow as usual. A developer
+  /// tool for trying events one by one (2026-11-12, 사용자); only
+  /// development builds send it.
+  const factory FarmCommand.finishStory({required String event}) = FinishStory;
+
   /// Comes back from exploring: [food] and [seeds] go into the farm, and
   /// the companions [potatoIds] go back to where they were, or to the fridge
   /// when that place is gone or taken. Companions [lostPotatoIds] were lost

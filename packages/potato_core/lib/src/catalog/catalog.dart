@@ -14,6 +14,7 @@ import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/items/gear.dart';
 import 'package:potato_core/src/map/map_chunk.dart';
 import 'package:potato_core/src/map/map_recipe.dart';
+import 'package:potato_core/src/map/map_script.dart';
 import 'package:potato_core/src/potatoes/seed.dart';
 
 /// Read-only game data: numbers and content definitions loaded at startup.
@@ -1156,6 +1157,28 @@ final class Catalog {
     }
   }
 
+  /// A drawn map's scripts must fit it and the zone that uses it: its
+  /// places, its boss and the enemies data knows.
+  static void _checkScripts(
+    List<CatalogIssue> issues,
+    DrawnMapData map,
+    ZoneData zone,
+    Map<String, EnemyData> enemies,
+  ) {
+    final cast = ScriptCast(
+      enemies: enemies,
+      characters: storyCharacters,
+      boss: enemies[zone.boss?.enemy],
+    );
+    for (final script in map.parsedScripts) {
+      for (final problem in script.check(map.map, cast)) {
+        issues.add(
+          CatalogIssue('maps', '${map.id}.scripts.${script.name}', '$problem'),
+        );
+      }
+    }
+  }
+
   static void _checkZone(_FileCheck check, String path, ZoneData zone) {
     check.atLeast('$path.score', zone.score, 0);
     if (zone.clearOpens != null && zone.danger != null) {
@@ -1488,6 +1511,7 @@ final class Catalog {
             ),
           );
         }
+        if (map != null) _checkScripts(issues, map, zone, enemies);
       }
     }
     for (final zone in zones.values) {

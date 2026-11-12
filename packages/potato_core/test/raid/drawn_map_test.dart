@@ -84,6 +84,20 @@ void main() {
       );
     });
 
+    test('its scripts are checked against it and its zone', () {
+      final map = _drawn()
+        ..['scripts'] = [
+          {'name': 'ok', 'text': 'actor r biter at a\nwait defeated r'},
+          {'name': 'bad', 'text': 'actor r biter at a\nattack boss jump at r'},
+        ];
+      (map['map'] as Map<String, dynamic>)['markers']['at:a'] = [_at(2, 3)];
+      final result = Catalog.load(_filesWith(map));
+      expect(result.issues.map((i) => i.toString()), [
+        'maps: story.scripts.bad: line 2: no body "boss" yet',
+      ]);
+      expect(result.catalog, isNull);
+    });
+
     test('an enemy marker naming no such enemy is an issue', () {
       expect(
         _issues(_filesWith(_drawn(enemy: 'yeti'))),

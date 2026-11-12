@@ -762,6 +762,18 @@ Map<String, dynamic> _$UnlockAllToJson(UnlockAll instance) => <String, dynamic>{
   'runtimeType': instance.$type,
 };
 
+FinishStory _$FinishStoryFromJson(Map<String, dynamic> json) =>
+    $checkedCreate('FinishStory', json, ($checkedConvert) {
+      final val = FinishStory(
+        event: $checkedConvert('event', (v) => v as String),
+        $type: $checkedConvert('runtimeType', (v) => v as String?),
+      );
+      return val;
+    }, fieldKeyMap: const {r'$type': 'runtimeType'});
+
+Map<String, dynamic> _$FinishStoryToJson(FinishStory instance) =>
+    <String, dynamic>{'event': instance.event, 'runtimeType': instance.$type};
+
 ReturnHome _$ReturnHomeFromJson(Map<String, dynamic> json) => $checkedCreate(
   'ReturnHome',
   json,

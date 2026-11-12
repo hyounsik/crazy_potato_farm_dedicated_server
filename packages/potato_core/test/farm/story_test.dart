@@ -256,6 +256,27 @@ void main() {
     );
   });
 
+  test('a developer can finish an event at once, out of order', () {
+    expect(
+      farm.apply(const FarmCommand.finishStory(event: 'first_escape')),
+      isNull,
+    );
+    expect(farm.storyDone.keys, ['first_escape']);
+    expect(farm.isUnlocked(StoryUnlock.pests), isTrue);
+    expect(farm.takeEvents().whereType<StoryDone>().single.unlocks, [
+      'building:graveyard',
+      'pests',
+    ]);
+    expect(
+      farm.apply(const FarmCommand.finishStory(event: 'first_escape')),
+      FarmRejection.nothingToClaim,
+    );
+    expect(
+      farm.apply(const FarmCommand.finishStory(event: 'ghost')),
+      FarmRejection.nothingToClaim,
+    );
+  });
+
   test('goals already met finish a chain of events at once', () {
     final quick = sampleCatalogWith((files) {
       files['story'] = {

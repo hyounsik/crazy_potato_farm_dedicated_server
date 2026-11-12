@@ -845,6 +845,7 @@ final class FarmSimulation {
       score: score,
     ),
     UnlockAll() => _unlockAll(),
+    FinishStory(:final event) => _finishStoryNow(event),
     ReturnHome(
       :final food,
       :final seeds,
@@ -2900,6 +2901,17 @@ final class FarmSimulation {
       for (final stack in event.seeds) ..._rollStack(_roller, stack, _random),
     ];
     _send(MailKind.story, story: event.id, seeds: seeds, food: event.food);
+  }
+
+  /// Finishes [id] at once (a developer tool), then whatever it opens.
+  FarmRejection? _finishStoryNow(String id) {
+    final event = catalog.story.events.where((e) => e.id == id).firstOrNull;
+    if (event == null || _storyDone.containsKey(id)) {
+      return FarmRejection.nothingToClaim;
+    }
+    _finishStory(event);
+    _advanceStory();
+    return null;
   }
 
   /// Opens every feature and stops story events (a developer tool).

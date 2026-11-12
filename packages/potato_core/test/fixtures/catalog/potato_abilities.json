@@ -7,10 +7,6 @@
       "rare": 2,
       "legendary": 3
     },
-    "extra_slot_pool_weight": {
-      "common": 1,
-      "unique": 1
-    },
     "rarity_weights": {
       "normal": 100,
       "low": 30,

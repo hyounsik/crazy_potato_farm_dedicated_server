@@ -901,16 +901,6 @@ final class Catalog {
         check.positive('rules.rarity_weights.${rarity.name}', weight);
       }
     }
-    check.atLeast(
-      'rules.extra_slot_pool_weight.common',
-      rules.extraSlotPoolWeight.common,
-      0,
-    );
-    check.atLeast(
-      'rules.extra_slot_pool_weight.unique',
-      rules.extraSlotPoolWeight.unique,
-      0,
-    );
     if (!pools.containsKey(commonPool)) {
       check.issue('pools', 'missing "$commonPool"');
     }

@@ -781,7 +781,11 @@ final class FarmSimulation {
     HarvestPotato(:final fieldId, :final tile) => _harvest(fieldId, tile),
     HarvestField(:final fieldId) => _harvestField(fieldId),
     EnhanceGear(:final worn, :final index) => _enhanceGear(worn, index),
-    RerollGear(:final worn, :final index) => _rerollGear(worn, index),
+    RerollGear(:final worn, :final index, :final slots) => _rerollGear(
+      worn,
+      index,
+      slots: slots,
+    ),
     RepairGear(:final worn, :final index) => _repairGear(worn, index),
     EatMeal(:final meal) => _eatMeal(meal),
     EquipGear(:final index) => _equipGear(index),
@@ -1825,15 +1829,15 @@ final class FarmSimulation {
       _rules.seedLab.band(piece.level) *
       _rules.seedLab.gradeTimes[piece.grade]!;
 
-  /// Rolls [worn] or box [index]'s abilities anew; again and again until
-  /// the player is pleased, as with seeds.
-  FarmRejection? _rerollGear(GearKind? worn, int? index) {
+  /// Rolls [worn] or box [index]'s abilities anew, or with [slots] only a
+  /// belt's potato slots; again and again until the player is pleased, as
+  /// with seeds. The two are separate buttons (2026-11-11, 사용자), so a
+  /// normal belt (no abilities) can still roll its slots.
+  FarmRejection? _rerollGear(GearKind? worn, int? index, {bool slots = false}) {
     if (!hasGearLab) return FarmRejection.noGearLab;
     final piece = _gearAt(worn, index);
     if (piece == null) return FarmRejection.noSuchGear;
-    // A belt rolls its potato slots too, so even a normal one (no
-    // abilities) has something to roll (2026-11-11, 사용자).
-    if (piece.abilities.isEmpty && piece.slots.isEmpty) {
+    if (slots ? piece.slots.isEmpty : piece.abilities.isEmpty) {
       return FarmRejection.noAbilities;
     }
     final cost = gearRerollFood(piece);
@@ -1842,17 +1846,18 @@ final class FarmSimulation {
     _putGear(
       worn,
       index,
-      piece.copyWith(
-        abilities: _gearStats.rollAbilities(
-          piece.kind,
-          piece.family,
-          piece.grade,
-          _random,
-        ),
-        slots: piece.slots.isEmpty
-            ? piece.slots
-            : _gearStats.rollSlots(piece.kind, piece.grade, _random),
-      ),
+      slots
+          ? piece.copyWith(
+              slots: _gearStats.rollSlots(piece.kind, piece.grade, _random),
+            )
+          : piece.copyWith(
+              abilities: _gearStats.rollAbilities(
+                piece.kind,
+                piece.family,
+                piece.grade,
+                _random,
+              ),
+            ),
     );
     _events.add(FarmEvent.gearRerolled(kind: piece.kind));
     return null;

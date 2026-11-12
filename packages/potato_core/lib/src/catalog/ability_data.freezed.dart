@@ -1200,9 +1200,7 @@ as List<PotatoType>,
 mixin _$AbilityRulesData {
 
 /// Ability slots by grade; the first is the seed's own.
- Map<Grade, int> get slotsByGrade;/// For slots after the first: odds of drawing from the shared pool
-/// against the type's own.
- ExtraSlotPoolWeightData get extraSlotPoolWeight; Map<Rarity, int> get rarityWeights;
+ Map<Grade, int> get slotsByGrade; Map<Rarity, int> get rarityWeights;
 /// Create a copy of AbilityRulesData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -1216,20 +1214,20 @@ $AbilityRulesDataCopyWith<AbilityRulesData> get copyWith => _$AbilityRulesDataCo
 @override
 bool operator ==(Object other) {
   final _this = this as AbilityRulesData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbilityRulesData&&const DeepCollectionEquality().equals(other.slotsByGrade, _this.slotsByGrade)&&(identical(other.extraSlotPoolWeight, _this.extraSlotPoolWeight) || other.extraSlotPoolWeight == _this.extraSlotPoolWeight)&&const DeepCollectionEquality().equals(other.rarityWeights, _this.rarityWeights));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is AbilityRulesData&&const DeepCollectionEquality().equals(other.slotsByGrade, _this.slotsByGrade)&&const DeepCollectionEquality().equals(other.rarityWeights, _this.rarityWeights));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as AbilityRulesData;
-  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.slotsByGrade),_this.extraSlotPoolWeight,const DeepCollectionEquality().hash(_this.rarityWeights));
+  return Object.hash(runtimeType,const DeepCollectionEquality().hash(_this.slotsByGrade),const DeepCollectionEquality().hash(_this.rarityWeights));
 }
 
 @override
 String toString() {
   final _this = this as AbilityRulesData;
-  return 'AbilityRulesData(slotsByGrade: ${_this.slotsByGrade}, extraSlotPoolWeight: ${_this.extraSlotPoolWeight}, rarityWeights: ${_this.rarityWeights})';
+  return 'AbilityRulesData(slotsByGrade: ${_this.slotsByGrade}, rarityWeights: ${_this.rarityWeights})';
 }
 
 
@@ -1240,11 +1238,11 @@ abstract mixin class $AbilityRulesDataCopyWith<$Res>  {
   factory $AbilityRulesDataCopyWith(AbilityRulesData value, $Res Function(AbilityRulesData) _then) = _$AbilityRulesDataCopyWithImpl;
 @useResult
 $Res call({
- Map<Grade, int> slotsByGrade, ExtraSlotPoolWeightData extraSlotPoolWeight, Map<Rarity, int> rarityWeights
+ Map<Grade, int> slotsByGrade, Map<Rarity, int> rarityWeights
 });
 
 
-$ExtraSlotPoolWeightDataCopyWith<$Res> get extraSlotPoolWeight;
+
 
 }
 /// @nodoc
@@ -1257,24 +1255,14 @@ class _$AbilityRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of AbilityRulesData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? slotsByGrade = null,Object? extraSlotPoolWeight = null,Object? rarityWeights = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? slotsByGrade = null,Object? rarityWeights = null,}) {
   return _then(AbilityRulesData(
 slotsByGrade: null == slotsByGrade ? _self.slotsByGrade : slotsByGrade // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,extraSlotPoolWeight: null == extraSlotPoolWeight ? _self.extraSlotPoolWeight : extraSlotPoolWeight // ignore: cast_nullable_to_non_nullable
-as ExtraSlotPoolWeightData,rarityWeights: null == rarityWeights ? _self.rarityWeights : rarityWeights // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,rarityWeights: null == rarityWeights ? _self.rarityWeights : rarityWeights // ignore: cast_nullable_to_non_nullable
 as Map<Rarity, int>,
   ));
 }
-/// Create a copy of AbilityRulesData
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ExtraSlotPoolWeightDataCopyWith<$Res> get extraSlotPoolWeight {
-  
-  return $ExtraSlotPoolWeightDataCopyWith<$Res>(_self.extraSlotPoolWeight, (value) {
-    return _then(_self.copyWith(extraSlotPoolWeight: value));
-  });
-}
+
 }
 
 
@@ -1356,10 +1344,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<Grade, int> slotsByGrade,  ExtraSlotPoolWeightData extraSlotPoolWeight,  Map<Rarity, int> rarityWeights)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( Map<Grade, int> slotsByGrade,  Map<Rarity, int> rarityWeights)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _AbilityRulesData() when $default != null:
-return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights);case _:
+return $default(_that.slotsByGrade,_that.rarityWeights);case _:
   return orElse();
 
 }
@@ -1377,10 +1365,10 @@ return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<Grade, int> slotsByGrade,  ExtraSlotPoolWeightData extraSlotPoolWeight,  Map<Rarity, int> rarityWeights)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( Map<Grade, int> slotsByGrade,  Map<Rarity, int> rarityWeights)  $default,) {final _that = this;
 switch (_that) {
 case _AbilityRulesData():
-return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights);case _:
+return $default(_that.slotsByGrade,_that.rarityWeights);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1397,10 +1385,10 @@ return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<Grade, int> slotsByGrade,  ExtraSlotPoolWeightData extraSlotPoolWeight,  Map<Rarity, int> rarityWeights)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( Map<Grade, int> slotsByGrade,  Map<Rarity, int> rarityWeights)?  $default,) {final _that = this;
 switch (_that) {
 case _AbilityRulesData() when $default != null:
-return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights);case _:
+return $default(_that.slotsByGrade,_that.rarityWeights);case _:
   return null;
 
 }
@@ -1412,7 +1400,7 @@ return $default(_that.slotsByGrade,_that.extraSlotPoolWeight,_that.rarityWeights
 @JsonSerializable()
 
 class _AbilityRulesData implements AbilityRulesData {
-  const _AbilityRulesData({required  Map<Grade, int> slotsByGrade, required this.extraSlotPoolWeight, required  Map<Rarity, int> rarityWeights}): _slotsByGrade = slotsByGrade,_rarityWeights = rarityWeights;
+  const _AbilityRulesData({required  Map<Grade, int> slotsByGrade, required  Map<Rarity, int> rarityWeights}): _slotsByGrade = slotsByGrade,_rarityWeights = rarityWeights;
   factory _AbilityRulesData.fromJson(Map<String, dynamic> json) => _$AbilityRulesDataFromJson(json);
 
 /// Ability slots by grade; the first is the seed's own.
@@ -1424,9 +1412,6 @@ class _AbilityRulesData implements AbilityRulesData {
   return EqualUnmodifiableMapView(_slotsByGrade);
 }
 
-/// For slots after the first: odds of drawing from the shared pool
-/// against the type's own.
-@override final  ExtraSlotPoolWeightData extraSlotPoolWeight;
  final  Map<Rarity, int> _rarityWeights;
 @override Map<Rarity, int> get rarityWeights {
   if (_rarityWeights is EqualUnmodifiableMapView) return _rarityWeights;
@@ -1448,18 +1433,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbilityRulesData&&const DeepCollectionEquality().equals(other.slotsByGrade, _slotsByGrade)&&(identical(other.extraSlotPoolWeight, extraSlotPoolWeight) || other.extraSlotPoolWeight == extraSlotPoolWeight)&&const DeepCollectionEquality().equals(other.rarityWeights, _rarityWeights));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _AbilityRulesData&&const DeepCollectionEquality().equals(other.slotsByGrade, _slotsByGrade)&&const DeepCollectionEquality().equals(other.rarityWeights, _rarityWeights));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_slotsByGrade),extraSlotPoolWeight,const DeepCollectionEquality().hash(_rarityWeights));
+    return Object.hash(runtimeType,const DeepCollectionEquality().hash(_slotsByGrade),const DeepCollectionEquality().hash(_rarityWeights));
 }
 
 @override
 String toString() {
-    return 'AbilityRulesData(slotsByGrade: $slotsByGrade, extraSlotPoolWeight: $extraSlotPoolWeight, rarityWeights: $rarityWeights)';
+    return 'AbilityRulesData(slotsByGrade: $slotsByGrade, rarityWeights: $rarityWeights)';
 }
 
 
@@ -1470,11 +1455,11 @@ abstract mixin class _$AbilityRulesDataCopyWith<$Res> implements $AbilityRulesDa
   factory _$AbilityRulesDataCopyWith(_AbilityRulesData value, $Res Function(_AbilityRulesData) _then) = __$AbilityRulesDataCopyWithImpl;
 @override @useResult
 $Res call({
- Map<Grade, int> slotsByGrade, ExtraSlotPoolWeightData extraSlotPoolWeight, Map<Rarity, int> rarityWeights
+ Map<Grade, int> slotsByGrade, Map<Rarity, int> rarityWeights
 });
 
 
-@override $ExtraSlotPoolWeightDataCopyWith<$Res> get extraSlotPoolWeight;
+
 
 }
 /// @nodoc
@@ -1487,294 +1472,11 @@ class __$AbilityRulesDataCopyWithImpl<$Res>
 
 /// Create a copy of AbilityRulesData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? slotsByGrade = null,Object? extraSlotPoolWeight = null,Object? rarityWeights = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? slotsByGrade = null,Object? rarityWeights = null,}) {
   return _then(_AbilityRulesData(
 slotsByGrade: null == slotsByGrade ? _self._slotsByGrade : slotsByGrade // ignore: cast_nullable_to_non_nullable
-as Map<Grade, int>,extraSlotPoolWeight: null == extraSlotPoolWeight ? _self.extraSlotPoolWeight : extraSlotPoolWeight // ignore: cast_nullable_to_non_nullable
-as ExtraSlotPoolWeightData,rarityWeights: null == rarityWeights ? _self._rarityWeights : rarityWeights // ignore: cast_nullable_to_non_nullable
+as Map<Grade, int>,rarityWeights: null == rarityWeights ? _self._rarityWeights : rarityWeights // ignore: cast_nullable_to_non_nullable
 as Map<Rarity, int>,
-  ));
-}
-
-/// Create a copy of AbilityRulesData
-/// with the given fields replaced by the non-null parameter values.
-@override
-@pragma('vm:prefer-inline')
-$ExtraSlotPoolWeightDataCopyWith<$Res> get extraSlotPoolWeight {
-  
-  return $ExtraSlotPoolWeightDataCopyWith<$Res>(_self.extraSlotPoolWeight, (value) {
-    return _then(_self.copyWith(extraSlotPoolWeight: value));
-  });
-}
-}
-
-
-/// @nodoc
-mixin _$ExtraSlotPoolWeightData {
-
- int get common; int get unique;
-/// Create a copy of ExtraSlotPoolWeightData
-/// with the given fields replaced by the non-null parameter values.
-@JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-$ExtraSlotPoolWeightDataCopyWith<ExtraSlotPoolWeightData> get copyWith => _$ExtraSlotPoolWeightDataCopyWithImpl<ExtraSlotPoolWeightData>(this as ExtraSlotPoolWeightData, _$identity);
-
-  /// Serializes this ExtraSlotPoolWeightData to a JSON map.
-  Map<String, dynamic> toJson();
-
-
-@override
-bool operator ==(Object other) {
-  final _this = this as ExtraSlotPoolWeightData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ExtraSlotPoolWeightData&&(identical(other.common, _this.common) || other.common == _this.common)&&(identical(other.unique, _this.unique) || other.unique == _this.unique));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode {
-  final _this = this as ExtraSlotPoolWeightData;
-  return Object.hash(runtimeType,_this.common,_this.unique);
-}
-
-@override
-String toString() {
-  final _this = this as ExtraSlotPoolWeightData;
-  return 'ExtraSlotPoolWeightData(common: ${_this.common}, unique: ${_this.unique})';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class $ExtraSlotPoolWeightDataCopyWith<$Res>  {
-  factory $ExtraSlotPoolWeightDataCopyWith(ExtraSlotPoolWeightData value, $Res Function(ExtraSlotPoolWeightData) _then) = _$ExtraSlotPoolWeightDataCopyWithImpl;
-@useResult
-$Res call({
- int common, int unique
-});
-
-
-
-
-}
-/// @nodoc
-class _$ExtraSlotPoolWeightDataCopyWithImpl<$Res>
-    implements $ExtraSlotPoolWeightDataCopyWith<$Res> {
-  _$ExtraSlotPoolWeightDataCopyWithImpl(this._self, this._then);
-
-  final ExtraSlotPoolWeightData _self;
-  final $Res Function(ExtraSlotPoolWeightData) _then;
-
-/// Create a copy of ExtraSlotPoolWeightData
-/// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? common = null,Object? unique = null,}) {
-  return _then(ExtraSlotPoolWeightData(
-common: null == common ? _self.common : common // ignore: cast_nullable_to_non_nullable
-as int,unique: null == unique ? _self.unique : unique // ignore: cast_nullable_to_non_nullable
-as int,
-  ));
-}
-
-}
-
-
-/// Adds pattern-matching-related methods to [ExtraSlotPoolWeightData].
-extension ExtraSlotPoolWeightDataPatterns on ExtraSlotPoolWeightData {
-/// A variant of `map` that fallback to returning `orElse`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeMap<TResult extends Object?>(TResult Function( _ExtraSlotPoolWeightData value)?  $default,{required TResult orElse(),}){
-final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData() when $default != null:
-return $default(_that);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// Callbacks receives the raw object, upcasted.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case final Subclass2 value:
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult map<TResult extends Object?>(TResult Function( _ExtraSlotPoolWeightData value)  $default,){
-final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData():
-return $default(_that);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `map` that fallback to returning `null`.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case final Subclass value:
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? mapOrNull<TResult extends Object?>(TResult? Function( _ExtraSlotPoolWeightData value)?  $default,){
-final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData() when $default != null:
-return $default(_that);case _:
-  return null;
-
-}
-}
-/// A variant of `when` that fallback to an `orElse` callback.
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return orElse();
-/// }
-/// ```
-
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( int common,  int unique)?  $default,{required TResult orElse(),}) {final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData() when $default != null:
-return $default(_that.common,_that.unique);case _:
-  return orElse();
-
-}
-}
-/// A `switch`-like method, using callbacks.
-///
-/// As opposed to `map`, this offers destructuring.
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case Subclass2(:final field2):
-///     return ...;
-/// }
-/// ```
-
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( int common,  int unique)  $default,) {final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData():
-return $default(_that.common,_that.unique);case _:
-  throw StateError('Unexpected subclass');
-
-}
-}
-/// A variant of `when` that fallback to returning `null`
-///
-/// It is equivalent to doing:
-/// ```dart
-/// switch (sealedClass) {
-///   case Subclass(:final field):
-///     return ...;
-///   case _:
-///     return null;
-/// }
-/// ```
-
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( int common,  int unique)?  $default,) {final _that = this;
-switch (_that) {
-case _ExtraSlotPoolWeightData() when $default != null:
-return $default(_that.common,_that.unique);case _:
-  return null;
-
-}
-}
-
-}
-
-/// @nodoc
-@JsonSerializable()
-
-class _ExtraSlotPoolWeightData implements ExtraSlotPoolWeightData {
-  const _ExtraSlotPoolWeightData({required this.common, required this.unique});
-  factory _ExtraSlotPoolWeightData.fromJson(Map<String, dynamic> json) => _$ExtraSlotPoolWeightDataFromJson(json);
-
-@override final  int common;
-@override final  int unique;
-
-/// Create a copy of ExtraSlotPoolWeightData
-/// with the given fields replaced by the non-null parameter values.
-@override @JsonKey(includeFromJson: false, includeToJson: false)
-@pragma('vm:prefer-inline')
-_$ExtraSlotPoolWeightDataCopyWith<_ExtraSlotPoolWeightData> get copyWith => __$ExtraSlotPoolWeightDataCopyWithImpl<_ExtraSlotPoolWeightData>(this, _$identity);
-
-@override
-Map<String, dynamic> toJson() {
-  return _$ExtraSlotPoolWeightDataToJson(this, );
-}
-
-@override
-bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ExtraSlotPoolWeightData&&(identical(other.common, common) || other.common == common)&&(identical(other.unique, unique) || other.unique == unique));
-}
-
-@JsonKey(includeFromJson: false, includeToJson: false)
-@override
-int get hashCode {
-    return Object.hash(runtimeType,common,unique);
-}
-
-@override
-String toString() {
-    return 'ExtraSlotPoolWeightData(common: $common, unique: $unique)';
-}
-
-
-}
-
-/// @nodoc
-abstract mixin class _$ExtraSlotPoolWeightDataCopyWith<$Res> implements $ExtraSlotPoolWeightDataCopyWith<$Res> {
-  factory _$ExtraSlotPoolWeightDataCopyWith(_ExtraSlotPoolWeightData value, $Res Function(_ExtraSlotPoolWeightData) _then) = __$ExtraSlotPoolWeightDataCopyWithImpl;
-@override @useResult
-$Res call({
- int common, int unique
-});
-
-
-
-
-}
-/// @nodoc
-class __$ExtraSlotPoolWeightDataCopyWithImpl<$Res>
-    implements _$ExtraSlotPoolWeightDataCopyWith<$Res> {
-  __$ExtraSlotPoolWeightDataCopyWithImpl(this._self, this._then);
-
-  final _ExtraSlotPoolWeightData _self;
-  final $Res Function(_ExtraSlotPoolWeightData) _then;
-
-/// Create a copy of ExtraSlotPoolWeightData
-/// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? common = null,Object? unique = null,}) {
-  return _then(_ExtraSlotPoolWeightData(
-common: null == common ? _self.common : common // ignore: cast_nullable_to_non_nullable
-as int,unique: null == unique ? _self.unique : unique // ignore: cast_nullable_to_non_nullable
-as int,
   ));
 }
 

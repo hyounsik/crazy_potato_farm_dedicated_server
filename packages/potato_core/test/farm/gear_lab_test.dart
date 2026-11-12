@@ -163,29 +163,53 @@ void main() {
       expect(farm.gear[index].wear, 500);
     });
 
-    test(
-      'a belt rolls its potato slots too, even a normal one (2026-11-11)',
-      () {
-        buildAll('gear_lab');
-        farm.food = 1000000;
-        const belt = Gear(
-          kind: GearKind.belt,
-          grade: Grade.normal,
-          level: 5,
-          slots: [PotatoType.food],
+    test('a belt rolls its potato slots on a button of its own, even a '
+        'normal one, keeping its abilities (2026-11-11)', () {
+      buildAll('gear_lab');
+      farm.food = 1000000;
+      const belt = Gear(
+        kind: GearKind.belt,
+        grade: Grade.rare,
+        level: 5,
+        slots: [PotatoType.food, PotatoType.food],
+        abilities: [GearAbility(id: 'companion_hp', tier: 0)],
+      );
+      farm.apply(const FarmCommand.returnHome(food: 0, gear: [belt]));
+      final index = farm.gear.length - 1;
+      final seen = <PotatoType>{};
+      for (var i = 0; i < 40; i++) {
+        expect(
+          farm.apply(FarmCommand.rerollGear(index: index, slots: true)),
+          isNull,
         );
-        farm.apply(const FarmCommand.returnHome(food: 0, gear: [belt]));
-        final index = farm.gear.length - 1;
-        final seen = <PotatoType>{};
-        for (var i = 0; i < 40; i++) {
-          expect(farm.apply(FarmCommand.rerollGear(index: index)), isNull);
-          final slots = farm.gear[index].slots;
-          expect(slots, hasLength(1), reason: 'a normal belt keeps one slot');
-          seen.addAll(slots);
-        }
-        expect(seen, {PotatoType.food, PotatoType.combat, PotatoType.buff});
-      },
-    );
+        final rolled = farm.gear[index];
+        expect(rolled.slots, hasLength(2), reason: 'the grade keeps 2 slots');
+        expect(rolled.abilities, belt.abilities);
+        seen.addAll(rolled.slots);
+      }
+      expect(seen, {PotatoType.food, PotatoType.combat, PotatoType.buff});
+
+      final slots = farm.gear[index].slots;
+      expect(farm.apply(FarmCommand.rerollGear(index: index)), isNull);
+      expect(farm.gear[index].slots, slots, reason: 'abilities only');
+
+      const plain = Gear(
+        kind: GearKind.belt,
+        grade: Grade.normal,
+        level: 5,
+        slots: [PotatoType.food],
+      );
+      farm.apply(const FarmCommand.returnHome(food: 0, gear: [plain]));
+      final last = farm.gear.length - 1;
+      expect(
+        farm.apply(FarmCommand.rerollGear(index: last)),
+        FarmRejection.noAbilities,
+      );
+      expect(
+        farm.apply(FarmCommand.rerollGear(index: last, slots: true)),
+        isNull,
+      );
+    });
   });
 
   group('warehouse', () {

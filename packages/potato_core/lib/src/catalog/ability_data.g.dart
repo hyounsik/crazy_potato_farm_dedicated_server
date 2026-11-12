@@ -189,10 +189,6 @@ _AbilityRulesData _$AbilityRulesDataFromJson(Map<String, dynamic> json) =>
                   MapEntry($enumDecode(_$GradeEnumMap, k), (e as num).toInt()),
             ),
           ),
-          extraSlotPoolWeight: $checkedConvert(
-            'extra_slot_pool_weight',
-            (v) => ExtraSlotPoolWeightData.fromJson(v as Map<String, dynamic>),
-          ),
           rarityWeights: $checkedConvert(
             'rarity_weights',
             (v) => (v as Map<String, dynamic>).map(
@@ -205,7 +201,6 @@ _AbilityRulesData _$AbilityRulesDataFromJson(Map<String, dynamic> json) =>
       },
       fieldKeyMap: const {
         'slotsByGrade': 'slots_by_grade',
-        'extraSlotPoolWeight': 'extra_slot_pool_weight',
         'rarityWeights': 'rarity_weights',
       },
     );
@@ -215,7 +210,6 @@ Map<String, dynamic> _$AbilityRulesDataToJson(_AbilityRulesData instance) =>
       'slots_by_grade': instance.slotsByGrade.map(
         (k, e) => MapEntry(_$GradeEnumMap[k]!, e),
       ),
-      'extra_slot_pool_weight': instance.extraSlotPoolWeight.toJson(),
       'rarity_weights': instance.rarityWeights.map(
         (k, e) => MapEntry(_$RarityEnumMap[k]!, e),
       ),
@@ -226,17 +220,3 @@ const _$GradeEnumMap = {
   Grade.rare: 'rare',
   Grade.legendary: 'legendary',
 };
-
-_ExtraSlotPoolWeightData _$ExtraSlotPoolWeightDataFromJson(
-  Map<String, dynamic> json,
-) => $checkedCreate('_ExtraSlotPoolWeightData', json, ($checkedConvert) {
-  final val = _ExtraSlotPoolWeightData(
-    common: $checkedConvert('common', (v) => (v as num).toInt()),
-    unique: $checkedConvert('unique', (v) => (v as num).toInt()),
-  );
-  return val;
-});
-
-Map<String, dynamic> _$ExtraSlotPoolWeightDataToJson(
-  _ExtraSlotPoolWeightData instance,
-) => <String, dynamic>{'common': instance.common, 'unique': instance.unique};

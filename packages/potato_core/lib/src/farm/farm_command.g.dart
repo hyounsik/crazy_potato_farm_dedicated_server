@@ -99,6 +99,7 @@ RerollGear _$RerollGearFromJson(Map<String, dynamic> json) =>
           (v) => $enumDecodeNullable(_$GearKindEnumMap, v),
         ),
         index: $checkedConvert('index', (v) => (v as num?)?.toInt()),
+        slots: $checkedConvert('slots', (v) => v as bool? ?? false),
         $type: $checkedConvert('runtimeType', (v) => v as String?),
       );
       return val;
@@ -108,6 +109,7 @@ Map<String, dynamic> _$RerollGearToJson(RerollGear instance) =>
     <String, dynamic>{
       'worn': _$GearKindEnumMap[instance.worn],
       'index': instance.index,
+      'slots': instance.slots,
       'runtimeType': instance.$type,
     };
 

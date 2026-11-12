@@ -46,10 +46,9 @@ final class AbilityRoller {
   );
 
   /// The abilities a potato of [type] and [grade] comes up with: [first]
-  /// (the seed's), then one per remaining slot. Each later slot picks the
-  /// shared or the type's pool by the catalog's odds, then an ability there
-  /// by hidden rarity; an ability never comes twice, and an empty pool
-  /// falls back to the other.
+  /// (the seed's), then one per remaining slot, from the shared and the
+  /// type's pools together by hidden rarity (2026-11-11, 사용자: no picking
+  /// a pool first); an ability never comes twice.
   List<String> slots({
     required PotatoType type,
     required Grade grade,
@@ -63,15 +62,12 @@ final class AbilityRoller {
     final rules = catalog.abilityRules;
     final count = rules.slotsByGrade[grade] ?? 1;
     final taken = {first, ...kept.take(count - 1)};
-    final common = catalog.abilitiesIn(Catalog.commonPool).toList();
-    final own = catalog.abilitiesIn(type.name).toList();
-    final odds = rules.extraSlotPoolWeight;
+    final pool = [
+      ...catalog.abilitiesIn(Catalog.commonPool),
+      ...catalog.abilitiesIn(type.name),
+    ];
     for (var slot = taken.length; slot < count; slot++) {
-      final total = odds.common + odds.unique;
-      final fromCommon = total > 0 && random.nextInt(total) < odds.common;
-      final ability =
-          _pick(fromCommon ? common : own, taken, random) ??
-          _pick(fromCommon ? own : common, taken, random);
+      final ability = _pick(pool, taken, random);
       if (ability == null) break;
       taken.add(ability.id);
     }

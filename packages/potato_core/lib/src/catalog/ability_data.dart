@@ -238,23 +238,9 @@ abstract class AbilityRulesData with _$AbilityRulesData {
     /// Ability slots by grade; the first is the seed's own.
     required Map<Grade, int> slotsByGrade,
 
-    /// For slots after the first: odds of drawing from the shared pool
-    /// against the type's own.
-    required ExtraSlotPoolWeightData extraSlotPoolWeight,
     required Map<Rarity, int> rarityWeights,
   }) = _AbilityRulesData;
 
   factory AbilityRulesData.fromJson(Map<String, dynamic> json) =>
       _$AbilityRulesDataFromJson(json);
-}
-
-@freezed
-abstract class ExtraSlotPoolWeightData with _$ExtraSlotPoolWeightData {
-  const factory ExtraSlotPoolWeightData({
-    required int common,
-    required int unique,
-  }) = _ExtraSlotPoolWeightData;
-
-  factory ExtraSlotPoolWeightData.fromJson(Map<String, dynamic> json) =>
-      _$ExtraSlotPoolWeightDataFromJson(json);
 }

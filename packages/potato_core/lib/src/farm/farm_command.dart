@@ -34,9 +34,14 @@ sealed class FarmCommand with _$FarmCommand {
   const factory FarmCommand.enhanceGear({GearKind? worn, int? index}) =
       EnhanceGear;
 
-  /// Rolls a piece's abilities anew at the gear lab (2026-11-03, 사용자).
-  const factory FarmCommand.rerollGear({GearKind? worn, int? index}) =
-      RerollGear;
+  /// Rolls a piece's abilities anew at the gear lab (2026-11-03, 사용자),
+  /// or, with [slots], only a belt's potato slots (2026-11-11, 사용자: a
+  /// button of its own, so a good roll of one is not lost to the other).
+  const factory FarmCommand.rerollGear({
+    GearKind? worn,
+    int? index,
+    @Default(false) bool slots,
+  }) = RerollGear;
 
   /// Mends a piece as new, at the gear lab or, with one on the farm, the
   /// workbench. It may fail: the piece breaks up into materials, more

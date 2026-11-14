@@ -13,10 +13,27 @@ const String placeMarkerPrefix = 'at:';
 const String scriptFarmer = 'farmer';
 const String scriptBoss = 'boss';
 
+/// A move's start meaning wherever the body stands now (2026-11-14: the
+/// player's farmer, whose place the script cannot know).
+const String scriptHere = 'here';
+
 /// Story bodies a script may put on a map besides enemies: they walk and
 /// face but do not fight (2026-11-13, 사용자: John in a helmet and Ian with a pitchfork, the title screen's two potatoes). Each needs
 /// its picture in the client.
-const Set<String> storyCharacters = {'john', 'ian'};
+const Set<String> storyCharacters = {'kevin', 'john', 'ian'};
+
+/// What `pose` can set (2026-11-14, 사용자: the farmer sitting and lying,
+/// as in the map editor's 인물 palette); `stand` goes back to standing.
+const List<String> scriptPoses = [
+  'stand',
+  'sit_front',
+  'sit_right',
+  'sit_left',
+  'lie_left',
+  'lie_left_asleep',
+  'lie_right',
+  'lie_right_asleep',
+];
 
 /// A line of a story map's script (2026-11-12, 사용자: map editor M6).
 ///
@@ -142,6 +159,24 @@ final class FaceCommand extends ScriptCommand {
   final String target;
 }
 
+/// `exit <who>`: a story character or a mark leaves the map.
+final class ExitCommand extends ScriptCommand {
+  const ExitCommand(super.line, {super.together, required this.who});
+  final String who;
+}
+
+/// `pose <who> <pose>`: sits or lies down ([scriptPoses]), or stands.
+final class PoseCommand extends ScriptCommand {
+  const PoseCommand(
+    super.line, {
+    super.together,
+    required this.who,
+    required this.pose,
+  });
+  final String who;
+  final String pose;
+}
+
 /// `cue <name>`: a moment the story can hang a scene on
 /// (`map:<map>/cue:<name>`).
 final class CueCommand extends ScriptCommand {
@@ -197,27 +232,56 @@ final class ScriptCast {
 
 /// A named script of a story map, read from its text.
 final class MapScript {
-  MapScript._(this.name, this.commands, this.problems);
+  MapScript._(this.name, this.commands, this.starts, this.problems);
 
   /// Reads [text] line by line. Lines it cannot read are left out and
   /// reported in [problems]; [check] finds what the map and cast refuse.
   factory MapScript.parse(String name, String text) {
     final commands = <ScriptCommand>[];
+    final starts = <double?>[];
     final problems = <ScriptProblem>[];
     for (final (index, raw) in text.split('\n').indexed) {
-      final line = raw.split('#').first.trim();
+      var line = raw.split('#').first.trim();
       if (line.isEmpty) continue;
       try {
+        double? at;
+        if (RegExp(r'^@(\S*)\s*(.*)$').firstMatch(line) case final m?) {
+          at = double.tryParse(m[1]!);
+          if (at == null || at < 0) {
+            throw FormatException('"@${m[1]}" is not a start time like @1.5');
+          }
+          line = m[2]!;
+          if (line.startsWith('&')) {
+            throw const FormatException('a timed line cannot start with &');
+          }
+        }
         commands.add(_readLine(index + 1, line));
+        starts.add(at);
       } on FormatException catch (e) {
         problems.add(ScriptProblem(index + 1, e.message));
       }
     }
-    return MapScript._(name, List.unmodifiable(commands), problems);
+    return MapScript._(
+      name,
+      List.unmodifiable(commands),
+      List.unmodifiable(starts),
+      problems,
+    );
   }
 
   final String name;
   final List<ScriptCommand> commands;
+
+  /// Each command's start time (`@1.5`), or null for a line without one
+  /// (2026-11-14, 사용자: the map editor's timeline). A script with any
+  /// is timed: a clock runs, each line starts at its time whatever else is
+  /// still running, a line without a time starts with the one before, and
+  /// the clock stops while the farmer is waited for at a mark or an enemy
+  /// to fall.
+  final List<double?> starts;
+
+  /// Whether [starts] has any time: the script runs on a clock.
+  bool get timed => starts.any((t) => t != null);
 
   /// Lines [MapScript.parse] could not read.
   final List<ScriptProblem> problems;
@@ -236,13 +300,39 @@ final class MapScript {
 
   /// [problems] and what [map] and [cast] refuse: unknown places and names,
   /// walks between places that do not connect, attacks a body lacks.
-  List<ScriptProblem> check(MapData map, ScriptCast cast) =>
-      [...problems, ..._ScriptChecker(map, cast).run(commands)]
-        ..sort((a, b) => a.line.compareTo(b.line));
+  List<ScriptProblem> check(MapData map, ScriptCast cast) => [
+    ...problems,
+    ..._ScriptChecker(map, cast).run(commands),
+    ..._timeProblems(),
+  ]..sort((a, b) => a.line.compareTo(b.line));
+
+  /// A timed script's lines must not go back in time.
+  List<ScriptProblem> _timeProblems() {
+    final found = <ScriptProblem>[];
+    var last = 0.0;
+    for (final (i, at) in starts.indexed) {
+      if (at == null) continue;
+      if (at < last) {
+        found.add(
+          ScriptProblem(commands[i].line, 'starts before the line above'),
+        );
+      }
+      last = at;
+    }
+    return found;
+  }
 }
 
-/// The tile of place [name] on [map], or null.
+/// The tile of place [name] on [map], or null. A place may also be a tile
+/// written `x,y` (2026-11-14: the timeline marks tiles without naming
+/// them).
 TilePos? scriptPlace(MapData map, String name) {
+  if (RegExp(r'^(\d+),(\d+)$').firstMatch(name) case final m?) {
+    final tile = TilePos(int.parse(m[1]!), int.parse(m[2]!));
+    final inside =
+        tile.x >= 0 && tile.y >= 0 && tile.x < map.size && tile.y < map.size;
+    return inside ? tile : null;
+  }
   final tiles = map.markers['$placeMarkerPrefix$name'];
   return tiles == null || tiles.isEmpty ? null : tiles.first;
 }
@@ -333,6 +423,15 @@ ScriptCommand _readLine(int line, String text) {
       target: target,
     ),
     ['face', ...] => fail('face <who> <target>'),
+    ['exit', final who] => ExitCommand(line, together: together, who: who),
+    ['exit', ...] => fail('exit <who>'),
+    ['pose', final who, final pose] => PoseCommand(
+      line,
+      together: together,
+      who: who,
+      pose: pose,
+    ),
+    ['pose', ...] => fail('pose <who> <pose>'),
     ['cue', final name] => CueCommand(line, together: together, name: name),
     ['cue', ...] => fail('cue <name>'),
     _ => throw FormatException('unknown command "${w.first}"'),
@@ -404,6 +503,22 @@ final class _ScriptChecker {
       case FaceCommand(:final who, :final target):
         if (!bodies.containsKey(who)) _issue(command, 'no body "$who" yet');
         _target(command, target);
+      case ExitCommand(:final who):
+        if (marks.remove(who)) break;
+        if (!bodies.containsKey(who)) {
+          _issue(command, 'no body or mark "$who" yet');
+        } else if (bodies[who] != null ||
+            who == scriptFarmer ||
+            who == scriptBoss) {
+          _issue(command, 'only story characters and marks leave');
+        } else {
+          bodies.remove(who);
+        }
+      case PoseCommand(:final who, :final pose):
+        if (!bodies.containsKey(who)) _issue(command, 'no body "$who" yet');
+        if (!scriptPoses.contains(pose)) {
+          _issue(command, 'no pose "$pose" (${scriptPoses.join(', ')})');
+        }
       case WaitCommand() || SkillCommand() || CueCommand():
         break;
     }
@@ -430,7 +545,7 @@ final class _ScriptChecker {
     if (!isMark && !bodies.containsKey(who)) {
       _issue(command, 'no body or mark "$who" yet');
     }
-    final start = _place(command, from);
+    final start = from == scriptHere ? null : _place(command, from);
     final end = _place(command, to);
     if (isMark || start == null || end == null) return;
     if (map.findPath(scriptCentre(start), scriptCentre(end)).isEmpty) {
@@ -471,7 +586,9 @@ final class _ScriptChecker {
 
   TilePos? _place(ScriptCommand command, String name) {
     final tile = scriptPlace(map, name);
-    if (tile == null) _issue(command, 'no place "$name" (marker at:$name)');
+    if (tile == null) {
+      _issue(command, 'no place "$name" (marker at:$name or x,y on the map)');
+    }
     return tile;
   }
 }

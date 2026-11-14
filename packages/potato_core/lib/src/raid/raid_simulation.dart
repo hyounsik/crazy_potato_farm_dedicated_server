@@ -221,6 +221,7 @@ final class RaidSimulation {
     this._nextCloneAt = 0,
   }) : clouds = clouds ?? [] {
     map.fitPictures(zone.look, catalog.rules.raid.pictureBoxes);
+    watching = _drawn?.watch ?? false;
   }
 
   /// Builds zone [zone]'s map from [seed] and fills it: enemies, gathering
@@ -1456,11 +1457,23 @@ final class RaidSimulation {
 
   void _updatePlayer(RaidMember member, double dt) {
     final player = member.player;
-    if (player.isDown) return;
+    if (player.isDown || watching) return;
     player.sinceHit += dt;
     _stepMemberMove(member, dt);
     _eat(member, dt);
     if (member.isOut || player.isDown || player.isStunned) return;
+    if (_scriptShots[member] case (:final at, :final left)) {
+      // A story script's shooting: at its spot, for show.
+      if (left <= dt) {
+        _scriptShots.remove(member);
+      } else {
+        _scriptShots[member] = (at: at, left: left - dt);
+      }
+      final toward = at - player.position;
+      if (!toward.isZero) player.facing = toward.normalized();
+      _fire(player, null, 0, dt, weaponOf(member), at);
+      return;
+    }
     _fire(player, aimOf(member), shotDamageOf(member), dt, weaponOf(member));
   }
 
@@ -1523,10 +1536,12 @@ final class RaidSimulation {
     double damage,
     double dt, [
     WeaponData? tuned,
+    Vec2? at,
   ]) {
     final gun = tuned ?? catalog.weapons[shooter.weapon]!;
     shooter.fireCooldown -= dt;
-    if (gun.aimSeconds > 0) {
+    final point = at ?? target?.position;
+    if (gun.aimSeconds > 0 && at == null) {
       if (target?.id != shooter.aimTarget) shooter.aimProgress = 0;
       shooter.aimTarget = target?.id;
       if (target == null || shooter.fireCooldown > 0) return;
@@ -1535,9 +1550,10 @@ final class RaidSimulation {
       shooter.aimProgress = 0;
     } else {
       shooter.aimTarget = null;
-      if (shooter.fireCooldown > 0 || target == null) return;
+      if (shooter.fireCooldown > 0 || point == null) return;
     }
-    final aim = (target.position - shooter.position).normalized();
+    final aim = (point! - shooter.position).normalized();
+    if (aim.isZero) return;
     final spread = gun.spreadDegrees * math.pi / 180;
     for (var i = 0; i < gun.pellets; i++) {
       final angle = gun.pellets == 1
@@ -1558,6 +1574,139 @@ final class RaidSimulation {
       );
     }
     shooter.fireCooldown = gun.interval;
+  }
+
+  // Story scripts (map editor M6, 2026-11-12/14, 사용자) -----------------------
+
+  /// A story map only watched (2026-11-14, 사용자): the players are no one
+  /// on it. Nothing targets, sees or hits them, and they neither move,
+  /// shoot nor eat; the map's script plays everyone there.
+  bool watching = false;
+
+  /// Enemies a story map's script walks: no doing of their own meanwhile.
+  final Set<int> _scriptHeld = {};
+
+  /// Enemies in the middle of an attack a script ordered, which hurts
+  /// nobody; they leave once the pattern is over.
+  final Set<int> _showing = {};
+
+  /// Members a script has shooting at a spot, and for how long more.
+  final Map<RaidMember, ({Vec2 at, double left})> _scriptShots = {};
+
+  /// Whether a script holds [enemyId] now (walking it or in its attack).
+  bool scriptHolds(int enemyId) =>
+      _scriptHeld.contains(enemyId) || _showing.contains(enemyId);
+
+  /// A script starts or stops walking [enemyId].
+  void holdByScript(int enemyId, {required bool held}) {
+    if (held) {
+      _scriptHeld.add(enemyId);
+    } else {
+      _scriptHeld.remove(enemyId);
+    }
+  }
+
+  /// Has [enemyId] do [attack] once toward [at] for a story script, hurting
+  /// nobody (2026-11-12, 사용자): `melee`·`ranged` for an enemy, a pattern
+  /// for a boss (`charge`, `charge_chain`, `spray`, `jump`, `burrow`,
+  /// `cloud:<n>`, `shot:<n>`, counted from 1). A jumping or burrowing boss
+  /// follows [targetId] if given. False when it cannot now.
+  bool scriptAttack(int enemyId, String attack, Vec2 at, {int? targetId}) {
+    final enemy = enemies
+        .where((e) => e.id == enemyId && !e.isDown)
+        .firstOrNull;
+    if (enemy == null) return false;
+    final spec = catalog.enemies[enemy.kind]!;
+    final toward = at - enemy.position;
+    final facing = toward.isZero ? const Vec2(0, 1) : toward.normalized();
+    final boss = spec.boss;
+    if (boss == null) {
+      switch (attack) {
+        case 'melee':
+          // The lunge shows from the cooldown starting over.
+          enemy.attackCooldown = spec.attackInterval;
+        case 'ranged':
+          bullets.add(
+            RaidBullet(
+              id: _newId(),
+              position: enemy.position + facing * enemy.radius,
+              velocity: facing * spec.bulletSpeed,
+              damage: 0,
+              owner: enemy.id,
+              side: RaidSide.wild,
+              team: wildTeam,
+              remaining: math.max(spec.range, toward.length) * 1.3,
+            ),
+          );
+          enemy.attackCooldown = spec.attackInterval;
+        default:
+          return false;
+      }
+      enemy.heading = facing;
+      return true;
+    }
+    if (enemy.isWindingUp ||
+        enemy.holdLeft > 0 ||
+        enemy.isHidden ||
+        enemy.isCharging ||
+        enemy.isTelegraphing) {
+      return false;
+    }
+    final (name, number) = switch (attack.split(':')) {
+      [final name, final n] => (name, int.tryParse(n) ?? 0),
+      _ => (attack, 0),
+    };
+    switch (name) {
+      case 'charge' || 'charge_chain':
+        final chain = boss.chargeChain;
+        if (name == 'charge_chain' && chain == null) return false;
+        enemy
+          ..chargeChainLeft = name == 'charge' ? 0 : chain!.count - 1
+          ..chargeDirection = facing
+          ..telegraphLeft = boss.chargeTelegraphSeconds;
+      case 'spray':
+        _spray(enemy, boss, 0);
+      case 'jump' when boss.jump != null:
+        enemy
+          ..jumpLeft = boss.jump!.airSeconds
+          ..jumpAt = at;
+      case 'burrow' when boss.burrow != null:
+        enemy
+          ..windupLeft = _windupSeconds
+          ..windupCloud = burrowWindup
+          ..windupAt = facing;
+      case 'cloud' when number >= 1 && number <= boss.clouds.length:
+        enemy
+          ..windupLeft = _windupSeconds
+          ..windupCloud = number - 1
+          ..windupAt = facing;
+      case 'shot' when number >= 1 && number <= boss.shots.length:
+        _fan(enemy, boss.shots[number - 1], facing, 0);
+        enemy.poseLeft = _poseSeconds;
+      default:
+        return false;
+    }
+    enemy
+      ..target = targetId
+      ..heading = facing;
+    _showing.add(enemy.id);
+    return true;
+  }
+
+  /// A story script has [member]'s farmer shoot at [at] for [seconds], for
+  /// show (2026-11-12, 사용자): the shots hurt nobody.
+  void scriptShoot(RaidMember member, Vec2 at, double seconds) =>
+      _scriptShots[member] = (at: at, left: seconds);
+
+  /// A story script has [member]'s farmer dash toward [to], ready or not.
+  void scriptDash(RaidMember member, Vec2 to) {
+    final player = member.player;
+    final toward = to - player.position;
+    if (toward.isZero) return;
+    player
+      ..dashDirection = toward.normalized()
+      ..dashLeft = rules.player.dashSeconds
+      ..dashCooldown = rules.player.dashCooldownSeconds;
   }
 
   /// The body auto-aim would shoot now, for drawing an aim line too.
@@ -1585,7 +1734,8 @@ final class RaidSimulation {
   /// Every body in the run, standing or not. Members already out of the run
   /// are left out so nothing targets or hits them.
   Iterable<RaidBody> get _bodies sync* {
-    for (final m in _active) {
+    // Watchers are nowhere: nothing sees, targets or hits them.
+    for (final m in watching ? const <RaidMember>[] : _active) {
       yield m.player;
       yield* m.companions;
     }
@@ -2115,6 +2265,8 @@ final class RaidSimulation {
     enemy
       ..attackCooldown -= dt
       ..sinceHit += dt;
+    // A story script walks it: nothing of its own meanwhile.
+    if (_scriptHeld.contains(enemy.id)) return;
     if (enemy.target == null && spec.temper == EnemyTemper.aggressive) {
       enemy.target = _nearestInSight(enemy, aggressiveSight)?.id;
     }
@@ -2152,7 +2304,8 @@ final class RaidSimulation {
     for (final key in enemy.cooldowns.keys) {
       enemy.cooldowns[key] = enemy.cooldowns[key]! - dt;
     }
-    final damage = _enemyDamage;
+    // A script's attack is for show (2026-11-12, 사용자): it hurts nobody.
+    final damage = _showing.contains(enemy.id) ? 0.0 : _enemyDamage;
 
     enemy.swingLeft = math.max(0, enemy.swingLeft - dt);
     if (enemy.isWindingUp) {
@@ -2225,6 +2378,10 @@ final class RaidSimulation {
       return;
     }
 
+    // Between patterns: a boss a script holds, or one just done with a
+    // script's attack, does nothing of its own this frame.
+    final shown = _showing.remove(enemy.id);
+    if (shown || _scriptHeld.contains(enemy.id)) return;
     var target = enemy.target == null ? null : _body(enemy.target!);
     if (target == null ||
         target.isDown ||
@@ -2252,27 +2409,8 @@ final class RaidSimulation {
       return;
     }
     if (enemy.sprayCooldown <= 0 && boss.sprayBullets > 0) {
-      for (var i = 0; i < boss.sprayBullets; i++) {
-        final direction = const Vec2(
-          1,
-          0,
-        ).rotated(2 * math.pi * i / boss.sprayBullets);
-        bullets.add(
-          RaidBullet(
-            id: _newId(),
-            position: enemy.position + direction * enemy.radius,
-            velocity: direction * boss.spraySpeed,
-            damage: boss.sprayDamage * damage,
-            owner: enemy.id,
-            side: RaidSide.wild,
-            team: wildTeam,
-            remaining: boss.sprayRange,
-          ),
-        );
-      }
-      enemy
-        ..sprayCooldown = boss.sprayEverySeconds
-        ..poseLeft = _poseSeconds;
+      _spray(enemy, boss, damage);
+      enemy.sprayCooldown = boss.sprayEverySeconds;
     }
     final d = target.position.distanceTo(enemy.position);
     if (d <= enemy.radius + target.radius + spec.reach) {
@@ -2291,6 +2429,29 @@ final class RaidSimulation {
     if (enemy.position != before) {
       enemy.heading = (enemy.position - before).normalized();
     }
+  }
+
+  /// Shots all around [enemy] at once.
+  void _spray(RaidEnemy enemy, BossData boss, double damage) {
+    for (var i = 0; i < boss.sprayBullets; i++) {
+      final direction = const Vec2(
+        1,
+        0,
+      ).rotated(2 * math.pi * i / boss.sprayBullets);
+      bullets.add(
+        RaidBullet(
+          id: _newId(),
+          position: enemy.position + direction * enemy.radius,
+          velocity: direction * boss.spraySpeed,
+          damage: boss.sprayDamage * damage,
+          owner: enemy.id,
+          side: RaidSide.wild,
+          team: wildTeam,
+          remaining: boss.sprayRange,
+        ),
+      );
+    }
+    enemy.poseLeft = _poseSeconds;
   }
 
   /// Shows where [enemy] is about to charge, at [target] (straight on as it
@@ -2505,7 +2666,9 @@ final class RaidSimulation {
         radius: cloud.radius,
         spreadSeconds: cloud.spreadSeconds,
         seconds: cloud.seconds,
-        damagePerSecond: cloud.damagePerSecond * _enemyDamage,
+        damagePerSecond: _showing.contains(enemy.id)
+            ? 0
+            : cloud.damagePerSecond * _enemyDamage,
         owner: enemy.id,
         kind: enemy.kind,
         direction: facing,
@@ -2650,7 +2813,8 @@ final class RaidSimulation {
   // Shots and damage ---------------------------------------------------------
 
   void _hurt(RaidBody target, double amount, RaidBody? from) {
-    if (target.isDown) return;
+    // A script's attacks and shots are for show (2026-11-12, 사용자).
+    if (amount <= 0 || target.isDown) return;
     if (target is RaidCompanion && target.guardLeft > 0) return;
     if (target is RaidPlayer && target.isDashing) return;
     if (!damageOn && target.team == playerTeam) return;

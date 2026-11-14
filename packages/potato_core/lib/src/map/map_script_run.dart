@@ -53,6 +53,9 @@ final class ScriptBody {
 
   /// Whether a move walks it now.
   bool walking = false;
+
+  /// Sitting or lying ([scriptPoses] but `stand`), or null standing.
+  String? pose;
 }
 
 /// One run of a checked [MapScript] over time, apart from any screen.
@@ -62,10 +65,31 @@ final class ScriptBody {
 /// [MapScript.check] found nothing: a name it does not know is skipped.
 final class ScriptRun {
   ScriptRun(MapScript script, this.map, {required Vec2 farmer, Vec2? boss})
-    : _steps = _stepsOf(script.commands) {
+    : _steps = script.timed ? const [] : _stepsOf(script.commands),
+      _timed = script.timed ? _timesOf(script) : null {
     bodies[scriptFarmer] = ScriptBody(scriptFarmer, null, farmer);
     if (boss != null) bodies[scriptBoss] = ScriptBody(scriptBoss, null, boss);
-    _startNext();
+    if (_timed == null) {
+      _startNext();
+    } else {
+      _startDue();
+    }
+  }
+
+  /// A timed script's commands with their start times, in order; null for
+  /// a script run line after line.
+  final List<(double, ScriptCommand)>? _timed;
+
+  /// A timed script's clock: seconds of the timeline played, not counting
+  /// the time it stood waiting (2026-11-14, 사용자: the editor's timeline).
+  double clock = 0;
+
+  static List<(double, ScriptCommand)> _timesOf(MapScript script) {
+    var last = 0.0;
+    return [
+      for (final (i, command) in script.commands.indexed)
+        (last = script.starts[i] ?? last, command),
+    ];
   }
 
   final MapData map;
@@ -85,7 +109,8 @@ final class ScriptRun {
   final List<ScriptAction> _actions = [];
   final Set<String> _defeated = {};
 
-  bool get done => _running.isEmpty && _next >= _steps.length;
+  bool get done =>
+      _running.isEmpty && _next >= (_timed?.length ?? _steps.length);
 
   /// The commands running now, for the editor to light up.
   List<ScriptCommand> get running => [for (final t in _running) t.command];
@@ -131,6 +156,7 @@ final class ScriptRun {
   /// over before the next line starts.
   void advance(double dt) {
     elapsed += dt;
+    if (_timed != null) return _advanceTimed(dt);
     var left = dt;
     // A step that ends mid-frame hands the rest of the frame to the next.
     while (!done) {
@@ -143,6 +169,40 @@ final class ScriptRun {
       if (_running.isNotEmpty || moment) return;
       left = 0;
       if (_startNext()) return;
+    }
+  }
+
+  /// A timed script: running commands go on, the clock moves unless a wait
+  /// holds it, and every line whose time has come starts.
+  void _advanceTimed(double dt) {
+    var moment = false;
+    for (final task in [..._running]) {
+      if (!task.advance(this, dt)) continue;
+      _running.remove(task);
+      moment = moment || task is _WaitTask;
+    }
+    // A scene may hang on a mark reached or an enemy down: the rest of the
+    // frame waits for it.
+    if (moment) return;
+    if (_running.any((t) => t is _WaitTask)) return;
+    clock += dt;
+    _startDue();
+  }
+
+  /// Starts each timed line whose time has come, until a wait or a cue.
+  void _startDue() {
+    final timed = _timed!;
+    while (_next < timed.length && timed[_next].$1 <= clock + 1e-9) {
+      final (at, command) = timed[_next++];
+      final task = _start(command);
+      if (task is _WaitTask) {
+        _running.add(task);
+        clock = at;
+        return;
+      }
+      // Started late within the frame: it catches up on what it missed.
+      if (task != null && !task.advance(this, clock - at)) _running.add(task);
+      if (command is CueCommand) return;
     }
   }
 
@@ -195,6 +255,10 @@ final class ScriptRun {
         _faceAt(who, target);
       case CueCommand(:final name):
         _actions.add(ScriptCue(name));
+      case ExitCommand(:final who):
+        if (marks.remove(who) == null) bodies.remove(who);
+      case PoseCommand(:final who, :final pose):
+        bodies[who]?.pose = pose == 'stand' ? null : pose;
     }
     return null;
   }
@@ -278,13 +342,19 @@ final class _MoveTask extends _Task {
     : _length = _lengthOf(points);
 
   static _Task? of(MoveCommand command, ScriptRun run) {
-    final from = scriptPlace(run.map, command.from);
     final to = scriptPlace(run.map, command.to);
-    if (from == null || to == null) return null;
-    final start = scriptCentre(from);
-    final end = scriptCentre(to);
+    if (to == null) return null;
     final isMark = run.marks.containsKey(command.who);
     if (!isMark && !run.bodies.containsKey(command.who)) return null;
+    // `here`: from wherever it stands now (the player's farmer).
+    final from = command.from == scriptHere
+        ? null
+        : scriptPlace(run.map, command.from);
+    final start = from != null
+        ? scriptCentre(from)
+        : run.marks[command.who] ?? run.bodies[command.who]?.position;
+    if (start == null) return null;
+    final end = scriptCentre(to);
     final path = isMark ? [end] : run.map.findPath(start, end);
     return _MoveTask(command, command.who, [start, ...path]);
   }

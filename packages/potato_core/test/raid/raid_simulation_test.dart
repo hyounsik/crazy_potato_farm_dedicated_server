@@ -2417,4 +2417,176 @@ void main() {
       );
     });
   });
+
+  group('story script orders (2026-11-14)', () {
+    test('a held enemy stays put and does not attack', () {
+      final run = openRun();
+      final biter = addEnemy(
+        run,
+        'biter',
+        run.player.position + const Vec2(1, 0),
+      );
+      run.holdByScript(biter.id, held: true);
+      final at = biter.position;
+      final hp = run.player.hp;
+      runFor(run, 2);
+      expect(biter.position, at);
+      expect(run.player.hp, hp);
+
+      run.holdByScript(biter.id, held: false);
+      runFor(run, 2);
+      expect(run.player.hp, lessThan(hp), reason: 'its own again');
+    });
+
+    test("an enemy's ordered attack shows and hurts nobody", () {
+      final run = openRun();
+      final spitter = addEnemy(
+        run,
+        'spitter',
+        run.player.position + const Vec2(2, 0),
+      );
+      run.holdByScript(spitter.id, held: true);
+      final hp = run.player.hp;
+      expect(
+        run.scriptAttack(spitter.id, 'ranged', run.player.position),
+        isTrue,
+      );
+      expect(spitter.attackCooldown, greaterThan(0), reason: 'the pose');
+      expect(run.bullets.where((b) => b.owner == spitter.id), isNotEmpty);
+      runFor(run, 1.5);
+      expect(run.player.hp, hp);
+      expect(
+        run.scriptAttack(spitter.id, 'jump', run.player.position),
+        isFalse,
+      );
+    });
+
+    group('a boss', () {
+      (RaidSimulation, RaidEnemy) held() {
+        final run = RaidSimulation.start(
+          catalog: catalog,
+          zone: 'zone_boss_open',
+          seed: 1,
+          food: 100,
+        );
+        run.player
+          ..weapon = 'blank'
+          ..position = const Vec2(12.5, 12.5);
+        final boss = run.boss!;
+        run.holdByScript(boss.id, held: true);
+        return (run, boss);
+      }
+
+      test('held, it starts no pattern of its own', () {
+        final (run, boss) = held();
+        for (final key in boss.cooldowns.keys) {
+          boss.cooldowns[key] = 0;
+        }
+        final hp = run.player.hp;
+        runFor(run, 3);
+        expect(boss.isHidden || boss.isWindingUp || boss.isCharging, isFalse);
+        expect(run.player.hp, hp);
+      });
+
+      for (final attack in [
+        'charge',
+        'charge_chain',
+        'jump',
+        'burrow',
+        'cloud:1',
+        'shot:1',
+      ]) {
+        test('$attack plays through and hurts nobody', () {
+          final (run, boss) = held();
+          final hp = run.player.hp;
+          expect(
+            run.scriptAttack(
+              boss.id,
+              attack,
+              run.player.position,
+              targetId: run.player.id,
+            ),
+            isTrue,
+          );
+          expect(run.scriptHolds(boss.id), isTrue);
+          var shown = false;
+          for (var i = 0; i < (8 / run.stepSeconds).round(); i++) {
+            run.step();
+            shown |=
+                boss.isHidden ||
+                boss.isWindingUp ||
+                boss.isCharging ||
+                boss.isTelegraphing ||
+                boss.poseLeft > 0 ||
+                run.clouds.isNotEmpty;
+          }
+          expect(shown, isTrue);
+          expect(run.player.hp, hp);
+          expect(run.scriptHolds(boss.id), isTrue, reason: 'still walked');
+          run.holdByScript(boss.id, held: false);
+          expect(run.scriptHolds(boss.id), isFalse);
+        });
+      }
+
+      test('a pattern it lacks is refused', () {
+        final (run, boss) = held();
+        expect(
+          run.scriptAttack(boss.id, 'shot:2', run.player.position),
+          isFalse,
+        );
+        expect(
+          run.scriptAttack(boss.id, 'melee', run.player.position),
+          isFalse,
+        );
+        expect(run.scriptHolds(boss.id), isTrue);
+      });
+    });
+
+    test('the farmer shoots at a spot for show, then auto-aims again', () {
+      final run = openRun();
+      final brute = addEnemy(
+        run,
+        'brute',
+        run.player.position + const Vec2(2, 0),
+      );
+      final hp = brute.hp;
+      final spot = run.player.position + const Vec2(0, -3);
+      run.scriptShoot(run.members.single, spot, 1);
+      final shots = <RaidBullet>{};
+      for (var i = 0; i < (1 / run.stepSeconds).round(); i++) {
+        run.step();
+        shots.addAll(run.bullets.where((b) => b.owner == run.player.id));
+      }
+      expect(shots, isNotEmpty);
+      expect(shots.every((b) => b.velocity.y < 0), isTrue, reason: 'upward');
+      expect(brute.hp, hp);
+      runFor(run, 2);
+      expect(brute.hp, lessThan(hp), reason: 'auto-aim again');
+    });
+
+    test('the farmer dashes where told, ready or not', () {
+      final run = openRun();
+      run.player.dashCooldown = 5;
+      final from = run.player.position;
+      run.scriptDash(run.members.single, from + const Vec2(-3, 0));
+      expect(run.player.isDashing, isTrue);
+      runFor(run, 0.5);
+      expect(run.player.position.x, lessThan(from.x - 0.5));
+    });
+  });
+
+  test('a watched run: the player is no one there (2026-11-14)', () {
+    final run = openRun()..watching = true;
+    final biter = addEnemy(
+      run,
+      'biter',
+      run.player.position + const Vec2(1, 0),
+    );
+    final food = run.bag.countOf('food');
+    runFor(run, 3);
+    expect(biter.target, isNull);
+    expect(run.player.hp, run.player.maxHp);
+    expect(run.bag.countOf('food'), food);
+    expect(run.bullets, isEmpty);
+  });
 }

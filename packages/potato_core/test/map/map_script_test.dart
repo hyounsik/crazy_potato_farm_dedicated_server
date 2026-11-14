@@ -142,7 +142,7 @@ wait reach m
 face x farmer
 '''),
         [
-          '1: no place "nowhere" (marker at:nowhere)',
+          '1: no place "nowhere" (marker at:nowhere or x,y on the map)',
           '2: no kind "ghost"',
           '3: "r" has no attack "spray" (melee)',
           '4: "boss" has no attack "cloud:2" (melee, charge, cloud:1)',
@@ -266,5 +266,77 @@ cue done
         expect(r.done, isTrue);
       },
     );
+
+    group('timed (2026-11-14)', () {
+      test('lines start at their times, overlapping, on tiles or places', () {
+        final r = run(
+          '@0 actor j john at 1,1\n'
+          '@0 actor i ian at 3,3\n'
+          '@0 move j 1,1 -> 1,4 3s\n'
+          '@1 move i d -> 3,6 3s\n'
+          '@5 exit j',
+        );
+        final j = r.bodies['j']!;
+        final i = r.bodies['i']!;
+        r.advance(1.5);
+        expect(j.walking, isTrue);
+        expect(i.walking, isTrue, reason: 'started at 1s while j still walks');
+        r.advance(3);
+        expect(j.position, const Vec2(1.5, 4.5));
+        expect(i.position, const Vec2(3.5, 6.5));
+        expect(r.clock, closeTo(4.5, 1e-9));
+        r.advance(1);
+        expect(r.bodies.containsKey('j'), isFalse);
+        expect(r.done, isTrue);
+      });
+
+      test('a wait stops the clock until the farmer reaches the mark', () {
+        final r = run(
+          '@0 mark m at d\n'
+          '@1 wait reach m\n'
+          '@2 cue after',
+        );
+        r.advance(1.5);
+        expect(r.clock, 1);
+        expect(r.waitingReach, ['m']);
+        r.advance(10);
+        expect(r.clock, 1);
+        r.reach('m');
+        r.advance(0.1);
+        expect(r.marks, isEmpty);
+        r.advance(1);
+        expect(r.takeActions().whereType<ScriptCue>(), isNotEmpty);
+        expect(r.done, isTrue);
+      });
+
+      test('a move from here starts where the body stands', () {
+        final r = run('@0 move farmer here -> 1,6 2s');
+        r.advance(2);
+        expect(r.bodies[scriptFarmer]!.position, const Vec2(1.5, 6.5));
+      });
+
+      test('pose sits the farmer and stand gets him up', () {
+        final r = run('@0 pose farmer sit_left\n@1 pose farmer stand');
+        expect(r.bodies[scriptFarmer]!.pose, 'sit_left');
+        r.advance(1);
+        expect(r.bodies[scriptFarmer]!.pose, isNull);
+      });
+
+      test('problems: going back in time, bad tiles, bad poses, exits', () {
+        expect(
+          _problems(
+            '@2 wait 1s\n@1 wait 1s\n@3 actor j john at 40,1\n'
+            '@4 pose farmer fly\n@5 exit farmer\n@x wait 1s',
+          ),
+          [
+            '2: starts before the line above',
+            '3: no place "40,1" (marker at:40,1 or x,y on the map)',
+            '4: no pose "fly" (${scriptPoses.join(', ')})',
+            '5: only story characters and marks leave',
+            '6: "@x" is not a start time like @1.5',
+          ],
+        );
+      });
+    });
   });
 }

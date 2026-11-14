@@ -9,6 +9,7 @@ final class DrawnMapData {
     Map<String, String> scripts = const {},
     this.hunger = true,
     this.damage = true,
+    this.watch = false,
   }) : scripts = Map.unmodifiable(scripts);
 
   factory DrawnMapData.fromJson(Map<String, dynamic> json) => DrawnMapData(
@@ -20,6 +21,7 @@ final class DrawnMapData {
     },
     hunger: json['hunger'] as bool? ?? true,
     damage: json['damage'] as bool? ?? true,
+    watch: json['watch'] as bool? ?? false,
   );
 
   final String id;
@@ -37,6 +39,10 @@ final class DrawnMapData {
   /// companions lose no health (2026-11-14, 사용자: map info). Enemies
   /// still do.
   final bool damage;
+
+  /// Only watched (2026-11-14, 사용자): no player on it; its `start`
+  /// script plays everyone, Kevin too when it puts him there.
+  final bool watch;
 
   /// [scripts], read.
   List<MapScript> get parsedScripts => [

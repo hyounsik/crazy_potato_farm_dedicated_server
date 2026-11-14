@@ -55,7 +55,7 @@ const _horsefly = EnemyData(
 
 const _cast = ScriptCast(
   enemies: {'rat': _rat},
-  characters: {'helmet_potato'},
+  characters: {'john', 'ian'},
   boss: _horsefly,
 );
 
@@ -68,8 +68,8 @@ void main() {
   group('reading', () {
     test('commands, comments, blank lines and & together', () {
       final script = MapScript.parse('meet', '''
-# the helmet potato walks to the table
-actor helm helmet_potato at a
+# John walks to the table
+actor helm john at a
 move helm a -> b 2s   # slowly
 & mark meet at c
 
@@ -181,7 +181,7 @@ face x farmer
     }
 
     test('a move walks round the wall in its time, then the next starts', () {
-      final r = run('actor h helmet_potato at a\nmove h a -> b 4s\nwait 1s');
+      final r = run('actor h john at a\nmove h a -> b 4s\nwait 1s');
       final h = r.bodies['h']!;
       expect(h.position.distanceTo(const Vec2(1.5, 1.5)), lessThan(1e-9));
       r.advance(2);

@@ -424,10 +424,19 @@ final class FarmSimulation {
   );
 
   /// Whether runs may go to zone [zone]: the story opened it, or a cleared
-  /// region opens it (2026-11-08, 사용자).
+  /// region opens it (2026-11-08, 사용자), and it is not a story map
+  /// already played through ([zoneDone]).
   bool zoneOpen(String zone) =>
-      isUnlocked(StoryUnlock.zone(zone)) ||
-      clearedZones.any((id) => catalog.zones[id]!.clearOpens!.contains(zone));
+      !zoneDone(zone) &&
+      (isUnlocked(StoryUnlock.zone(zone)) ||
+          clearedZones.any(
+            (id) => catalog.zones[id]!.clearOpens!.contains(zone),
+          ));
+
+  /// Whether [zone] is a story map played once ([ZoneData.once]) that a run
+  /// of this farm already got out of (2026-11-14, 사용자): it stays shut.
+  bool zoneDone(String zone) =>
+      (catalog.zones[zone]?.once ?? false) && (totals.escapes[zone] ?? 0) > 0;
 
   /// The story events that may happen now, in story order: not done, and
   /// every event before them done.

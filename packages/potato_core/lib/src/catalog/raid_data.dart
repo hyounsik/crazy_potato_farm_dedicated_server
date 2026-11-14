@@ -597,6 +597,15 @@ abstract class ZoneData with _$ZoneData {
     /// that are never cleared (danger and test zones).
     List<String>? clearOpens,
 
+    /// A story map played once (2026-11-14, 사용자): an event opens it, and
+    /// once a run gets out of it the zone closes for good. Leaving early or
+    /// falling keeps it open to try again.
+    @Default(false) bool once,
+
+    /// Said before setting out, to be agreed to first (2026-11-14, 사용자:
+    /// e.g. the ending's "no way back once you start").
+    @LocalizedTextConverter() LocalizedText? notice,
+
     /// Which region's pictures the map is drawn with (`grassland`,
     /// `desert`, ...): ground, high ground, trees and the like. Only the
     /// look; the rules are the same (2026-10-25, phase 8 drafts).

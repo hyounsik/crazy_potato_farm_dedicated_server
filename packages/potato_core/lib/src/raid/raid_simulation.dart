@@ -2,6 +2,7 @@ import 'dart:math' as math;
 
 import 'package:potato_core/src/catalog/ability_data.dart';
 import 'package:potato_core/src/catalog/catalog.dart';
+import 'package:potato_core/src/catalog/drawn_map_data.dart';
 import 'package:potato_core/src/catalog/grade.dart';
 import 'package:potato_core/src/catalog/potato_type_data.dart';
 import 'package:potato_core/src/catalog/raid_data.dart';
@@ -550,6 +551,12 @@ final class RaidSimulation {
   final Catalog catalog;
   final ZoneData zone;
   final MapData map;
+
+  /// Whether the map makes the run hungry and the players' side hurt
+  /// ([DrawnMapData.hunger], [DrawnMapData.damage]); on for made maps.
+  late final bool hungerOn = _drawn?.hunger ?? true;
+  late final bool damageOn = _drawn?.damage ?? true;
+  DrawnMapData? get _drawn => catalog.maps[zone.drawnMap];
   final GameRandom _random;
 
   /// Each member's best potato level per type, as they set out: seeds found
@@ -851,7 +858,7 @@ final class RaidSimulation {
   bool get isHungry => isHungryOf(_first);
 
   bool isHungryOf(RaidMember member) =>
-      member.bag.countOf(rules.food.item) == 0;
+      hungerOn && member.bag.countOf(rules.food.item) == 0;
 
   /// What the run brings home, once it is over.
   RaidResult? get result => resultOf(_first);
@@ -1462,6 +1469,11 @@ final class RaidSimulation {
   void _eat(RaidMember member, double dt) {
     final food = rules.food;
     final player = member.player;
+    if (!hungerOn) {
+      // Nothing eaten, but healing goes on as usual.
+      _heal(member, dt);
+      return;
+    }
     if (isHungryOf(member)) {
       player
         ..foodOwed = 0
@@ -1475,14 +1487,8 @@ final class RaidSimulation {
       return;
     }
     player.hungrySeconds = 0;
-    final spec = rules.player;
     var rate = food.perSecond;
-    if (player.sinceHit >= spec.regenDelaySeconds && player.hp < player.maxHp) {
-      final regen = _userStats(member)
-          .apply(RaidStat.regenSpeed, spec.regenPerSecond);
-      player.hp = math.min(player.maxHp, player.hp + regen * dt);
-      rate += food.regenExtraPerSecond;
-    }
+    if (_heal(member, dt)) rate += food.regenExtraPerSecond;
     rate =
         _userStats(member).apply(RaidStat.foodConsumption, rate) *
         _gear.factorOf(player.equipped, GearStat.foodUse);
@@ -1492,6 +1498,19 @@ final class RaidSimulation {
       player.foodOwed -= whole;
       member.bag.remove(food.item, whole);
     }
+  }
+
+  /// Heals [member] a little a while after the last hit; whether it did.
+  bool _heal(RaidMember member, double dt) {
+    final spec = rules.player;
+    final player = member.player;
+    if (player.sinceHit < spec.regenDelaySeconds || player.hp >= player.maxHp) {
+      return false;
+    }
+    final regen = _userStats(member)
+        .apply(RaidStat.regenSpeed, spec.regenPerSecond);
+    player.hp = math.min(player.maxHp, player.hp + regen * dt);
+    return true;
   }
 
   /// [shooter] fires at [target] (null holds fire). Charging weapons must
@@ -2634,6 +2653,7 @@ final class RaidSimulation {
     if (target.isDown) return;
     if (target is RaidCompanion && target.guardLeft > 0) return;
     if (target is RaidPlayer && target.isDashing) return;
+    if (!damageOn && target.team == playerTeam) return;
     target.hp = math.max(0, target.hp - amount);
     _events.add(BodyHit(target.id, amount));
     final foe = from != null && from.team != target.team ? from : null;

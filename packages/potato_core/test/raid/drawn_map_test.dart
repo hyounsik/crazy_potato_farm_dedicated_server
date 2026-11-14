@@ -132,6 +132,53 @@ void main() {
       ]);
     });
 
+    test('a map without hunger or damage: nothing eaten, nobody hurt '
+        '(2026-11-14)', () {
+      final calm = Catalog.load(
+        _filesWith({..._drawn(), 'hunger': false, 'damage': false}),
+      ).catalog!;
+      expect(calm.maps['story']!.hunger, isFalse);
+      final run = RaidSimulation.start(
+        catalog: calm,
+        zone: 'story_zone',
+        seed: 1,
+        food: 10,
+      );
+      final hp = run.player.hp;
+      final biter = run.enemies.first
+        ..position = run.player.position
+        ..hp = 1e9;
+      for (final e in run.enemies) {
+        e.hp = 1e9;
+      }
+      for (var i = 0; i < (20 / run.stepSeconds).round(); i++) {
+        biter.position = run.player.position;
+        run.step();
+      }
+      expect(run.bag.countOf('food'), 10);
+      expect(run.isHungryOf(run.members.single), isFalse);
+      expect(run.player.hp, hp);
+
+      // The same map with both on eats and hurts.
+      final plain = RaidSimulation.start(
+        catalog: catalog,
+        zone: 'story_zone',
+        seed: 1,
+        food: 10,
+      );
+      final food = plain.bag.countOf('food');
+      final other = plain.enemies.first;
+      for (final e in plain.enemies) {
+        e.hp = 1e9;
+      }
+      for (var i = 0; i < (20 / plain.stepSeconds).round(); i++) {
+        other.position = plain.player.position;
+        plain.step();
+      }
+      expect(plain.player.hp, lessThan(plain.player.maxHp));
+      expect(plain.bag.countOf('food'), lessThan(food));
+    });
+
     test('survives a save', () {
       final run = start(1);
       final back = RaidSimulation.fromJson(run.toJson(), catalog);

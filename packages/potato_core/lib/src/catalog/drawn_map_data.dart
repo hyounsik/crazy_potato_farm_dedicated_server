@@ -7,6 +7,8 @@ final class DrawnMapData {
     required this.id,
     required this.map,
     Map<String, String> scripts = const {},
+    this.hunger = true,
+    this.damage = true,
   }) : scripts = Map.unmodifiable(scripts);
 
   factory DrawnMapData.fromJson(Map<String, dynamic> json) => DrawnMapData(
@@ -16,6 +18,8 @@ final class DrawnMapData {
       for (final s in json['scripts'] as List<Object?>? ?? const [])
         (s! as Map<String, dynamic>)['name'] as String: s['text'] as String,
     },
+    hunger: json['hunger'] as bool? ?? true,
+    damage: json['damage'] as bool? ?? true,
   );
 
   final String id;
@@ -24,6 +28,15 @@ final class DrawnMapData {
   /// Its story scripts' text by name, as written in the map editor
   /// (2026-11-12, 사용자: M6). Read with [MapScript.parse].
   final Map<String, String> scripts;
+
+  /// Whether runs here get hungry: off, no food is eaten and nobody goes
+  /// hungry (2026-11-14, 사용자: map info).
+  final bool hunger;
+
+  /// Whether the players' side gets hurt here: off, the farmer and the
+  /// companions lose no health (2026-11-14, 사용자: map info). Enemies
+  /// still do.
+  final bool damage;
 
   /// [scripts], read.
   List<MapScript> get parsedScripts => [

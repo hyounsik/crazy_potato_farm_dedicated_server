@@ -377,4 +377,32 @@ void main() {
     final id = growOne();
     expect(companionsFor(farm, [id, 999]).single.potatoId, id);
   });
+
+  test('a story map played once closes after a run gets out of it, not '
+      'before (2026-11-14)', () {
+    final once = sampleCatalogWith((files) {
+      final zones = (files['zones']! as Map<String, dynamic>)['zones']!;
+      for (final zone in zones as List<Object?>) {
+        final z = zone! as Map<String, dynamic>;
+        if (z['id'] == 'sample_zone') z['once'] = true;
+      }
+    });
+    final farm = FarmSimulation.newFarm(once, seed: 1);
+    expect(farm.zoneOpen('sample_zone'), isTrue);
+
+    // Fell or left early: still open, to try again.
+    farm.apply(const FarmCommand.returnHome(food: 0, zone: 'sample_zone'));
+    expect(farm.zoneDone('sample_zone'), isFalse);
+    expect(farm.zoneOpen('sample_zone'), isTrue);
+
+    farm.apply(
+      const FarmCommand.returnHome(food: 0, zone: 'sample_zone', score: 1),
+    );
+    expect(farm.zoneDone('sample_zone'), isTrue);
+    expect(farm.zoneOpen('sample_zone'), isFalse);
+    expect(
+      farm.apply(const FarmCommand.depart(food: 0, zone: 'sample_zone')),
+      FarmRejection.locked,
+    );
+  });
 }

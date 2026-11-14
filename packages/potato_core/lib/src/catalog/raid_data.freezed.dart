@@ -6548,7 +6548,12 @@ mixin _$ZoneData {
 /// `clear:<id>` unlock). Its score then counts toward the farm's
 /// progress, the highest danger difficulty to pick. Null for zones
 /// that are never cleared (danger and test zones).
- List<String>? get clearOpens;/// Which region's pictures the map is drawn with (`grassland`,
+ List<String>? get clearOpens;/// A story map played once (2026-11-14, 사용자): an event opens it, and
+/// once a run gets out of it the zone closes for good. Leaving early or
+/// falling keeps it open to try again.
+ bool get once;/// Said before setting out, to be agreed to first (2026-11-14, 사용자:
+/// e.g. the ending's "no way back once you start").
+@LocalizedTextConverter() LocalizedText? get notice;/// Which region's pictures the map is drawn with (`grassland`,
 /// `desert`, ...): ground, high ground, trees and the like. Only the
 /// look; the rules are the same (2026-10-25, phase 8 drafts).
  String get look;
@@ -6565,20 +6570,20 @@ $ZoneDataCopyWith<ZoneData> get copyWith => _$ZoneDataCopyWithImpl<ZoneData>(thi
 @override
 bool operator ==(Object other) {
   final _this = this as ZoneData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.levelMin, _this.levelMin) || other.levelMin == _this.levelMin)&&(identical(other.levelMax, _this.levelMax) || other.levelMax == _this.levelMax)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.drawnMap, _this.drawnMap) || other.drawnMap == _this.drawnMap)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops)&&(identical(other.danger, _this.danger) || other.danger == _this.danger)&&(identical(other.boss, _this.boss) || other.boss == _this.boss)&&const DeepCollectionEquality().equals(other.clearOpens, _this.clearOpens)&&(identical(other.look, _this.look) || other.look == _this.look));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is ZoneData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.score, _this.score) || other.score == _this.score)&&(identical(other.levelMin, _this.levelMin) || other.levelMin == _this.levelMin)&&(identical(other.levelMax, _this.levelMax) || other.levelMax == _this.levelMax)&&(identical(other.name, _this.name) || other.name == _this.name)&&(identical(other.map, _this.map) || other.map == _this.map)&&(identical(other.drawnMap, _this.drawnMap) || other.drawnMap == _this.drawnMap)&&(identical(other.enemies, _this.enemies) || other.enemies == _this.enemies)&&(identical(other.gathering, _this.gathering) || other.gathering == _this.gathering)&&(identical(other.drops, _this.drops) || other.drops == _this.drops)&&(identical(other.danger, _this.danger) || other.danger == _this.danger)&&(identical(other.boss, _this.boss) || other.boss == _this.boss)&&const DeepCollectionEquality().equals(other.clearOpens, _this.clearOpens)&&(identical(other.once, _this.once) || other.once == _this.once)&&(identical(other.notice, _this.notice) || other.notice == _this.notice)&&(identical(other.look, _this.look) || other.look == _this.look));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as ZoneData;
-  return Object.hash(runtimeType,_this.id,_this.score,_this.levelMin,_this.levelMax,_this.name,_this.map,_this.drawnMap,_this.enemies,_this.gathering,_this.drops,_this.danger,_this.boss,const DeepCollectionEquality().hash(_this.clearOpens),_this.look);
+  return Object.hash(runtimeType,_this.id,_this.score,_this.levelMin,_this.levelMax,_this.name,_this.map,_this.drawnMap,_this.enemies,_this.gathering,_this.drops,_this.danger,_this.boss,const DeepCollectionEquality().hash(_this.clearOpens),_this.once,_this.notice,_this.look);
 }
 
 @override
 String toString() {
   final _this = this as ZoneData;
-  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, levelMin: ${_this.levelMin}, levelMax: ${_this.levelMax}, name: ${_this.name}, map: ${_this.map}, drawnMap: ${_this.drawnMap}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops}, danger: ${_this.danger}, boss: ${_this.boss}, clearOpens: ${_this.clearOpens}, look: ${_this.look})';
+  return 'ZoneData(id: ${_this.id}, score: ${_this.score}, levelMin: ${_this.levelMin}, levelMax: ${_this.levelMax}, name: ${_this.name}, map: ${_this.map}, drawnMap: ${_this.drawnMap}, enemies: ${_this.enemies}, gathering: ${_this.gathering}, drops: ${_this.drops}, danger: ${_this.danger}, boss: ${_this.boss}, clearOpens: ${_this.clearOpens}, once: ${_this.once}, notice: ${_this.notice}, look: ${_this.look})';
 }
 
 
@@ -6589,7 +6594,7 @@ abstract mixin class $ZoneDataCopyWith<$Res>  {
   factory $ZoneDataCopyWith(ZoneData value, $Res Function(ZoneData) _then) = _$ZoneDataCopyWithImpl;
 @useResult
 $Res call({
- String id, int score, int? levelMin, int? levelMax,@LocalizedTextConverter() LocalizedText? name, MapRecipe? map, String? drawnMap, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss, List<String>? clearOpens, String look
+ String id, int score, int? levelMin, int? levelMax,@LocalizedTextConverter() LocalizedText? name, MapRecipe? map, String? drawnMap, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss, List<String>? clearOpens, bool once,@LocalizedTextConverter() LocalizedText? notice, String look
 });
 
 
@@ -6606,7 +6611,7 @@ class _$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? levelMin = freezed,Object? levelMax = freezed,Object? name = freezed,Object? map = freezed,Object? drawnMap = freezed,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,Object? clearOpens = freezed,Object? look = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? score = null,Object? levelMin = freezed,Object? levelMax = freezed,Object? name = freezed,Object? map = freezed,Object? drawnMap = freezed,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,Object? clearOpens = freezed,Object? once = null,Object? notice = freezed,Object? look = null,}) {
   return _then(ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -6621,7 +6626,9 @@ as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_
 as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
 as ZoneDangerData?,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
 as ZoneBossData?,clearOpens: freezed == clearOpens ? _self.clearOpens : clearOpens // ignore: cast_nullable_to_non_nullable
-as List<String>?,look: null == look ? _self.look : look // ignore: cast_nullable_to_non_nullable
+as List<String>?,once: null == once ? _self.once : once // ignore: cast_nullable_to_non_nullable
+as bool,notice: freezed == notice ? _self.notice : notice // ignore: cast_nullable_to_non_nullable
+as LocalizedText?,look: null == look ? _self.look : look // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }
@@ -6770,10 +6777,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  String look)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  bool once, @LocalizedTextConverter()  LocalizedText? notice,  String look)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.look);case _:
+return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.once,_that.notice,_that.look);case _:
   return orElse();
 
 }
@@ -6791,10 +6798,10 @@ return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  String look)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  bool once, @LocalizedTextConverter()  LocalizedText? notice,  String look)  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData():
-return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.look);case _:
+return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.once,_that.notice,_that.look);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -6811,10 +6818,10 @@ return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_t
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  String look)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  int score,  int? levelMin,  int? levelMax, @LocalizedTextConverter()  LocalizedText? name,  MapRecipe? map,  String? drawnMap,  ZoneEnemiesData enemies,  ZoneGatheringData gathering,  ZoneDropsData drops,  ZoneDangerData? danger,  ZoneBossData? boss,  List<String>? clearOpens,  bool once, @LocalizedTextConverter()  LocalizedText? notice,  String look)?  $default,) {final _that = this;
 switch (_that) {
 case _ZoneData() when $default != null:
-return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.look);case _:
+return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_that.map,_that.drawnMap,_that.enemies,_that.gathering,_that.drops,_that.danger,_that.boss,_that.clearOpens,_that.once,_that.notice,_that.look);case _:
   return null;
 
 }
@@ -6826,7 +6833,7 @@ return $default(_that.id,_that.score,_that.levelMin,_that.levelMax,_that.name,_t
 @JsonSerializable()
 
 class _ZoneData implements ZoneData {
-  const _ZoneData({required this.id, required this.score, this.levelMin, this.levelMax, @LocalizedTextConverter() this.name, this.map, this.drawnMap, required this.enemies, required this.gathering, required this.drops, this.danger, this.boss,  List<String>? clearOpens, this.look = 'grassland'}): _clearOpens = clearOpens;
+  const _ZoneData({required this.id, required this.score, this.levelMin, this.levelMax, @LocalizedTextConverter() this.name, this.map, this.drawnMap, required this.enemies, required this.gathering, required this.drops, this.danger, this.boss,  List<String>? clearOpens, this.once = false, @LocalizedTextConverter() this.notice, this.look = 'grassland'}): _clearOpens = clearOpens;
   factory _ZoneData.fromJson(Map<String, dynamic> json) => _$ZoneDataFromJson(json);
 
 @override final  String id;
@@ -6875,6 +6882,13 @@ class _ZoneData implements ZoneData {
   return EqualUnmodifiableListView(value);
 }
 
+/// A story map played once (2026-11-14, 사용자): an event opens it, and
+/// once a run gets out of it the zone closes for good. Leaving early or
+/// falling keeps it open to try again.
+@override@JsonKey() final  bool once;
+/// Said before setting out, to be agreed to first (2026-11-14, 사용자:
+/// e.g. the ending's "no way back once you start").
+@override@LocalizedTextConverter() final  LocalizedText? notice;
 /// Which region's pictures the map is drawn with (`grassland`,
 /// `desert`, ...): ground, high ground, trees and the like. Only the
 /// look; the rules are the same (2026-10-25, phase 8 drafts).
@@ -6893,18 +6907,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelMin, levelMin) || other.levelMin == levelMin)&&(identical(other.levelMax, levelMax) || other.levelMax == levelMax)&&(identical(other.name, name) || other.name == name)&&(identical(other.map, map) || other.map == map)&&(identical(other.drawnMap, drawnMap) || other.drawnMap == drawnMap)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops)&&(identical(other.danger, danger) || other.danger == danger)&&(identical(other.boss, boss) || other.boss == boss)&&const DeepCollectionEquality().equals(other.clearOpens, _clearOpens)&&(identical(other.look, look) || other.look == look));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _ZoneData&&(identical(other.id, id) || other.id == id)&&(identical(other.score, score) || other.score == score)&&(identical(other.levelMin, levelMin) || other.levelMin == levelMin)&&(identical(other.levelMax, levelMax) || other.levelMax == levelMax)&&(identical(other.name, name) || other.name == name)&&(identical(other.map, map) || other.map == map)&&(identical(other.drawnMap, drawnMap) || other.drawnMap == drawnMap)&&(identical(other.enemies, enemies) || other.enemies == enemies)&&(identical(other.gathering, gathering) || other.gathering == gathering)&&(identical(other.drops, drops) || other.drops == drops)&&(identical(other.danger, danger) || other.danger == danger)&&(identical(other.boss, boss) || other.boss == boss)&&const DeepCollectionEquality().equals(other.clearOpens, _clearOpens)&&(identical(other.once, once) || other.once == once)&&(identical(other.notice, notice) || other.notice == notice)&&(identical(other.look, look) || other.look == look));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,score,levelMin,levelMax,name,map,drawnMap,enemies,gathering,drops,danger,boss,const DeepCollectionEquality().hash(_clearOpens),look);
+    return Object.hash(runtimeType,id,score,levelMin,levelMax,name,map,drawnMap,enemies,gathering,drops,danger,boss,const DeepCollectionEquality().hash(_clearOpens),once,notice,look);
 }
 
 @override
 String toString() {
-    return 'ZoneData(id: $id, score: $score, levelMin: $levelMin, levelMax: $levelMax, name: $name, map: $map, drawnMap: $drawnMap, enemies: $enemies, gathering: $gathering, drops: $drops, danger: $danger, boss: $boss, clearOpens: $clearOpens, look: $look)';
+    return 'ZoneData(id: $id, score: $score, levelMin: $levelMin, levelMax: $levelMax, name: $name, map: $map, drawnMap: $drawnMap, enemies: $enemies, gathering: $gathering, drops: $drops, danger: $danger, boss: $boss, clearOpens: $clearOpens, once: $once, notice: $notice, look: $look)';
 }
 
 
@@ -6915,7 +6929,7 @@ abstract mixin class _$ZoneDataCopyWith<$Res> implements $ZoneDataCopyWith<$Res>
   factory _$ZoneDataCopyWith(_ZoneData value, $Res Function(_ZoneData) _then) = __$ZoneDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, int score, int? levelMin, int? levelMax,@LocalizedTextConverter() LocalizedText? name, MapRecipe? map, String? drawnMap, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss, List<String>? clearOpens, String look
+ String id, int score, int? levelMin, int? levelMax,@LocalizedTextConverter() LocalizedText? name, MapRecipe? map, String? drawnMap, ZoneEnemiesData enemies, ZoneGatheringData gathering, ZoneDropsData drops, ZoneDangerData? danger, ZoneBossData? boss, List<String>? clearOpens, bool once,@LocalizedTextConverter() LocalizedText? notice, String look
 });
 
 
@@ -6932,7 +6946,7 @@ class __$ZoneDataCopyWithImpl<$Res>
 
 /// Create a copy of ZoneData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? levelMin = freezed,Object? levelMax = freezed,Object? name = freezed,Object? map = freezed,Object? drawnMap = freezed,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,Object? clearOpens = freezed,Object? look = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? score = null,Object? levelMin = freezed,Object? levelMax = freezed,Object? name = freezed,Object? map = freezed,Object? drawnMap = freezed,Object? enemies = null,Object? gathering = null,Object? drops = null,Object? danger = freezed,Object? boss = freezed,Object? clearOpens = freezed,Object? once = null,Object? notice = freezed,Object? look = null,}) {
   return _then(_ZoneData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,score: null == score ? _self.score : score // ignore: cast_nullable_to_non_nullable
@@ -6947,7 +6961,9 @@ as ZoneGatheringData,drops: null == drops ? _self.drops : drops // ignore: cast_
 as ZoneDropsData,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
 as ZoneDangerData?,boss: freezed == boss ? _self.boss : boss // ignore: cast_nullable_to_non_nullable
 as ZoneBossData?,clearOpens: freezed == clearOpens ? _self._clearOpens : clearOpens // ignore: cast_nullable_to_non_nullable
-as List<String>?,look: null == look ? _self.look : look // ignore: cast_nullable_to_non_nullable
+as List<String>?,once: null == once ? _self.once : once // ignore: cast_nullable_to_non_nullable
+as bool,notice: freezed == notice ? _self.notice : notice // ignore: cast_nullable_to_non_nullable
+as LocalizedText?,look: null == look ? _self.look : look // ignore: cast_nullable_to_non_nullable
 as String,
   ));
 }

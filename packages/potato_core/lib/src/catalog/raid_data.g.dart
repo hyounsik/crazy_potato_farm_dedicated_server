@@ -1174,6 +1174,14 @@ _ZoneData _$ZoneDataFromJson(Map<String, dynamic> json) => $checkedCreate(
         'clear_opens',
         (v) => (v as List<dynamic>?)?.map((e) => e as String).toList(),
       ),
+      once: $checkedConvert('once', (v) => v as bool? ?? false),
+      notice: $checkedConvert(
+        'notice',
+        (v) => _$JsonConverterFromJson<Object, LocalizedText>(
+          v,
+          const LocalizedTextConverter().fromJson,
+        ),
+      ),
       look: $checkedConvert('look', (v) => v as String? ?? 'grassland'),
     );
     return val;
@@ -1203,6 +1211,11 @@ Map<String, dynamic> _$ZoneDataToJson(_ZoneData instance) => <String, dynamic>{
   'danger': instance.danger?.toJson(),
   'boss': instance.boss?.toJson(),
   'clear_opens': instance.clearOpens,
+  'once': instance.once,
+  'notice': _$JsonConverterToJson<Object, LocalizedText>(
+    instance.notice,
+    const LocalizedTextConverter().toJson,
+  ),
   'look': instance.look,
 };
 

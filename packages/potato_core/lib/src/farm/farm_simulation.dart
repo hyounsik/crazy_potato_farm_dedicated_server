@@ -773,15 +773,57 @@ final class FarmSimulation {
   FarmRejection? apply(FarmCommand command, {PlayerKit? by}) {
     _actor = by ?? kit;
     try {
+      if (lockFor(command) case final key? when !isUnlocked(key)) {
+        return FarmRejection.locked;
+      }
       final rejection = _dispatch(command);
-      if (rejection == null) _advanceStory();
+      if (rejection == null) {
+        _countAction(command);
+        _advanceStory();
+      }
       return rejection;
     } finally {
       _actor = kit;
     }
   }
 
+  /// The unlock key [command] needs, if any (2026-11-16, 사용자: chapter 1
+  /// locks using what already stands on the farm).
+  String? lockFor(FarmCommand command) => switch (command) {
+    PlantSeed() ||
+    HarvestPotato() ||
+    HarvestField() ||
+    ClearPest() ||
+    MovePotato() => StoryUnlock.useField,
+    MakeField() ||
+    ResizeField() ||
+    MoveField() ||
+    RemoveField() => StoryUnlock.fieldBuild,
+    Uproot() ||
+    Replant() ||
+    Retrain() ||
+    ReleasePotato() => StoryUnlock.useCellar,
+    LoadBed() || UnloadBed() => StoryUnlock.useTruck,
+    // The story takes the farmer to a story map played once.
+    Depart(:final zone) when catalog.zones[zone]?.once ?? false => null,
+    Depart() => StoryUnlock.useTruck,
+    _ => null,
+  };
+
+  /// Counts the story action a command that worked was, if any.
+  void _countAction(FarmCommand command) {
+    final action = switch (command) {
+      PlantSeed() => StoryActions.plant,
+      StoryAction(:final action) => action,
+      _ => null,
+    };
+    if (action == null) return;
+    totals.actions[action] = (totals.actions[action] ?? 0) + 1;
+  }
+
   FarmRejection? _dispatch(FarmCommand command) => switch (command) {
+    StoryAction(:final action) =>
+      action.isEmpty ? FarmRejection.nothingToClaim : null,
     PlantSeed(:final fieldId, :final tile, :final seed) => _plant(
       fieldId,
       tile,
@@ -2896,6 +2938,7 @@ final class FarmSimulation {
           totals.pestsClearedByTap + totals.pestsClearedByGuards,
         StoryGoalKind.potatoesDied => totals.potatoesDied,
         StoryGoalKind.potatoesTrained => totals.potatoesTrained,
+        StoryGoalKind.action => totals.actions[goal.action] ?? 0,
         StoryGoalKind.wait => (_tick - since) * _rules.farm.stepMillis ~/ 1000,
       };
 

@@ -113,6 +113,7 @@ _StoryGoalData _$StoryGoalDataFromJson(Map<String, dynamic> json) =>
           'type',
           'zone',
           'danger',
+          'action',
         ],
       );
       final val = _StoryGoalData(
@@ -128,6 +129,7 @@ _StoryGoalData _$StoryGoalDataFromJson(Map<String, dynamic> json) =>
         ),
         zone: $checkedConvert('zone', (v) => v as String?),
         danger: $checkedConvert('danger', (v) => v as bool?),
+        action: $checkedConvert('action', (v) => v as String?),
       );
       return val;
     });
@@ -140,6 +142,7 @@ Map<String, dynamic> _$StoryGoalDataToJson(_StoryGoalData instance) =>
       'type': _$PotatoTypeEnumMap[instance.type],
       'zone': instance.zone,
       'danger': instance.danger,
+      'action': instance.action,
     };
 
 const _$StoryGoalKindEnumMap = {
@@ -155,6 +158,7 @@ const _$StoryGoalKindEnumMap = {
   StoryGoalKind.pestsCleared: 'pests_cleared',
   StoryGoalKind.potatoesDied: 'potatoes_died',
   StoryGoalKind.potatoesTrained: 'potatoes_trained',
+  StoryGoalKind.action: 'action',
   StoryGoalKind.wait: 'wait',
 };
 

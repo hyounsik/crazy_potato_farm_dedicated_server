@@ -1695,6 +1695,14 @@ final class RaidSimulation {
 
   /// A story script has [member]'s farmer shoot at [at] for [seconds], for
   /// show (2026-11-12, 사용자): the shots hurt nobody.
+  /// A story script ends the run: everyone still on the map gets out, as
+  /// through an exit (2026-11-16, 사용자: the prologue's cave).
+  void scriptEnd() {
+    for (final m in List.of(_active)) {
+      _end(m, RaidOutcome.extracted);
+    }
+  }
+
   void scriptShoot(RaidMember member, Vec2 at, double seconds) =>
       _scriptShots[member] = (at: at, left: seconds);
 

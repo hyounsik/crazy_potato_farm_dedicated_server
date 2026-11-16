@@ -21,8 +21,10 @@ final class FarmTotals {
     this.potatoesTrained = 0,
     Map<String, int>? escapes,
     Map<String, int>? bossKills,
+    Map<String, int>? actions,
   }) : escapes = escapes ?? {},
-       bossKills = bossKills ?? {};
+       bossKills = bossKills ?? {},
+       actions = actions ?? {};
 
   factory FarmTotals.fromJson(Map<String, dynamic> json) =>
       _$FarmTotalsFromJson(json);
@@ -52,6 +54,9 @@ final class FarmTotals {
   /// Runs in which the zone's boss fell, by zone id.
   final Map<String, int> bossKills;
 
+  /// Story actions done (`StoryGoalKind.action`), by name (2026-11-16).
+  final Map<String, int> actions;
+
   FarmTotals copy() => FarmTotals.fromJson(toJson());
 
   /// What changed since [before], as totals.
@@ -75,6 +80,11 @@ final class FarmTotals {
       for (final MapEntry(:key, :value) in bossKills.entries)
         if (value - (before.bossKills[key] ?? 0) != 0)
           key: value - (before.bossKills[key] ?? 0),
+    },
+    actions: {
+      for (final MapEntry(:key, :value) in actions.entries)
+        if (value - (before.actions[key] ?? 0) != 0)
+          key: value - (before.actions[key] ?? 0),
     },
   );
 

@@ -1256,7 +1256,11 @@ final class Catalog {
     Map<String, ZoneData> zones,
   ) {
     void checkKey(String path, String key) {
-      if (key == StoryUnlock.pests || key == StoryUnlock.farmExpansion) return;
+      if (key == StoryUnlock.pests ||
+          key == StoryUnlock.farmExpansion ||
+          StoryUnlock.uses.contains(key)) {
+        return;
+      }
       if (StoryUnlock.buildingOf(key) case final id?) {
         if (!buildings.containsKey(id)) check.issue(path, 'no building "$id"');
         return;
@@ -1311,6 +1315,10 @@ final class Catalog {
         }
         if (goal.zone case final id? when !zones.containsKey(id)) {
           check.issue('$at.zone', 'no zone "$id"');
+        }
+        if ((goal.kind == StoryGoalKind.action) !=
+            (goal.action?.isNotEmpty ?? false)) {
+          check.issue('$at.action', 'an action goal names its action');
         }
       }
     }

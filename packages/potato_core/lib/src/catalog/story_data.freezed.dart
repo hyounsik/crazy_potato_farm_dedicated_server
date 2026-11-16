@@ -658,7 +658,8 @@ as List<SeedStackData>,
 /// @nodoc
 mixin _$StoryGoalData {
 
- StoryGoalKind get kind; int get count; String? get building; PotatoType? get type; String? get zone; bool? get danger;
+ StoryGoalKind get kind; int get count; String? get building; PotatoType? get type; String? get zone; bool? get danger;/// The action counted by [StoryGoalKind.action].
+ String? get action;
 /// Create a copy of StoryGoalData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -672,20 +673,20 @@ $StoryGoalDataCopyWith<StoryGoalData> get copyWith => _$StoryGoalDataCopyWithImp
 @override
 bool operator ==(Object other) {
   final _this = this as StoryGoalData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryGoalData&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.count, _this.count) || other.count == _this.count)&&(identical(other.building, _this.building) || other.building == _this.building)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.zone, _this.zone) || other.zone == _this.zone)&&(identical(other.danger, _this.danger) || other.danger == _this.danger));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryGoalData&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.count, _this.count) || other.count == _this.count)&&(identical(other.building, _this.building) || other.building == _this.building)&&(identical(other.type, _this.type) || other.type == _this.type)&&(identical(other.zone, _this.zone) || other.zone == _this.zone)&&(identical(other.danger, _this.danger) || other.danger == _this.danger)&&(identical(other.action, _this.action) || other.action == _this.action));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as StoryGoalData;
-  return Object.hash(runtimeType,_this.kind,_this.count,_this.building,_this.type,_this.zone,_this.danger);
+  return Object.hash(runtimeType,_this.kind,_this.count,_this.building,_this.type,_this.zone,_this.danger,_this.action);
 }
 
 @override
 String toString() {
   final _this = this as StoryGoalData;
-  return 'StoryGoalData(kind: ${_this.kind}, count: ${_this.count}, building: ${_this.building}, type: ${_this.type}, zone: ${_this.zone}, danger: ${_this.danger})';
+  return 'StoryGoalData(kind: ${_this.kind}, count: ${_this.count}, building: ${_this.building}, type: ${_this.type}, zone: ${_this.zone}, danger: ${_this.danger}, action: ${_this.action})';
 }
 
 
@@ -696,7 +697,7 @@ abstract mixin class $StoryGoalDataCopyWith<$Res>  {
   factory $StoryGoalDataCopyWith(StoryGoalData value, $Res Function(StoryGoalData) _then) = _$StoryGoalDataCopyWithImpl;
 @useResult
 $Res call({
- StoryGoalKind kind, int count, String? building, PotatoType? type, String? zone, bool? danger
+ StoryGoalKind kind, int count, String? building, PotatoType? type, String? zone, bool? danger, String? action
 });
 
 
@@ -713,7 +714,7 @@ class _$StoryGoalDataCopyWithImpl<$Res>
 
 /// Create a copy of StoryGoalData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? count = null,Object? building = freezed,Object? type = freezed,Object? zone = freezed,Object? danger = freezed,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? count = null,Object? building = freezed,Object? type = freezed,Object? zone = freezed,Object? danger = freezed,Object? action = freezed,}) {
   return _then(StoryGoalData(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as StoryGoalKind,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
@@ -721,7 +722,8 @@ as int,building: freezed == building ? _self.building : building // ignore: cast
 as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType?,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
 as String?,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 
@@ -806,10 +808,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger,  String? action)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StoryGoalData() when $default != null:
-return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger);case _:
+return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger,_that.action);case _:
   return orElse();
 
 }
@@ -827,10 +829,10 @@ return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger,  String? action)  $default,) {final _that = this;
 switch (_that) {
 case _StoryGoalData():
-return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger);case _:
+return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger,_that.action);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -847,10 +849,10 @@ return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_tha
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( StoryGoalKind kind,  int count,  String? building,  PotatoType? type,  String? zone,  bool? danger,  String? action)?  $default,) {final _that = this;
 switch (_that) {
 case _StoryGoalData() when $default != null:
-return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger);case _:
+return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_that.danger,_that.action);case _:
   return null;
 
 }
@@ -862,7 +864,7 @@ return $default(_that.kind,_that.count,_that.building,_that.type,_that.zone,_tha
 
 @JsonSerializable(disallowUnrecognizedKeys: true)
 class _StoryGoalData implements StoryGoalData {
-  const _StoryGoalData({required this.kind, this.count = 1, this.building, this.type, this.zone, this.danger});
+  const _StoryGoalData({required this.kind, this.count = 1, this.building, this.type, this.zone, this.danger, this.action});
   factory _StoryGoalData.fromJson(Map<String, dynamic> json) => _$StoryGoalDataFromJson(json);
 
 @override final  StoryGoalKind kind;
@@ -871,6 +873,8 @@ class _StoryGoalData implements StoryGoalData {
 @override final  PotatoType? type;
 @override final  String? zone;
 @override final  bool? danger;
+/// The action counted by [StoryGoalKind.action].
+@override final  String? action;
 
 /// Create a copy of StoryGoalData
 /// with the given fields replaced by the non-null parameter values.
@@ -885,18 +889,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryGoalData&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.count, count) || other.count == count)&&(identical(other.building, building) || other.building == building)&&(identical(other.type, type) || other.type == type)&&(identical(other.zone, zone) || other.zone == zone)&&(identical(other.danger, danger) || other.danger == danger));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryGoalData&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.count, count) || other.count == count)&&(identical(other.building, building) || other.building == building)&&(identical(other.type, type) || other.type == type)&&(identical(other.zone, zone) || other.zone == zone)&&(identical(other.danger, danger) || other.danger == danger)&&(identical(other.action, action) || other.action == action));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,kind,count,building,type,zone,danger);
+    return Object.hash(runtimeType,kind,count,building,type,zone,danger,action);
 }
 
 @override
 String toString() {
-    return 'StoryGoalData(kind: $kind, count: $count, building: $building, type: $type, zone: $zone, danger: $danger)';
+    return 'StoryGoalData(kind: $kind, count: $count, building: $building, type: $type, zone: $zone, danger: $danger, action: $action)';
 }
 
 
@@ -907,7 +911,7 @@ abstract mixin class _$StoryGoalDataCopyWith<$Res> implements $StoryGoalDataCopy
   factory _$StoryGoalDataCopyWith(_StoryGoalData value, $Res Function(_StoryGoalData) _then) = __$StoryGoalDataCopyWithImpl;
 @override @useResult
 $Res call({
- StoryGoalKind kind, int count, String? building, PotatoType? type, String? zone, bool? danger
+ StoryGoalKind kind, int count, String? building, PotatoType? type, String? zone, bool? danger, String? action
 });
 
 
@@ -924,7 +928,7 @@ class __$StoryGoalDataCopyWithImpl<$Res>
 
 /// Create a copy of StoryGoalData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? count = null,Object? building = freezed,Object? type = freezed,Object? zone = freezed,Object? danger = freezed,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? count = null,Object? building = freezed,Object? type = freezed,Object? zone = freezed,Object? danger = freezed,Object? action = freezed,}) {
   return _then(_StoryGoalData(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as StoryGoalKind,count: null == count ? _self.count : count // ignore: cast_nullable_to_non_nullable
@@ -932,7 +936,8 @@ as int,building: freezed == building ? _self.building : building // ignore: cast
 as String?,type: freezed == type ? _self.type : type // ignore: cast_nullable_to_non_nullable
 as PotatoType?,zone: freezed == zone ? _self.zone : zone // ignore: cast_nullable_to_non_nullable
 as String?,danger: freezed == danger ? _self.danger : danger // ignore: cast_nullable_to_non_nullable
-as bool?,
+as bool?,action: freezed == action ? _self.action : action // ignore: cast_nullable_to_non_nullable
+as String?,
   ));
 }
 

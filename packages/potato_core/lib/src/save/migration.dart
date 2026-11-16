@@ -1,5 +1,5 @@
 /// The farm document format this code writes.
-const int farmFormatVersion = 7;
+const int farmFormatVersion = 8;
 
 /// The oldest format this code reads. Older documents (before abilities and
 /// levels) are not upgraded while the game is in development: the client
@@ -48,6 +48,10 @@ _farmMigrations = [
     }
     return json..['returned_seeds'] = returned;
   },
+  // 7 → 8: chapter 1 replaces the placeholder story and locks using fields,
+  // the truck and the cellar (2026-11-16, user). Farms made before it keep
+  // everything open and skip the story.
+  (json) => json..['story_skipped'] = true,
 ];
 
 /// Brings a decoded farm document up to [farmFormatVersion].

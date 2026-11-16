@@ -184,6 +184,12 @@ final class CueCommand extends ScriptCommand {
   final String name;
 }
 
+/// `end`: the run ends, everyone getting out as through an exit
+/// (2026-11-16, 사용자: the prologue's cave).
+final class EndCommand extends ScriptCommand {
+  const EndCommand(super.line, {super.together});
+}
+
 /// Something wrong on a line.
 final class ScriptProblem {
   const ScriptProblem(this.line, this.message);
@@ -434,6 +440,8 @@ ScriptCommand _readLine(int line, String text) {
     ['pose', ...] => fail('pose <who> <pose>'),
     ['cue', final name] => CueCommand(line, together: together, name: name),
     ['cue', ...] => fail('cue <name>'),
+    ['end'] => EndCommand(line, together: together),
+    ['end', ...] => fail('end'),
     _ => throw FormatException('unknown command "${w.first}"'),
   };
 }
@@ -519,7 +527,7 @@ final class _ScriptChecker {
         if (!scriptPoses.contains(pose)) {
           _issue(command, 'no pose "$pose" (${scriptPoses.join(', ')})');
         }
-      case WaitCommand() || SkillCommand() || CueCommand():
+      case WaitCommand() || SkillCommand() || CueCommand() || EndCommand():
         break;
     }
   }

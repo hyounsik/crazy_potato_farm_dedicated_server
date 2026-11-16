@@ -315,10 +315,20 @@ cue done
         expect(r.bodies[scriptFarmer]!.position, const Vec2(1.5, 6.5));
       });
 
+      test('end asks for the run to end (2026-11-16)', () {
+        final r = run('@0 cue light\n@1 end');
+        r.advance(1.1);
+        final actions = r.takeActions();
+        expect(actions.last, isA<ScriptEnd>());
+        expect(r.done, isTrue);
+      });
+
       test('pose sits the farmer and stand gets him up', () {
         final r = run('@0 pose farmer sit_left\n@1 pose farmer stand');
         expect(r.bodies[scriptFarmer]!.pose, 'sit_left');
+        expect(r.holdsFarmer, isTrue, reason: 'no walking off while sitting');
         r.advance(1);
+        expect(r.holdsFarmer, isFalse);
         expect(r.bodies[scriptFarmer]!.pose, isNull);
       });
 

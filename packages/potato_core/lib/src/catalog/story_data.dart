@@ -53,6 +53,25 @@ abstract final class StoryUnlock {
   /// Runs may go to zone `<id>`.
   static String zone(String id) => 'zone:$id';
 
+  /// Using what stands on the farm (2026-11-16, 사용자: chapter 1 opens
+  /// them scene by scene): fields (plant, harvest, pests, moving potatoes
+  /// between fields).
+  static const String useField = 'use:field';
+
+  /// Making, resizing, moving and removing fields.
+  static const String fieldBuild = 'field_build';
+
+  /// The truck: loading its bed and setting out. A story map played once
+  /// (`ZoneData.once`) is set out to without it: the story takes the farmer
+  /// there.
+  static const String useTruck = 'use:truck';
+
+  /// The potato cellar: potatoes in and out of it.
+  static const String useCellar = 'use:potato_cellar';
+
+  /// Every `use:`-like key above.
+  static const List<String> uses = [useField, fieldBuild, useTruck, useCellar];
+
   /// Story region `<id>` counts as cleared, as if its boss fell: the zones
   /// in its [ZoneData.clearOpens] open and its score counts toward progress
   /// (2026-11-08, 사용자: the story may clear a region on its own).
@@ -74,6 +93,19 @@ abstract final class StoryUnlock {
   /// The zone id in a `clear:` key, or null.
   static String? clearOf(String key) =>
       key.startsWith(_clearPrefix) ? key.substring(_clearPrefix.length) : null;
+}
+
+/// Story actions the game counts (`StoryGoalKind.action`, 2026-11-16,
+/// 사용자: chapter 1).
+abstract final class StoryActions {
+  /// A seed planted (the farm counts it).
+  static const String plant = 'plant';
+
+  /// Into the house (the app says so).
+  static const String enterHouse = 'enter_house';
+
+  /// Out of the house onto the farm (the app says so).
+  static const String leaveHouse = 'leave_house';
 }
 
 /// One story event: done when every goal holds, after the events [after].
@@ -152,6 +184,11 @@ enum StoryGoalKind {
   /// Combat seeds trained in a training ground.
   potatoesTrained,
 
+  /// Times the player did [StoryGoalData.action] (2026-11-16, 사용자:
+  /// chapter 1): `plant` (a seed planted), `enter_house`, `leave_house`
+  /// (sent by the app), any other name the app sends.
+  action,
+
   /// Seconds since the event could start (its [StoryEventData.after] were
   /// done). Farm time, so it runs while the app is closed too.
   wait,
@@ -171,6 +208,9 @@ abstract class StoryGoalData with _$StoryGoalData {
     PotatoType? type,
     String? zone,
     bool? danger,
+
+    /// The action counted by [StoryGoalKind.action].
+    String? action,
   }) = _StoryGoalData;
 
   factory StoryGoalData.fromJson(Map<String, dynamic> json) =>

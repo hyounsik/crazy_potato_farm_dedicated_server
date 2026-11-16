@@ -227,6 +227,11 @@ sealed class FarmCommand with _$FarmCommand {
   /// development builds send it.
   const factory FarmCommand.finishStory({required String event}) = FinishStory;
 
+  /// The player did story action [action] the farm cannot see by itself
+  /// (2026-11-16, 사용자: chapter 1), such as `enter_house` and
+  /// `leave_house`. Counted for `StoryGoalKind.action` goals.
+  const factory FarmCommand.storyAction({required String action}) = StoryAction;
+
   /// Comes back from exploring: [food] and [seeds] go into the farm, and
   /// the companions [potatoIds] go back to where they were, or to the fridge
   /// when that place is gone or taken. Companions [lostPotatoIds] were lost

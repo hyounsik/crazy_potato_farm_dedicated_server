@@ -59,6 +59,12 @@ FarmTotals _$FarmTotalsFromJson(Map<String, dynamic> json) => $checkedCreate(
           (k, e) => MapEntry(k, (e as num).toInt()),
         ),
       ),
+      actions: $checkedConvert(
+        'actions',
+        (v) => (v as Map<String, dynamic>?)?.map(
+          (k, e) => MapEntry(k, (e as num).toInt()),
+        ),
+      ),
     );
     return val;
   },
@@ -89,4 +95,5 @@ Map<String, dynamic> _$FarmTotalsToJson(FarmTotals instance) =>
       'potatoes_trained': instance.potatoesTrained,
       'escapes': instance.escapes,
       'boss_kills': instance.bossKills,
+      'actions': instance.actions,
     };

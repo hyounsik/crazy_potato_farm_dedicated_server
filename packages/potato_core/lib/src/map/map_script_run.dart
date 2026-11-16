@@ -40,6 +40,12 @@ final class ScriptCue extends ScriptAction {
   final String name;
 }
 
+/// The run ends: everyone on the map gets out, as through an exit
+/// (2026-11-16, 사용자: the prologue's cave ends at its light).
+final class ScriptEnd extends ScriptAction {
+  const ScriptEnd();
+}
+
 /// A body a script has put on the map or moves.
 final class ScriptBody {
   ScriptBody(this.name, this.kind, this.position);
@@ -115,8 +121,11 @@ final class ScriptRun {
   /// The commands running now, for the editor to light up.
   List<ScriptCommand> get running => [for (final t in _running) t.command];
 
-  /// Whether the script moves the farmer now, so the player cannot.
-  bool get holdsFarmer => _running.any((t) => t.holdsFarmer);
+  /// Whether the script moves the farmer now, so the player cannot: while
+  /// it walks him, and while he sits or lies (2026-11-16: the prologue's
+  /// cave starts with him lying there).
+  bool get holdsFarmer =>
+      bodies[scriptFarmer]?.pose != null || _running.any((t) => t.holdsFarmer);
 
   /// Marks the run waits for the farmer to reach.
   Iterable<String> get waitingReach => _running
@@ -255,6 +264,8 @@ final class ScriptRun {
         _faceAt(who, target);
       case CueCommand(:final name):
         _actions.add(ScriptCue(name));
+      case EndCommand():
+        _actions.add(const ScriptEnd());
       case ExitCommand(:final who):
         if (marks.remove(who) == null) bodies.remove(who);
       case PoseCommand(:final who, :final pose):

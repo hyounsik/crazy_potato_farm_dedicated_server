@@ -2438,6 +2438,12 @@ void main() {
       expect(run.player.hp, lessThan(hp), reason: 'its own again');
     });
 
+    test('the script ends the run: everyone gets out (2026-11-16)', () {
+      final run = openRun();
+      run.scriptEnd();
+      expect(run.outcome, RaidOutcome.extracted);
+    });
+
     test("an enemy's ordered attack shows and hurts nobody", () {
       final run = openRun();
       final spitter = addEnemy(

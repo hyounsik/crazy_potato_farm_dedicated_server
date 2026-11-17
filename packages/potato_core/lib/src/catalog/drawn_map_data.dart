@@ -10,6 +10,7 @@ final class DrawnMapData {
     this.hunger = true,
     this.damage = true,
     this.watch = false,
+    this.armed = true,
   }) : scripts = Map.unmodifiable(scripts);
 
   factory DrawnMapData.fromJson(Map<String, dynamic> json) => DrawnMapData(
@@ -22,6 +23,7 @@ final class DrawnMapData {
     hunger: json['hunger'] as bool? ?? true,
     damage: json['damage'] as bool? ?? true,
     watch: json['watch'] as bool? ?? false,
+    armed: json['armed'] as bool? ?? true,
   );
 
   final String id;
@@ -43,6 +45,11 @@ final class DrawnMapData {
   /// Only watched (2026-11-14, 사용자): no player on it; its `start`
   /// script plays everyone, Kevin too when it puts him there.
   final bool watch;
+
+  /// Whether the farmer here is drawn with his gun, as on runs; off, he is
+  /// the bare-handed farm farmer (2026-11-17, 사용자: the prologue's failing
+  /// farm). Only how he looks: shooting is the run's as ever.
+  final bool armed;
 
   /// [scripts], read.
   List<MapScript> get parsedScripts => [

@@ -158,6 +158,10 @@ enum StoryGoalKind {
   /// Baby potatoes the farm holds.
   food,
 
+  /// Seeds in the pouch, of [StoryGoalData.type] when set (2026-11-19,
+  /// 사용자: chapter 4 starts with the first buff seed in hand).
+  seeds,
+
   /// Runs come home with success, to [StoryGoalData.zone] when set, or to
   /// danger (true) or safe (false) zones when [StoryGoalData.danger] is set.
   escapes,

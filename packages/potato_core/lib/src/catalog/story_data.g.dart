@@ -150,6 +150,7 @@ const _$StoryGoalKindEnumMap = {
   StoryGoalKind.buildings: 'buildings',
   StoryGoalKind.potatoes: 'potatoes',
   StoryGoalKind.food: 'food',
+  StoryGoalKind.seeds: 'seeds',
   StoryGoalKind.escapes: 'escapes',
   StoryGoalKind.bossKills: 'boss_kills',
   StoryGoalKind.progress: 'progress',

@@ -299,6 +299,35 @@ void main() {
     expect(fresh.isUnlocked(StoryUnlock.pests), isTrue);
   });
 
+  test('seeds in the pouch count by type (2026-11-19: chapter 4)', () {
+    final buff = sampleCatalogWith((files) {
+      files['story'] = {
+        'version': 1,
+        'locked': ['pests'],
+        'events': [
+          {
+            'id': 'buff_seed',
+            'goals': [
+              {'kind': 'seeds', 'type': 'buff'},
+            ],
+            'unlocks': ['pests'],
+          },
+        ],
+      };
+    });
+    final fresh = FarmSimulation.newFarm(buff, seed: 1);
+    final goal = buff.story.events.single.goals.single;
+    fresh
+      ..seeds.add(plainSeed(PotatoType.food), 3)
+      ..step();
+    expect(fresh.storyGoalCount(goal), 0);
+    expect(fresh.storyDone, isEmpty);
+    fresh
+      ..seeds.add(plainSeed(PotatoType.buff))
+      ..step();
+    expect(fresh.storyDone.keys, ['buff_seed']);
+  });
+
   group('story data checks', () {
     List<String> issuesWith(Map<String, dynamic> story) {
       final files = sampleCatalogFiles()..['story'] = story;

@@ -2918,6 +2918,10 @@ final class FarmSimulation {
           ...awayPotatoes,
         ].where((p) => goal.type == null || p.type == goal.type).length,
         StoryGoalKind.food => food,
+        StoryGoalKind.seeds =>
+          _seeds.counts.entries
+              .where((e) => goal.type == null || e.key.type == goal.type)
+              .fold(0, (n, e) => n + e.value),
         StoryGoalKind.escapes =>
           totals.escapes.entries
               .where(

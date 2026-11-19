@@ -55,7 +55,7 @@ const _horsefly = EnemyData(
 
 const _cast = ScriptCast(
   enemies: {'rat': _rat},
-  characters: {'john', 'ian'},
+  characters: {'kevin', 'claire'},
   boss: _horsefly,
 );
 
@@ -68,8 +68,8 @@ void main() {
   group('reading', () {
     test('commands, comments, blank lines and & together', () {
       final script = MapScript.parse('meet', '''
-# John walks to the table
-actor helm john at a
+# Kevin walks to the table
+actor helm kevin at a
 move helm a -> b 2s   # slowly
 & mark meet at c
 
@@ -181,7 +181,7 @@ face x farmer
     }
 
     test('a move walks round the wall in its time, then the next starts', () {
-      final r = run('actor h john at a\nmove h a -> b 4s\nwait 1s');
+      final r = run('actor h kevin at a\nmove h a -> b 4s\nwait 1s');
       final h = r.bodies['h']!;
       expect(h.position.distanceTo(const Vec2(1.5, 1.5)), lessThan(1e-9));
       r.advance(2);
@@ -270,8 +270,8 @@ cue done
     group('timed (2026-11-14)', () {
       test('lines start at their times, overlapping, on tiles or places', () {
         final r = run(
-          '@0 actor j john at 1,1\n'
-          '@0 actor i ian at 3,3\n'
+          '@0 actor j kevin at 1,1\n'
+          '@0 actor i claire at 3,3\n'
           '@0 move j 1,1 -> 1,4 3s\n'
           '@1 move i d -> 3,6 3s\n'
           '@5 exit j',
@@ -335,7 +335,7 @@ cue done
       test('problems: going back in time, bad tiles, bad poses, exits', () {
         expect(
           _problems(
-            '@2 wait 1s\n@1 wait 1s\n@3 actor j john at 40,1\n'
+            '@2 wait 1s\n@1 wait 1s\n@3 actor j kevin at 40,1\n'
             '@4 pose farmer fly\n@5 exit farmer\n@x wait 1s',
           ),
           [

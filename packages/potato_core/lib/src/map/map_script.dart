@@ -18,9 +18,9 @@ const String scriptBoss = 'boss';
 const String scriptHere = 'here';
 
 /// Story bodies a script may put on a map besides enemies: they walk and
-/// face but do not fight (2026-11-13, 사용자: John in a helmet and Ian with a pitchfork, the title screen's two potatoes). Each needs
+/// face but do not fight (2026-11-13, 사용자: Kevin in a helmet and Claire with a pitchfork, the title screen's two potatoes). Each needs
 /// its picture in the client.
-const Set<String> storyCharacters = {'kevin', 'john', 'ian'};
+const Set<String> storyCharacters = {'john', 'kevin', 'claire'};
 
 /// What `pose` can set (2026-11-14, 사용자: the farmer sitting and lying,
 /// as in the map editor's 인물 palette); `stand` goes back to standing.
@@ -211,7 +211,7 @@ final class ScriptCast {
   /// Enemy kinds by id (`enemies.json`): they can attack and be defeated.
   final Map<String, EnemyData> enemies;
 
-  /// Story bodies that only walk and face (John, Ian).
+  /// Story bodies that only walk and face (Kevin, Claire).
   final Set<String> characters;
 
   /// The map's zone's boss, for [scriptBoss].

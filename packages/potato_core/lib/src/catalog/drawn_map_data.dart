@@ -43,7 +43,7 @@ final class DrawnMapData {
   final bool damage;
 
   /// Only watched (2026-11-14, 사용자): no player on it; its `start`
-  /// script plays everyone, Kevin too when it puts him there.
+  /// script plays everyone, John too when it puts him there.
   final bool watch;
 
   /// Whether the farmer here is drawn with his gun, as on runs; off, he is

@@ -47,6 +47,10 @@ abstract final class StoryUnlock {
   /// Locked blocks may be opened with baby potatoes.
   static const String farmExpansion = 'farm_expansion';
 
+  /// Claire and Kevin work the farm (2026-11-19, 사용자: from the end of
+  /// chapter 2). Only a story that locks it has them.
+  static const String helpers = 'helpers';
+
   /// The building kind `<id>` shows in the build menu.
   static String building(String id) => 'building:$id';
 
@@ -136,7 +140,17 @@ abstract class StoryEventData with _$StoryEventData {
 
     /// Sent in the event's letter, taken by claiming it.
     @Default(0) int food,
+
+    /// Put straight into the pouch when the event is done, or the overflow
+    /// when it is full, at the farm's `FarmSimulation.storyLevel` whatever
+    /// the stack's own level (2026-11-19, 사용자: letters went unseen, and a
+    /// level 1 seed is no use later on).
     @Default(<SeedStackData>[]) List<SeedStackData> seeds,
+
+    /// A bug comes onto a planted field when the event is done, and stays
+    /// until cleared (2026-11-19, 사용자: chapter 2's pitchfork potato
+    /// waits for one, which a farm harvested often never saw).
+    @Default(false) bool pest,
   }) = _StoryEventData;
 
   factory StoryEventData.fromJson(Map<String, dynamic> json) =>
@@ -184,6 +198,10 @@ enum StoryGoalKind {
 
   /// Potatoes that died of old age or were lost on runs.
   potatoesDied,
+
+  /// Blocks of land opened past the starting ones (2026-11-19, 사용자: the
+  /// field office opens after the first).
+  blocks,
 
   /// Combat seeds trained in a training ground.
   potatoesTrained,

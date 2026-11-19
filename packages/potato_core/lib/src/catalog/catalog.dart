@@ -128,15 +128,19 @@ final class Catalog {
     );
   }
 
-  /// The chance one roll of zone [id]'s gathering spots gives a seed of each
-  /// type and grade, at [score] (its own when null), with no luck
-  /// (2026-11-09, 사용자: shown in the danger zone's difficulty popup).
+  /// Of the seeds zone [id]'s gathering spots give, the share of each type
+  /// and grade, at [score] (its own when null), with no luck (2026-11-09,
+  /// 사용자: shown in the danger zone's difficulty popup). The shares add up
+  /// to 1: seeds only, not everything a spot drops (2026-11-19, 사용자).
   Map<(PotatoType, Grade), double> seedChances(String id, {int? score}) {
     final zone = zoneAt(id, score: score);
     final table = zone == null ? null : lootTables[zone.gathering.loot];
     if (zone == null || table == null) return const {};
     int weigh(LootEntryData e) => lootWeight(e.item, e.weight, zone.score);
-    final total = table.entries.fold(0, (sum, e) => sum + weigh(e));
+    final total = table.entries
+        .where((e) => items[e.item]?.seed != null)
+        .fold(0, (sum, e) => sum + weigh(e));
+    if (total == 0) return const {};
     final chances = <(PotatoType, Grade), double>{};
     for (final entry in table.entries) {
       final seed = items[entry.item]?.seed;
@@ -1258,6 +1262,7 @@ final class Catalog {
     void checkKey(String path, String key) {
       if (key == StoryUnlock.pests ||
           key == StoryUnlock.farmExpansion ||
+          key == StoryUnlock.helpers ||
           StoryUnlock.uses.contains(key)) {
         return;
       }

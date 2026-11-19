@@ -328,7 +328,14 @@ mixin _$StoryEventData {
  List<String>? get after;/// All must hold at once. An empty list is done as soon as [after] is.
  List<StoryGoalData> get goals;/// Unlock keys opened when the event is done.
  List<String> get unlocks;/// Sent in the event's letter, taken by claiming it.
- int get food; List<SeedStackData> get seeds;
+ int get food;/// Put straight into the pouch when the event is done, or the overflow
+/// when it is full, at the farm's `FarmSimulation.storyLevel` whatever
+/// the stack's own level (2026-11-19, 사용자: letters went unseen, and a
+/// level 1 seed is no use later on).
+ List<SeedStackData> get seeds;/// A bug comes onto a planted field when the event is done, and stays
+/// until cleared (2026-11-19, 사용자: chapter 2's pitchfork potato
+/// waits for one, which a farm harvested often never saw).
+ bool get pest;
 /// Create a copy of StoryEventData
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -342,20 +349,20 @@ $StoryEventDataCopyWith<StoryEventData> get copyWith => _$StoryEventDataCopyWith
 @override
 bool operator ==(Object other) {
   final _this = this as StoryEventData;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryEventData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.note, _this.note) || other.note == _this.note)&&const DeepCollectionEquality().equals(other.after, _this.after)&&const DeepCollectionEquality().equals(other.goals, _this.goals)&&const DeepCollectionEquality().equals(other.unlocks, _this.unlocks)&&(identical(other.food, _this.food) || other.food == _this.food)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is StoryEventData&&(identical(other.id, _this.id) || other.id == _this.id)&&(identical(other.title, _this.title) || other.title == _this.title)&&(identical(other.note, _this.note) || other.note == _this.note)&&const DeepCollectionEquality().equals(other.after, _this.after)&&const DeepCollectionEquality().equals(other.goals, _this.goals)&&const DeepCollectionEquality().equals(other.unlocks, _this.unlocks)&&(identical(other.food, _this.food) || other.food == _this.food)&&const DeepCollectionEquality().equals(other.seeds, _this.seeds)&&(identical(other.pest, _this.pest) || other.pest == _this.pest));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as StoryEventData;
-  return Object.hash(runtimeType,_this.id,_this.title,_this.note,const DeepCollectionEquality().hash(_this.after),const DeepCollectionEquality().hash(_this.goals),const DeepCollectionEquality().hash(_this.unlocks),_this.food,const DeepCollectionEquality().hash(_this.seeds));
+  return Object.hash(runtimeType,_this.id,_this.title,_this.note,const DeepCollectionEquality().hash(_this.after),const DeepCollectionEquality().hash(_this.goals),const DeepCollectionEquality().hash(_this.unlocks),_this.food,const DeepCollectionEquality().hash(_this.seeds),_this.pest);
 }
 
 @override
 String toString() {
   final _this = this as StoryEventData;
-  return 'StoryEventData(id: ${_this.id}, title: ${_this.title}, note: ${_this.note}, after: ${_this.after}, goals: ${_this.goals}, unlocks: ${_this.unlocks}, food: ${_this.food}, seeds: ${_this.seeds})';
+  return 'StoryEventData(id: ${_this.id}, title: ${_this.title}, note: ${_this.note}, after: ${_this.after}, goals: ${_this.goals}, unlocks: ${_this.unlocks}, food: ${_this.food}, seeds: ${_this.seeds}, pest: ${_this.pest})';
 }
 
 
@@ -366,7 +373,7 @@ abstract mixin class $StoryEventDataCopyWith<$Res>  {
   factory $StoryEventDataCopyWith(StoryEventData value, $Res Function(StoryEventData) _then) = _$StoryEventDataCopyWithImpl;
 @useResult
 $Res call({
- String id, String title, String note, List<String>? after, List<StoryGoalData> goals, List<String> unlocks, int food, List<SeedStackData> seeds
+ String id, String title, String note, List<String>? after, List<StoryGoalData> goals, List<String> unlocks, int food, List<SeedStackData> seeds, bool pest
 });
 
 
@@ -383,7 +390,7 @@ class _$StoryEventDataCopyWithImpl<$Res>
 
 /// Create a copy of StoryEventData
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? note = null,Object? after = freezed,Object? goals = null,Object? unlocks = null,Object? food = null,Object? seeds = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? id = null,Object? title = null,Object? note = null,Object? after = freezed,Object? goals = null,Object? unlocks = null,Object? food = null,Object? seeds = null,Object? pest = null,}) {
   return _then(StoryEventData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -393,7 +400,8 @@ as List<String>?,goals: null == goals ? _self.goals : goals // ignore: cast_null
 as List<StoryGoalData>,unlocks: null == unlocks ? _self.unlocks : unlocks // ignore: cast_nullable_to_non_nullable
 as List<String>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,seeds: null == seeds ? _self.seeds : seeds // ignore: cast_nullable_to_non_nullable
-as List<SeedStackData>,
+as List<SeedStackData>,pest: null == pest ? _self.pest : pest // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -478,10 +486,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds,  bool pest)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _StoryEventData() when $default != null:
-return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds);case _:
+return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds,_that.pest);case _:
   return orElse();
 
 }
@@ -499,10 +507,10 @@ return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.un
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds,  bool pest)  $default,) {final _that = this;
 switch (_that) {
 case _StoryEventData():
-return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds);case _:
+return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds,_that.pest);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -519,10 +527,10 @@ return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.un
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( String id,  String title,  String note,  List<String>? after,  List<StoryGoalData> goals,  List<String> unlocks,  int food,  List<SeedStackData> seeds,  bool pest)?  $default,) {final _that = this;
 switch (_that) {
 case _StoryEventData() when $default != null:
-return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds);case _:
+return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.unlocks,_that.food,_that.seeds,_that.pest);case _:
   return null;
 
 }
@@ -534,7 +542,7 @@ return $default(_that.id,_that.title,_that.note,_that.after,_that.goals,_that.un
 
 @JsonSerializable(disallowUnrecognizedKeys: true)
 class _StoryEventData implements StoryEventData {
-  const _StoryEventData({required this.id, this.title = '', this.note = '',  List<String>? after,  List<StoryGoalData> goals = const <StoryGoalData>[],  List<String> unlocks = const <String>[], this.food = 0,  List<SeedStackData> seeds = const <SeedStackData>[]}): _after = after,_goals = goals,_unlocks = unlocks,_seeds = seeds;
+  const _StoryEventData({required this.id, this.title = '', this.note = '',  List<String>? after,  List<StoryGoalData> goals = const <StoryGoalData>[],  List<String> unlocks = const <String>[], this.food = 0,  List<SeedStackData> seeds = const <SeedStackData>[], this.pest = false}): _after = after,_goals = goals,_unlocks = unlocks,_seeds = seeds;
   factory _StoryEventData.fromJson(Map<String, dynamic> json) => _$StoryEventDataFromJson(json);
 
 @override final  String id;
@@ -577,13 +585,25 @@ class _StoryEventData implements StoryEventData {
 
 /// Sent in the event's letter, taken by claiming it.
 @override@JsonKey() final  int food;
+/// Put straight into the pouch when the event is done, or the overflow
+/// when it is full, at the farm's `FarmSimulation.storyLevel` whatever
+/// the stack's own level (2026-11-19, 사용자: letters went unseen, and a
+/// level 1 seed is no use later on).
  final  List<SeedStackData> _seeds;
+/// Put straight into the pouch when the event is done, or the overflow
+/// when it is full, at the farm's `FarmSimulation.storyLevel` whatever
+/// the stack's own level (2026-11-19, 사용자: letters went unseen, and a
+/// level 1 seed is no use later on).
 @override@JsonKey() List<SeedStackData> get seeds {
   if (_seeds is EqualUnmodifiableListView) return _seeds;
   // ignore: implicit_dynamic_type
   return EqualUnmodifiableListView(_seeds);
 }
 
+/// A bug comes onto a planted field when the event is done, and stays
+/// until cleared (2026-11-19, 사용자: chapter 2's pitchfork potato
+/// waits for one, which a farm harvested often never saw).
+@override@JsonKey() final  bool pest;
 
 /// Create a copy of StoryEventData
 /// with the given fields replaced by the non-null parameter values.
@@ -598,18 +618,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryEventData&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.note, note) || other.note == note)&&const DeepCollectionEquality().equals(other.after, _after)&&const DeepCollectionEquality().equals(other.goals, _goals)&&const DeepCollectionEquality().equals(other.unlocks, _unlocks)&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _StoryEventData&&(identical(other.id, id) || other.id == id)&&(identical(other.title, title) || other.title == title)&&(identical(other.note, note) || other.note == note)&&const DeepCollectionEquality().equals(other.after, _after)&&const DeepCollectionEquality().equals(other.goals, _goals)&&const DeepCollectionEquality().equals(other.unlocks, _unlocks)&&(identical(other.food, food) || other.food == food)&&const DeepCollectionEquality().equals(other.seeds, _seeds)&&(identical(other.pest, pest) || other.pest == pest));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,id,title,note,const DeepCollectionEquality().hash(_after),const DeepCollectionEquality().hash(_goals),const DeepCollectionEquality().hash(_unlocks),food,const DeepCollectionEquality().hash(_seeds));
+    return Object.hash(runtimeType,id,title,note,const DeepCollectionEquality().hash(_after),const DeepCollectionEquality().hash(_goals),const DeepCollectionEquality().hash(_unlocks),food,const DeepCollectionEquality().hash(_seeds),pest);
 }
 
 @override
 String toString() {
-    return 'StoryEventData(id: $id, title: $title, note: $note, after: $after, goals: $goals, unlocks: $unlocks, food: $food, seeds: $seeds)';
+    return 'StoryEventData(id: $id, title: $title, note: $note, after: $after, goals: $goals, unlocks: $unlocks, food: $food, seeds: $seeds, pest: $pest)';
 }
 
 
@@ -620,7 +640,7 @@ abstract mixin class _$StoryEventDataCopyWith<$Res> implements $StoryEventDataCo
   factory _$StoryEventDataCopyWith(_StoryEventData value, $Res Function(_StoryEventData) _then) = __$StoryEventDataCopyWithImpl;
 @override @useResult
 $Res call({
- String id, String title, String note, List<String>? after, List<StoryGoalData> goals, List<String> unlocks, int food, List<SeedStackData> seeds
+ String id, String title, String note, List<String>? after, List<StoryGoalData> goals, List<String> unlocks, int food, List<SeedStackData> seeds, bool pest
 });
 
 
@@ -637,7 +657,7 @@ class __$StoryEventDataCopyWithImpl<$Res>
 
 /// Create a copy of StoryEventData
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? note = null,Object? after = freezed,Object? goals = null,Object? unlocks = null,Object? food = null,Object? seeds = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? id = null,Object? title = null,Object? note = null,Object? after = freezed,Object? goals = null,Object? unlocks = null,Object? food = null,Object? seeds = null,Object? pest = null,}) {
   return _then(_StoryEventData(
 id: null == id ? _self.id : id // ignore: cast_nullable_to_non_nullable
 as String,title: null == title ? _self.title : title // ignore: cast_nullable_to_non_nullable
@@ -647,7 +667,8 @@ as List<String>?,goals: null == goals ? _self._goals : goals // ignore: cast_nul
 as List<StoryGoalData>,unlocks: null == unlocks ? _self._unlocks : unlocks // ignore: cast_nullable_to_non_nullable
 as List<String>,food: null == food ? _self.food : food // ignore: cast_nullable_to_non_nullable
 as int,seeds: null == seeds ? _self._seeds : seeds // ignore: cast_nullable_to_non_nullable
-as List<SeedStackData>,
+as List<SeedStackData>,pest: null == pest ? _self.pest : pest // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

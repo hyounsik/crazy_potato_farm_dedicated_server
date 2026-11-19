@@ -141,6 +141,7 @@ abstract class FarmDocument with _$FarmDocument {
               kind: pest.kind,
               clearedMillis: pest.clearedMillis,
               biteMillis: pest.biteMillis,
+              stays: pest.stays,
             ),
             null => null,
           },
@@ -253,6 +254,7 @@ abstract class FarmDocument with _$FarmDocument {
                 kind: pest.kind,
                 clearedMillis: pest.clearedMillis,
                 biteMillis: pest.biteMillis,
+                stays: pest.stays,
               ),
               null => null,
             },
@@ -353,6 +355,7 @@ abstract class PestDocument with _$PestDocument {
     required PestKind kind,
     required int clearedMillis,
     required int biteMillis,
+    @Default(false) bool stays,
   }) = _PestDocument;
 
   factory PestDocument.fromJson(Map<String, dynamic> json) =>

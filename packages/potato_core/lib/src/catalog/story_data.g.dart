@@ -53,6 +53,7 @@ _StoryEventData _$StoryEventDataFromJson(
       'unlocks',
       'food',
       'seeds',
+      'pest',
     ],
   );
   final val = _StoryEventData(
@@ -86,6 +87,7 @@ _StoryEventData _$StoryEventDataFromJson(
               .toList() ??
           const <SeedStackData>[],
     ),
+    pest: $checkedConvert('pest', (v) => v as bool? ?? false),
   );
   return val;
 });
@@ -100,6 +102,7 @@ Map<String, dynamic> _$StoryEventDataToJson(_StoryEventData instance) =>
       'unlocks': instance.unlocks,
       'food': instance.food,
       'seeds': instance.seeds.map((e) => e.toJson()).toList(),
+      'pest': instance.pest,
     };
 
 _StoryGoalData _$StoryGoalDataFromJson(Map<String, dynamic> json) =>
@@ -158,6 +161,7 @@ const _$StoryGoalKindEnumMap = {
   StoryGoalKind.pestsAppeared: 'pests_appeared',
   StoryGoalKind.pestsCleared: 'pests_cleared',
   StoryGoalKind.potatoesDied: 'potatoes_died',
+  StoryGoalKind.blocks: 'blocks',
   StoryGoalKind.potatoesTrained: 'potatoes_trained',
   StoryGoalKind.action: 'action',
   StoryGoalKind.wait: 'wait',

@@ -12,9 +12,19 @@ enum PestKind {
 
 /// A pest on a field. It stays until cleared by tapping or by guards.
 final class Pest {
-  Pest({required this.kind, this.clearedMillis = 0, this.biteMillis = 0});
+  Pest({
+    required this.kind,
+    this.clearedMillis = 0,
+    this.biteMillis = 0,
+    this.stays = false,
+  });
 
   final PestKind kind;
+
+  /// Bugs the story brought ([StoryEventData.pest]): they stay until
+  /// cleared even with too little stored to draw bugs (2026-11-19, 사용자:
+  /// a farm harvested often never saw chapter 2's second bug).
+  final bool stays;
 
   /// Guard work done on it; cleared at the kind's `clear_seconds`.
   int clearedMillis;

@@ -929,7 +929,7 @@ $PestDocumentCopyWith<$Res>? get pest {
 /// @nodoc
 mixin _$PestDocument {
 
- PestKind get kind; int get clearedMillis; int get biteMillis;
+ PestKind get kind; int get clearedMillis; int get biteMillis; bool get stays;
 /// Create a copy of PestDocument
 /// with the given fields replaced by the non-null parameter values.
 @JsonKey(includeFromJson: false, includeToJson: false)
@@ -943,20 +943,20 @@ $PestDocumentCopyWith<PestDocument> get copyWith => _$PestDocumentCopyWithImpl<P
 @override
 bool operator ==(Object other) {
   final _this = this as PestDocument;
-  return identical(this, other) || (other.runtimeType == runtimeType&&other is PestDocument&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.clearedMillis, _this.clearedMillis) || other.clearedMillis == _this.clearedMillis)&&(identical(other.biteMillis, _this.biteMillis) || other.biteMillis == _this.biteMillis));
+  return identical(this, other) || (other.runtimeType == runtimeType&&other is PestDocument&&(identical(other.kind, _this.kind) || other.kind == _this.kind)&&(identical(other.clearedMillis, _this.clearedMillis) || other.clearedMillis == _this.clearedMillis)&&(identical(other.biteMillis, _this.biteMillis) || other.biteMillis == _this.biteMillis)&&(identical(other.stays, _this.stays) || other.stays == _this.stays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
   final _this = this as PestDocument;
-  return Object.hash(runtimeType,_this.kind,_this.clearedMillis,_this.biteMillis);
+  return Object.hash(runtimeType,_this.kind,_this.clearedMillis,_this.biteMillis,_this.stays);
 }
 
 @override
 String toString() {
   final _this = this as PestDocument;
-  return 'PestDocument(kind: ${_this.kind}, clearedMillis: ${_this.clearedMillis}, biteMillis: ${_this.biteMillis})';
+  return 'PestDocument(kind: ${_this.kind}, clearedMillis: ${_this.clearedMillis}, biteMillis: ${_this.biteMillis}, stays: ${_this.stays})';
 }
 
 
@@ -967,7 +967,7 @@ abstract mixin class $PestDocumentCopyWith<$Res>  {
   factory $PestDocumentCopyWith(PestDocument value, $Res Function(PestDocument) _then) = _$PestDocumentCopyWithImpl;
 @useResult
 $Res call({
- PestKind kind, int clearedMillis, int biteMillis
+ PestKind kind, int clearedMillis, int biteMillis, bool stays
 });
 
 
@@ -984,12 +984,13 @@ class _$PestDocumentCopyWithImpl<$Res>
 
 /// Create a copy of PestDocument
 /// with the given fields replaced by the non-null parameter values.
-@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? clearedMillis = null,Object? biteMillis = null,}) {
+@pragma('vm:prefer-inline') @override $Res call({Object? kind = null,Object? clearedMillis = null,Object? biteMillis = null,Object? stays = null,}) {
   return _then(PestDocument(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as PestKind,clearedMillis: null == clearedMillis ? _self.clearedMillis : clearedMillis // ignore: cast_nullable_to_non_nullable
 as int,biteMillis: null == biteMillis ? _self.biteMillis : biteMillis // ignore: cast_nullable_to_non_nullable
-as int,
+as int,stays: null == stays ? _self.stays : stays // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 
@@ -1074,10 +1075,10 @@ return $default(_that);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PestKind kind,  int clearedMillis,  int biteMillis)?  $default,{required TResult orElse(),}) {final _that = this;
+@optionalTypeArgs TResult maybeWhen<TResult extends Object?>(TResult Function( PestKind kind,  int clearedMillis,  int biteMillis,  bool stays)?  $default,{required TResult orElse(),}) {final _that = this;
 switch (_that) {
 case _PestDocument() when $default != null:
-return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
+return $default(_that.kind,_that.clearedMillis,_that.biteMillis,_that.stays);case _:
   return orElse();
 
 }
@@ -1095,10 +1096,10 @@ return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PestKind kind,  int clearedMillis,  int biteMillis)  $default,) {final _that = this;
+@optionalTypeArgs TResult when<TResult extends Object?>(TResult Function( PestKind kind,  int clearedMillis,  int biteMillis,  bool stays)  $default,) {final _that = this;
 switch (_that) {
 case _PestDocument():
-return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
+return $default(_that.kind,_that.clearedMillis,_that.biteMillis,_that.stays);case _:
   throw StateError('Unexpected subclass');
 
 }
@@ -1115,10 +1116,10 @@ return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
 /// }
 /// ```
 
-@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PestKind kind,  int clearedMillis,  int biteMillis)?  $default,) {final _that = this;
+@optionalTypeArgs TResult? whenOrNull<TResult extends Object?>(TResult? Function( PestKind kind,  int clearedMillis,  int biteMillis,  bool stays)?  $default,) {final _that = this;
 switch (_that) {
 case _PestDocument() when $default != null:
-return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
+return $default(_that.kind,_that.clearedMillis,_that.biteMillis,_that.stays);case _:
   return null;
 
 }
@@ -1130,12 +1131,13 @@ return $default(_that.kind,_that.clearedMillis,_that.biteMillis);case _:
 @JsonSerializable()
 
 class _PestDocument implements PestDocument {
-  const _PestDocument({required this.kind, required this.clearedMillis, required this.biteMillis});
+  const _PestDocument({required this.kind, required this.clearedMillis, required this.biteMillis, this.stays = false});
   factory _PestDocument.fromJson(Map<String, dynamic> json) => _$PestDocumentFromJson(json);
 
 @override final  PestKind kind;
 @override final  int clearedMillis;
 @override final  int biteMillis;
+@override@JsonKey() final  bool stays;
 
 /// Create a copy of PestDocument
 /// with the given fields replaced by the non-null parameter values.
@@ -1150,18 +1152,18 @@ Map<String, dynamic> toJson() {
 
 @override
 bool operator ==(Object other) {
-    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PestDocument&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.clearedMillis, clearedMillis) || other.clearedMillis == clearedMillis)&&(identical(other.biteMillis, biteMillis) || other.biteMillis == biteMillis));
+    return identical(this, other) || (other.runtimeType == runtimeType&&other is _PestDocument&&(identical(other.kind, kind) || other.kind == kind)&&(identical(other.clearedMillis, clearedMillis) || other.clearedMillis == clearedMillis)&&(identical(other.biteMillis, biteMillis) || other.biteMillis == biteMillis)&&(identical(other.stays, stays) || other.stays == stays));
 }
 
 @JsonKey(includeFromJson: false, includeToJson: false)
 @override
 int get hashCode {
-    return Object.hash(runtimeType,kind,clearedMillis,biteMillis);
+    return Object.hash(runtimeType,kind,clearedMillis,biteMillis,stays);
 }
 
 @override
 String toString() {
-    return 'PestDocument(kind: $kind, clearedMillis: $clearedMillis, biteMillis: $biteMillis)';
+    return 'PestDocument(kind: $kind, clearedMillis: $clearedMillis, biteMillis: $biteMillis, stays: $stays)';
 }
 
 
@@ -1172,7 +1174,7 @@ abstract mixin class _$PestDocumentCopyWith<$Res> implements $PestDocumentCopyWi
   factory _$PestDocumentCopyWith(_PestDocument value, $Res Function(_PestDocument) _then) = __$PestDocumentCopyWithImpl;
 @override @useResult
 $Res call({
- PestKind kind, int clearedMillis, int biteMillis
+ PestKind kind, int clearedMillis, int biteMillis, bool stays
 });
 
 
@@ -1189,12 +1191,13 @@ class __$PestDocumentCopyWithImpl<$Res>
 
 /// Create a copy of PestDocument
 /// with the given fields replaced by the non-null parameter values.
-@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? clearedMillis = null,Object? biteMillis = null,}) {
+@override @pragma('vm:prefer-inline') $Res call({Object? kind = null,Object? clearedMillis = null,Object? biteMillis = null,Object? stays = null,}) {
   return _then(_PestDocument(
 kind: null == kind ? _self.kind : kind // ignore: cast_nullable_to_non_nullable
 as PestKind,clearedMillis: null == clearedMillis ? _self.clearedMillis : clearedMillis // ignore: cast_nullable_to_non_nullable
 as int,biteMillis: null == biteMillis ? _self.biteMillis : biteMillis // ignore: cast_nullable_to_non_nullable
-as int,
+as int,stays: null == stays ? _self.stays : stays // ignore: cast_nullable_to_non_nullable
+as bool,
   ));
 }
 

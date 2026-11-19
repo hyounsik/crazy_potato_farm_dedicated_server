@@ -111,6 +111,7 @@ final class FarmSimulation {
     _unlockDone();
     // Seeds from old saves with nowhere left to wait (compost yards).
     returnedSeeds.forEach(_gainSeed);
+    _syncHelpers();
   }
 
   /// Moves each building that no longer fits where it stands (a save from
@@ -477,7 +478,59 @@ final class FarmSimulation {
   FarmBuilding? building(int id) => _buildings[id];
 
   /// Combat potatoes on the farm, growing or guarding, in id order.
+  /// Claire and Kevin are not among them ([helpers]).
   Iterable<Guard> get guards => _guards.values;
+
+  /// The story's helpers on the farm now ([StoryHelper]): none before the
+  /// story opens them ([StoryUnlock.helpers]). Never saved: the farm makes
+  /// them from its story each time.
+  Map<StoryHelper, Guard> get helpers => UnmodifiableMapView(_helpers);
+
+  final Map<StoryHelper, Guard> _helpers = {};
+
+  /// Everyone who walks the farm working: guards and helpers.
+  Iterable<Guard> get _workers => [..._guards.values, ..._helpers.values];
+
+  /// Puts the helpers on the farm, at the story level, once the story opens
+  /// them; a story that never locks them (test data) has none.
+  void _syncHelpers() {
+    final on =
+        catalog.story.locked.contains(StoryUnlock.helpers) &&
+        isUnlocked(StoryUnlock.helpers);
+    if (!on) {
+      _helpers.clear();
+      return;
+    }
+    final level = storyLevel;
+    for (final helper in StoryHelper.values) {
+      final old = _helpers[helper];
+      if (old != null && old.potato.level == level) continue;
+      final potato = Potato(
+        id: helper.potatoId,
+        type: PotatoType.combat,
+        grade: Grade.normal,
+        level: level,
+        abilities: helper.abilities,
+        style: CombatStyle.melee,
+        grownMillis: Potato.grownForGood,
+      );
+      _adopt(potato);
+      _worked.remove(potato.id);
+      _helpers[helper] = Guard(
+        potato: potato,
+        buildingId: -1,
+        at: old?.at ?? _helperHome,
+      );
+    }
+  }
+
+  /// Where the helpers first stand: the house's door.
+  TilePos get _helperHome {
+    final house = _buildings.values.where((b) => b.kind == 'house').firstOrNull;
+    if (house != null) return _doorOf(house);
+    final size = _rules.farm.size;
+    return TilePos(size ~/ 2, size ~/ 2);
+  }
 
   /// Potatoes in the fridge, in id order.
   Iterable<Potato> get fridge => _fridge.values;
@@ -589,7 +642,7 @@ final class FarmSimulation {
   double get autoHarvestPerHour {
     final data = catalog.potatoType(PotatoType.combat);
     var total = 0.0;
-    for (final guard in _guards.values) {
+    for (final guard in _workers) {
       if (!guard.potato.isGrown(data)) continue;
       final effect = _effects.periodic(guard.potato, FarmAction.harvestFood);
       final interval = effect?.intervalInUse;
@@ -780,6 +833,8 @@ final class FarmSimulation {
       if (rejection == null) {
         _countAction(command);
         _advanceStory();
+        // A run home may open a region: the helpers' level follows.
+        if (command is ReturnHome) _syncHelpers();
       }
       return rejection;
     } finally {
@@ -1096,6 +1151,12 @@ final class FarmSimulation {
         ),
       );
     }
+    // The helpers never age; they only work.
+    for (final helper in _helpers.values) {
+      _patrol(helper, millis);
+      _sendToHarvest(helper);
+      _lightningPest(helper);
+    }
     _sendIdleGuards();
     for (final field in _fields.values) {
       final pest = field.pest;
@@ -1219,11 +1280,12 @@ final class FarmSimulation {
     if (pests.isEmpty) return;
     final data = catalog.potatoType(PotatoType.combat);
     final assigned = <int, int>{};
-    for (final guard in _guards.values) {
+    final workers = _workers.toList();
+    for (final guard in workers) {
       final target = guard.targetFieldId;
       if (target != null) assigned[target] = (assigned[target] ?? 0) + 1;
     }
-    for (final guard in _guards.values) {
+    for (final guard in workers) {
       if (guard.targetFieldId != null || !guard.potato.isGrown(data)) continue;
       FarmField? best;
       var bestLoad = 0;
@@ -1259,6 +1321,7 @@ final class FarmSimulation {
   /// Whether [guard] does any work on a pest of [kind]: an ability may take
   /// its clearing speed to nothing.
   bool _clears(Guard guard, PestKind kind) {
+    if (StoryHelper.of(guard.potato.id)?.clearsPests == false) return false;
     final speed = switch (kind) {
       PestKind.bug => FarmStat.bugClearSpeed,
       PestKind.blight => FarmStat.blightClearSpeed,
@@ -1338,8 +1401,8 @@ final class FarmSimulation {
     }
   }
 
-  void _appear(FarmField field, PestKind kind) {
-    field.pest = Pest(kind: kind);
+  void _appear(FarmField field, PestKind kind, {bool stays = false}) {
+    field.pest = Pest(kind: kind, stays: stays);
     totals.pestsAppeared++;
     _events.add(FarmEvent.pestAppeared(fieldId: field.id, kind: kind));
   }
@@ -1362,7 +1425,10 @@ final class FarmSimulation {
     final pest = field.pest;
     if (pest == null && enough && _tick >= field.quietUntilTick) {
       _appear(field, PestKind.bug);
-    } else if (pest?.kind == PestKind.bug && !enough) {
+    } else if (pest != null &&
+        pest.kind == PestKind.bug &&
+        !pest.stays &&
+        !enough) {
       _pestLeaves(field);
     }
   }
@@ -1370,7 +1436,7 @@ final class FarmSimulation {
   /// [field]'s pest goes by itself, with no reward.
   void _pestLeaves(FarmField field) {
     field.pest = null;
-    for (final guard in _guards.values) {
+    for (final guard in _workers) {
       if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
     }
     _events.add(FarmEvent.fieldChanged(fieldId: field.id));
@@ -1600,7 +1666,7 @@ final class FarmSimulation {
   /// Guards heading for or working at a field that moved or went stop
   /// where they are and look for work again.
   void _stopGuardsAt(int fieldId) {
-    for (final guard in _guards.values) {
+    for (final guard in _workers) {
       if (guard.targetFieldId == fieldId) guard.stop();
     }
   }
@@ -2812,8 +2878,9 @@ final class FarmSimulation {
         : PestKind.values.length.toDouble();
     final data = catalog.potatoType(PotatoType.combat);
     var clearing = 0.0;
-    for (final guard in _guards.values) {
+    for (final guard in _workers) {
       if (!guard.potato.isGrown(data)) continue;
+      if (StoryHelper.of(guard.potato.id)?.clearsPests == false) continue;
       final base =
           3600 *
           _strengthPercent(guard.potato) /
@@ -2852,7 +2919,7 @@ final class FarmSimulation {
     } else {
       totals.pestsClearedByGuards++;
     }
-    for (final guard in _guards.values) {
+    for (final guard in _workers) {
       if (guard.targetFieldId == field.id && !guard.harvesting) guard.stop();
     }
     _events.add(
@@ -2941,6 +3008,10 @@ final class FarmSimulation {
         StoryGoalKind.pestsCleared =>
           totals.pestsClearedByTap + totals.pestsClearedByGuards,
         StoryGoalKind.potatoesDied => totals.potatoesDied,
+        StoryGoalKind.blocks => math.max(
+          0,
+          _openBlocks.length - _rules.farm.startBlocks.length,
+        ),
         StoryGoalKind.potatoesTrained => totals.potatoesTrained,
         StoryGoalKind.action => totals.actions[goal.action] ?? 0,
         StoryGoalKind.wait => (_tick - since) * _rules.farm.stepMillis ~/ 1000,
@@ -2953,10 +3024,40 @@ final class FarmSimulation {
     _storyDone[event.id] = _tick;
     _unlocked.addAll(event.unlocks);
     _events.add(FarmEvent.storyDone(event: event.id, unlocks: event.unlocks));
-    final seeds = [
-      for (final stack in event.seeds) ..._rollStack(_roller, stack, _random),
-    ];
-    _send(MailKind.story, story: event.id, seeds: seeds, food: event.food);
+    final level = storyLevel;
+    for (final stack in event.seeds) {
+      _rollStack(
+        _roller,
+        stack.copyWith(level: level),
+        _random,
+      ).forEach(_gainSeed);
+    }
+    _send(MailKind.story, story: event.id, food: event.food);
+    if (event.pest) _storyBug();
+    _syncHelpers();
+  }
+
+  /// The level the story's own gifts and helpers have: the lowest level of
+  /// the strongest region open to runs (2026-11-19, 사용자), 1 before any.
+  /// Story maps played once do not count.
+  int get storyLevel {
+    var best = 0;
+    var level = 1;
+    for (final zone in catalog.zones.values) {
+      if (zone.once || zone.score <= best || !zoneOpen(zone.id)) continue;
+      best = zone.score;
+      level = zone.levelMin ?? zone.score;
+    }
+    return level;
+  }
+
+  /// A bug that stays on the first planted field with no pest
+  /// ([StoryEventData.pest]); none when there is no such field.
+  void _storyBug() {
+    final field = _fields.values
+        .where((f) => f.pest == null && f._potatoes.isNotEmpty)
+        .firstOrNull;
+    if (field != null) _appear(field, PestKind.bug, stays: true);
   }
 
   /// Finishes [id] at once (a developer tool), then whatever it opens.
@@ -2974,6 +3075,7 @@ final class FarmSimulation {
   FarmRejection? _unlockAll() {
     if (storySkipped) return FarmRejection.nothingToClaim;
     storySkipped = true;
+    _syncHelpers();
     return null;
   }
 

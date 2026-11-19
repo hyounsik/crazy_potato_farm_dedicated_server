@@ -126,6 +126,7 @@ void main() {
   test('meeting the goals finishes the event, opens it and sends a letter', () {
     expect(farm.storyEventsOpen.map((e) => e.id), ['two_fields']);
     farm.takeEvents();
+    final before = farm.seeds.counts.keys.toSet();
 
     expect(farm.apply(FarmCommand.makeField(rect: secondField())), isNull);
     expect(farm.storyDone.keys, ['two_fields']);
@@ -145,8 +146,15 @@ void main() {
     expect(letter.kind, MailKind.story);
     expect(letter.story, 'two_fields');
     expect(letter.food, 30);
-    expect(letter.seeds, hasLength(2));
-    expect(letter.seeds.every((s) => s.grade == Grade.rare), isTrue);
+    // Seeds go straight to the pouch, at the story level (2026-11-19,
+    // 사용자: letters went unseen, and level 1 seeds are no use later).
+    expect(letter.seeds, isEmpty);
+    final rare = farm.seeds.counts.entries
+        .where((e) => !before.contains(e.key))
+        .toList();
+    expect(rare.every((e) => e.key.grade == Grade.rare), isTrue);
+    expect(rare.fold(0, (n, e) => n + e.value), 2);
+    expect(rare.every((e) => e.key.level == farm.storyLevel), isTrue);
     final food = farm.food;
     expect(farm.apply(FarmCommand.claimMail(mailId: letter.id)), isNull);
     expect(farm.food, food + 30);
@@ -326,6 +334,132 @@ void main() {
       ..seeds.add(plainSeed(PotatoType.buff))
       ..step();
     expect(fresh.storyDone.keys, ['buff_seed']);
+  });
+
+  test('a story bug stays with little stored, and blocks opened count '
+      '(2026-11-19: chapter 2)', () {
+    final story = sampleCatalogWith((files) {
+      files['story'] = {
+        'version': 1,
+        'locked': ['pests'],
+        'events': [
+          {
+            'id': 'bugs',
+            'goals': [
+              {'kind': 'fields', 'count': 1},
+            ],
+            'unlocks': ['pests'],
+            'pest': true,
+          },
+          {
+            'id': 'wider',
+            'goals': [
+              {'kind': 'blocks', 'count': 1},
+            ],
+          },
+        ],
+      };
+    });
+    final fresh = FarmSimulation.newFarm(story, seed: 1)..food = 100000;
+    final field = fresh.fields.first;
+    fresh.seeds.add(_normal);
+    expect(
+      fresh.apply(
+        FarmCommand.plant(
+          fieldId: field.id,
+          tile: field.rect.origin,
+          seed: _normal,
+        ),
+      ),
+      isNull,
+    );
+    fresh.step();
+    expect(fresh.storyDone.keys, contains('bugs'));
+    expect(field.pest?.kind, PestKind.bug);
+    expect(field.stored, lessThan(story.rules.pests.bug.storedPerBug));
+    for (var i = 0; i < 20; i++) {
+      fresh.step();
+    }
+    expect(field.pest?.stays, isTrue, reason: 'stays until cleared');
+    expect(fresh.storyDone.keys, isNot(contains('wider')));
+
+    final blocks = story.rules.farm.size ~/ story.rules.farm.blockSize;
+    final block = [
+      for (var y = 0; y < blocks; y++)
+        for (var x = 0; x < blocks; x++) TilePos(x, y),
+    ].firstWhere(fresh.canOpen);
+    expect(fresh.apply(FarmCommand.openBlock(block: block)), isNull);
+    fresh.step();
+    expect(fresh.storyDone.keys, contains('wider'));
+  });
+
+  test('the story level is the lowest level of the strongest open region', () {
+    expect(farm.storyLevel, 1, reason: 'nothing open yet');
+    farm.apply(FarmCommand.makeField(rect: secondField()));
+    final zone = catalog.zones['sample_zone']!;
+    expect(farm.storyLevel, zone.levelMin ?? zone.score);
+  });
+
+  test('Claire and Kevin work the farm once the story opens them, at the '
+      'story level, unsaved and never counted (2026-11-19)', () {
+    final story = sampleCatalogWith((files) {
+      files['story'] = {
+        'version': 1,
+        'locked': ['helpers', 'pests'],
+        'events': [
+          {
+            'id': 'chapter_2',
+            'goals': [
+              {'kind': 'fields', 'count': 2},
+            ],
+            'unlocks': ['helpers', 'pests'],
+          },
+        ],
+      };
+    });
+    final fresh = FarmSimulation.newFarm(story, seed: 1)..food = 100000;
+    expect(fresh.helpers, isEmpty);
+
+    TileRect free() {
+      for (var y = 0; y < story.rules.farm.size; y++) {
+        for (var x = 0; x < story.rules.farm.size; x++) {
+          final rect = TileRect(origin: TilePos(x, y), width: 1, height: 1);
+          if (fresh.canPlace(rect)) return rect;
+        }
+      }
+      throw StateError('no room');
+    }
+
+    expect(fresh.apply(FarmCommand.makeField(rect: free())), isNull);
+    expect(fresh.helpers.keys, StoryHelper.values);
+    final claire = fresh.helpers[StoryHelper.claire]!;
+    expect(claire.potato.level, fresh.storyLevel);
+    expect(claire.potato.abilities, isEmpty);
+    expect(fresh.guards, isEmpty);
+    expect(fresh.countOf(PotatoType.combat), 0);
+    expect(fresh.upkeepPerHour, 0);
+
+    // Claire clears a pest with no training ground on the farm.
+    final field = fresh.fields.first;
+    fresh.seeds.add(_normal);
+    fresh.apply(
+      FarmCommand.plant(
+        fieldId: field.id,
+        tile: field.rect.origin,
+        seed: _normal,
+      ),
+    );
+    field.pest = Pest(kind: PestKind.blight, stays: true);
+    for (var i = 0; i < 20000 && field.pest != null; i++) {
+      fresh.step();
+    }
+    expect(field.pest, isNull);
+    expect(fresh.totals.pestsClearedByGuards, 1);
+
+    // Not saved; made again from the story on load.
+    final saved = FarmDocument.of(fresh);
+    expect(saved.guards, isEmpty);
+    expect(saved.toSimulation(story).helpers.keys, StoryHelper.values);
   });
 
   group('story data checks', () {

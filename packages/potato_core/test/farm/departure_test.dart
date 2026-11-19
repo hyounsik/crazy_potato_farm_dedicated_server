@@ -299,36 +299,11 @@ void main() {
     expect(farm.dangerScores('sample_danger'), (min: lowest, max: 55));
   });
 
-  test('seed chances add up from the gathering table', () {
+  test('seed chances are shares of the seeds, adding up to 1 '
+      '(2026-11-19)', () {
     final chances = catalog.seedChances('sample_zone');
-    final table =
-        catalog.lootTables[catalog.zones['sample_zone']!.gathering.loot]!;
-    final seeds = table.entries.where(
-      (e) => catalog.items[e.item]?.seed != null,
-    );
-    final total = table.entries.fold(
-      0,
-      (sum, e) =>
-          sum +
-          catalog.lootWeight(
-            e.item,
-            e.weight,
-            catalog.zones['sample_zone']!.score,
-          ),
-    );
-    final expected =
-        seeds.fold(
-          0,
-          (sum, e) =>
-              sum +
-              catalog.lootWeight(
-                e.item,
-                e.weight,
-                catalog.zones['sample_zone']!.score,
-              ),
-        ) /
-        total;
-    expect(chances.values.fold(0.0, (a, b) => a + b), closeTo(expected, 1e-9));
+    expect(chances, isNotEmpty);
+    expect(chances.values.fold(0.0, (a, b) => a + b), closeTo(1, 1e-9));
   });
 
   test('a danger difficulty past progress is refused (2026-11-08)', () {

@@ -311,6 +311,7 @@ _PestDocument _$PestDocumentFromJson(Map<String, dynamic> json) =>
             (v) => (v as num).toInt(),
           ),
           biteMillis: $checkedConvert('bite_millis', (v) => (v as num).toInt()),
+          stays: $checkedConvert('stays', (v) => v as bool? ?? false),
         );
         return val;
       },
@@ -325,6 +326,7 @@ Map<String, dynamic> _$PestDocumentToJson(_PestDocument instance) =>
       'kind': _$PestKindEnumMap[instance.kind]!,
       'cleared_millis': instance.clearedMillis,
       'bite_millis': instance.biteMillis,
+      'stays': instance.stays,
     };
 
 const _$PestKindEnumMap = {PestKind.bug: 'bug', PestKind.blight: 'blight'};

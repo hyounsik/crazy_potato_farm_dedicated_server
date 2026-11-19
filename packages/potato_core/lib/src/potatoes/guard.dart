@@ -1,6 +1,29 @@
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 
+/// The story's two potatoes who work the farm once chapter 2 is over
+/// (2026-11-19, 사용자): Claire clears pests as a normal combat potato with no
+/// ability, Kevin brings in baby potatoes as Homebody does but clears no
+/// pests (사용자: so Claire matters). Neither dies, eats or counts as the
+/// farm's potato, and both are at the farm's story level.
+enum StoryHelper {
+  claire(-1, <String>[], clearsPests: true),
+  kevin(-2, <String>['combat.homebody'], clearsPests: false);
+
+  const StoryHelper(this.potatoId, this.abilities, {required this.clearsPests});
+
+  /// Never a real potato's id (those count up from 1).
+  final int potatoId;
+
+  final List<String> abilities;
+
+  final bool clearsPests;
+
+  /// The helper whose potato has [id], or null for any other potato.
+  static StoryHelper? of(int id) =>
+      values.where((h) => h.potatoId == id).firstOrNull;
+}
+
 /// A combat potato on the farm: it grows inside a training ground, then
 /// walks the farm clearing pests.
 ///

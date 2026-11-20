@@ -1,14 +1,18 @@
 import 'package:potato_core/src/common/tile.dart';
 import 'package:potato_core/src/potatoes/potato.dart';
 
-/// The story's two potatoes who work the farm once chapter 2 is over
-/// (2026-11-19, 사용자): Claire clears pests as a normal combat potato with no
-/// ability, Kevin brings in baby potatoes as Homebody does but clears no
-/// pests (사용자: so Claire matters). Neither dies, eats or counts as the
-/// farm's potato, and both are at the farm's story level.
+/// The story's two potatoes who walk the farm once chapter 2 is over
+/// (2026-11-19, 사용자). Neither dies, eats or counts as the farm's potato,
+/// and both are at the farm's story level.
+///
+/// They do no work for now (2026-11-20, 사용자: the farm's auto harvest went
+/// far too high before the grass boss; their abilities first come off).
+/// Before that Claire cleared pests as a plain combat potato and Kevin
+/// harvested as Homebody: set [abilities] and [clearsPests] back to bring it
+/// back.
 enum StoryHelper {
-  claire(-1, <String>[], clearsPests: true),
-  kevin(-2, <String>['combat.homebody'], clearsPests: false);
+  claire(-1, <String>[], clearsPests: false),
+  kevin(-2, <String>[], clearsPests: false);
 
   const StoryHelper(this.potatoId, this.abilities, {required this.clearsPests});
 

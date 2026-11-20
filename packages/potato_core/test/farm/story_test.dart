@@ -435,11 +435,12 @@ void main() {
     final claire = fresh.helpers[StoryHelper.claire]!;
     expect(claire.potato.level, fresh.storyLevel);
     expect(claire.potato.abilities, isEmpty);
+    expect(fresh.helpers[StoryHelper.kevin]!.potato.abilities, isEmpty);
     expect(fresh.guards, isEmpty);
     expect(fresh.countOf(PotatoType.combat), 0);
     expect(fresh.upkeepPerHour, 0);
 
-    // Claire clears a pest with no training ground on the farm.
+    // They do no work for now (2026-11-20, 사용자): a pest stays.
     final field = fresh.fields.first;
     fresh.seeds.add(_normal);
     fresh.apply(
@@ -450,11 +451,12 @@ void main() {
       ),
     );
     field.pest = Pest(kind: PestKind.blight, stays: true);
-    for (var i = 0; i < 20000 && field.pest != null; i++) {
+    for (var i = 0; i < 3000; i++) {
       fresh.step();
     }
-    expect(field.pest, isNull);
-    expect(fresh.totals.pestsClearedByGuards, 1);
+    expect(fresh.totals.pestsClearedByGuards, 0);
+    expect(fresh.autoHarvestPerHour, 0);
+    expect(fresh.pestBalance().clearing, 0);
 
     // Not saved; made again from the story on load.
     final saved = FarmDocument.of(fresh);

@@ -522,8 +522,13 @@ void main() {
       farm.takeEvents();
       final before = field.leftover;
       farm.runSteps(60);
-      // Five, and one more for its ten levels.
-      expect(field.leftover - before, 6);
+      // Five times one batch of its own, which grows with level
+      // (2026-11-20, 사용자: no longer a fixed five).
+      final food = catalog.potatoType(PotatoType.food);
+      final batch =
+          food.production!.amount[potato.grade]! *
+          (1 + 12 * catalog.rules.potatoes.level.foodYieldPermille / 1000);
+      expect(field.leftover - before, (5 * batch).round());
       expect(farm.takeEvents().whereType<SkillUsed>(), hasLength(1));
     });
   });

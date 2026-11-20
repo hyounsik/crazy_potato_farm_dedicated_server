@@ -630,6 +630,9 @@ final class FarmSimulation {
           _work(potato, field).rates.foodYield *
           3600 /
           production.everySeconds;
+      if (_burstEvery(potato) case final every? when every > 0) {
+        total += _burstAmount(potato, field) * 3600 / every;
+      }
     }
     return total;
   }
@@ -1251,16 +1254,17 @@ final class FarmSimulation {
   }
 
   /// A grown food potato with a burst (2026-11-10, user), when its time
-  /// comes, adds its value plus one per ten levels of baby potatoes to the
-  /// field's harvest: the farm has no picking up.
+  /// comes, adds to the field's harvest its value times what it makes in one
+  /// batch now (2026-11-20, 사용자: a fixed 5 a minute out-made two full 3×3
+  /// fields early on; now it grows with level, grade and totems as the
+  /// potato does). The farm has no picking up.
   void _burstFood(Potato potato, FarmField field) {
-    final effect = _effects.periodic(potato, FarmSkillAction.burstFood);
-    final interval = effect?.intervalInUse;
-    final base = effect?.valueInUse ?? 0;
-    if (interval == null || base <= 0 || !_isDue(interval)) return;
+    final interval = _burstEvery(potato);
+    if (interval == null || !_isDue(interval)) return;
     if (!potato.isGrown(catalog.potatoType(potato.type))) return;
-    final per = _rules.raid.companion.skills.burstLevelsPerExtra;
-    field.leftover += base.floor() + potato.level ~/ math.max(1, per);
+    final amount = _burstAmount(potato, field);
+    if (amount <= 0) return;
+    field.leftover += amount.round();
     _events.add(
       FarmEvent.skillUsed(
         potatoId: potato.id,
@@ -1268,6 +1272,18 @@ final class FarmSimulation {
         fieldId: field.id,
       ),
     );
+  }
+
+  int? _burstEvery(Potato potato) =>
+      _effects.periodic(potato, FarmSkillAction.burstFood)?.intervalInUse;
+
+  /// Baby potatoes [potato]'s burst adds, before rounding.
+  double _burstAmount(Potato potato, FarmField field) {
+    final times =
+        _effects.periodic(potato, FarmSkillAction.burstFood)?.valueInUse ?? 0;
+    final amount =
+        catalog.potatoType(potato.type).production?.amount[potato.grade] ?? 0;
+    return times * amount * _work(potato, field).rates.foodYield;
   }
 
   /// Sends each grown guard without a target to the pest with the fewest

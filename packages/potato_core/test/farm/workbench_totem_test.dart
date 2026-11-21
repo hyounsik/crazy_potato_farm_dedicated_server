@@ -126,7 +126,8 @@ void main() {
                 farm.canPlace(TileRect(origin: tile, width: 2, height: 2)),
           );
       final giant = putUp('giant_totem', spot);
-      expect(farm.totemLimit, 5);
+      // Three more at once, no second level (2026-11-21, user).
+      expect(farm.totemLimit, 6);
       expect(fourth(), isNull);
       expect(
         farm.apply(FarmCommand.demolish(buildingId: giant)),
@@ -135,6 +136,19 @@ void main() {
       );
       final save = FarmDocument.of(farm).toJson();
       expect(save.containsKey('totem_limit'), isFalse);
+    });
+
+    test('a building saved above its top level comes back at the top '
+        '(2026-11-21: the giant totem lost its second level)', () {
+      final giant = FarmBuilding(
+        id: 1,
+        data: catalog.buildings['giant_totem']!,
+        origin: const TilePos(0, 0),
+        level: 2,
+      );
+      expect(giant.level, 1);
+      expect(giant.totems, 3);
+      expect(giant.upgradeCost, isNull);
     });
 
     test('1x1 buildings may touch any building on their sides and top, '

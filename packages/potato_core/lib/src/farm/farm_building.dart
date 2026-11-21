@@ -7,10 +7,10 @@ final class FarmBuilding {
     required this.id,
     required this.data,
     required this.origin,
-    this.level = 1,
+    int level = 1,
     this.litUntilTick = 0,
     this.readyTick = 0,
-  });
+  }) : level = level.clamp(1, data.levels.length);
 
   /// Shares the id sequence with fields and potatoes.
   final int id;
@@ -19,7 +19,9 @@ final class FarmBuilding {
   /// The top-left tile. Changes when the building is moved.
   TilePos origin;
 
-  /// From 1 up to the number of levels in [data].
+  /// From 1 up to the number of levels in [data]. A save from before the
+  /// data dropped a level comes back at the top one (2026-11-21, user: the
+  /// giant totem lost its second level).
   int level;
 
   /// For totems: the step its light goes out on, and the step it can be lit

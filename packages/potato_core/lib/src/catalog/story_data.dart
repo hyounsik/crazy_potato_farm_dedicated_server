@@ -206,6 +206,10 @@ enum StoryGoalKind {
   /// Combat seeds trained in a training ground.
   potatoesTrained,
 
+  /// Seeds made by breeding potatoes in fields (2026-11-21, 사용자: chapter
+  /// 5 ends when the first new seed comes up).
+  seedsBred,
+
   /// Times the player did [StoryGoalData.action] (2026-11-16, 사용자:
   /// chapter 1): `plant` (a seed planted), `enter_house`, `leave_house`
   /// (sent by the app), any other name the app sends.

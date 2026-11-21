@@ -1066,6 +1066,7 @@ final class FarmSimulation {
         if (max != null && potato.seeds.length >= max) break;
         final seed = _bredSeed(potato, field);
         potato.seeds.add(seed);
+        totals.seedsBred++;
         _events.add(
           FarmEvent.seedMade(
             fieldId: field.id,
@@ -3029,6 +3030,7 @@ final class FarmSimulation {
           _openBlocks.length - _rules.farm.startBlocks.length,
         ),
         StoryGoalKind.potatoesTrained => totals.potatoesTrained,
+        StoryGoalKind.seedsBred => totals.seedsBred,
         StoryGoalKind.action => totals.actions[goal.action] ?? 0,
         StoryGoalKind.wait => (_tick - since) * _rules.farm.stepMillis ~/ 1000,
       };

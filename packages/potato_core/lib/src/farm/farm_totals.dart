@@ -19,6 +19,7 @@ final class FarmTotals {
     this.foodHarvestedByGuards = 0,
     this.potatoesDied = 0,
     this.potatoesTrained = 0,
+    this.seedsBred = 0,
     Map<String, int>? escapes,
     Map<String, int>? bossKills,
     Map<String, int>? actions,
@@ -48,6 +49,10 @@ final class FarmTotals {
   /// Combat seeds trained into potatoes.
   int potatoesTrained;
 
+  /// Seeds breeding potatoes made (2026-11-21, 사용자: chapter 5 ends on
+  /// the first).
+  int seedsBred;
+
   /// Successful runs, by zone id.
   final Map<String, int> escapes;
 
@@ -71,6 +76,7 @@ final class FarmTotals {
     foodHarvestedByGuards: foodHarvestedByGuards - before.foodHarvestedByGuards,
     potatoesDied: potatoesDied - before.potatoesDied,
     potatoesTrained: potatoesTrained - before.potatoesTrained,
+    seedsBred: seedsBred - before.seedsBred,
     escapes: {
       for (final MapEntry(:key, :value) in escapes.entries)
         if (value - (before.escapes[key] ?? 0) != 0)

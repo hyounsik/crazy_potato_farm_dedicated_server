@@ -163,6 +163,7 @@ const _$StoryGoalKindEnumMap = {
   StoryGoalKind.potatoesDied: 'potatoes_died',
   StoryGoalKind.blocks: 'blocks',
   StoryGoalKind.potatoesTrained: 'potatoes_trained',
+  StoryGoalKind.seedsBred: 'seeds_bred',
   StoryGoalKind.action: 'action',
   StoryGoalKind.wait: 'wait',
 };

@@ -699,6 +699,13 @@ void main() {
         expect(catalog.abilities[seed.ability]!.pool, seed.type.name);
       }
       expect(farm.takeEvents().whereType<SeedMade>(), isNotEmpty);
+      expect(
+        farm.storyGoalCount(
+          const StoryGoalData(kind: StoryGoalKind.seedsBred, count: 1),
+        ),
+        catalog.rules.breeding.storeMax,
+        reason: 'chapter 5 counts the seeds bred',
+      );
     });
 
     test('harvesting takes the seeds in with the baby potatoes', () {
